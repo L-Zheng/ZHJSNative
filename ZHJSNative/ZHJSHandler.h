@@ -11,6 +11,7 @@
 #import <JavaScriptCore/JavaScriptCore.h>
 @class ZHJSContext;
 @class ZHWebView;
+@class ZHJSApiHandler;
 
 //NS_ASSUME_NONNULL_BEGIN
 
@@ -18,6 +19,8 @@ static NSString * const ZHJSHandlerName = @"ZHJSEventHandler";
 static NSString * const ZHJSHandlerLogName = @"ZHJSLogEventHandler";
 
 @interface ZHJSHandler : NSObject<WKScriptMessageHandler>
+
+@property (nonatomic,strong) ZHJSApiHandler *apiHandler;
 
 @property (nonatomic,weak) ZHWebView *webView;
 @property (nonatomic,weak) ZHJSContext *jsContext;

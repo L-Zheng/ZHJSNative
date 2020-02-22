@@ -10,177 +10,32 @@
 #import "ZHUtil.h"
 #import "ZHJSContext.h"
 #import "ZHWebView.h"
+#import "ZHJSApiHandler.h"
 
 @implementation ZHJSHandler
 
-/** ⚠️⚠️⚠️添加API步骤：
- 1、customApiKeys方法添加方法名
- 2、实现方法：
-    带有回调的方法：第二个参数必须为callBack  不能改动
-       - (void)<#functionName#><##>:(NSDictionary *)params callBack:(void (^) (id result, NSError *error))callBack{}
-    没有有回调的方法：
-       - (void)<#functionName#><##>:(NSDictionary *)params{}
- */
-#pragma mark - event
+#pragma mark - init
 
-//apis
-- (NSArray *)customApiKeys{
-    return @[
-        @"request",
-        @"getJsonSync",
-        @"getNumberSync",
-        @"getBoolSync",
-        @"getStringSync",
-        @"commonLinkTo"
-    ];
-}
-
-- (void)request:(NSDictionary *)info callBack:(void (^) (id result, NSError *error))callBack{
-    NSString *url = [info objectForKey:@"url"];
-    NSString *method = [[info objectForKey:@"method"] uppercaseString];
-    NSMutableDictionary *headers = [info objectForKey:@"header"];
-    NSDictionary *parameters = [info objectForKey:@"data"];
-    if (!parameters || ![parameters isKindOfClass:[NSDictionary class]]) {
-        parameters = @{};
-    }if (!headers || ![headers isKindOfClass:[NSDictionary class]]) {
-        headers = [@{} mutableCopy];
+- (instancetype)init{
+    self = [super init];
+    if (self) {
+        self.apiHandler = [[ZHJSApiHandler alloc] init];
     }
-    
-    NSMutableURLRequest *request = nil;
-    if ([method isEqualToString:@"POST"]) {
-        BOOL isAppendParams = YES;
-        //参数拼接Url
-        if (isAppendParams) {
-            NSURL *aURL = [NSURL URLWithString:(parameters.count ? [NSString stringWithFormat:@"%@?%@", url, [self queryString:parameters]] : url)];
-            request = [NSMutableURLRequest requestWithURL:aURL cachePolicy:NSURLRequestReloadIgnoringLocalCacheData timeoutInterval:30];
-        }else{
-            request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:url] cachePolicy:NSURLRequestReloadIgnoringLocalCacheData timeoutInterval:30];
-            //参数放Body
-            NSString *contentType = [request valueForHTTPHeaderField:@"Content-Type"];
-            if ([contentType isEqualToString:@"application/x-www-form-urlencoded"]) {
-                NSData *data = [[self queryString:parameters] dataUsingEncoding:NSUTF8StringEncoding];
-                if (data) [request setHTTPBody:data];
-            }else{
-                NSData *data = [NSJSONSerialization dataWithJSONObject:parameters options:0 error:nil];
-                if (data) [request setHTTPBody:data];
-            }
-        }
-        [request setHTTPMethod:@"POST"];
-    } else {
-        NSURL *aURL = [NSURL URLWithString:(parameters.count ? [NSString stringWithFormat:@"%@?%@", url, [self queryString:parameters]] : url)];
-        request = [NSMutableURLRequest requestWithURL:aURL cachePolicy:NSURLRequestReloadIgnoringLocalCacheData timeoutInterval:30];
-        [request setHTTPMethod:@"GET"];
-    }
-    //header参数
-    for (NSString *filedkey in headers) {
-        [request setValue:headers[filedkey] forHTTPHeaderField:filedkey];
-    }
-    [request setHTTPShouldHandleCookies:NO];
-    if (![request valueForHTTPHeaderField:@"Content-Type"]) {
-        [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
-    }
-    [request setValue:@"iPhone" forHTTPHeaderField:@"User-Agent"];
-    
-    NSURLSession *session = [NSURLSession sharedSession];
-    NSLog(@"👉-ios-request--api发起请求");
-    NSLog(@"%@", @{
-        @"request-url": request.URL.absoluteString,
-        @"js-url": url,
-        @"js-method": method,
-        @"js-params": parameters,
-        @"js-headers": headers
-    });
-    
-    //创建请求 Task
-    NSURLSessionDataTask *dataTask = [session dataTaskWithRequest:request completionHandler:
-                                      ^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
-        if (!callBack) return;
-        //解析返回的数据
-        dispatch_async(dispatch_get_main_queue(), ^{
-            NSError * (^createError) (NSString *desc) = ^(NSString *desc){
-                return [NSError errorWithDomain:@"fund-news-request" code:404 userInfo:@{NSLocalizedDescriptionKey: desc}];
-            };
-            NSLog(@"👉-ios-request--api请求回调");
-            NSLog(@"%@", @{
-                @"url": response.URL.absoluteString?:@""
-            });
-            
-            if (error) {
-                callBack(nil, error);
-                return;
-            }
-            if (!data) {
-                callBack(nil, createError(@"没有数据"));
-                return;
-            }
-            if (!response || ![response isKindOfClass:[NSHTTPURLResponse class]]) {
-                callBack(nil, createError((response ? @"不是NSHTTPURLResponse响应" : @"response为空")));
-                return;
-            }
-            
-            id result = nil;
-            NSError *jsonError = nil;
-//            [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-            result = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:&jsonError];
-            if (jsonError || !result) {
-                callBack(nil, createError(@"解析json失败"));
-                return;
-            }
-            NSLog(@"👉-ios-request--api回调数据");
-            NSLog(@"%@",result);
-            callBack(@{@"data": result?:@{},
-                       @"statusCode": @([(NSHTTPURLResponse *)response statusCode])
-            }, nil);
-        });
-    }];
-    [dataTask resume];
-}
-- (NSString *)queryString:(NSDictionary *)parameters{
-    __block NSMutableArray *arguments = [NSMutableArray array];
-    [parameters enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
-        if (obj == [NSNull null] ||
-            ![key isKindOfClass:[NSString class]]) return;
-        if ([obj isKindOfClass:[NSString class]] || [obj isKindOfClass:[NSNumber class]]) {
-            obj = [NSString stringWithFormat:@"%@", obj];
-        }else{
-            return;
-        }
-        NSString *encodedKey   = [key stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
-        NSString *encodedValue = [obj stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
-        NSString *kvPair       = [NSString stringWithFormat:@"%@=%@", encodedKey, encodedValue];
-        [arguments addObject:kvPair];
-    }];
-    return [arguments componentsJoinedByString:@"&"];
-}
-
-
-- (NSDictionary *)getJsonSync:(NSDictionary *)params{
-    return @{@"sdfd": @"22222", @"sf": @(YES)};
-}
-- (NSNumber *)getNumberSync:(NSDictionary *)params{
-    return @(22);
-}
-- (NSNumber *)getBoolSync:(NSDictionary *)params{
-    return @(YES);
-}
-- (NSString *)getStringSync:(NSDictionary *)params{
-    return @"dfgewrefdwd";
-}
-- (void)commonLinkTo:(NSDictionary *)params{
-    NSLog(@"-------commonLinkTo------------");
-    NSLog(@"%@",params);
+    return self;
 }
 
 #pragma mark - api
 
 //JSContext注入的api
 - (NSDictionary *)jsContextApiMap{
-    NSArray *apis = [self customApiKeys];
-    NSMutableDictionary *map = [NSMutableDictionary dictionary];
-    for (NSString *key in apis) {
-        [map setValue:[self jsContextApiMapBlock:key] forKey:key];
-    }
-    return [map copy];
+    NSDictionary *apiMap = [self.apiHandler.apiMethodMap copy];
+    NSMutableDictionary *resMap = [NSMutableDictionary dictionary];
+    
+    __weak __typeof__(self) __self = self;
+    [apiMap enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *obj, BOOL *stop) {
+        [resMap setValue:[__self jsContextApiMapBlock:key] forKey:key];
+    }];
+    return [resMap copy];
 }
 - (id)jsContextApiMapBlock:(NSString *)key{
     if (!key || key.length == 0) return nil;
@@ -199,7 +54,7 @@
         JSValueProperty fail = @"fail";
         BOOL isHasCallFunction = ([paramsValue hasProperty:success] || [paramsValue hasProperty:fail]);
         if (!isHasCallFunction) {
-            return [__self runNativeFunc:[NSString stringWithFormat:@"%@:",key] params1:params params2:nil];
+            return [__self runNativeFunc:key params1:params params2:nil];
         }
         
         //获取回调方法
@@ -213,7 +68,7 @@
                 [failFunc callWithArguments:@[desc]];
             }
         };
-        return [__self runNativeFunc:[NSString stringWithFormat:@"%@:%@:",key, [__self callFunctionParamsKey]] params1:params params2:block];
+        return [__self runNativeFunc:key params1:params params2:block];
         
     };
     return apiBlock;
@@ -252,7 +107,7 @@
     
     //不是json数据
     if (![params isKindOfClass:[NSDictionary class]]) {
-        return [self runNativeFunc:[NSString stringWithFormat:@"%@:",methodName] params1:params params2:nil];
+        return [self runNativeFunc:methodName params1:params params2:nil];
     }
     
     //需要回调方法
@@ -268,11 +123,11 @@
                 [__self callBackJsFunc:failId data:error.localizedDescription callBack:nil];
             }
         };
-        return [self runNativeFunc:[NSString stringWithFormat:@"%@:%@:",methodName, [self callFunctionParamsKey]] params1:params params2:block];
+        return [self runNativeFunc:methodName params1:params params2:block];
     }
     
     //不需要回调方法
-    return [self runNativeFunc:[NSString stringWithFormat:@"%@:",methodName] params1:params params2:nil];
+    return [self runNativeFunc:methodName params1:params params2:nil];
 }
 
 //同步处理js的调用
@@ -282,12 +137,12 @@
 
 //运行原生方法
 - (id)runNativeFunc:(NSString *)methodName params1:(id)params1 params2:(id)params2{
-    SEL sel = NSSelectorFromString(methodName);
-    if (![self respondsToSelector:sel]) return nil;
+    SEL sel = [self.apiHandler fetchSelectorByName:methodName];
+    if (!sel) return nil;
     
-    NSMethodSignature *signature = [self methodSignatureForSelector:sel];
+    NSMethodSignature *signature = [self.apiHandler methodSignatureForSelector:sel];
     NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:signature];
-    [invocation setTarget:self];
+    [invocation setTarget:self.apiHandler];
     [invocation setSelector:sel];
     
     //设置参数
@@ -389,10 +244,6 @@
     }];
 }
 
-//带有回调方法的js事件 调用原生方法名的第二个参数
-- (NSString *)callFunctionParamsKey{
-    return @"callBack";
-}
 //获取回调
 - (NSString *)fetchCallSuccessFuncKey{
     return @"FNCallBackSuccessKey";
