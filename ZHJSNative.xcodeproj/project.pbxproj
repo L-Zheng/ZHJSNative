@@ -16,6 +16,15 @@
 		0F079870240104FB004AAFBC /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F07986F240104FB004AAFBC /* main.m */; };
 		0F07987A240104FB004AAFBC /* ZHJSNativeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F079879240104FB004AAFBC /* ZHJSNativeTests.m */; };
 		0F079885240104FB004AAFBC /* ZHJSNativeUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F079884240104FB004AAFBC /* ZHJSNativeUITests.m */; };
+		0F079894240105BC004AAFBC /* JavaScriptCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0F079893240105BC004AAFBC /* JavaScriptCore.framework */; };
+		0F079896240105C1004AAFBC /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0F079895240105C1004AAFBC /* WebKit.framework */; };
+		0F079899240105E3004AAFBC /* ZHJSContext.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F079898240105E3004AAFBC /* ZHJSContext.m */; };
+		0F07989C2401060A004AAFBC /* ZHWebView.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F07989B2401060A004AAFBC /* ZHWebView.m */; };
+		0F07989F24010627004AAFBC /* ZHController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F07989E24010627004AAFBC /* ZHController.m */; };
+		0F0798A224010647004AAFBC /* ZHJSHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F0798A124010647004AAFBC /* ZHJSHandler.m */; };
+		0F0798A524010655004AAFBC /* ZHWebViewDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F0798A424010655004AAFBC /* ZHWebViewDelegate.m */; };
+		0F0798A72401089A004AAFBC /* TestBundle.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 0F0798A62401089A004AAFBC /* TestBundle.bundle */; };
+		0F0798AA240108F6004AAFBC /* ZHUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F0798A9240108F6004AAFBC /* ZHUtil.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -54,6 +63,21 @@
 		0F079880240104FB004AAFBC /* ZHJSNativeUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ZHJSNativeUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		0F079884240104FB004AAFBC /* ZHJSNativeUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHJSNativeUITests.m; sourceTree = "<group>"; };
 		0F079886240104FB004AAFBC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		0F079893240105BC004AAFBC /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
+		0F079895240105C1004AAFBC /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
+		0F079897240105E3004AAFBC /* ZHJSContext.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHJSContext.h; sourceTree = "<group>"; };
+		0F079898240105E3004AAFBC /* ZHJSContext.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHJSContext.m; sourceTree = "<group>"; };
+		0F07989A2401060A004AAFBC /* ZHWebView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHWebView.h; sourceTree = "<group>"; };
+		0F07989B2401060A004AAFBC /* ZHWebView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHWebView.m; sourceTree = "<group>"; };
+		0F07989D24010627004AAFBC /* ZHController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHController.h; sourceTree = "<group>"; };
+		0F07989E24010627004AAFBC /* ZHController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHController.m; sourceTree = "<group>"; };
+		0F0798A024010647004AAFBC /* ZHJSHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHJSHandler.h; sourceTree = "<group>"; };
+		0F0798A124010647004AAFBC /* ZHJSHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHJSHandler.m; sourceTree = "<group>"; };
+		0F0798A324010655004AAFBC /* ZHWebViewDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHWebViewDelegate.h; sourceTree = "<group>"; };
+		0F0798A424010655004AAFBC /* ZHWebViewDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHWebViewDelegate.m; sourceTree = "<group>"; };
+		0F0798A62401089A004AAFBC /* TestBundle.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = TestBundle.bundle; sourceTree = "<group>"; };
+		0F0798A8240108F6004AAFBC /* ZHUtil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHUtil.h; sourceTree = "<group>"; };
+		0F0798A9240108F6004AAFBC /* ZHUtil.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHUtil.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,6 +85,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0F079896240105C1004AAFBC /* WebKit.framework in Frameworks */,
+				0F079894240105BC004AAFBC /* JavaScriptCore.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -88,6 +114,7 @@
 				0F079878240104FB004AAFBC /* ZHJSNativeTests */,
 				0F079883240104FB004AAFBC /* ZHJSNativeUITests */,
 				0F07985B240104FA004AAFBC /* Products */,
+				0F079892240105BC004AAFBC /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -104,12 +131,25 @@
 		0F07985C240104FA004AAFBC /* ZHJSNative */ = {
 			isa = PBXGroup;
 			children = (
+				0F0798A62401089A004AAFBC /* TestBundle.bundle */,
 				0F07985D240104FA004AAFBC /* AppDelegate.h */,
 				0F07985E240104FA004AAFBC /* AppDelegate.m */,
 				0F079860240104FA004AAFBC /* SceneDelegate.h */,
 				0F079861240104FA004AAFBC /* SceneDelegate.m */,
 				0F079863240104FA004AAFBC /* ViewController.h */,
 				0F079864240104FA004AAFBC /* ViewController.m */,
+				0F07989D24010627004AAFBC /* ZHController.h */,
+				0F07989E24010627004AAFBC /* ZHController.m */,
+				0F0798A8240108F6004AAFBC /* ZHUtil.h */,
+				0F0798A9240108F6004AAFBC /* ZHUtil.m */,
+				0F0798A024010647004AAFBC /* ZHJSHandler.h */,
+				0F0798A124010647004AAFBC /* ZHJSHandler.m */,
+				0F079897240105E3004AAFBC /* ZHJSContext.h */,
+				0F079898240105E3004AAFBC /* ZHJSContext.m */,
+				0F07989A2401060A004AAFBC /* ZHWebView.h */,
+				0F07989B2401060A004AAFBC /* ZHWebView.m */,
+				0F0798A324010655004AAFBC /* ZHWebViewDelegate.h */,
+				0F0798A424010655004AAFBC /* ZHWebViewDelegate.m */,
 				0F079866240104FA004AAFBC /* Main.storyboard */,
 				0F079869240104FB004AAFBC /* Assets.xcassets */,
 				0F07986B240104FB004AAFBC /* LaunchScreen.storyboard */,
@@ -135,6 +175,15 @@
 				0F079886240104FB004AAFBC /* Info.plist */,
 			);
 			path = ZHJSNativeUITests;
+			sourceTree = "<group>";
+		};
+		0F079892240105BC004AAFBC /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				0F079895240105C1004AAFBC /* WebKit.framework */,
+				0F079893240105BC004AAFBC /* JavaScriptCore.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -243,6 +292,7 @@
 				0F07986D240104FB004AAFBC /* LaunchScreen.storyboard in Resources */,
 				0F07986A240104FB004AAFBC /* Assets.xcassets in Resources */,
 				0F079868240104FA004AAFBC /* Main.storyboard in Resources */,
+				0F0798A72401089A004AAFBC /* TestBundle.bundle in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -269,8 +319,14 @@
 			files = (
 				0F079865240104FA004AAFBC /* ViewController.m in Sources */,
 				0F07985F240104FA004AAFBC /* AppDelegate.m in Sources */,
+				0F079899240105E3004AAFBC /* ZHJSContext.m in Sources */,
+				0F0798A524010655004AAFBC /* ZHWebViewDelegate.m in Sources */,
+				0F07989F24010627004AAFBC /* ZHController.m in Sources */,
+				0F0798AA240108F6004AAFBC /* ZHUtil.m in Sources */,
 				0F079870240104FB004AAFBC /* main.m in Sources */,
+				0F0798A224010647004AAFBC /* ZHJSHandler.m in Sources */,
 				0F079862240104FA004AAFBC /* SceneDelegate.m in Sources */,
+				0F07989C2401060A004AAFBC /* ZHWebView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
