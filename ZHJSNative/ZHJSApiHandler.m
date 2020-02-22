@@ -193,7 +193,7 @@
             NSArray *subNames = [resName componentsSeparatedByString:@":"];
             resName = (subNames.count > 0 ? subNames[0] : resName);
         }
-        NSLog(@"-方法名---%@----",resName);
+//        NSLog(@"-方法名---%@----",resName);
         [resMethodMap setValue:name forKey:resName];
         //        执行方法
 #pragma clang diagnostic push

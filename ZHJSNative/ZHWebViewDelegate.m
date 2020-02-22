@@ -35,7 +35,10 @@
     NSDictionary *receiveInfo = [NSJSONSerialization JSONObjectWithData:[prompt dataUsingEncoding:NSUTF8StringEncoding] options:0 error:&error];
     
     id result = [self.webView.handler handleJSFuncSync:receiveInfo];
-    if (!result) return;
+    if (!result) {
+        if (completionHandler) completionHandler(nil);
+        return;
+    }
     /** 包裹一层数据：js端再解析出来
      作用：原生传数据可在js正常解析出类型
      不包裹：
@@ -47,7 +50,10 @@
      */
     result = @{@"data": result};
     NSData *data = [NSJSONSerialization dataWithJSONObject:result options:0 error:nil];
-    if (!data) return;
+    if (!data) {
+        if (completionHandler) completionHandler(nil);
+        return;
+    }
     if (completionHandler) completionHandler([[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]);
 }
 - (void)webView:(WKWebView *)webView didFailProvisionalNavigation:(WKNavigation *)navigation withError:(NSError *)error{
