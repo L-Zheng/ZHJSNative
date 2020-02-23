@@ -35,32 +35,6 @@
 
 #pragma mark - encode
 
-//获取数据在js中的类型
-+ (NSString *)fetJSDataType:(id)data{
-//    ['String', 'Object', 'Number', 'Array', 'Undefined', 'Function', 'Null', 'Symbol', 'Boolean']
-    NSDictionary *map = @{
-        @"NSString": @"String",
-        @"NSDictionary": @"Object",
-        @"NSNumber": @"Number",
-        @"NSArray": @"Array",
-    };
-    __block NSString *type = nil;
-    [map enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *obj, BOOL *stop) {
-        if ([data isKindOfClass:NSClassFromString(key)]) {
-            type = obj;
-            *stop = YES;
-        }
-    }];
-    if (type) return type;
-    //以上类型均不是
-    
-    //iOS对象
-    if ([data isKindOfClass:[NSObject class]]) return @"String";
-    
-    //默认作为BOOL值处理
-    return @"Boolean";
-}
-
 + (NSString *)encodeObj:(id)data{
     NSString *res = nil;
     if ([data isKindOfClass:[NSString class]]) {

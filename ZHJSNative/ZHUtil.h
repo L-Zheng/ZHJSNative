@@ -16,8 +16,6 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSString *)jsPath;
 + (NSString *)jsEventPath;
 
-//获取数据在js中的类型
-+ (NSString *)fetJSDataType:(id)data;
 //编码
 + (NSString *)encodeObj:(id)data;
 

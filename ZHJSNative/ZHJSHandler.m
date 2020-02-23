@@ -202,7 +202,7 @@
 }
 
 - (void)dealloc{
-    NSLog(@"----ZHJSHandler-------dealloc---------");
+    NSLog(@"-------%s---------", __func__);
 }
 
 @end

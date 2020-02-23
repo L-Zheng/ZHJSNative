@@ -85,7 +85,7 @@
 
 
 - (void)dealloc{
-    NSLog(@"----EFNewsWebDelegate-------dealloc---------");
+    NSLog(@"-------%s---------", __func__);
 }
 
 @end

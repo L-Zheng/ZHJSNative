@@ -199,7 +199,7 @@
     } @finally {
         
     }
-    NSLog(@"----EFNewsWebview-------dealloc---------");
+    NSLog(@"-------%s---------", __func__);
 }
 
 #pragma mark - js
