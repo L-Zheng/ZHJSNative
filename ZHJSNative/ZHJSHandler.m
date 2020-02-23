@@ -43,7 +43,6 @@
     
     //处理js的事件
     id (^apiBlock)(void) = ^(){
-        
         //获取参数
         NSArray *arguments = [ZHJSContext currentArguments];
         JSValue *paramsValue = (arguments.count == 0) ? nil : arguments[0];
@@ -60,7 +59,7 @@
         //获取回调方法
         JSValue *successFunc = [paramsValue valueForProperty:success];
         JSValue *failFunc = [paramsValue valueForProperty:fail];
-        void (^block)(id, NSError *) = ^(id result, NSError *error) {
+        ZHJSApiBlock block = ^(id result, NSError *error) {
             if (!error && result) {
                 [successFunc callWithArguments:@[result]];
             }else{
@@ -116,7 +115,7 @@
     BOOL isHasCallFunction = (successId.length || failId.length);
     if (isHasCallFunction) {
         __weak __typeof__(self) __self = self;
-        void (^block)(id, NSError *) = ^(id result, NSError *error) {
+        ZHJSApiBlock block = ^(id result, NSError *error) {
             if (!error) {
                 [__self callBackJsFunc:successId data:result callBack:nil];
             }else{

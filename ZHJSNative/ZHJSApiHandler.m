@@ -19,7 +19,7 @@
 /** ⚠️⚠️⚠️添加API步骤：
  在下面实现方法即可：
      带有回调的方法
-       - (void)js_<#functionName#><##>:(NSDictionary *)params callBack:(void (^) (id result, NSError *error))callBack{}
+       - (void)js_<#functionName#><##>:(NSDictionary *)params callBack:(ZHJSApiBlock)callBack{}
  
      没有回调的方法
        无返回值
@@ -40,7 +40,7 @@
        //返回BOOL：@(YES)、@(NO)
        - (NSNumber *)js_<#functionName#><##>Sync:(NSDictionary *)params{}
  */
-- (void)js_request:(NSDictionary *)info callBack:(void (^) (id result, NSError *error))callBack{
+- (void)js_request:(NSDictionary *)info callBack:(ZHJSApiBlock)callBack{
     NSString *url = [info objectForKey:@"url"];
     NSString *method = [[info objectForKey:@"method"] uppercaseString];
     NSMutableDictionary *headers = [info objectForKey:@"header"];
