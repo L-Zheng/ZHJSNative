@@ -16,16 +16,31 @@
 @implementation ZHJSApiHandler
 
 #pragma mark - api
-
 /** ⚠️⚠️⚠️添加API步骤：
- 在下面实现方法：
+ 在下面实现方法即可：
      带有回调的方法
-       - (void)fd_<#functionName#><##>:(NSDictionary *)params callBack:(void (^) (id result, NSError *error))callBack{}
+       - (void)js_<#functionName#><##>:(NSDictionary *)params callBack:(void (^) (id result, NSError *error))callBack{}
+ 
      没有回调的方法
-       - (void)fd_<#functionName#><##>:(NSDictionary *)params{}
-       - (void)fd_<#functionName#><##>Sync:(NSDictionary *)params{}
+       无返回值
+       - (void)js_<#functionName#><##>:(NSDictionary *)params{}
+ 
+       //返回NSDictionary
+       - (NSDictionary *)js_<#functionName#><##>Sync:(NSDictionary *)params{}
+ 
+       //返回NSArray
+       - (NSArray *)js_<#functionName#><##>Sync:(NSDictionary *)params{}
+ 
+       //返回NSString
+       - (NSString *)js_<#functionName#><##>Sync:(NSDictionary *)params{}
+ 
+       //返回NSNumber
+       - (NSNumber *)js_<#functionName#><##>Sync:(NSDictionary *)params{}
+       
+       //返回BOOL：@(YES)、@(NO)
+       - (NSNumber *)js_<#functionName#><##>Sync:(NSDictionary *)params{}
  */
-- (void)fd_request:(NSDictionary *)info callBack:(void (^) (id result, NSError *error))callBack{
+- (void)js_request:(NSDictionary *)info callBack:(void (^) (id result, NSError *error))callBack{
     NSString *url = [info objectForKey:@"url"];
     NSString *method = [[info objectForKey:@"method"] uppercaseString];
     NSMutableDictionary *headers = [info objectForKey:@"header"];
@@ -144,19 +159,19 @@
 }
 
 
-- (NSDictionary *)fd_getJsonSync:(NSDictionary *)params{
+- (NSDictionary *)js_getJsonSync:(NSDictionary *)params{
     return @{@"sdfd": @"22222", @"sf": @(YES)};
 }
-- (NSNumber *)fd_getNumberSync:(NSDictionary *)params{
+- (NSNumber *)js_getNumberSync:(NSDictionary *)params{
     return @(22);
 }
-- (NSNumber *)fd_getBoolSync:(NSDictionary *)params{
+- (NSNumber *)js_getBoolSync:(NSDictionary *)params{
     return @(YES);
 }
-- (NSString *)fd_getStringSync:(NSDictionary *)params{
+- (NSString *)js_getStringSync:(NSDictionary *)params{
     return @"dfgewrefdwd";
 }
-- (void)fd_commonLinkTo:(NSDictionary *)params{
+- (void)js_commonLinkTo:(NSDictionary *)params{
     NSLog(@"-------commonLinkTo------------");
     NSLog(@"%@",params);
 }
@@ -173,7 +188,7 @@
 }
 
 - (NSString *)methodPrefix{
-    return @"fd_";
+    return @"js_";
 }
 
 - (NSDictionary *)getAllApiMethodMap{
@@ -206,6 +221,14 @@
     return [resMethodMap copy];
 }
 
+#pragma mark - public
+
+//api方法map
+- (NSDictionary *)fetchApiMethodMap{
+    return [self.apiMethodMap copy];
+}
+
+//获取方法名
 - (SEL)fetchSelectorByName:(NSString *)name{
     if (!name || name.length == 0 || ![self.apiMethodMap.allKeys containsObject:name]) return nil;
     

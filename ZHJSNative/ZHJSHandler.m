@@ -28,7 +28,7 @@
 
 //JSContext注入的api
 - (NSDictionary *)jsContextApiMap{
-    NSDictionary *apiMap = [self.apiHandler.apiMethodMap copy];
+    NSDictionary *apiMap = [self.apiHandler fetchApiMethodMap];
     NSMutableDictionary *resMap = [NSMutableDictionary dictionary];
     
     __weak __typeof__(self) __self = self;

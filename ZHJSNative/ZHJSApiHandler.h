@@ -12,10 +12,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface ZHJSApiHandler : NSObject
 
-@property (nonatomic,strong,readonly) NSString *methodPrefix;
-@property (nonatomic,strong,readonly) NSDictionary *apiMethodMap;
-
-
+//api方法map
+- (NSDictionary *)fetchApiMethodMap;
+//获取方法名
 - (SEL)fetchSelectorByName:(NSString *)name;
 
 @end
