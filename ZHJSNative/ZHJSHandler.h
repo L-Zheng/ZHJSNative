@@ -30,8 +30,8 @@ static NSString * const ZHJSHandlerLogName = @"ZHJSLogEventHandler";
 //WebView注入的api
 + (NSString *)webViewApiSource;
 
-//同步处理js的调用
-- (id)handleJSFuncSync:(NSDictionary *)jsInfo;
+//处理js消息
+- (id)handleScriptMessage:(NSDictionary *)jsInfo;
 @end
 
 //NS_ASSUME_NONNULL_END

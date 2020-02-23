@@ -130,11 +130,6 @@
     return [self runNativeFunc:methodName params1:params params2:nil];
 }
 
-//同步处理js的调用
-- (id)handleJSFuncSync:(NSDictionary *)jsInfo{
-    return [self handleScriptMessage:jsInfo];
-}
-
 //运行原生方法
 - (id)runNativeFunc:(NSString *)methodName params1:(id)params1 params2:(id)params2{
     SEL sel = [self.apiHandler fetchSelectorByName:methodName];
@@ -189,51 +184,6 @@
         
     }
 }
-
-//异步处理js的调用
-
-- (id)handleJSFunc:(NSDictionary *)jsInfo{
-    if (!jsInfo || ![jsInfo isKindOfClass:[NSDictionary class]]) return nil;
-    
-    NSString *methodValue = [jsInfo valueForKey:@"methodName"];
-    
-    NSString *methodName = [NSString stringWithFormat:@"%@:",methodValue];
-    id params = [jsInfo objectForKey:@"params"];
-    SEL sel = NSSelectorFromString(methodName);
-    if (![self respondsToSelector:sel]) {
-        methodName = methodValue;
-        sel = NSSelectorFromString(methodName);
-        if (![self respondsToSelector:sel]) return nil;
-    }
-    
-    NSMethodSignature *signature = [self methodSignatureForSelector:sel];
-    NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:signature];
-    [invocation setTarget:self];
-    [invocation setSelector:sel];
-
-    //设置参数
-    NSMutableArray *paramsArr = [@[] mutableCopy];
-    if (params) {
-        [paramsArr addObject:params];
-    }
-    if (paramsArr.count > 0) {
-        NSUInteger i = 1;
-        for (id object in paramsArr) {
-            id tempObject = object;
-            [invocation setArgument:&tempObject atIndex:++i];
-        }
-    }
-    //运行
-    [invocation invoke];
-    
-    if ([signature methodReturnLength]) {
-        id res;
-        [invocation getReturnValue:&res];
-        return res;
-    }
-    return nil;
-}
-
 
 //js消息回调
 - (void)callBackJsFunc:(NSString *)funcId data:(id)result callBack:(void (^) (id data, NSError *error))callBack{

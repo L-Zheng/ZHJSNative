@@ -34,7 +34,7 @@
     NSError *error;
     NSDictionary *receiveInfo = [NSJSONSerialization JSONObjectWithData:[prompt dataUsingEncoding:NSUTF8StringEncoding] options:0 error:&error];
     
-    id result = [self.webView.handler handleJSFuncSync:receiveInfo];
+    id result = [self.webView.handler handleScriptMessage:receiveInfo];
     if (!result) {
         if (completionHandler) completionHandler(nil);
         return;

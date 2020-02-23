@@ -223,7 +223,7 @@
         if (error) {
             NSLog(@"----❌js:function:%@--error:%@--", funcName, error);
         }else{
-            NSLog(@"----✅js:function:%@--res:%@--", funcName, res);;
+            NSLog(@"----✅js:function:%@--返回值:%@--", funcName, res?:@"void");
         }
         if (completionHandler) {
             completionHandler(res, error);
