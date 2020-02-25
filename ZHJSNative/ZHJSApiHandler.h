@@ -7,12 +7,15 @@
 //
 
 #import <Foundation/Foundation.h>
+@class ZHJSHandler;
 
 //NS_ASSUME_NONNULL_BEGIN
 
 typedef void(^ZHJSApiBlock)(id result, NSError *error);
 
 @interface ZHJSApiHandler : NSObject
+
+@property (nonatomic,weak) ZHJSHandler *handler;
 
 //api方法map
 - (NSDictionary *)fetchApiMethodMap;

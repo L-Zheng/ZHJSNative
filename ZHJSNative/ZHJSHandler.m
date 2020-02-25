@@ -20,6 +20,7 @@
     self = [super init];
     if (self) {
         self.apiHandler = [[ZHJSApiHandler alloc] init];
+        self.apiHandler.handler = self;
     }
     return self;
 }
