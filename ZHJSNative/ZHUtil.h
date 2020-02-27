@@ -14,6 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (NSString *)htmlPath;
 + (NSString *)jsPath;
++ (NSString *)jsEventPath;
 
 //编码
 + (NSString *)encodeObj:(id)data;

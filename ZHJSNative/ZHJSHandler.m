@@ -104,6 +104,9 @@
     return jsCode;
 }
 - (NSString *)fetchWebViewApi{
+//    NSString *handlerJS = [NSString stringWithContentsOfFile:[ZHUtil jsEventPath] encoding:NSUTF8StringEncoding error:nil];
+//    return handlerJS;
+
     //获取js方法前缀
     NSString *apiPrefix = [self.apiHandler fetchApiMethodPrefixName];
     //获取js方法映射表
