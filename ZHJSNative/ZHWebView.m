@@ -28,15 +28,16 @@
     
     
     WKUserContentController *userContent = [[WKUserContentController alloc] init];
-    //注入api js
-    WKUserScript *apiScript = [[WKUserScript alloc] initWithSource:[handler fetchWebViewApi] injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:YES];
-    [userContent addUserScript:apiScript];
-    [userContent addScriptMessageHandler:handler name:ZHJSHandlerName];
     
     //注入log
     WKUserScript *logScript = [[WKUserScript alloc] initWithSource:[handler fetchWebViewLogApi] injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:YES];
     [userContent addUserScript:logScript];
     [userContent addScriptMessageHandler:handler name:ZHJSHandlerLogName];
+    
+    //注入api js
+    WKUserScript *apiScript = [[WKUserScript alloc] initWithSource:[handler fetchWebViewApi] injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:YES];
+    [userContent addUserScript:apiScript];
+    [userContent addScriptMessageHandler:handler name:ZHJSHandlerName];
     
     
     WKWebViewConfiguration *config = [[WKWebViewConfiguration alloc] init];

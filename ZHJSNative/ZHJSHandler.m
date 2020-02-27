@@ -120,7 +120,7 @@
     [apiConfigStr appendFormat:@"const %@={", commonAPIName];
     for (NSUInteger i = 0; i < keysCount; i++) {
         NSString *api = apiMapKeys[i];
-        BOOL isSync = [api containsString:@"Sync"];
+        BOOL isSync = [api hasSuffix:@"Sync"];
         [apiConfigStr appendFormat:@"%@:{sync:%@},", api, (isSync ? @"true" : @"false")];
         // 删除最后一个逗号
         if (i == keysCount - 1) {

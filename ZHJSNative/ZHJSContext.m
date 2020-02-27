@@ -67,5 +67,8 @@
     return [func callWithArguments:arguments];
 }
 
+- (void)dealloc{
+    NSLog(@"-------%s---------", __func__);
+}
 
 @end
