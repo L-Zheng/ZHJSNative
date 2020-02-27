@@ -42,34 +42,16 @@
 
 //注入console.log
 - (void)registerLogAPI{
-    void (^logBlock)(JSValue *shareData) = ^(JSValue *shareData){
-        NSArray *args = [JSContext currentArguments];
-        if (args.count == 0) return;
-        NSLog(@"👉JSContext中的log:");
-        if (args.count == 1) {
-            NSLog(@"%@",[args[0] toObject]);
-            return;
-        }
-        NSMutableArray *messages = [NSMutableArray array];
-        for (JSValue *obj in args) {
-            [messages addObject:[obj toObject]];
-        }
-        NSLog(@"%@", messages);
-    };
-    [self setObject:@{@"log": logBlock} forKeyedSubscript:@"console"];
+    __weak __typeof__(self) __self = self;
+    [self.handler fetchJSContextLogApi:^(NSString *apiPrefix, NSDictionary *apiBlockMap) {
+        [__self setObject:apiBlockMap forKeyedSubscript:apiPrefix];
+    }];
 }
-
 - (void)registerAPI{
-    //注入fund API
-    NSDictionary *apiMap = [self.handler jsContextApiMap];
-    [self setObject:apiMap forKeyedSubscript:[self apiKey]];
-}
-
-#pragma mark - js api
-
-//注入的api 如fund.reques({})
-- (NSString *)apiKey{
-    return @"fund";
+    __weak __typeof__(self) __self = self;
+    [self.handler fetchJSContextApi:^(NSString *apiPrefix, NSDictionary *apiBlockMap) {
+        [__self setObject:apiBlockMap forKeyedSubscript:apiPrefix];
+    }];
 }
 
 #pragma mark - public

@@ -26,12 +26,6 @@
     NSString *destPath = [bundle pathForResource:name.stringByDeletingPathExtension ofType:name.pathExtension];
     return destPath;
 }
-+ (NSString *)jsEventPath{
-    NSString *name = @"event.js";
-    NSBundle *bundle = [NSBundle bundleWithPath:[self bundlePath]];
-    NSString *destPath = [bundle pathForResource:name.stringByDeletingPathExtension ofType:name.pathExtension];
-    return destPath;
-}
 
 #pragma mark - encode
 

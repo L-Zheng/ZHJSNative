@@ -25,18 +25,40 @@
     return self;
 }
 
-#pragma mark - api
-
+#pragma mark - JSContext api
 //JSContext注入的api
-- (NSDictionary *)jsContextApiMap{
+- (void)fetchJSContextLogApi:(void (^) (NSString *apiPrefix, NSDictionary *apiBlockMap))callBack{
+    if (!callBack) return;
+    void (^logBlock)(void) = ^(){
+        NSArray *args = [JSContext currentArguments];
+        if (args.count == 0) return;
+        NSLog(@"👉JSContext中的log:");
+        if (args.count == 1) {
+            NSLog(@"%@",[args[0] toObject]);
+            return;
+        }
+        NSMutableArray *messages = [NSMutableArray array];
+        for (JSValue *obj in args) {
+            [messages addObject:[obj toObject]];
+        }
+        NSLog(@"%@", messages);
+    };
+    callBack(@"console", @{@"log": logBlock});
+}
+- (void)fetchJSContextApi:(void (^) (NSString *apiPrefix, NSDictionary *apiBlockMap))callBack{
+    if (!callBack) return;
+    //获取js方法前缀
+    NSString *apiPrefix = [self.apiHandler fetchApiMethodPrefixName];
+    //获取js方法映射表
     NSDictionary *apiMap = [self.apiHandler fetchApiMethodMap];
-    NSMutableDictionary *resMap = [NSMutableDictionary dictionary];
     
+    NSMutableDictionary *resMap = [NSMutableDictionary dictionary];
     __weak __typeof__(self) __self = self;
     [apiMap enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *obj, BOOL *stop) {
+        //设置方法实现
         [resMap setValue:[__self jsContextApiMapBlock:key] forKey:key];
     }];
-    return [resMap copy];
+    callBack(apiPrefix, [resMap copy]);
 }
 - (id)jsContextApiMapBlock:(NSString *)key{
     if (!key || key.length == 0) return nil;
@@ -73,11 +95,42 @@
     };
     return apiBlock;
 }
+
+#pragma mark - WebView api
 //WebView注入的api
-+ (NSString *)webViewApiSource{
-    NSString *handlerJS = [NSString stringWithContentsOfFile:[ZHUtil jsEventPath] encoding:NSUTF8StringEncoding error:nil];
-//    handlerJS = [handlerJS stringByReplacingOccurrencesOfString:@"\n" withString:@""];
-    return handlerJS;
+- (NSString *)fetchWebViewLogApi{
+    NSString *jsCode = [NSString stringWithFormat:
+    @"const FNJSToNativeLogHandlerName='%@';console.log=function(oriLogFunc){return function(obj){let newObj=obj;const type=Object.prototype.toString.call(newObj);if(type=='[object Function]'){newObj=newObj.toString()}const res=JSON.parse(JSON.stringify(newObj));const handler=window.webkit.messageHandlers[FNJSToNativeLogHandlerName];handler.postMessage(res);oriLogFunc.call(console,obj)}}(console.log);", ZHJSHandlerLogName];
+    return jsCode;
+}
+- (NSString *)fetchWebViewApi{
+    //获取js方法前缀
+    NSString *apiPrefix = [self.apiHandler fetchApiMethodPrefixName];
+    //获取js方法映射表
+    NSDictionary *apiMap = [self.apiHandler fetchApiMethodMap];
+    NSArray *apiMapKeys = apiMap.allKeys;
+    NSUInteger keysCount = apiMapKeys.count;
+    NSString *commonAPIName = @"FNCommonAPI";
+    
+    //生成jsCode
+    NSMutableString *apiConfigStr = [NSMutableString string];
+    [apiConfigStr appendFormat:@"const %@={", commonAPIName];
+    for (NSUInteger i = 0; i < keysCount; i++) {
+        NSString *api = apiMapKeys[i];
+        BOOL isSync = [api containsString:@"Sync"];
+        [apiConfigStr appendFormat:@"%@:{sync:%@},", api, (isSync ? @"true" : @"false")];
+        // 删除最后一个逗号
+        if (i == keysCount - 1) {
+            NSRange range = [apiConfigStr rangeOfString:@"," options:NSBackwardsSearch];
+            if (range.location != NSNotFound){
+                [apiConfigStr deleteCharactersInRange:range];
+            }
+        }
+    }
+    [apiConfigStr appendString:@"};"];
+    
+    NSString *res = [NSString stringWithFormat:@"%@const FNJSToNativeHandlerName='%@';const FNCallBackSuccessKey='%@';const FNCallBackFailKey='%@';const FNJSType=(()=>{let type={};const typeArr=['String','Object','Number','Array','Undefined','Function','Null','Symbol','Boolean'];for(let i=0;i<typeArr.length;i++){(name=>{type['is'+name]=(obj=>{return Object.prototype.toString.call(obj)=='[object '+name+']'})})(typeArr[i])}return type})();const FNCallBackMap={};const FNCallBack=params=>{if(!FNJSType.isString(params)||!params){return}const newParams=JSON.parse(decodeURIComponent(params));if(!FNJSType.isObject(newParams)){return}const funcId=newParams.funcId;const res=newParams.data;let arr=FNCallBackMap[funcId];if(!FNJSType.isArray(arr)||arr.length==0){return}arr.forEach(el=>{if(FNJSType.isFunction(el)){el(res)}});FNRemoveCallBack(funcId)};const FNAddCallBack=(funcId,func)=>{let arr=FNCallBackMap[funcId];if(!FNJSType.isArray(arr)){arr=[]}if(arr.indexOf(func)==-1){arr.push(func)}FNCallBackMap[funcId]=arr};const FNRemoveCallBack=funcId=>{if(FNCallBackMap.hasOwnProperty(funcId)){delete FNCallBackMap[funcId]}};const FNHandleCallBackParams=(methodName,params)=>{if(!FNJSType.isObject(params)){return params}const CreateRandom=methodName=>{return`-${methodName}-${(new Date).getTime()}-${Math.floor(Math.random()*1e3)}-`};let newParams=params;const success=params.success;if(success&&FNJSType.isFunction(success)){const funcId=FNCallBackSuccessKey+CreateRandom(methodName);FNAddCallBack(funcId,success);newParams[FNCallBackSuccessKey]=funcId}const fail=params.fail;if(fail&&FNJSType.isFunction(fail)){const funcId=FNCallBackFailKey+CreateRandom(methodName);FNAddCallBack(funcId,fail);newParams[FNCallBackFailKey]=funcId}return newParams};const FNSendParams=(methodName,params,sync=false)=>{let res={};if(!sync){const newParams=FNHandleCallBackParams(methodName,params);res=newParams?{methodName:methodName,params:newParams}:{methodName:methodName};return JSON.parse(JSON.stringify(res))}res=params?{methodName:methodName,params:params}:{methodName:methodName};return res};const FNSendParamsSync=(methodName,params)=>{return FNSendParams(methodName,params,true)};const FNSendNative=params=>{const handler=window.webkit.messageHandlers[FNJSToNativeHandlerName];handler.postMessage(params)};const FNSendNativeSync=params=>{let res=prompt(JSON.stringify(params));try{res=JSON.parse(res);return res.data}catch(error){console.log('❌FNSendNativeSync--error');console.log(error)}return null};const %@=(()=>{const apiMap=%@;let res={};for(const key in apiMap){if(!apiMap.hasOwnProperty(key)){continue}const config=apiMap[key];const isSync=config.hasOwnProperty('sync')?config.sync:false;const func=isSync?params=>{return FNSendNativeSync(FNSendParamsSync(key,params))}:params=>{FNSendNative(FNSendParams(key,params))};res[key]=func}return res})();", apiConfigStr, ZHJSHandlerName, self.fetchCallSuccessFuncKey, self.fetchCallFailFuncKey, apiPrefix, commonAPIName];
+    return res;
 }
 
 #pragma mark - WKScriptMessageHandler

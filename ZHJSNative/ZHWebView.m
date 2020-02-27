@@ -29,29 +29,12 @@
     
     WKUserContentController *userContent = [[WKUserContentController alloc] init];
     //注入api js
-    NSString *apiJSCode = [ZHJSHandler webViewApiSource];
-    WKUserScript *apiScript = [[WKUserScript alloc] initWithSource:apiJSCode injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:YES];
+    WKUserScript *apiScript = [[WKUserScript alloc] initWithSource:[handler fetchWebViewApi] injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:YES];
     [userContent addUserScript:apiScript];
     [userContent addScriptMessageHandler:handler name:ZHJSHandlerName];
     
     //注入log
-    NSString *jsCode = [NSString stringWithFormat:
-    @"console.log = (function(oriLogFunc){\
-        return function(obj)\
-        {\
-            /** 里面的注释必须带有闭合标签   语句后面必须带有; */\
-            let newObj = obj;\
-            const type = Object.prototype.toString.call(newObj);\
-            if (type == '[object Function]')\
-            {\
-              newObj = newObj.toString();\
-            }\
-            const res = JSON.parse(JSON.stringify(newObj));\
-            window.webkit.messageHandlers.%@.postMessage(res);\
-            oriLogFunc.call(console,obj);\
-        }\
-    })(console.log);", ZHJSHandlerLogName];
-    WKUserScript *logScript = [[WKUserScript alloc] initWithSource:jsCode injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:YES];
+    WKUserScript *logScript = [[WKUserScript alloc] initWithSource:[handler fetchWebViewLogApi] injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:YES];
     [userContent addUserScript:logScript];
     [userContent addScriptMessageHandler:handler name:ZHJSHandlerLogName];
     

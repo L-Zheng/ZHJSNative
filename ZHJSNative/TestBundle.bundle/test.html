@@ -24,11 +24,54 @@
 
 </body>
 
+<!-- <script src="http://wechatfe.github.io/vconsole/lib/vconsole.min.js?v=3.3.0"></script>
 <script>
+      window.vConsole = new window.VConsole();
+</script> -->
+<script>
+const FNJSType = (() => {
+    let type = {};
+    const typeArr = ['String', 'Object', 'Number', 'Array', 'Undefined', 'Function', 'Null', 'Symbol', 'Boolean'];
+    for (let i = 0; i < typeArr.length; i++) {
+        ((name) => {
+            type['is' + name] = (obj) => {
+                return Object.prototype.toString.call(obj) == '[object ' + name + ']';
+            }
+        })(typeArr[i]);
+    }
+    return type;
+})();
+
+// let windowOnError = null;
+// let printLog = function(){
+
+// }
+// var e = this;
+// FNJSType.isFunction(window.onerror) && (this.windowOnError = window.onerror), window.onerror = function (t, o, n, r, i) {
+//                                 var a = t;
+//                                 o && (a += "\n" + o.replace(location.origin, "")), (n || r) && (a += ":" + n + ":" + r);
+//                                 var l = !!i && !!i.stack && i.stack.toString() || "";
+//                                 console.log('ffff')
+//                                 e.windowOnError.call(window, t, o, n, r, i)
+
+//                                 e.printLog({
+//                                     logType: "error",
+//                                     logs: [a, l],
+//                                     noOrigin: !0
+//                                 }), FNJSType.isFunction(e.windowOnError) && e.windowOnError.call(window, t, o, n, r, i)
+//                             }
+// window.onerror = function (errorMsg, url, lineNumber) {  
+//     console.log('Error: ' + errorMsg + ' Script: ' + url + ' Line: ' + lineNumber);   
+//     // report error maybe
+// }
+// window.onerror = function (errorMsg, url, lineNumber, column, errorObj) {  
+//     console.log('sfdgfewfdg') 
+//     console.log('Error: ' + errorMsg + ' Script: ' + url + ' Line: ' + lineNumber + ' Column: ' + column + ' StackTrace: ' +  errorObj);
+// }
     function clickA() {
-        // fund.commonLinkTo({
-        //     title: 'sdfdwefd3ew324refg'
-        // })
+        fund.commonLinkTo11({
+            title: 'sdfdwefd3ew324refg'
+        })
         // fund.request({
         //     url: 'https://dataapineice.1234567.com.cn/community/show/article?serverversion=6.2.5&userid=43fe14e102644bd5b0edcd8fc3306e80&product=EFund&passportid=1010285265217684&deviceid=F0DD802F-6164-439E-9ACB-85763AAE813F&plat=Iphone&ids=20191128154557877210040_300&ctoken=afqqc6c6afacj-q6f1qk-8kjrnej-d1-&utoken=ndecnj-fjne1krck8816q68fkcnfkcnu&version=6.3.0&gtoken=85D646FD659449F7A3E646530A51F372',
         //     method: 'GET',

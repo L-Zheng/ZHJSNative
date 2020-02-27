@@ -25,7 +25,7 @@
     [self configView];
     [self configWebView];
     
-    self.context = [ZHJSContext createContext];
+//    self.context = [ZHJSContext createContext];
 }
 
 - (void)viewDidLayoutSubviews {
@@ -43,6 +43,12 @@
     [super viewDidAppear:animated];
     NSLog(@"----✅viewDidAppear----");
     [self configGesture];
+    
+//    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+//        [self.webView loadUrl:[NSURL fileURLWithPath:[ZHUtil htmlPath]] finish:^(BOOL success) {
+//            
+//        }];
+//    });
 }
 
 - (void)configView{

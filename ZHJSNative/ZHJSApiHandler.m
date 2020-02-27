@@ -25,19 +25,19 @@
        无返回值
        - (void)js_<#functionName#><##>:(NSDictionary *)params{}
  
-       //返回NSDictionary
+       //返回JS类型Object
        - (NSDictionary *)js_<#functionName#><##>Sync:(NSDictionary *)params{}
  
-       //返回NSArray
+       //返回JS类型Array
        - (NSArray *)js_<#functionName#><##>Sync:(NSDictionary *)params{}
  
-       //返回NSString
+       //返回JS类型String
        - (NSString *)js_<#functionName#><##>Sync:(NSDictionary *)params{}
  
-       //返回NSNumber
+       //返回JS类型Number
        - (NSNumber *)js_<#functionName#><##>Sync:(NSDictionary *)params{}
        
-       //返回BOOL：@(YES)、@(NO)
+       //返回JS类型Boolean：@(YES)、@(NO)
        - (NSNumber *)js_<#functionName#><##>Sync:(NSDictionary *)params{}
  */
 - (void)js_request:(NSDictionary *)info callBack:(ZHJSApiBlock)callBack{
@@ -103,7 +103,7 @@
         //解析返回的数据
         dispatch_async(dispatch_get_main_queue(), ^{
             NSError * (^createError) (NSString *desc) = ^(NSString *desc){
-                return [NSError errorWithDomain:@"fund-news-request" code:404 userInfo:@{NSLocalizedDescriptionKey: desc}];
+                return [NSError errorWithDomain:@"-request-" code:404 userInfo:@{NSLocalizedDescriptionKey: desc}];
             };
             NSLog(@"👉-ios-request--api请求回调");
             NSLog(@"%@", @{
@@ -157,7 +157,6 @@
     }];
     return [arguments componentsJoinedByString:@"&"];
 }
-
 
 - (NSDictionary *)js_getJsonSync:(NSDictionary *)params{
     return @{@"sdfd": @"22222", @"sf": @(YES)};
@@ -222,6 +221,11 @@
 }
 
 #pragma mark - public
+
+//api方法名
+- (NSString *)fetchApiMethodPrefixName{
+    return @"fund";
+}
 
 //api方法map
 - (NSDictionary *)fetchApiMethodMap{

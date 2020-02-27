@@ -17,6 +17,8 @@ typedef void(^ZHJSApiBlock)(id result, NSError *error);
 
 @property (nonatomic,weak) ZHJSHandler *handler;
 
+//api方法名
+- (NSString *)fetchApiMethodPrefixName;
 //api方法map
 - (NSDictionary *)fetchApiMethodMap;
 //获取方法名

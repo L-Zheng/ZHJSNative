@@ -26,9 +26,11 @@ static NSString * const ZHJSHandlerLogName = @"ZHJSLogEventHandler";
 @property (nonatomic,weak) ZHJSContext *jsContext;
 
 //JSContext注入的api
-- (NSDictionary *)jsContextApiMap;
+- (void)fetchJSContextApi:(void (^) (NSString *apiPrefix, NSDictionary *apiBlockMap))callBack;
+- (void)fetchJSContextLogApi:(void (^) (NSString *apiPrefix, NSDictionary *apiBlockMap))callBack;
 //WebView注入的api
-+ (NSString *)webViewApiSource;
+- (NSString *)fetchWebViewLogApi;
+- (NSString *)fetchWebViewApi;
 
 //处理js消息
 - (id)handleScriptMessage:(NSDictionary *)jsInfo;
