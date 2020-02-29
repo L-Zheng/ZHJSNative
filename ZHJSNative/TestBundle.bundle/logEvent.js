@@ -6,16 +6,14 @@ console.log = ((oriLogFunc) => {
         const parseData = (data) => {
           let res = null;
           const type = Object.prototype.toString.call(data);
-          if (type == '[object Null]' || type == '[object String]') {
+          if (type == '[object Null]' || type == '[object String]' || type == '[object Number]') {
             res = data;
           }else if (type == '[object Function]'){
             res = data.toString();
           }else if (type == '[object Undefined]') {
             res = 'Undefined';
           }else if (type == '[object Boolean]') {
-            res = `[object Boolean]-->${data ? 'true' : 'false'}`;
-          }else if (type == '[object Number]') {
-            res = `[object Number]-->${data}`;
+            res = data ? 'true' : 'false';
           }else if (type == '[object Object]') {
             res = {};
             for (const key in data) {

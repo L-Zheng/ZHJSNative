@@ -3,8 +3,10 @@
  */
 /**
  * 最小化该js文件： 
+ * uglify-es库地址 ：https://github.com/mishoo/UglifyJS2
  * npm install -g uglify-es
  * uglifyjs event.js -b beautify=false,quote_style=1 -o min4.js
+ * uglifyjs logEvent.js -b beautify=false,quote_style=1 -o min4.js
  */
 /** ❗️❗️Api配置说明：sync：是否是同步方法 */
 /** fund通用API */
