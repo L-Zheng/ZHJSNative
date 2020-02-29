@@ -25,7 +25,7 @@
     [self configView];
     [self configWebView];
     
-//    self.context = [ZHJSContext createContext];
+    self.context = [ZHJSContext createContext];
 }
 
 - (void)viewDidLayoutSubviews {

@@ -30,8 +30,9 @@ const FNCommonAPI = {
 };
 /** 发送消息name:与iOS原生保持一致 */
 const FNJSToNativeHandlerName = 'ZHJSEventHandler';
-const FNCallBackSuccessKey = 'FNCallBackSuccessKey';
-const FNCallBackFailKey = 'FNCallBackFailKey';
+const FNCallBackSuccessKey = 'ZHCallBackSuccessKey';
+const FNCallBackFailKey = 'ZHCallBackFailKey';
+const FNCallBackCompleteKey = 'ZHCallBackCompleteKey';
 const FNJSType = (() => {
     let type = {};
     const typeArr = ['String', 'Object', 'Number', 'Array', 'Undefined', 'Function', 'Null', 'Symbol', 'Boolean'];
@@ -55,57 +56,92 @@ const FNCallBack = (params) => {
     }
     const funcId = newParams.funcId;
     const res = newParams.data;
+    const alive = newParams.alive;
 
-    let arr = FNCallBackMap[funcId];
-    if (!FNJSType.isArray(arr) || arr.length == 0) {
+    let randomKey = '',
+        funcNameKey = '';
+    const matchKey = (key) => {
+        if (!funcId.endsWith(key)) return false;
+        randomKey = funcId.replace(new RegExp(key, 'g'), '');
+        funcNameKey = key;
+        return true;
+    };
+    const matchRes = (matchKey(FNCallBackSuccessKey) || matchKey(FNCallBackFailKey) || matchKey(FNCallBackCompleteKey));
+    if (!matchRes) return;
+
+    let funcMap = FNCallBackMap[randomKey];
+    if (!FNJSType.isObject(funcMap)) return;
+    const func = funcMap[funcNameKey];
+    if (!FNJSType.isFunction(func)) return;
+    try {
+        /** 
+         * 原函数没有参数 complete: () => {}  调用func(res) 不会报错
+         * 原函数有参数 complete: (res) => {}  调用func() 会报错 走catch
+         */
+        func(res);
+    } catch (error) {
+        console.log('CallBack-error');
+        console.log(error);
+    }
+    if (alive) return;
+    /** 回调complete后删除 */
+    if (funcNameKey == FNCallBackCompleteKey) {
+        FNRemoveCallBack(randomKey);
+    }
+}
+/**
+{
+    '-request-1582972065568-79-': {
+        FNCallBackSuccessKey: function
+        FNCallBackFailKey: function
+        FNCallBackCompleteKey: function
+    }
+}
+ */
+const FNAddCallBack = (randomKey, funcNameKey, func) => {
+    let funcMap = FNCallBackMap[randomKey];
+    if (!FNJSType.isObject(funcMap)) {
+        const map = {};
+        map[funcNameKey] = func;
+        FNCallBackMap[randomKey] = map;
         return;
     }
-    arr.forEach(el => {
-        if (FNJSType.isFunction(el)) {
-            el(res);
-        }
-    });
-    FNRemoveCallBack(funcId);
-}
-const FNAddCallBack = (funcId, func) => {
-    let arr = FNCallBackMap[funcId];
-    if (!FNJSType.isArray(arr)) {
-        arr = [];
-    }
-    if (arr.indexOf(func) == -1) {
-        arr.push(func);
-    }
-    FNCallBackMap[funcId] = arr;
+    if (funcMap.hasOwnProperty(funcNameKey)) return;
+    funcMap[funcNameKey] = func;
+    FNCallBackMap[randomKey] = funcMap;
 };
-const FNRemoveCallBack = (funcId) => {
-    if (FNCallBackMap.hasOwnProperty(funcId)) {
-        delete FNCallBackMap[funcId];
-    }
+const FNRemoveCallBack = (randomKey) => {
+    if (!FNCallBackMap.hasOwnProperty(randomKey)) return;
+    delete FNCallBackMap[randomKey];
 };
 const FNHandleCallBackParams = (methodName, params) => {
     if (!FNJSType.isObject(params)) {
         return params;
     }
-    /** 生成随机数 */
-    const CreateRandom = (methodName) => {
-        /** 0-1000的随机整数 */
-        return `-${methodName}-${new Date().getTime()}-${Math.floor(Math.random() * 1000)}-`;
-    };
+    /** 0-10000的随机整数 */
+    const randomKey = `-${methodName}-${new Date().getTime()}-${Math.floor(Math.random() * 10000)}-`;
     /** 参数 */
     let newParams = params;
     /** 成功回调 */
     const success = params.success;
     if (success && FNJSType.isFunction(success)) {
-        const funcId = FNCallBackSuccessKey + CreateRandom(methodName);
-        FNAddCallBack(funcId, success);
+        const funcId = randomKey + FNCallBackSuccessKey;
+        FNAddCallBack(randomKey, FNCallBackSuccessKey, success);
         newParams[FNCallBackSuccessKey] = funcId;
     }
     /** 失败回调 */
     const fail = params.fail;
     if (fail && FNJSType.isFunction(fail)) {
-        const funcId = FNCallBackFailKey + CreateRandom(methodName);
-        FNAddCallBack(funcId, fail);
+        const funcId = randomKey + FNCallBackFailKey;
+        FNAddCallBack(randomKey, FNCallBackFailKey, fail);
         newParams[FNCallBackFailKey] = funcId;
+    }
+    /** 完成回调 */
+    const complete = params.complete;
+    if (complete && FNJSType.isFunction(complete)) {
+        const funcId = randomKey + FNCallBackCompleteKey;
+        FNAddCallBack(randomKey, FNCallBackCompleteKey, complete);
+        newParams[FNCallBackCompleteKey] = funcId;
     }
     return newParams;
 };
@@ -113,25 +149,20 @@ const FNHandleCallBackParams = (methodName, params) => {
 /** 构造发送参数 */
 const FNSendParams = (methodName, params, sync = false) => {
     /** js发送消息 以此为key包裹消息体 */
+    let newParams = params;
     let res = {};
     if (!sync) {
-        const newParams = FNHandleCallBackParams(methodName, params);
-        res = newParams ? {
-            methodName,
-            params: newParams
-        } : {
-                methodName
-            };
-        /** 必须这样 否则js运行window.webkit.messageHandlers  会报错cannot be cloned */
-        return JSON.parse(JSON.stringify(res));
+        newParams = FNHandleCallBackParams(methodName, params);
     }
-    res = params ? {
+    const haveParms = !(FNJSType.isNull(newParams) || FNJSType.isUndefined(newParams));
+    res = haveParms ? {
         methodName,
-        params,
+        params: newParams
     } : {
-            methodName
-        }
-    return res;
+        methodName
+    };
+    /** 必须这样【JSON.parse(JSON.stringify())】 否则js运行window.webkit.messageHandlers  会报错cannot be cloned */
+    return sync ? res : JSON.parse(JSON.stringify(res));
 };
 const FNSendParamsSync = (methodName, params) => {
     return FNSendParams(methodName, params, true);
@@ -146,7 +177,7 @@ const FNSendNativeSync = (params) => {
         res = JSON.parse(res);
         return res.data;
     } catch (error) {
-        console.log('❌FNSendNativeSync--error');
+        console.log('❌SendNativeSync--error');
         console.log(error);
     }
     return null;

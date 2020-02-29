@@ -10,7 +10,7 @@
 #import <objc/runtime.h>
 
 @interface ZHJSApiHandler ()
-@property (nonatomic,strong) NSDictionary *apiMethodMap;
+@property (nonatomic,strong) NSDictionary <NSString *, ZHJSApiMethodItem *> *apiMethodMap;
 @end
 
 @implementation ZHJSApiHandler
@@ -18,13 +18,11 @@
 #pragma mark - api
 /** ⚠️⚠️⚠️添加API步骤：
  在下面实现方法即可：
-     带有回调的方法
+     异步方法
+       - (void)js_<#functionName#><##>:(NSDictionary *)params{}
        - (void)js_<#functionName#><##>:(NSDictionary *)params callBack:(ZHJSApiBlock)callBack{}
  
-     没有回调的方法
-       无返回值
-       - (void)js_<#functionName#><##>:(NSDictionary *)params{}
- 
+     同步方法
        //返回JS类型Object
        - (NSDictionary *)js_<#functionName#><##>Sync:(NSDictionary *)params{}
  
@@ -191,7 +189,7 @@
 }
 
 - (NSDictionary *)getAllApiMethodMap{
-    NSMutableDictionary *resMethodMap = [@{} mutableCopy];
+    NSMutableDictionary <NSString *, ZHJSApiMethodItem *> *resMethodMap = [@{} mutableCopy];
     
     unsigned int count;
     Method *methods = class_copyMethodList([self class], &count);
@@ -199,16 +197,18 @@
     for (int i = 0; i < count; i++){
         Method method = methods[i];
         SEL selector = method_getName(method);
-        NSString *name = NSStringFromSelector(selector);
-        if (![name hasPrefix:self.methodPrefix]) continue;
+        NSString *nativeName = NSStringFromSelector(selector);
+        if (![nativeName hasPrefix:self.methodPrefix]) continue;
         
-        NSString *resName = [name substringFromIndex:self.methodPrefix.length];
-        if ([resName containsString:@":"]) {
-            NSArray *subNames = [resName componentsSeparatedByString:@":"];
-            resName = (subNames.count > 0 ? subNames[0] : resName);
+        NSString *jsName = [nativeName substringFromIndex:self.methodPrefix.length];
+        if ([jsName containsString:@":"]) {
+            NSArray *subNames = [jsName componentsSeparatedByString:@":"];
+            jsName = (subNames.count > 0 ? subNames[0] : jsName);
         }
-//        NSLog(@"-方法名---%@----",resName);
-        [resMethodMap setValue:name forKey:resName];
+        ZHJSApiMethodItem *item = [[ZHJSApiMethodItem alloc] init];
+        item.jsMethodName = jsName;
+        item.nativeMethodName = nativeName;
+        [resMethodMap setValue:item forKey:jsName];
         //        执行方法
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
@@ -227,8 +227,8 @@
     return @"fund";
 }
 
-//api方法map
-- (NSDictionary *)fetchApiMethodMap{
+//api方法映射表
+- (NSDictionary <NSString *, ZHJSApiMethodItem *> *)fetchApiMethodMap{
     return [self.apiMethodMap copy];
 }
 
@@ -236,10 +236,10 @@
 - (SEL)fetchSelectorByName:(NSString *)name{
     if (!name || name.length == 0 || ![self.apiMethodMap.allKeys containsObject:name]) return nil;
     
-    NSString *res = self.apiMethodMap[name];
-    if (!res) return nil;
+    ZHJSApiMethodItem *item = self.apiMethodMap[name];
+    if (!item || !item.nativeMethodName) return nil;
     
-    SEL sel = NSSelectorFromString(res);
+    SEL sel = NSSelectorFromString(item.nativeMethodName);
     if (![self respondsToSelector:sel]) return nil;
     return sel;
 }
@@ -248,4 +248,10 @@
     NSLog(@"-------%s---------", __func__);
 }
 
+@end
+
+@implementation ZHJSApiMethodItem
+- (BOOL)isSync{
+    return [self.jsMethodName hasSuffix:@"Sync"];
+}
 @end
