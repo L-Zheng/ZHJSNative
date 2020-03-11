@@ -35,7 +35,7 @@
     [context registerAPI];
     
     //运算js
-    [context evaluateScript:[NSString stringWithContentsOfURL:[NSURL fileURLWithPath:[ZHUtil jsPath]] encoding:NSUTF8StringEncoding error:nil]];
+//    [context evaluateScript:[NSString stringWithContentsOfURL:[NSURL fileURLWithPath:[ZHUtil jsPath]] encoding:NSUTF8StringEncoding error:nil]];
     
     return context;
 }
@@ -60,6 +60,9 @@
     if (funcName.length == 0) {
         return nil;
     }
+    /**objectForKeyedSubscript 只能获取js代码中的 function 与 var 变量  let 与 const 变量不能获取
+     如：var test = {}  function test(params) {}
+     */
     JSValue *func = [self objectForKeyedSubscript:funcName];
     if (!func.isObject) {
         return nil;

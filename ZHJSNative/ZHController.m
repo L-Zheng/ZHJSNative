@@ -26,6 +26,8 @@
     [self configWebView];
     
     self.context = [ZHJSContext createContext];
+    //运算js
+    [self.context evaluateScript:[NSString stringWithContentsOfURL:[NSURL fileURLWithPath:[ZHUtil jsPath]] encoding:NSUTF8StringEncoding error:nil]];
 }
 
 - (void)viewDidLayoutSubviews {
