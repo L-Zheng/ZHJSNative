@@ -33,6 +33,10 @@ console.log = ((oriLogFunc) => {
       } else if (type == '[object Error]') {
         res = data;
         errorRes.push(res);
+      } else if (type == '[object Window]') {
+        res = data.toString();
+      } else {
+        res = data;
       }
       return res;
     };
@@ -60,6 +64,7 @@ console.log = ((oriLogFunc) => {
       handler.postMessage(JSON.parse(JSON.stringify(iosRes)));
     } catch (error) { }
     /**检测到log error弹窗提醒*/
+    return;
     if (errorRes.length == 0) return;
     if (!window.onerror) return;
     try {

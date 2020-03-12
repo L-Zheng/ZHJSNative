@@ -26,11 +26,8 @@
     context.handler = [[ZHJSHandler alloc] init];
     context.handler.jsContext = context;
     
-    //设置异常回调
-    [context setExceptionHandler:^(JSContext *context, JSValue *exception){
-        NSLog(@"❌ZHJSContext异常");
-        NSLog(@"%@", exception);
-    }];
+    //注入api
+    [context registerException];
     [context registerLogAPI];
     [context registerAPI];
     
@@ -40,6 +37,17 @@
     return context;
 }
 
+- (void)registerException{
+    //设置异常回调
+    __weak __typeof__(self) __self = self;
+    [self setExceptionHandler:^(JSContext *context, JSValue *exception){
+        NSLog(@"❌JSContext异常");
+        NSMutableDictionary *res = [[exception toDictionary] mutableCopy];
+        [res setValue:[exception toString]?:@"" forKey:@"msg"];
+        NSLog(@"%@", res);
+        [__self.handler showJSContextException:[res copy]];
+    }];
+}
 //注入console.log
 - (void)registerLogAPI{
     __weak __typeof__(self) __self = self;

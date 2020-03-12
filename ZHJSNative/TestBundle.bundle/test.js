@@ -1,3 +1,6 @@
+const aaa = [] 
+        aaa.forEach(el, index => { });
+
 // fund.commonLinkTo(123)
 
 // fund.request({

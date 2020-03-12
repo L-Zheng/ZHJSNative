@@ -18,11 +18,11 @@ window.onerror = ((oriFunc) => {
             return argCount > idx ? params[idx] : invaildDesc;
         };
         const iosRes = {
-            'error-msg': fetchVaule(0),
-            'file-url': fetchVaule(1),
-            'lineNumber': fetchVaule(2),
-            'columnNumber': fetchVaule(3),
-            'error-stack': fetchVaule(4)
+            'msg': fetchVaule(0),
+            'url': fetchVaule(1),
+            'line': fetchVaule(2),
+            'column': fetchVaule(3),
+            'stack': fetchVaule(4)
         };
         const res = JSON.parse(JSON.stringify(iosRes));
         try {

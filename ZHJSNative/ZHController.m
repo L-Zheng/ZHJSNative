@@ -25,9 +25,9 @@
     [self configView];
     [self configWebView];
     
-    self.context = [ZHJSContext createContext];
     //运算js
-    [self.context evaluateScript:[NSString stringWithContentsOfURL:[NSURL fileURLWithPath:[ZHUtil jsPath]] encoding:NSUTF8StringEncoding error:nil]];
+//    self.context = [ZHJSContext createContext];
+//    [self.context evaluateScript:[NSString stringWithContentsOfURL:[NSURL fileURLWithPath:[ZHUtil jsPath]] encoding:NSUTF8StringEncoding error:nil]];
 }
 
 - (void)viewDidLayoutSubviews {
@@ -67,7 +67,7 @@
 
 - (void)configWebView{
     ZHWebView *webView = [ZHWebView createWebView];
-    [webView loadUrl:[NSURL fileURLWithPath:@"/Users/em/Desktop/My/ZHCode/GitHubCode/ZHJSNative的副本/ZHJSNative/TestBundle.bundle/test.html"] finish:^(BOOL success) {
+    [webView loadUrl:[NSURL fileURLWithPath:[ZHUtil htmlPath]] finish:^(BOOL success) {
         
     }];
     

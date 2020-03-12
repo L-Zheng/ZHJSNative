@@ -23,9 +23,7 @@
 #pragma mark - init
 
 + (ZHWebView *)createWebView{
-    
     ZHJSHandler *handler = [[ZHJSHandler alloc] init];
-    
     
     WKUserContentController *userContent = [[WKUserContentController alloc] init];
     

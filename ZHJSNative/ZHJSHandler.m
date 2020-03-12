@@ -144,7 +144,6 @@ case cType:{\
 }
 
 #pragma mark - WebView api
-
 //WebView注入的api
 - (NSString *)fetchWebViewLogApi{
 //        NSString *handlerJS = [NSString stringWithContentsOfFile:[ZHUtil jsLogEventPath] encoding:NSUTF8StringEncoding error:nil];
@@ -152,17 +151,16 @@ case cType:{\
     
     //以下代码由logEvent.js压缩而成
     NSString *jsCode = [NSString stringWithFormat:
-    @"const FNJSToNativeLogHandlerName='%@';console.log=(oriLogFunc=>{return function(...args){oriLogFunc.call(console,...args);let errorRes=[];const parseData=data=>{let res=null;const type=Object.prototype.toString.call(data);if(type=='[object Null]'||type=='[object String]'||type=='[object Number]'){res=data}else if(type=='[object Function]'){res=data.toString()}else if(type=='[object Undefined]'){res='Undefined'}else if(type=='[object Boolean]'){res=data?'true':'false'}else if(type=='[object Object]'){res={};for(const key in data){const el=data[key];res[key]=parseData(el)}}else if(type=='[object Array]'){res=[];data.forEach(el=>{res.push(parseData(el))})}else if(type=='[object Error]'){res=data;errorRes.push(res)}return res};const params=arguments;const type=Object.prototype.toString.call(params);const argCount=params.length;if(type!='[object Arguments]')return;let iosRes=[];const fetchVaule=idx=>{return argCount>idx?params[idx]:'无此参数'};if(argCount==0)return;if(argCount==1){iosRes=parseData(fetchVaule(0))}else{for(let idx=0;idx<argCount;idx++){iosRes.push(parseData(fetchVaule(idx)))}}try{const handler=window.webkit.messageHandlers[FNJSToNativeLogHandlerName];handler.postMessage(JSON.parse(JSON.stringify(iosRes)))}catch(error){}if(errorRes.length==0)return;if(!window.onerror)return;try{errorRes.forEach(el=>{window.onerror(el)})}catch(error){}}})(console.log);", ZHJSHandlerLogName];
+    @"const FNJSToNativeLogHandlerName='%@';console.log=(oriLogFunc=>{return function(...args){oriLogFunc.call(console,...args);let errorRes=[];const parseData=data=>{let res=null;const type=Object.prototype.toString.call(data);if(type=='[object Null]'||type=='[object String]'||type=='[object Number]'){res=data}else if(type=='[object Function]'){res=data.toString()}else if(type=='[object Undefined]'){res='Undefined'}else if(type=='[object Boolean]'){res=data?'true':'false'}else if(type=='[object Object]'){res={};for(const key in data){const el=data[key];res[key]=parseData(el)}}else if(type=='[object Array]'){res=[];data.forEach(el=>{res.push(parseData(el))})}else if(type=='[object Error]'){res=data;errorRes.push(res)}else if(type=='[object Window]'){res=data.toString()}else{res=data}return res};const params=arguments;const type=Object.prototype.toString.call(params);const argCount=params.length;if(type!='[object Arguments]')return;let iosRes=[];const fetchVaule=idx=>{return argCount>idx?params[idx]:'无此参数'};if(argCount==0)return;if(argCount==1){iosRes=parseData(fetchVaule(0))}else{for(let idx=0;idx<argCount;idx++){iosRes.push(parseData(fetchVaule(idx)))}}try{const handler=window.webkit.messageHandlers[FNJSToNativeLogHandlerName];handler.postMessage(JSON.parse(JSON.stringify(iosRes)))}catch(error){}return;if(errorRes.length==0)return;if(!window.onerror)return;try{errorRes.forEach(el=>{window.onerror(el)})}catch(error){}}})(console.log);", ZHJSHandlerLogName];
     return jsCode;
 }
-
 - (NSString *)fetchWebViewErrorApi{
 //        NSString *handlerJS = [NSString stringWithContentsOfFile:[ZHUtil jsErrorEventPath] encoding:NSUTF8StringEncoding error:nil];
 //        return handlerJS;
     
     //以下代码由errorEvent.js压缩而成
     NSString *jsCode = [NSString stringWithFormat:
-    @"const FNJSToNativeErrorHandlerName='%@';window.onerror=(oriFunc=>{return function(...args){if(oriFunc)oriFunc.apply(window,args);const params=arguments;const type=Object.prototype.toString.call(params);const argCount=params.length;if(type!='[object Arguments]')return;if(argCount==0)return;const invaildDesc='无此参数';const fetchVaule=idx=>{return argCount>idx?params[idx]:invaildDesc};const iosRes={'error-msg':fetchVaule(0),'file-url':fetchVaule(1),lineNumber:fetchVaule(2),columnNumber:fetchVaule(3),'error-stack':fetchVaule(4)};const res=JSON.parse(JSON.stringify(iosRes));try{const handler=window.webkit.messageHandlers[FNJSToNativeErrorHandlerName];handler.postMessage(res)}catch(error){}}console.log('oriFuncoriFunc');console.log(window.onerror);})(window.onerror);", ZHJSHandlerErrorName];
+    @"const FNJSToNativeErrorHandlerName='%@';window.onerror=(oriFunc=>{return function(...args){if(oriFunc)oriFunc.apply(window,args);const params=arguments;const type=Object.prototype.toString.call(params);const argCount=params.length;if(type!='[object Arguments]')return;if(argCount==0)return;const invaildDesc='无此参数';const fetchVaule=idx=>{return argCount>idx?params[idx]:invaildDesc};const iosRes={msg:fetchVaule(0),url:fetchVaule(1),line:fetchVaule(2),column:fetchVaule(3),stack:fetchVaule(4)};const res=JSON.parse(JSON.stringify(iosRes));try{const handler=window.webkit.messageHandlers[FNJSToNativeErrorHandlerName];handler.postMessage(res)}catch(error){}}})(window.onerror);", ZHJSHandlerErrorName];
     return jsCode;
 }
 - (NSString *)fetchWebViewApi{
@@ -189,6 +187,24 @@ case cType:{\
     return res;
 }
 
+#pragma mark - exception
+//异常弹窗
+- (void)showWebViewException:(NSDictionary *)exception{
+    [self showException:@"WebView JS异常" exception:exception];
+}
+- (void)showJSContextException:(NSDictionary *)exception{
+    [self showException:@"JSCore异常" exception:exception];
+}
+- (void)showException:(NSString *)title exception:(NSDictionary *)exception{
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:title message:[exception description] preferredStyle:UIAlertControllerStyleAlert];
+    __weak __typeof__(alert) weakAlert = alert;
+    UIAlertAction *action = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
+        [weakAlert.presentingViewController dismissViewControllerAnimated:YES completion:nil];
+    }];
+    [alert addAction:action];
+    [[UIApplication sharedApplication].keyWindow.rootViewController presentViewController:alert animated:YES completion:nil];
+}
+
 #pragma mark - WKScriptMessageHandler
 
 - (void)userContentController:(WKUserContentController *)userContentController didReceiveScriptMessage:(WKScriptMessage *)message {
@@ -198,8 +214,10 @@ case cType:{\
         return;
     }
     if ([message.name isEqualToString:ZHJSHandlerErrorName]) {
-        NSLog(@"👉js中的error：");
+        NSLog(@"❌WebView js异常");
+        NSDictionary *exception = message.body;
         NSLog(@"%@", message.body);
+        [self showWebViewException:exception];
         return;
     }
     if ([message.name isEqualToString:ZHJSHandlerName]) {
