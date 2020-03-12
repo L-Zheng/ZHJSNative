@@ -105,9 +105,9 @@ case cType:{\
         }
         
         //是否需要回调
-        NSString *success = self.fetchJSContextCallSuccessFuncKey;
-        NSString *fail = self.fetchJSContextCallFailFuncKey;
-        NSString *complete = self.fetchJSContextCallCompleteFuncKey;
+        NSString *success = __self.fetchJSContextCallSuccessFuncKey;
+        NSString *fail = __self.fetchJSContextCallFailFuncKey;
+        NSString *complete = __self.fetchJSContextCallCompleteFuncKey;
         BOOL hasCallFunction = ([jsValue hasProperty:success] ||
                                 [jsValue hasProperty:fail] ||
                                 [jsValue hasProperty:complete]);

@@ -44,12 +44,14 @@
 - (void)registerLogAPI{
     __weak __typeof__(self) __self = self;
     [self.handler fetchJSContextLogApi:^(NSString *apiPrefix, NSDictionary *apiBlockMap) {
+        if (apiBlockMap.allKeys.count == 0) return;
         [__self setObject:apiBlockMap forKeyedSubscript:apiPrefix];
     }];
 }
 - (void)registerAPI{
     __weak __typeof__(self) __self = self;
     [self.handler fetchJSContextApi:^(NSString *apiPrefix, NSDictionary *apiBlockMap) {
+        if (apiBlockMap.allKeys.count == 0) return;
         [__self setObject:apiBlockMap forKeyedSubscript:apiPrefix];
     }];
 }
