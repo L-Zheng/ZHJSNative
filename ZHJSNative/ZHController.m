@@ -67,7 +67,7 @@
 
 - (void)configWebView{
     ZHWebView *webView = [ZHWebView createWebView];
-    [webView loadUrl:[NSURL fileURLWithPath:[ZHUtil htmlPath]] finish:^(BOOL success) {
+    [webView loadUrl:[NSURL fileURLWithPath:@"/Users/em/Desktop/My/ZHCode/GitHubCode/ZHJSNative的副本/ZHJSNative/TestBundle.bundle/test.html"] finish:^(BOOL success) {
         
     }];
     

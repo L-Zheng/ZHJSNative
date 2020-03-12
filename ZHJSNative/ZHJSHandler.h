@@ -17,6 +17,7 @@
 
 static NSString * const ZHJSHandlerName = @"ZHJSEventHandler";
 static NSString * const ZHJSHandlerLogName = @"ZHJSLogEventHandler";
+static NSString * const ZHJSHandlerErrorName = @"ZHJSErrorEventHandler";
 
 @interface ZHJSHandler : NSObject<WKScriptMessageHandler>
 
@@ -30,6 +31,7 @@ static NSString * const ZHJSHandlerLogName = @"ZHJSLogEventHandler";
 - (void)fetchJSContextLogApi:(void (^) (NSString *apiPrefix, NSDictionary *apiBlockMap))callBack;
 //WebView注入的api
 - (NSString *)fetchWebViewLogApi;
+- (NSString *)fetchWebViewErrorApi;
 - (NSString *)fetchWebViewApi;
 
 //处理js消息

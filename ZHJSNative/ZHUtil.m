@@ -38,6 +38,12 @@
     NSString *destPath = [bundle pathForResource:name.stringByDeletingPathExtension ofType:name.pathExtension];
     return destPath;
 }
++ (NSString *)jsErrorEventPath{
+    NSString *name = @"errorEvent.js";
+    NSBundle *bundle = [NSBundle bundleWithPath:[self bundlePath]];
+    NSString *destPath = [bundle pathForResource:name.stringByDeletingPathExtension ofType:name.pathExtension];
+    return destPath;
+}
 
 #pragma mark - encode
 

@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Access-Control-Allow-Origin" content="*">
     <title>Document</title>
     <style>
         .body {
@@ -24,51 +25,74 @@
 
 </body>
 
-<!-- <script src="http://wechatfe.github.io/vconsole/lib/vconsole.min.js?v=3.3.0"></script>
+<!-- <script src="http://wechatfe.github.io/vconsole/lib/vconsole.min.js?v=3.3.0" crossorigin="anonymous"></script>
 <script>
       window.vConsole = new window.VConsole();
 </script> -->
 <script>
-// const FNJSType = (() => {
-//     let type = {};
-//     const typeArr = ['String', 'Object', 'Number', 'Array', 'Undefined', 'Function', 'Null', 'Symbol', 'Boolean'];
-//     for (let i = 0; i < typeArr.length; i++) {
-//         ((name) => {
-//             type['is' + name] = (obj) => {
-//                 return Object.prototype.toString.call(obj) == '[object ' + name + ']';
-//             }
-//         })(typeArr[i]);
+    window.onerror = function (errorMsg, url, lineNumber, column, errorObj) {
+        // console.log('sfdgfewfdg') 
+        console.log('Error: ' + errorMsg + ' Script: ' + url + ' Line: ' + lineNumber + ' Column: ' + column + ' StackTrace: ' +  errorObj);
+        // console.log(arguments)
+        // window.demoError = arguments
+    }
+    
+
+// /** 发送消息name:与iOS原生保持一致 */
+// const FNJSToNativeErrorHandlerName = 'ZHJSErrorEventHandler';
+// window.onerror = ((oriFunc) => {
+//     /**不能使用箭头函数 否则arguments找不到*/
+//     return function (...args) {
+//         /**发送至webview控制台*/
+//         if (oriFunc) oriFunc.apply(window, args);
+//         /**获取参数*/
+//         const params = arguments;
+//         const type = Object.prototype.toString.call(params);
+//         const argCount = params.length;
+//         /**发送至iOS原生*/
+//         if (type != '[object Arguments]') return;
+//         if (argCount == 0) return;
+//         const invaildDesc = '无此参数';
+//         const fetchVaule = (idx) => {
+//             return argCount > idx ? params[idx] : invaildDesc;
+//         };
+//         const iosRes = {
+//             'error-msg': fetchVaule(0),
+//             'file-url': fetchVaule(1),
+//             'lineNumber': fetchVaule(2),
+//             'columnNumber': fetchVaule(3),
+//             'error-stack': fetchVaule(4)
+//         };
+//         const res = JSON.parse(JSON.stringify(iosRes));
+//         try {
+//             const handler = window.webkit.messageHandlers[FNJSToNativeErrorHandlerName];
+//             handler.postMessage(res);
+//         } catch (error) { }
 //     }
-//     return type;
-// })();
+// })(window.onerror);
 
-// let windowOnError = null;
-// let printLog = function(){
+    // const aaa = []
+    // aaa.forEach(el, index => {});
 
-// }
-// var e = this;
-// FNJSType.isFunction(window.onerror) && (this.windowOnError = window.onerror), window.onerror = function (t, o, n, r, i) {
-//                                 var a = t;
-//                                 o && (a += "\n" + o.replace(location.origin, "")), (n || r) && (a += ":" + n + ":" + r);
-//                                 var l = !!i && !!i.stack && i.stack.toString() || "";
-//                                 console.log('ffff')
-//                                 e.windowOnError.call(window, t, o, n, r, i)
+    try {
+        var msg = "Hi, " + Name
+    } catch (error) {
+        console.log(error)
+        // console.log( Object.prototype.toString.call(error))
+        // throw error
+    }
+    console.log(123, 345, 3456)
 
-//                                 e.printLog({
-//                                     logType: "error",
-//                                     logs: [a, l],
-//                                     noOrigin: !0
-//                                 }), FNJSType.isFunction(e.windowOnError) && e.windowOnError.call(window, t, o, n, r, i)
-//                             }
-// window.onerror = function (errorMsg, url, lineNumber) {  
-//     console.log('Error: ' + errorMsg + ' Script: ' + url + ' Line: ' + lineNumber);   
-//     // report error maybe
-// }
-// window.onerror = function (errorMsg, url, lineNumber, column, errorObj) {  
-//     console.log('sfdgfewfdg') 
-//     console.log('Error: ' + errorMsg + ' Script: ' + url + ' Line: ' + lineNumber + ' Column: ' + column + ' StackTrace: ' +  errorObj);
-// }
     function clickA() {
+
+        // console.log(fff)
+        // const arr = [{}]
+        // arr.forEach(el, index => {
+
+        // });
+
+
+
         // console.log({sdfd: 'sfd', eee: false, ttt: 4.56, mmm: {cccc: 'cccc', nnn: function (params) {}}, dsf: ['ccc', 'sdsf', function (params) {}]})
         // console.log(fund)
         // fund.commonLinkTo(true)
@@ -96,7 +120,7 @@
         // console.log(Object.prototype.toString.call(res.sf))
         // console.log(res.sf)
 
-        
+
     }
 </script>
 

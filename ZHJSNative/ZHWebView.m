@@ -34,6 +34,11 @@
     [userContent addUserScript:logScript];
     [userContent addScriptMessageHandler:handler name:ZHJSHandlerLogName];
     
+    //注入error
+    WKUserScript *errorScript = [[WKUserScript alloc] initWithSource:[handler fetchWebViewErrorApi] injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:YES];
+    [userContent addUserScript:errorScript];
+    [userContent addScriptMessageHandler:handler name:ZHJSHandlerErrorName];
+    
     //注入api js
     WKUserScript *apiScript = [[WKUserScript alloc] initWithSource:[handler fetchWebViewApi] injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:YES];
     [userContent addUserScript:apiScript];
@@ -177,6 +182,7 @@
         [userContent removeAllUserScripts];
         [userContent removeScriptMessageHandlerForName:ZHJSHandlerName];
         [userContent removeScriptMessageHandlerForName:ZHJSHandlerLogName];
+        [userContent removeScriptMessageHandlerForName:ZHJSHandlerErrorName];
         [[NSNotificationCenter defaultCenter] removeObserver:self];
     } @catch (NSException *exception) {
         

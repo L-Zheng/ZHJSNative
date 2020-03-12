@@ -152,7 +152,17 @@ case cType:{\
     
     //以下代码由logEvent.js压缩而成
     NSString *jsCode = [NSString stringWithFormat:
-    @"const FNJSToNativeLogHandlerName='%@';console.log=(oriLogFunc=>{return obj=>{const parseData=data=>{let res=null;const type=Object.prototype.toString.call(data);if(type=='[object Null]'||type=='[object String]'||type=='[object Number]'){res=data}else if(type=='[object Function]'){res=data.toString()}else if(type=='[object Undefined]'){res='Undefined'}else if(type=='[object Boolean]'){res=data?'true':'false'}else if(type=='[object Object]'){res={};for(const key in data){const el=data[key];res[key]=parseData(el)}}else if(type=='[object Array]'){res=[];data.forEach(el=>{res.push(parseData(el))})}return res};let newObj=parseData(obj);const res=JSON.parse(JSON.stringify(newObj));const handler=window.webkit.messageHandlers[FNJSToNativeLogHandlerName];handler.postMessage(res);oriLogFunc.call(console,obj)}})(console.log);", ZHJSHandlerLogName];
+    @"const FNJSToNativeLogHandlerName='%@';console.log=(oriLogFunc=>{return function(...args){oriLogFunc.call(console,...args);let errorRes=[];const parseData=data=>{let res=null;const type=Object.prototype.toString.call(data);if(type=='[object Null]'||type=='[object String]'||type=='[object Number]'){res=data}else if(type=='[object Function]'){res=data.toString()}else if(type=='[object Undefined]'){res='Undefined'}else if(type=='[object Boolean]'){res=data?'true':'false'}else if(type=='[object Object]'){res={};for(const key in data){const el=data[key];res[key]=parseData(el)}}else if(type=='[object Array]'){res=[];data.forEach(el=>{res.push(parseData(el))})}else if(type=='[object Error]'){res=data;errorRes.push(res)}return res};const params=arguments;const type=Object.prototype.toString.call(params);const argCount=params.length;if(type!='[object Arguments]')return;let iosRes=[];const fetchVaule=idx=>{return argCount>idx?params[idx]:'无此参数'};if(argCount==0)return;if(argCount==1){iosRes=parseData(fetchVaule(0))}else{for(let idx=0;idx<argCount;idx++){iosRes.push(parseData(fetchVaule(idx)))}}try{const handler=window.webkit.messageHandlers[FNJSToNativeLogHandlerName];handler.postMessage(JSON.parse(JSON.stringify(iosRes)))}catch(error){}if(errorRes.length==0)return;if(!window.onerror)return;try{errorRes.forEach(el=>{window.onerror(el)})}catch(error){}}})(console.log);", ZHJSHandlerLogName];
+    return jsCode;
+}
+
+- (NSString *)fetchWebViewErrorApi{
+//        NSString *handlerJS = [NSString stringWithContentsOfFile:[ZHUtil jsErrorEventPath] encoding:NSUTF8StringEncoding error:nil];
+//        return handlerJS;
+    
+    //以下代码由errorEvent.js压缩而成
+    NSString *jsCode = [NSString stringWithFormat:
+    @"const FNJSToNativeErrorHandlerName='%@';window.onerror=(oriFunc=>{return function(...args){if(oriFunc)oriFunc.apply(window,args);const params=arguments;const type=Object.prototype.toString.call(params);const argCount=params.length;if(type!='[object Arguments]')return;if(argCount==0)return;const invaildDesc='无此参数';const fetchVaule=idx=>{return argCount>idx?params[idx]:invaildDesc};const iosRes={'error-msg':fetchVaule(0),'file-url':fetchVaule(1),lineNumber:fetchVaule(2),columnNumber:fetchVaule(3),'error-stack':fetchVaule(4)};const res=JSON.parse(JSON.stringify(iosRes));try{const handler=window.webkit.messageHandlers[FNJSToNativeErrorHandlerName];handler.postMessage(res)}catch(error){}}console.log('oriFuncoriFunc');console.log(window.onerror);})(window.onerror);", ZHJSHandlerErrorName];
     return jsCode;
 }
 - (NSString *)fetchWebViewApi{
@@ -184,6 +194,11 @@ case cType:{\
 - (void)userContentController:(WKUserContentController *)userContentController didReceiveScriptMessage:(WKScriptMessage *)message {
     if ([message.name isEqualToString:ZHJSHandlerLogName]) {
         NSLog(@"👉js中的log：");
+        NSLog(@"%@", message.body);
+        return;
+    }
+    if ([message.name isEqualToString:ZHJSHandlerErrorName]) {
+        NSLog(@"👉js中的error：");
         NSLog(@"%@", message.body);
         return;
     }
