@@ -207,9 +207,11 @@
 - (void)postMessageToJs:(NSString *)funcName params:(NSDictionary *)params completionHandler:(void (^)(id res, NSError *error))completionHandler{
     NSString *paramsStr = [ZHUtil encodeObj:params];
     NSString *js = [NSString stringWithFormat:@"(%@)(\"%@\")", funcName, paramsStr];
+    __weak __typeof__(self) __self = self;
     [self evaluateJavaScript:js completionHandler:^(id _Nullable res, NSError * _Nullable error) {
         if (error) {
             NSLog(@"----❌js:function:%@--error:%@--", funcName, error);
+            [__self.handler showWebViewException:error.userInfo];
         }else{
             NSLog(@"----✅js:function:%@--返回值:%@--", funcName, res?:@"void");
         }
