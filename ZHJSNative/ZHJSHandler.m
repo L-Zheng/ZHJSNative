@@ -159,8 +159,8 @@ case cType:{\
 //        return handlerJS;
     
     //以下代码由errorEvent.js压缩而成
-    NSString *jsCode = [NSString stringWithFormat:
-    @"const FNJSToNativeErrorHandlerName='%@';window.onerror=(oriFunc=>{return function(...args){if(oriFunc)oriFunc.apply(window,args);const params=arguments;const type=Object.prototype.toString.call(params);const argCount=params.length;if(type!='[object Arguments]')return;if(argCount==0)return;const invaildDesc='无此参数';const fetchVaule=idx=>{return argCount>idx?params[idx]:invaildDesc};const iosRes={msg:fetchVaule(0),url:fetchVaule(1),line:fetchVaule(2),column:fetchVaule(3),stack:fetchVaule(4)};const res=JSON.parse(JSON.stringify(iosRes));try{const handler=window.webkit.messageHandlers[FNJSToNativeErrorHandlerName];handler.postMessage(res)}catch(error){}}})(window.onerror);", ZHJSHandlerErrorName];
+    NSString *jsCode = [NSString stringWithFormat:@"const FNJSToNativeErrorHandlerName='%@';window.onerror=(oriFunc=>{return function(...args){if(oriFunc)oriFunc.apply(window,args);const params=arguments;const type=Object.prototype.toString.call(params);const argCount=params.length;if(type!='[object Arguments]')return;if(argCount==0)return;const fetchVaule=idx=>{return argCount>idx?params[idx]:'no this params'};const firstParma=fetchVaule(0);const isErrorParam=Object.prototype.toString.call(firstParma)=='[object Error]';const iosRes={message:isErrorParam?firstParma.message:fetchVaule(0),sourceURL:isErrorParam?firstParma.sourceURL:fetchVaule(1),line:isErrorParam?firstParma.line:fetchVaule(2),column:isErrorParam?firstParma.column:fetchVaule(3),stack:isErrorParam?firstParma.stack.toString():fetchVaule(4)};const res=JSON.parse(JSON.stringify(iosRes));try{const handler=window.webkit.messageHandlers[FNJSToNativeErrorHandlerName];handler.postMessage(res)}catch(error){}}})(window.onerror);", ZHJSHandlerErrorName];
+//    jsCode = @"";
     return jsCode;
 }
 - (NSString *)fetchWebViewApi{
@@ -198,7 +198,33 @@ case cType:{\
 }
 - (void)showException:(NSString *)title exception:(NSDictionary *)exception{
 #ifdef DEBUG
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:title message:[exception description] preferredStyle:UIAlertControllerStyleAlert];
+    if (!exception || ![exception isKindOfClass:[NSDictionary class]] || exception.allKeys.count == 0) return;
+    
+    NSMutableDictionary *info = [exception mutableCopy];
+    
+    id stackRes = nil;
+    NSString *stack = [info valueForKey:@"stack"];
+    if ([stack isKindOfClass:[NSString class]] && stack.length) {
+        //Vue报错是string类型
+        if ([stack containsString:@"\n"]) {
+            NSInteger limit = 3;
+            NSMutableArray *arr = [[stack componentsSeparatedByString:@"\n"] mutableCopy];
+            if (arr.count > limit) {
+                [arr removeObjectsInRange:NSMakeRange(limit, arr.count - limit)];
+            }
+            stackRes = [arr copy];
+        }else{
+            NSInteger limit = 200;
+            if (stack.length > limit) stack = [stack substringToIndex:limit];
+            stackRes = stack;
+        }
+    }else{
+        //html js报错是json类型
+        stackRes = stack;
+    }
+    if (stackRes) [info setValue:stackRes forKey:@"stack"];
+    
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:title message:[info description] preferredStyle:UIAlertControllerStyleAlert];
     __weak __typeof__(alert) weakAlert = alert;
     UIAlertAction *action = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
         [weakAlert.presentingViewController dismissViewControllerAnimated:YES completion:nil];

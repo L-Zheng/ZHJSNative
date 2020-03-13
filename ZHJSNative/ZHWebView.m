@@ -28,20 +28,35 @@
     WKUserContentController *userContent = [[WKUserContentController alloc] init];
     
     //注入log
-    WKUserScript *logScript = [[WKUserScript alloc] initWithSource:[handler fetchWebViewLogApi] injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:YES];
-    [userContent addUserScript:logScript];
-    [userContent addScriptMessageHandler:handler name:ZHJSHandlerLogName];
-    
+    {
+        NSString *code = [handler fetchWebViewLogApi];
+        if (code.length) {
+            WKUserScript *script = [[WKUserScript alloc] initWithSource:code injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:YES];
+            [userContent addUserScript:script];
+        }
+    }
     //注入error
-    WKUserScript *errorScript = [[WKUserScript alloc] initWithSource:[handler fetchWebViewErrorApi] injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:YES];
-    [userContent addUserScript:errorScript];
-    [userContent addScriptMessageHandler:handler name:ZHJSHandlerErrorName];
-    
+    {
+        NSString *code = [handler fetchWebViewErrorApi];
+        if (code.length) {
+            WKUserScript *script = [[WKUserScript alloc] initWithSource:code injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:YES];
+            [userContent addUserScript:script];
+        }
+    }
     //注入api js
-    WKUserScript *apiScript = [[WKUserScript alloc] initWithSource:[handler fetchWebViewApi] injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:YES];
-    [userContent addUserScript:apiScript];
-    [userContent addScriptMessageHandler:handler name:ZHJSHandlerName];
+    {
+        NSString *code = [handler fetchWebViewApi];
+        if (code.length) {
+            WKUserScript *script = [[WKUserScript alloc] initWithSource:code injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:YES];
+            [userContent addUserScript:script];
+        }
+    }
     
+    //监听js
+    NSArray *handlerNames = [self fetchHandlerNames];
+    for (NSString *key in handlerNames) {
+        [userContent addScriptMessageHandler:handler name:key];
+    }
     
     WKWebViewConfiguration *config = [[WKWebViewConfiguration alloc] init];
     // 设置偏好设置
@@ -79,6 +94,12 @@
     webView.scrollView.delegate = webView.zh_delegate;
     
     return webView;
+}
+
+#pragma mark - handler
+
++ (NSArray *)fetchHandlerNames{
+    return @[ZHJSHandlerLogName, ZHJSHandlerName, ZHJSHandlerErrorName];
 }
 
 #pragma mark - load
@@ -178,9 +199,11 @@
     @try {
         WKUserContentController *userContent = self.configuration.userContentController;
         [userContent removeAllUserScripts];
-        [userContent removeScriptMessageHandlerForName:ZHJSHandlerName];
-        [userContent removeScriptMessageHandlerForName:ZHJSHandlerLogName];
-        [userContent removeScriptMessageHandlerForName:ZHJSHandlerErrorName];
+
+        NSArray *handlerNames = [ZHWebView fetchHandlerNames];
+        for (NSString *key in handlerNames) {
+            [userContent removeScriptMessageHandlerForName:key];
+        }
         [[NSNotificationCenter defaultCenter] removeObserver:self];
     } @catch (NSException *exception) {
         

@@ -43,7 +43,7 @@
     [self setExceptionHandler:^(JSContext *context, JSValue *exception){
         NSLog(@"❌JSContext异常");
         NSMutableDictionary *res = [[exception toDictionary] mutableCopy];
-        [res setValue:[exception toString]?:@"" forKey:@"msg"];
+        [res setValue:[exception toString]?:@"" forKey:@"message"];
         NSLog(@"%@", res);
         [__self.handler showJSContextException:[res copy]];
     }];

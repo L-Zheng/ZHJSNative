@@ -1,4 +1,13 @@
 
+/** Vue配置 
+Vue.config.errorHandler = ((oriFunc) => {
+    return function (err, vm, info) {
+        if (oriFunc) oriFunc.call(null, err, vm, info);
+        if (window.onerror) window.onerror.call(null, err);
+    }
+})(Vue.config.errorHandler);
+*/
+
 /** 发送消息name:与iOS原生保持一致 */
 const FNJSToNativeErrorHandlerName = 'ZHJSErrorEventHandler';
 window.onerror = ((oriFunc) => {
@@ -13,16 +22,19 @@ window.onerror = ((oriFunc) => {
         /**发送至iOS原生*/
         if (type != '[object Arguments]') return;
         if (argCount == 0) return;
-        const invaildDesc = '无此参数';
+
         const fetchVaule = (idx) => {
-            return argCount > idx ? params[idx] : invaildDesc;
+            return argCount > idx ? params[idx] : 'no this params';
         };
+        const firstParma = fetchVaule(0);
+        const isErrorParam = (Object.prototype.toString.call(firstParma) == '[object Error]');
+
         const iosRes = {
-            'msg': fetchVaule(0),
-            'url': fetchVaule(1),
-            'line': fetchVaule(2),
-            'column': fetchVaule(3),
-            'stack': fetchVaule(4)
+            message: isErrorParam ? firstParma.message : fetchVaule(0),
+            sourceURL: isErrorParam ? firstParma.sourceURL : fetchVaule(1),
+            line: isErrorParam ? firstParma.line : fetchVaule(2),
+            column: isErrorParam ? firstParma.column : fetchVaule(3),
+            stack: isErrorParam ? firstParma.stack.toString() : fetchVaule(4)
         };
         const res = JSON.parse(JSON.stringify(iosRes));
         try {
