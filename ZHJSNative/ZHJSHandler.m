@@ -188,6 +188,7 @@ case cType:{\
 }
 
 #pragma mark - exception
+
 //异常弹窗
 - (void)showWebViewException:(NSDictionary *)exception{
     [self showException:@"WebView JS异常" exception:exception];
@@ -196,13 +197,27 @@ case cType:{\
     [self showException:@"JSCore异常" exception:exception];
 }
 - (void)showException:(NSString *)title exception:(NSDictionary *)exception{
+#ifdef DEBUG
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:title message:[exception description] preferredStyle:UIAlertControllerStyleAlert];
     __weak __typeof__(alert) weakAlert = alert;
     UIAlertAction *action = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
         [weakAlert.presentingViewController dismissViewControllerAnimated:YES completion:nil];
     }];
     [alert addAction:action];
-    [[UIApplication sharedApplication].keyWindow.rootViewController presentViewController:alert animated:YES completion:nil];
+    [[self fetchActivityCtrl] presentViewController:alert animated:YES completion:nil];
+#endif
+}
+
+#pragma mark - activityCtrl
+
+- (UIViewController *)fetchActivityCtrl:(UIViewController *)ctrl{
+    UIViewController *topCtrl = ctrl.presentedViewController;
+    if (!topCtrl) return ctrl;
+    return [self fetchActivityCtrl:topCtrl];
+}
+- (UIViewController *)fetchActivityCtrl{
+    UIViewController *ctrl = [UIApplication sharedApplication].keyWindow.rootViewController;
+    return [self fetchActivityCtrl:ctrl];
 }
 
 #pragma mark - WKScriptMessageHandler
