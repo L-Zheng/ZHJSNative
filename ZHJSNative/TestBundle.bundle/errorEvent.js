@@ -1,5 +1,6 @@
 
 /** Vue配置 
+import Vue from 'vue';
 Vue.config.errorHandler = ((oriFunc) => {
     return function (err, vm, info) {
         if (oriFunc) oriFunc.call(null, err, vm, info);

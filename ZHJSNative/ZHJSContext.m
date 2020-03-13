@@ -38,7 +38,11 @@
 }
 
 - (void)registerException{
-    //设置异常回调
+    /** 异常回调
+     没有try cach方法 js直接报错   会回调
+     有try cach方法 catch方法抛出异常throw error;   会回调
+     有try cach方法 catch方法没有抛出异常throw error;   不会回调
+     */
     __weak __typeof__(self) __self = self;
     [self setExceptionHandler:^(JSContext *context, JSValue *exception){
         NSLog(@"❌JSContext异常");
