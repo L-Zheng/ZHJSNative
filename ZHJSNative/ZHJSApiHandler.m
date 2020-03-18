@@ -181,7 +181,15 @@
     NSLog(@"---------js_socketDidReceiveMessage-----------");
     NSLog(@"%@",params);
     NSString *type = [params valueForKey:@"type"];
-    if (![type isEqualToString:@"ok"]) return;
+    
+    if ([type isEqualToString:@"invalid"]) {
+//        [self.controller socketWaitRefreshPage];
+        return;
+    }
+    if ([type isEqualToString:@"hash"]) {
+//        [self.controller socketRefreshPage];
+        return;
+    }
 }
 - (void)js_socketDidError:(NSDictionary *)params{
 }

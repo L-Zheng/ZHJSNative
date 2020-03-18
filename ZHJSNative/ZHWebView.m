@@ -43,6 +43,7 @@
             [userContent addUserScript:script];
         }
     }
+#ifdef DEBUG
     //注入websocket js用于监听socket链接
     {
         NSString *code = [handler fetchWebViewSocketApi];
@@ -51,6 +52,7 @@
             [userContent addUserScript:script];
         }
     }
+#endif
     //注入api js
     {
         NSString *code = [handler fetchWebViewApi];
