@@ -32,6 +32,7 @@ static NSString * const ZHJSHandlerErrorName = @"ZHJSErrorEventHandler";
 //WebView注入的api
 - (NSString *)fetchWebViewLogApi;
 - (NSString *)fetchWebViewErrorApi;
+- (NSString *)fetchWebViewSocketApi;
 - (NSString *)fetchWebViewApi;
 //异常弹窗
 - (void)showWebViewException:(NSDictionary *)exception;

@@ -21,9 +21,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
-    [self configView];
-    [self configWebView];
+    [self config];
     
     //运算js
 //    self.context = [ZHJSContext createContext];
@@ -53,6 +51,11 @@
 //    });
 }
 
+- (void)config{
+    [self configView];
+    [self configWebView];
+}
+
 - (void)configView{
     self.automaticallyAdjustsScrollViewInsets = NO;
     self.view.backgroundColor = [UIColor whiteColor];
@@ -67,8 +70,11 @@
 
 - (void)configWebView{
     ZHWebView *webView = [ZHWebView createWebView];
+//    [webView loadUrl:[NSURL URLWithString:@"http://172.31.35.80:8080"] finish:^(BOOL success) {
+//
+//    }];
     [webView loadUrl:[NSURL fileURLWithPath:[ZHUtil htmlPath]] finish:^(BOOL success) {
-        
+
     }];
     
     [self configWebViewFrame:webView];

@@ -173,6 +173,22 @@
     NSLog(@"%@",params);
 }
 
+#ifdef DEBUG
+//socket链接调试
+- (void)js_socketDidOpen:(NSDictionary *)params{
+}
+- (void)js_socketDidReceiveMessage:(NSDictionary *)params{
+    NSLog(@"---------js_socketDidReceiveMessage-----------");
+    NSLog(@"%@",params);
+    NSString *type = [params valueForKey:@"type"];
+    if (![type isEqualToString:@"ok"]) return;
+}
+- (void)js_socketDidError:(NSDictionary *)params{
+}
+- (void)js_socketDidClose:(NSDictionary *)params{
+}
+#endif
+
 
 #pragma mark - init
 

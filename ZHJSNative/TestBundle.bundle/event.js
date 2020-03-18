@@ -8,6 +8,7 @@
  * uglifyjs event.js -b beautify=false,quote_style=1 -o min.js
  * uglifyjs logEvent.js -b beautify=false,quote_style=1 -o min-log.js
  * uglifyjs errorEvent.js -b beautify=false,quote_style=1 -o min-error.js
+ * uglifyjs socketEvent.js -b beautify=false,quote_style=1 -o min-socket.js
  */
 /** ❗️❗️Api配置说明：sync：是否是同步方法 */
 /** fund通用API */

@@ -17,6 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSString *)jsEventPath;
 + (NSString *)jsLogEventPath;
 + (NSString *)jsErrorEventPath;
++ (NSString *)jsSocketEventPath;
 
 //编码
 + (NSString *)encodeObj:(id)data;

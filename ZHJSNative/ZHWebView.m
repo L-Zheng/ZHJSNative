@@ -43,6 +43,14 @@
             [userContent addUserScript:script];
         }
     }
+    //注入websocket js用于监听socket链接
+    {
+        NSString *code = [handler fetchWebViewSocketApi];
+        if (code.length) {
+            WKUserScript *script = [[WKUserScript alloc] initWithSource:code injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:YES];
+            [userContent addUserScript:script];
+        }
+    }
     //注入api js
     {
         NSString *code = [handler fetchWebViewApi];
@@ -229,7 +237,12 @@
 /** 发送js消息 */
 - (void)postMessageToJs:(NSString *)funcName params:(NSDictionary *)params completionHandler:(void (^)(id res, NSError *error))completionHandler{
     NSString *paramsStr = [ZHUtil encodeObj:params];
-    NSString *js = [NSString stringWithFormat:@"(%@)(\"%@\")", funcName, paramsStr];
+    NSString *js;
+    if (paramsStr.length) {
+        js = [NSString stringWithFormat:@"(%@)(\"%@\")", funcName, paramsStr];
+    }else{
+        js = [NSString stringWithFormat:@"(%@)()", funcName];
+    }
     __weak __typeof__(self) __self = self;
     [self evaluateJavaScript:js completionHandler:^(id _Nullable res, NSError * _Nullable error) {
         if (error) {

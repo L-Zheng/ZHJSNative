@@ -14,40 +14,35 @@
     return [[NSBundle mainBundle] pathForResource:@"TestBundle" ofType:@"bundle"];
 }
 
-+ (NSString *)htmlPath{
-    NSString *name = @"test.html";
++ (NSString *)pathWithName:(NSString *)name{
     NSBundle *bundle = [NSBundle bundleWithPath:[self bundlePath]];
     NSString *destPath = [bundle pathForResource:name.stringByDeletingPathExtension ofType:name.pathExtension];
     return destPath;
+}
+
++ (NSString *)htmlPath{
+    return [self pathWithName:@"test.html"];
 }
 + (NSString *)jsPath{
-    NSString *name = @"test.js";
-    NSBundle *bundle = [NSBundle bundleWithPath:[self bundlePath]];
-    NSString *destPath = [bundle pathForResource:name.stringByDeletingPathExtension ofType:name.pathExtension];
-    return destPath;
+    return [self pathWithName:@"test.js"];
 }
 + (NSString *)jsEventPath{
-    NSString *name = @"event.js";
-    NSBundle *bundle = [NSBundle bundleWithPath:[self bundlePath]];
-    NSString *destPath = [bundle pathForResource:name.stringByDeletingPathExtension ofType:name.pathExtension];
-    return destPath;
+    return [self pathWithName:@"event.js"];
 }
 + (NSString *)jsLogEventPath{
-    NSString *name = @"logEvent.js";
-    NSBundle *bundle = [NSBundle bundleWithPath:[self bundlePath]];
-    NSString *destPath = [bundle pathForResource:name.stringByDeletingPathExtension ofType:name.pathExtension];
-    return destPath;
+    return [self pathWithName:@"logEvent.js"];
 }
 + (NSString *)jsErrorEventPath{
-    NSString *name = @"errorEvent.js";
-    NSBundle *bundle = [NSBundle bundleWithPath:[self bundlePath]];
-    NSString *destPath = [bundle pathForResource:name.stringByDeletingPathExtension ofType:name.pathExtension];
-    return destPath;
+    return [self pathWithName:@"errorEvent.js"];
+}
++ (NSString *)jsSocketEventPath{
+    return [self pathWithName:@"socketEvent.js"];
 }
 
 #pragma mark - encode
 
 + (NSString *)encodeObj:(id)data{
+    if (!data) return nil;
     NSString *res = nil;
     if ([data isKindOfClass:[NSString class]]) {
         res = (NSString *)data;

@@ -1,0 +1,1 @@
+window.NativeWebsocket=WebSocket;window.WebSocket=function(url,protocols){try{console.log('socketssdgfocketsocketsocket');console.log(url);console.log(protocols)}catch(error){}window.interceptedWebsockets=[];var ws=new NativeWebsocket(url,protocols);interceptedWebsockets.push(ws);return ws};
