@@ -5,7 +5,7 @@ window.WebSocket = function (url, protocols) {
     var ws = new NativeWebsocket(url, protocols);
     window.interceptedWebsockets.push(ws);
 
-    //1s后监听链接消息  因为刚建立链接时会有消息接收
+    /** 1s后监听链接消息  因为刚建立链接时会有消息接收 */
     setTimeout(() => {
         ws.addEventListener('message', function (event) {
             let data = event.data;
@@ -17,14 +17,11 @@ window.WebSocket = function (url, protocols) {
                 if (Object.prototype.toString.call(data) == '[object Array]' && data.length > 0) {
                     data = JSON.parse(data[0]);
                     formatData.push(data);
-                    //通知原生刷新
-                    fund.socketDidReceiveMessage(data)
+                    fund.socketDidReceiveMessage(data);
                 } else {
                     formatData = data;
                 }
             }
-            // console.log('Message from server111 ', event, event.data, data, formatData);
-            // console.log('Message from server111 ',formatData);
         });
     }, 1000);
     return ws;
