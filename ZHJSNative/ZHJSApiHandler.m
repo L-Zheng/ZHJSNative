@@ -180,8 +180,9 @@
 - (void)js_socketDidReceiveMessage:(NSDictionary *)params{
     NSLog(@"---------js_socketDidReceiveMessage-----------");
     NSLog(@"%@",params);
+    if (![params isKindOfClass:[NSDictionary class]]) return;
     NSString *type = [params valueForKey:@"type"];
-    
+    if (![type isKindOfClass:[NSString class]]) return;
     if ([type isEqualToString:@"invalid"]) {
 //        [self.controller socketWaitRefreshPage];
         return;
