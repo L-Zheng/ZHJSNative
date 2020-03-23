@@ -59,6 +59,7 @@
 - (void)configView{
     self.automaticallyAdjustsScrollViewInsets = NO;
     self.view.backgroundColor = [UIColor whiteColor];
+//    self.view.backgroundColor = [UIColor colorWithRed:arc4random_uniform(255.0)/ 255.0 green:arc4random_uniform(255.0)/ 255.0 blue:arc4random_uniform(255.0)/ 255.0 alpha:1.0];
 }
 
 - (void)configNavigaitonBar:(BOOL)animated{
@@ -70,10 +71,12 @@
 
 - (void)configWebView{
     ZHWebView *webView = [ZHWebView createWebView];
-//    [webView loadUrl:[NSURL URLWithString:@"http://172.31.35.80:8080"] finish:^(BOOL success) {
-//
-//    }];
-    [webView loadUrl:[NSURL fileURLWithPath:[ZHUtil htmlPath]] finish:^(BOOL success) {
+    NSURL *url = [NSURL fileURLWithPath:[ZHUtil htmlPath]];
+    
+//    url = [NSURL fileURLWithPath:@"/Users/em/Desktop/My/ZHCode/GitHubCode/ZHJSNative/ZHJSNative/TestBundle.bundle/test.html"];
+//    url = [NSURL URLWithString:@"http://172.31.35.80:8081"];
+    
+    [webView loadUrl:url finish:^(BOOL success) {
 
     }];
     

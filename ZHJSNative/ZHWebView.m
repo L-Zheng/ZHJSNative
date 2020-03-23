@@ -11,14 +11,79 @@
 #import "ZHUtil.h"
 #import "ZHWebViewDelegate.h"
 
-@interface ZHWebView ()
+@interface ZHWebView ()<UIGestureRecognizerDelegate>
 @property (nonatomic,copy) void (^loadFinish) (BOOL success);
 @property (nonatomic, assign) BOOL loadSuccess;
 @property (nonatomic, assign) BOOL loadFail;
+@property (nonatomic,strong) UIGestureRecognizer *pressGes;
 @end
 
-
 @implementation ZHWebView
+
+- (instancetype)initWithFrame:(CGRect)frame configuration:(WKWebViewConfiguration *)configuration{
+    self = [super initWithFrame:frame configuration:configuration];
+    if (self) {
+        [self configGesture];
+    }
+    return self;
+}
+
+#pragma mark - config gesture
+
+- (void)configGesture{
+    //此长按手势 可防止手势冲突  如:webview中的图表长按滑动手势与pageCtrl滑动手势冲突
+    UILongPressGestureRecognizer *pressGes = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(longPressGes:)];
+    pressGes.minimumPressDuration = 0.4f;
+    pressGes.numberOfTouchesRequired = 1;
+    pressGes.cancelsTouchesInView = YES;
+    pressGes.delegate = self;
+    self.pressGes = pressGes;
+    [self addGestureRecognizer:self.pressGes];
+}
+
+- (void)longPressGes:(UILongPressGestureRecognizer *)gesture{
+    switch (gesture.state){
+        case UIGestureRecognizerStateBegan:{
+        }
+            break;
+        case UIGestureRecognizerStateChanged:{
+        }
+            break;
+        case UIGestureRecognizerStateEnded:{
+//            UIScrollView *scroll = [self fetchSuperScrollView];
+        }
+            break;
+        default:{
+//            UIScrollView *scroll = [self fetchSuperScrollView];
+        }
+            break;
+    }
+}
+
+#pragma mark - fetch
+
+- (UIScrollView *)fetchInScrollView:(UIView *)view{
+    if ([view isKindOfClass:[UIScrollView class]]) return (UIScrollView *)view;
+    if (!view.superview) return nil;
+    return [self fetchInScrollView:view.superview];
+}
+
+- (UIScrollView *)fetchSuperScrollView{
+    UIView *view = self;
+    return [self fetchInScrollView:view];
+}
+
+#pragma mark - UIGestureRecognizerDelegate
+
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer{
+    NSLog(@"%@--%@",NSStringFromClass([gestureRecognizer class]), NSStringFromClass([otherGestureRecognizer class]));
+    if ([otherGestureRecognizer isKindOfClass:[UILongPressGestureRecognizer class]]) {
+        //只有当手势为长按手势时反馈，非长按手势将阻止。
+        return YES;
+    }else{
+        return NO;
+    }
+}
 
 #pragma mark - init
 
@@ -49,6 +114,14 @@
         NSString *code = [handler fetchWebViewSocketApi];
         if (code.length) {
             WKUserScript *script = [[WKUserScript alloc] initWithSource:code injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:YES];
+            [userContent addUserScript:script];
+        }
+    }
+    //禁用webview长按弹出菜单
+    {
+        NSString *code = [handler fetchWebViewTouchCalloutApi];
+        if (code.length) {
+            WKUserScript *script = [[WKUserScript alloc] initWithSource:code injectionTime:WKUserScriptInjectionTimeAtDocumentEnd forMainFrameOnly:YES];
             [userContent addUserScript:script];
         }
     }
@@ -88,6 +161,8 @@
     webView.scrollView.showsVerticalScrollIndicator = YES;
     //设置流畅滑动【否则 滑动效果没有减速过快】
     webView.scrollView.decelerationRate = UIScrollViewDecelerationRateNormal;
+    //禁用链接预览
+//    [webView setAllowsLinkPreview:NO];
     
     if (@available(iOS 11.0, *)) {
         webView.scrollView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
