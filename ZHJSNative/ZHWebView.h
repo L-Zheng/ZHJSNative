@@ -11,8 +11,15 @@
 #import <JavaScriptCore/JavaScriptCore.h>
 @class ZHJSHandler;
 @class ZHWebViewDelegate;
+@class ZHWebView;
 
 //NS_ASSUME_NONNULL_BEGIN
+
+@protocol ZHWebViewSocketDebugDelegate <NSObject>
+- (void)webViewReadyRefresh:(ZHWebView *)webView;
+- (void)webViewRefresh:(ZHWebView *)webView;
+@end
+
 
 @interface ZHWebView : WKWebView
 
@@ -23,6 +30,8 @@
 @property (nonatomic, assign, readonly) BOOL loadSuccess;
 @property (nonatomic, assign, readonly) BOOL loadFail;
 
+@property (nonatomic,weak) id <ZHWebViewSocketDebugDelegate> socketDebugDelegate;
+
 + (ZHWebView *)createWebView;
 
 /** 加载h5 */
@@ -30,6 +39,14 @@
 
 /** 发送js消息 */
 - (void)postMessageToJs:(NSString *)funcName params:(NSDictionary *)params completionHandler:(void (^)(id res, NSError *error))completionHandler;
+
+#ifdef DEBUG
+//socket链接调试
+- (void)socketDidOpen:(NSDictionary *)params;
+- (void)socketDidReceiveMessage:(NSDictionary *)params;
+- (void)socketDidError:(NSDictionary *)params;
+- (void)socketDidClose:(NSDictionary *)params;
+#endif
 
 @end
 

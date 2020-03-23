@@ -334,4 +334,36 @@
     }];
 }
 
+#pragma mark - socket debug
+#ifdef DEBUG
+- (void)socketDidOpen:(NSDictionary *)params{
+    
+}
+- (void)socketDidReceiveMessage:(NSDictionary *)params{
+    NSLog(@"---------js_socketDidReceiveMessage-----------");
+    NSLog(@"%@",params);
+    if (![params isKindOfClass:[NSDictionary class]]) return;
+    NSString *type = [params valueForKey:@"type"];
+    if (![type isKindOfClass:[NSString class]]) return;
+    if ([type isEqualToString:@"invalid"]) {
+        if ([self.socketDebugDelegate respondsToSelector:@selector(webViewReadyRefresh:)]) {
+            [self.socketDebugDelegate webViewReadyRefresh:self];
+        }
+        return;
+    }
+    if ([type isEqualToString:@"hash"]) {
+        if ([self.socketDebugDelegate respondsToSelector:@selector(webViewRefresh:)]) {
+            [self.socketDebugDelegate webViewRefresh:self];
+        }
+        return;
+    }
+}
+- (void)socketDidError:(NSDictionary *)params{
+    
+}
+- (void)socketDidClose:(NSDictionary *)params{
+    
+}
+#endif
+
 @end

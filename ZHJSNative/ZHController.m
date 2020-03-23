@@ -11,7 +11,7 @@
 #import "ZHUtil.h"
 #import "ZHJSContext.h"
 
-@interface ZHController ()
+@interface ZHController ()<ZHWebViewSocketDebugDelegate>
 @property (nonatomic, strong) ZHWebView *webView;
 @property (nonatomic, strong) ZHJSContext *context;
 
@@ -76,13 +76,15 @@
 //    url = [NSURL fileURLWithPath:@"/Users/em/Desktop/My/ZHCode/GitHubCode/ZHJSNative/ZHJSNative/TestBundle.bundle/test.html"];
 //    url = [NSURL URLWithString:@"http://172.31.35.80:8081"];
     
+    __weak __typeof__(self) __self = self;
     [webView loadUrl:url finish:^(BOOL success) {
-
+        [__self configDebugOption:@"刷新"];
     }];
     
     [self configWebViewFrame:webView];
     [self.view addSubview:webView];
     self.webView = webView;
+    webView.socketDebugDelegate = self;
 }
 
 - (void)configWebViewFrame:(WKWebView *)webView{
@@ -159,4 +161,30 @@
     NSLog(@"-------%s---------", __func__);
 }
 
+#pragma mark - ZHWebViewSocketDebugDelegate
+
+- (void)webViewReadyRefresh:(ZHWebView *)webView{
+    [self configDebugOption:@"准备中..."];
+}
+- (void)webViewRefresh:(ZHWebView *)webView{
+    [self refreshWebView];
+}
+
+- (void)refreshWebView{
+    [self configDebugOption:@"刷新中..."];
+    [self.webView removeFromSuperview];
+    [self config];
+}
+
+- (void)configDebugOption:(NSString *)title{
+    #ifdef DEBUG
+    UIBarButtonItem *item = [[UIBarButtonItem alloc] initWithTitle:title style:UIBarButtonItemStylePlain target:self action:@selector(refreshWebView)];
+    NSMutableArray *rightItems = [NSMutableArray array];
+//    if (self.navigationItem.rightBarButtonItems.count > 0) {
+//        [rightItems addObject:self.navigationItem.rightBarButtonItems.firstObject];
+//    }
+    [rightItems addObject:item];
+    self.navigationItem.rightBarButtonItems = rightItems;
+    #endif
+}
 @end

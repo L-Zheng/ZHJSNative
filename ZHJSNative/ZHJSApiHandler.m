@@ -7,6 +7,8 @@
 //
 
 #import "ZHJSApiHandler.h"
+#import "ZHJSHandler.h"
+#import "ZHWebView.h"
 #import <objc/runtime.h>
 
 @interface ZHJSApiHandler ()
@@ -176,25 +178,16 @@
 #ifdef DEBUG
 //socket链接调试
 - (void)js_socketDidOpen:(NSDictionary *)params{
+    [self.handler.webView socketDidOpen:params];
 }
 - (void)js_socketDidReceiveMessage:(NSDictionary *)params{
-    NSLog(@"---------js_socketDidReceiveMessage-----------");
-    NSLog(@"%@",params);
-    if (![params isKindOfClass:[NSDictionary class]]) return;
-    NSString *type = [params valueForKey:@"type"];
-    if (![type isKindOfClass:[NSString class]]) return;
-    if ([type isEqualToString:@"invalid"]) {
-//        [self.controller socketWaitRefreshPage];
-        return;
-    }
-    if ([type isEqualToString:@"hash"]) {
-//        [self.controller socketRefreshPage];
-        return;
-    }
+    [self.handler.webView socketDidReceiveMessage:params];
 }
 - (void)js_socketDidError:(NSDictionary *)params{
+    [self.handler.webView socketDidError:params];
 }
 - (void)js_socketDidClose:(NSDictionary *)params{
+    [self.handler.webView socketDidClose:params];
 }
 #endif
 
