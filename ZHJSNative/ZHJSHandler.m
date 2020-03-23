@@ -424,7 +424,10 @@ case cType:{\
     if (![self respondsToSelector:sel]) return nil;
     //此方法可能存在crash:  javascriptCore调用api的时候【野指针错误】
     @try {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
         return [self performSelector:sel withObject:params1 withObject:params2];
+#pragma clang diagnostic pop
     } @catch (NSException *exception) {
         NSLog(@"------runNativeFunc--------------");
         NSLog(@"%@",exception);
