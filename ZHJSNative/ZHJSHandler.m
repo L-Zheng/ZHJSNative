@@ -29,10 +29,10 @@ case cType:{\
 
 #pragma mark - init
 
-- (instancetype)init{
+- (instancetype)initWithApiHandler:(id <ZHJSApiProtocol>)apiHandler{
     self = [super init];
     if (self) {
-        self.apiHandler = [[ZHJSApiHandler alloc] init];
+        self.apiHandler = [[ZHJSApiHandler alloc] initWithApiHandler:apiHandler];
         self.apiHandler.handler = self;
     }
     return self;
@@ -60,21 +60,26 @@ case cType:{\
 }
 - (void)fetchJSContextApi:(void (^) (NSString *apiPrefix, NSDictionary *apiBlockMap))callBack{
     if (!callBack) return;
-    //获取js方法前缀
-    NSString *apiPrefix = [self.apiHandler fetchApiMethodPrefixName];
-    //获取js方法映射表
-    NSDictionary <NSString *, ZHJSApiMethodItem *> *apiMap = [self.apiHandler fetchApiMethodMap];
-    
-    NSMutableDictionary *resMap = [NSMutableDictionary dictionary];
+
     __weak __typeof__(self) __self = self;
-    [apiMap enumerateKeysAndObjectsUsingBlock:^(NSString *key, ZHJSApiMethodItem *item, BOOL *stop) {
-        //设置方法实现
-        [resMap setValue:[__self jsContextApiMapBlock:key] forKey:key];
-    }];
-    callBack(apiPrefix, [resMap copy]);
+    void (^block)(NSString *, NSDictionary <NSString *, ZHJSApiMethodItem *> *) = ^(NSString *apiPrefix, NSDictionary <NSString *, ZHJSApiMethodItem *> *apiMap){
+        if (![apiPrefix isKindOfClass:[NSString class]] || apiPrefix.length == 0) {
+            callBack(nil, nil);
+            return;
+        }
+        NSMutableDictionary *resMap = [NSMutableDictionary dictionary];
+        [apiMap enumerateKeysAndObjectsUsingBlock:^(NSString *key, ZHJSApiMethodItem *item, BOOL *stop) {
+            //设置方法实现
+            [resMap setValue:[__self jsContextApiMapBlock:key apiPrefix:apiPrefix] forKey:key];
+        }];
+        callBack(apiPrefix, [resMap copy]);
+    };
+    
+    block([self.apiHandler fetchInternalJSApiPrefix], self.apiHandler.internalApiMap);
+    block([self.apiHandler fetchOutsideJSApiPrefix], self.apiHandler.outsideApiMap);
 }
 //JSContext调用原生实现
-- (id)jsContextApiMapBlock:(NSString *)key{
+- (id)jsContextApiMapBlock:(NSString *)key apiPrefix:(NSString *)apiPrefix{
     if (!key || key.length == 0) return nil;
     __weak __typeof__(self) __self = self;
     
@@ -85,7 +90,7 @@ case cType:{\
         JSValue *jsValue = (arguments.count == 0) ? nil : arguments[0];
         //js没传参数
         if (!jsValue) {
-            return [__self runNativeFunc:key arguments:@[]];
+            return [__self runNativeFunc:key apiPrefix:apiPrefix arguments:@[]];
         }
         /**
          null：[JSValue toObject]=[NSNull null]
@@ -97,11 +102,11 @@ case cType:{\
          json：[JSValue toObject]= [NSDictionary class]    [jsValue isObject]=YES
          */
         if ([jsValue isNull] || [jsValue isUndefined]) {
-            return [__self runNativeFunc:key arguments:@[]];
+            return [__self runNativeFunc:key apiPrefix:apiPrefix arguments:@[]];
         }
         NSDictionary *params = [jsValue toObject];
         if (![params isKindOfClass:[NSDictionary class]]) {
-            return [__self runNativeFunc:key arguments:@[params]];
+            return [__self runNativeFunc:key apiPrefix:apiPrefix arguments:@[params]];
         }
         
         //是否需要回调
@@ -112,7 +117,7 @@ case cType:{\
                                 [jsValue hasProperty:fail] ||
                                 [jsValue hasProperty:complete]);
         if (!hasCallFunction) {
-            return [__self runNativeFunc:key arguments:@[params]];
+            return [__self runNativeFunc:key apiPrefix:apiPrefix arguments:@[params]];
         }
         
         //获取回调方法
@@ -138,7 +143,7 @@ case cType:{\
              */
             if (completeFunc) [completeFunc callWithArguments:@[]];
         };
-        return [__self runNativeFunc:key arguments:@[params, block]];
+        return [__self runNativeFunc:key apiPrefix:apiPrefix arguments:@[params, block]];
     };
     return apiBlock;
 }
@@ -166,8 +171,10 @@ case cType:{\
 - (NSString *)fetchWebViewSocketApi{
 //    return [NSString stringWithContentsOfFile:[ZHUtil jsSocketEventPath] encoding:NSUTF8StringEncoding error:nil];
     
+    NSString *jsPrefix = [self.apiHandler fetchInternalJSApiPrefix];
+    if (jsPrefix.length == 0) return nil;
     //以下代码由socketEvent.js压缩而成
-    NSString *jsCode = @"window.interceptedWebsockets=[];window.NativeWebsocket=WebSocket;window.WebSocket=function(url,protocols){var ws=new NativeWebsocket(url,protocols);window.interceptedWebsockets.push(ws);setTimeout(()=>{ws.addEventListener('message',function(event){let data=event.data;let formatData=[];if(data.length<=1){formatData=data}else{data=JSON.parse(data.substring(1));if(Object.prototype.toString.call(data)=='[object Array]'&&data.length>0){data=JSON.parse(data[0]);formatData.push(data);fund.socketDidReceiveMessage(data)}else{formatData=data}}})},1e3);return ws};";
+    NSString *jsCode = [NSString stringWithFormat:@"window.interceptedWebsockets=[];window.NativeWebsocket=WebSocket;window.WebSocket=function(url,protocols){var ws=new NativeWebsocket(url,protocols);window.interceptedWebsockets.push(ws);setTimeout(()=>{ws.addEventListener('message',function(event){let data=event.data;let formatData=[];if(data.length<=1){formatData=data}else{data=JSON.parse(data.substring(1));if(Object.prototype.toString.call(data)=='[object Array]'&&data.length>0){data=JSON.parse(data[0]);formatData.push(data);%@.socketDidReceiveMessage(data)}else{formatData=data}}})},1e3);return ws};", jsPrefix];
     return jsCode;
 }
 - (NSString *)fetchWebViewTouchCalloutApi{
@@ -175,26 +182,43 @@ case cType:{\
     return jsCode;
 }
 - (NSString *)fetchWebViewApi{
-//    NSString *handlerJS = [NSString stringWithContentsOfFile:[ZHUtil jsEventPath] encoding:NSUTF8StringEncoding error:nil];
-//    return handlerJS;
+    //    NSString *handlerJS = [NSString stringWithContentsOfFile:[ZHUtil jsEventPath] encoding:NSUTF8StringEncoding error:nil];
+    //    return handlerJS;
     
-    //获取js方法映射表
-    NSDictionary <NSString *, ZHJSApiMethodItem *> *apiMap = [self.apiHandler fetchApiMethodMap];
+    //获取方法前缀
+    NSString *internalJSPrefix = [self.apiHandler fetchInternalJSApiPrefix];
+    if (internalJSPrefix.length == 0) return nil;
+    NSString *outsideJSPrefix = [self.apiHandler fetchOutsideJSApiPrefix];
+    if (outsideJSPrefix.length == 0) return nil;
+    
     //生成jsCode
-    NSMutableString *apiConfigStr = [NSMutableString string];
-    [apiConfigStr appendString:@"{"];
-    [apiMap enumerateKeysAndObjectsUsingBlock:^(NSString *key, ZHJSApiMethodItem *item, BOOL *stop) {
-        [apiConfigStr appendFormat:@"%@:{sync:%@},", key, (item.isSync ? @"true" : @"false")];
-    }];
-    // 删除最后一个逗号
-    NSRange range = [apiConfigStr rangeOfString:@"," options:NSBackwardsSearch];
-    if (range.location != NSNotFound){
-        [apiConfigStr deleteCharactersInRange:range];
-    }
-    [apiConfigStr appendString:@"}"];
+    NSString *(^block)(NSDictionary <NSString *, ZHJSApiMethodItem *> *) = ^(NSDictionary <NSString *, ZHJSApiMethodItem *> *apiMap){
+        NSMutableString *code = [NSMutableString string];
+        [code appendString:@"{"];
+        [apiMap enumerateKeysAndObjectsUsingBlock:^(NSString *key, ZHJSApiMethodItem *item, BOOL *stop) {
+            [code appendFormat:@"%@:{sync:%@},", key, (item.isSync ? @"true" : @"false")];
+        }];
+        // 删除最后一个逗号
+        NSRange range = [code rangeOfString:@"," options:NSBackwardsSearch];
+        if (range.location != NSNotFound){
+            [code deleteCharactersInRange:range];
+        }
+        [code appendString:@"}"];
+        return [code copy];
+    };
     
     //以下代码由event.js压缩而成
-    NSString *res = [NSString stringWithFormat:@"const FNCommonAPI=%@;const FNJSToNativeHandlerName='%@';const FNCallBackSuccessKey='%@';const FNCallBackFailKey='%@';const FNCallBackCompleteKey='%@';const FNJSType=(()=>{let type={};const typeArr=['String','Object','Number','Array','Undefined','Function','Null','Symbol','Boolean'];for(let i=0;i<typeArr.length;i++){(name=>{type['is'+name]=(obj=>{return Object.prototype.toString.call(obj)=='[object '+name+']'})})(typeArr[i])}return type})();const FNCallBackMap={};const FNCallBack=params=>{if(!FNJSType.isString(params)||!params){return}const newParams=JSON.parse(decodeURIComponent(params));if(!FNJSType.isObject(newParams)){return}const funcId=newParams.funcId;const res=newParams.data;const alive=newParams.alive;let randomKey='',funcNameKey='';const matchKey=key=>{if(!funcId.endsWith(key))return false;randomKey=funcId.replace(new RegExp(key,'g'),'');funcNameKey=key;return true};const matchRes=matchKey(FNCallBackSuccessKey)||matchKey(FNCallBackFailKey)||matchKey(FNCallBackCompleteKey);if(!matchRes)return;let funcMap=FNCallBackMap[randomKey];if(!FNJSType.isObject(funcMap))return;const func=funcMap[funcNameKey];if(!FNJSType.isFunction(func))return;try{func(res)}catch(error){console.log('CallBack-error');console.log(error)}if(alive)return;if(funcNameKey==FNCallBackCompleteKey){FNRemoveCallBack(randomKey)}};const FNAddCallBack=(randomKey,funcNameKey,func)=>{let funcMap=FNCallBackMap[randomKey];if(!FNJSType.isObject(funcMap)){const map={};map[funcNameKey]=func;FNCallBackMap[randomKey]=map;return}if(funcMap.hasOwnProperty(funcNameKey))return;funcMap[funcNameKey]=func;FNCallBackMap[randomKey]=funcMap};const FNRemoveCallBack=randomKey=>{if(!FNCallBackMap.hasOwnProperty(randomKey))return;delete FNCallBackMap[randomKey]};const FNHandleCallBackParams=(methodName,params)=>{if(!FNJSType.isObject(params)){return params}const randomKey=`-${methodName}-${(new Date).getTime()}-${Math.floor(Math.random()*1e4)}-`;let newParams=params;const success=params.success;if(success&&FNJSType.isFunction(success)){const funcId=randomKey+FNCallBackSuccessKey;FNAddCallBack(randomKey,FNCallBackSuccessKey,success);newParams[FNCallBackSuccessKey]=funcId}const fail=params.fail;if(fail&&FNJSType.isFunction(fail)){const funcId=randomKey+FNCallBackFailKey;FNAddCallBack(randomKey,FNCallBackFailKey,fail);newParams[FNCallBackFailKey]=funcId}const complete=params.complete;if(complete&&FNJSType.isFunction(complete)){const funcId=randomKey+FNCallBackCompleteKey;FNAddCallBack(randomKey,FNCallBackCompleteKey,complete);newParams[FNCallBackCompleteKey]=funcId}return newParams};const FNSendParams=(methodName,params,sync=false)=>{let newParams=params;let res={};if(!sync){newParams=FNHandleCallBackParams(methodName,params)}const haveParms=!(FNJSType.isNull(newParams)||FNJSType.isUndefined(newParams));res=haveParms?{methodName:methodName,params:newParams}:{methodName:methodName};return sync?res:JSON.parse(JSON.stringify(res))};const FNSendParamsSync=(methodName,params)=>{return FNSendParams(methodName,params,true)};const FNSendNative=params=>{const handler=window.webkit.messageHandlers[FNJSToNativeHandlerName];handler.postMessage(params)};const FNSendNativeSync=params=>{let res=prompt(JSON.stringify(params));try{res=JSON.parse(res);return res.data}catch(error){console.log('❌SendNativeSync--error');console.log(error)}return null};const %@=(()=>{const apiMap=FNCommonAPI;let res={};for(const key in apiMap){if(!apiMap.hasOwnProperty(key)){continue}const config=apiMap[key];const isSync=config.hasOwnProperty('sync')?config.sync:false;const func=isSync?params=>{return FNSendNativeSync(FNSendParamsSync(key,params))}:params=>{FNSendNative(FNSendParams(key,params))};res[key]=func}return res})();", apiConfigStr, ZHJSHandlerName, self.fetchWebViewCallSuccessFuncKey, self.fetchWebViewCallFailFuncKey, self.fetchWebViewCallCompleteFuncKey, [self.apiHandler fetchApiMethodPrefixName]];
+    NSString *res = [NSString stringWithFormat:@"const FNCommonAPI=%@;const FNZhengInternalAPI=%@;const FNJSToNativeHandlerName='%@';const FNCallBackSuccessKey='%@';const FNCallBackFailKey='%@';const FNCallBackCompleteKey='%@';const FNJSType=(()=>{let type={};const typeArr=['String','Object','Number','Array','Undefined','Function','Null','Symbol','Boolean'];for(let i=0;i<typeArr.length;i++){(name=>{type['is'+name]=(obj=>{return Object.prototype.toString.call(obj)=='[object '+name+']'})})(typeArr[i])}return type})();const FNCallBackMap={};const FNCallBack=params=>{if(!FNJSType.isString(params)||!params){return}const newParams=JSON.parse(decodeURIComponent(params));if(!FNJSType.isObject(newParams)){return}const funcId=newParams.funcId;const res=newParams.data;const alive=newParams.alive;let randomKey='',funcNameKey='';const matchKey=key=>{if(!funcId.endsWith(key))return false;randomKey=funcId.replace(new RegExp(key,'g'),'');funcNameKey=key;return true};const matchRes=matchKey(FNCallBackSuccessKey)||matchKey(FNCallBackFailKey)||matchKey(FNCallBackCompleteKey);if(!matchRes)return;let funcMap=FNCallBackMap[randomKey];if(!FNJSType.isObject(funcMap))return;const func=funcMap[funcNameKey];if(!FNJSType.isFunction(func))return;try{func(res)}catch(error){console.log('CallBack-error');console.log(error)}if(alive)return;if(funcNameKey==FNCallBackCompleteKey){FNRemoveCallBack(randomKey)}};const FNAddCallBack=(randomKey,funcNameKey,func)=>{let funcMap=FNCallBackMap[randomKey];if(!FNJSType.isObject(funcMap)){const map={};map[funcNameKey]=func;FNCallBackMap[randomKey]=map;return}if(funcMap.hasOwnProperty(funcNameKey))return;funcMap[funcNameKey]=func;FNCallBackMap[randomKey]=funcMap};const FNRemoveCallBack=randomKey=>{if(!FNCallBackMap.hasOwnProperty(randomKey))return;delete FNCallBackMap[randomKey]};const FNHandleCallBackParams=(methodName,params)=>{if(!FNJSType.isObject(params)){return params}const randomKey=`-${methodName}-${(new Date).getTime()}-${Math.floor(Math.random()*1e4)}-`;let newParams=params;const success=params.success;if(success&&FNJSType.isFunction(success)){const funcId=randomKey+FNCallBackSuccessKey;FNAddCallBack(randomKey,FNCallBackSuccessKey,success);newParams[FNCallBackSuccessKey]=funcId}const fail=params.fail;if(fail&&FNJSType.isFunction(fail)){const funcId=randomKey+FNCallBackFailKey;FNAddCallBack(randomKey,FNCallBackFailKey,fail);newParams[FNCallBackFailKey]=funcId}const complete=params.complete;if(complete&&FNJSType.isFunction(complete)){const funcId=randomKey+FNCallBackCompleteKey;FNAddCallBack(randomKey,FNCallBackCompleteKey,complete);newParams[FNCallBackCompleteKey]=funcId}return newParams};const FNSendParams=(apiPrefix,methodName,params,sync=false)=>{let newParams=params;let res={};if(!sync){newParams=FNHandleCallBackParams(methodName,params)}const haveParms=!(FNJSType.isNull(newParams)||FNJSType.isUndefined(newParams));res=haveParms?{methodName:methodName,apiPrefix:apiPrefix,params:newParams}:{methodName:methodName,apiPrefix:apiPrefix};return sync?res:JSON.parse(JSON.stringify(res))};const FNSendParamsSync=(apiPrefix,methodName,params)=>{return FNSendParams(apiPrefix,methodName,params,true)};const FNSendNative=params=>{const handler=window.webkit.messageHandlers[FNJSToNativeHandlerName];handler.postMessage(params)};const FNSendNativeSync=params=>{let res=prompt(JSON.stringify(params));try{res=JSON.parse(res);return res.data}catch(error){console.log('❌SendNativeSync--error');console.log(error)}return null};const FNGeneratorAPI=(apiPrefix,apiMap)=>{let res={};for(const key in apiMap){if(!apiMap.hasOwnProperty(key)){continue}const config=apiMap[key];const isSync=config.hasOwnProperty('sync')?config.sync:false;const func=isSync?params=>{return FNSendNativeSync(FNSendParamsSync(apiPrefix,key,params))}:params=>{FNSendNative(FNSendParams(apiPrefix,key,params))};res[key]=func}return res};const %@=FNGeneratorAPI('%@',FNCommonAPI);const %@=FNGeneratorAPI('%@',FNZhengInternalAPI);",
+                     block(self.apiHandler.outsideApiMap),
+                     block(self.apiHandler.internalApiMap),
+                     ZHJSHandlerName,
+                     self.fetchWebViewCallSuccessFuncKey,
+                     self.fetchWebViewCallFailFuncKey,
+                     self.fetchWebViewCallCompleteFuncKey,
+                     outsideJSPrefix,
+                     outsideJSPrefix,
+                     internalJSPrefix,
+                     internalJSPrefix];
     return res;
 }
 
@@ -290,6 +314,7 @@ case cType:{\
 - (id)handleScriptMessage:(NSDictionary *)jsInfo{
     if (!jsInfo || ![jsInfo isKindOfClass:[NSDictionary class]]) return nil;
     NSString *jsMethodName = [jsInfo valueForKey:@"methodName"];
+    NSString *apiPrefix = [jsInfo valueForKey:@"apiPrefix"];
 
     /** 参数类型
      null、undefined：js端处理掉   jsInfo没有params字段
@@ -302,10 +327,10 @@ case cType:{\
     NSDictionary *params = [jsInfo objectForKey:@"params"];
     
     if (!params) {
-        return [self runNativeFunc:jsMethodName arguments:@[]];
+        return [self runNativeFunc:jsMethodName apiPrefix:apiPrefix arguments:@[]];
     }
     if (![params isKindOfClass:[NSDictionary class]]) {
-        return [self runNativeFunc:jsMethodName arguments:@[params]];
+        return [self runNativeFunc:jsMethodName apiPrefix:apiPrefix arguments:@[params]];
     }
     
     //回调方法
@@ -315,7 +340,7 @@ case cType:{\
     BOOL hasCallFunction = (successId.length || failId.length || completeId.length);
     //不需要回调方法
     if (!hasCallFunction) {
-        return [self runNativeFunc:jsMethodName arguments:@[params]];
+        return [self runNativeFunc:jsMethodName apiPrefix:apiPrefix arguments:@[params]];
     }
     //需要回调
     __weak __typeof__(self) __self = self;
@@ -329,95 +354,96 @@ case cType:{\
         }
         if (completeId.length) [__self callBackJsFunc:completeId data:[NSNull null] alive:alive callBack:nil];
     };
-    return [self runNativeFunc:jsMethodName arguments:@[params, block]];
+    return [self runNativeFunc:jsMethodName apiPrefix:apiPrefix arguments:@[params, block]];
 }
 //运行原生方法
-- (id)runNativeFunc:(NSString *)jsMethodName arguments:(NSArray *)arguments{
-    SEL sel = [self.apiHandler fetchSelectorByName:jsMethodName];
-    if (!sel) return nil;
-    
-    NSMethodSignature *sig = [self.apiHandler methodSignatureForSelector:sel];
-    NSInvocation *invo = [NSInvocation invocationWithMethodSignature:sig];
-    [invo setTarget:self.apiHandler];
-    [invo setSelector:sel];
-    /**
-     arguments.cout < 方法本身定义的参数：方法多出来的参数均为nil
-     arguments.cout > 方法本身定义的参数：arguments多出来的参数丢弃
-     */
-    // invocation 有2个隐藏参数，所以 argument 从2开始
-    if ([arguments isKindOfClass:[NSArray class]]) {
-        NSInteger count = MIN(arguments.count, sig.numberOfArguments - 2);
-        for (int idx = 0; idx < count; idx++) {
-            id arg = arguments[idx];
-            //获取该方法的参数类型
-            int argIdx = idx + 2;
-            const char *paramType = [sig getArgumentTypeAtIndex:argIdx];
-            switch(paramType[0]){
-                //char * 类型
-                case _C_CHARPTR: {
-                    if ([arg respondsToSelector:@selector(UTF8String)]) {
-                        char **_tmp = (char **)[arg UTF8String];
-                        [invo setArgument:&_tmp atIndex:argIdx];
+- (id)runNativeFunc:(NSString *)jsMethodName apiPrefix:(NSString *)apiPrefix arguments:(NSArray *)arguments{
+    __block id value = nil;
+    [self.apiHandler fetchSelectorByName:jsMethodName apiPrefix:apiPrefix callBack:^(id target, SEL sel) {
+        if (!target || !sel) return;
+        
+        NSMethodSignature *sig = [target methodSignatureForSelector:sel];
+        NSInvocation *invo = [NSInvocation invocationWithMethodSignature:sig];
+        [invo setTarget:target];
+        [invo setSelector:sel];
+        /**
+         arguments.cout < 方法本身定义的参数：方法多出来的参数均为nil
+         arguments.cout > 方法本身定义的参数：arguments多出来的参数丢弃
+         */
+        // invocation 有2个隐藏参数，所以 argument 从2开始
+        if ([arguments isKindOfClass:[NSArray class]]) {
+            NSInteger count = MIN(arguments.count, sig.numberOfArguments - 2);
+            for (int idx = 0; idx < count; idx++) {
+                id arg = arguments[idx];
+                //获取该方法的参数类型
+                int argIdx = idx + 2;
+                const char *paramType = [sig getArgumentTypeAtIndex:argIdx];
+                switch(paramType[0]){
+                        //char * 类型
+                    case _C_CHARPTR: {
+                        if ([arg respondsToSelector:@selector(UTF8String)]) {
+                            char **_tmp = (char **)[arg UTF8String];
+                            [invo setArgument:&_tmp atIndex:argIdx];
+                        }
+                        break;
                     }
-                    break;
+                        //                    case _C_LNG:{
+                        //                        if ([arg respondsToSelector:@selector(longValue)]) {
+                        //                            long *_tmp = malloc(sizeof(long));
+                        //                            memset(_tmp, 0, sizeof(long));
+                        //                            *_tmp = [arg longValue];
+                        //                            [invo setArgument:_tmp atIndex:idx];
+                        //                        }
+                        //                        break;
+                        //                    }
+                        //基本数据类型
+                        ZH_Invo_Set_Arg(invo, arg, argIdx, _C_INT, int, intValue)
+                        ZH_Invo_Set_Arg(invo, arg, argIdx, _C_SHT, short, shortValue)
+                        ZH_Invo_Set_Arg(invo, arg, argIdx, _C_LNG, long, longValue)
+                        ZH_Invo_Set_Arg(invo, arg, argIdx, _C_LNG_LNG, long long, longLongValue)
+                        ZH_Invo_Set_Arg(invo, arg, argIdx, _C_UCHR, unsigned char, unsignedCharValue)
+                        ZH_Invo_Set_Arg(invo, arg, argIdx, _C_UINT, unsigned int, unsignedIntValue)
+                        ZH_Invo_Set_Arg(invo, arg, argIdx, _C_USHT, unsigned short, unsignedShortValue)
+                        ZH_Invo_Set_Arg(invo, arg, argIdx, _C_ULNG, unsigned long, unsignedLongValue)
+                        ZH_Invo_Set_Arg(invo, arg, argIdx, _C_ULNG_LNG, unsigned long long, unsignedLongLongValue)
+                        ZH_Invo_Set_Arg(invo, arg, argIdx, _C_FLT, float, floatValue)
+                        ZH_Invo_Set_Arg(invo, arg, argIdx, _C_DBL, double, doubleValue)
+                        ZH_Invo_Set_Arg(invo, arg, argIdx, _C_BOOL, bool, boolValue)
+                        ZH_Invo_Set_Arg(invo, arg, argIdx, _C_CHR, char, charValue)
+                    default: {
+                        //id object类型
+                        [invo setArgument:&arg atIndex:argIdx];
+                        break;
+                    }
                 }
-//                    case _C_LNG:{
-//                        if ([arg respondsToSelector:@selector(longValue)]) {
-//                            long *_tmp = malloc(sizeof(long));
-//                            memset(_tmp, 0, sizeof(long));
-//                            *_tmp = [arg longValue];
-//                            [invo setArgument:_tmp atIndex:idx];
-//                        }
-//                        break;
-//                    }
-                    //基本数据类型
-                    ZH_Invo_Set_Arg(invo, arg, argIdx, _C_INT, int, intValue)
-                    ZH_Invo_Set_Arg(invo, arg, argIdx, _C_SHT, short, shortValue)
-                    ZH_Invo_Set_Arg(invo, arg, argIdx, _C_LNG, long, longValue)
-                    ZH_Invo_Set_Arg(invo, arg, argIdx, _C_LNG_LNG, long long, longLongValue)
-                    ZH_Invo_Set_Arg(invo, arg, argIdx, _C_UCHR, unsigned char, unsignedCharValue)
-                    ZH_Invo_Set_Arg(invo, arg, argIdx, _C_UINT, unsigned int, unsignedIntValue)
-                    ZH_Invo_Set_Arg(invo, arg, argIdx, _C_USHT, unsigned short, unsignedShortValue)
-                    ZH_Invo_Set_Arg(invo, arg, argIdx, _C_ULNG, unsigned long, unsignedLongValue)
-                    ZH_Invo_Set_Arg(invo, arg, argIdx, _C_ULNG_LNG, unsigned long long, unsignedLongLongValue)
-                    ZH_Invo_Set_Arg(invo, arg, argIdx, _C_FLT, float, floatValue)
-                    ZH_Invo_Set_Arg(invo, arg, argIdx, _C_DBL, double, doubleValue)
-                    ZH_Invo_Set_Arg(invo, arg, argIdx, _C_BOOL, bool, boolValue)
-                    ZH_Invo_Set_Arg(invo, arg, argIdx, _C_CHR, char, charValue)
-                default: {
-                    //id object类型
-                    [invo setArgument:&arg atIndex:argIdx];
-                    break;
-                }
+                /**
+                 strcmp(paramType, @encode(float))==0
+                 strcmp(paramType, @encode(double))==0
+                 strcmp(paramType, @encode(int))==0
+                 strcmp(paramType, @encode(id))==0
+                 strcmp(paramType, @encode(typeof(^{})))==0
+                 */
             }
-            /**
-            strcmp(paramType, @encode(float))==0
-            strcmp(paramType, @encode(double))==0
-            strcmp(paramType, @encode(int))==0
-            strcmp(paramType, @encode(id))==0
-            strcmp(paramType, @encode(typeof(^{})))==0
-             */
         }
-    }
-    //运行
-    [invo invoke];
-    
-    //        此处crash： https://www.jianshu.com/p/9b4cff40c25c
-    //这句代码在执行后的某个时刻会强行释放res，release掉.后面再用res就会报僵尸对象的错  加上__autoreleasing
-    //    __autoreleasing id res = nil;
-    //    if ([signature methodReturnLength]) [invocation getReturnValue:&res];
-    //    id value = res;
-    //    return value;
-    //
-    id __unsafe_unretained res = nil;
-    if ([sig methodReturnLength]) [invo getReturnValue:&res];
-    id value = res;
+        //运行
+        [invo invoke];
+        
+        //        此处crash： https://www.jianshu.com/p/9b4cff40c25c
+        //这句代码在执行后的某个时刻会强行释放res，release掉.后面再用res就会报僵尸对象的错  加上__autoreleasing
+        //    __autoreleasing id res = nil;
+        //    if ([signature methodReturnLength]) [invocation getReturnValue:&res];
+        //    id value = res;
+        //    return value;
+        //
+        id __unsafe_unretained res = nil;
+        if ([sig methodReturnLength]) [invo getReturnValue:&res];
+        value = res;
+        
+        //    void *res = NULL;
+        //    if ([signature methodReturnLength]) [invocation getReturnValue:&res];
+        //    return (__bridge id)res;
+    }];
     return value;
-    
-    //    void *res = NULL;
-    //    if ([signature methodReturnLength]) [invocation getReturnValue:&res];
-    //    return (__bridge id)res;
-    
 }
 - (id)runNativeFunc11:(NSString *)methodName params1:(id)params1 params2:(id)params2{
     SEL sel = NSSelectorFromString(methodName);

@@ -9,216 +9,68 @@
 #import "ZHJSApiHandler.h"
 #import "ZHJSHandler.h"
 #import "ZHWebView.h"
+#import "ZHJSInternalApiHandler.h"
 #import <objc/runtime.h>
 
 @interface ZHJSApiHandler ()
-@property (nonatomic,strong) NSDictionary <NSString *, ZHJSApiMethodItem *> *apiMethodMap;
+@property (nonatomic,strong) NSDictionary <NSString *, NSDictionary *> *apiMap;
+@property (nonatomic,strong) NSDictionary <NSString *, ZHJSApiMethodItem *> *internalApiMap;
+@property (nonatomic,strong) NSDictionary <NSString *, ZHJSApiMethodItem *> *outsideApiMap;
+@property (nonatomic,strong) ZHJSInternalApiHandler <ZHJSApiProtocol> *internalApiHandler;
 @end
 
 @implementation ZHJSApiHandler
 
-#pragma mark - api
-/** ⚠️⚠️⚠️添加API步骤：
- 在下面实现方法即可：
-     异步方法
-       - (void)js_<#functionName#><##>:(NSDictionary *)params{}
-       - (void)js_<#functionName#><##>:(NSDictionary *)params callBack:(ZHJSApiBlock)callBack{}
- 
-     同步方法
-       //返回JS类型Object
-       - (NSDictionary *)js_<#functionName#><##>Sync:(NSDictionary *)params{}
- 
-       //返回JS类型Array
-       - (NSArray *)js_<#functionName#><##>Sync:(NSDictionary *)params{}
- 
-       //返回JS类型String
-       - (NSString *)js_<#functionName#><##>Sync:(NSDictionary *)params{}
- 
-       //返回JS类型Number
-       - (NSNumber *)js_<#functionName#><##>Sync:(NSDictionary *)params{}
-       
-       //返回JS类型Boolean：@(YES)、@(NO)
-       - (NSNumber *)js_<#functionName#><##>Sync:(NSDictionary *)params{}
- */
-- (void)js_request:(NSDictionary *)info callBack:(ZHJSApiBlock)callBack{
-    NSString *url = [info objectForKey:@"url"];
-    NSString *method = [[info objectForKey:@"method"] uppercaseString];
-    NSMutableDictionary *headers = [info objectForKey:@"header"];
-    NSDictionary *parameters = [info objectForKey:@"data"];
-    if (!parameters || ![parameters isKindOfClass:[NSDictionary class]]) {
-        parameters = @{};
-    }if (!headers || ![headers isKindOfClass:[NSDictionary class]]) {
-        headers = [@{} mutableCopy];
-    }
-    
-    NSMutableURLRequest *request = nil;
-    if ([method isEqualToString:@"POST"]) {
-        BOOL isAppendParams = YES;
-        //参数拼接Url
-        if (isAppendParams) {
-            NSURL *aURL = [NSURL URLWithString:(parameters.count ? [NSString stringWithFormat:@"%@?%@", url, [self queryString:parameters]] : url)];
-            request = [NSMutableURLRequest requestWithURL:aURL cachePolicy:NSURLRequestReloadIgnoringLocalCacheData timeoutInterval:30];
-        }else{
-            request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:url] cachePolicy:NSURLRequestReloadIgnoringLocalCacheData timeoutInterval:30];
-            //参数放Body
-            NSString *contentType = [request valueForHTTPHeaderField:@"Content-Type"];
-            if ([contentType isEqualToString:@"application/x-www-form-urlencoded"]) {
-                NSData *data = [[self queryString:parameters] dataUsingEncoding:NSUTF8StringEncoding];
-                if (data) [request setHTTPBody:data];
-            }else{
-                NSData *data = [NSJSONSerialization dataWithJSONObject:parameters options:0 error:nil];
-                if (data) [request setHTTPBody:data];
-            }
-        }
-        [request setHTTPMethod:@"POST"];
-    } else {
-        NSURL *aURL = [NSURL URLWithString:(parameters.count ? [NSString stringWithFormat:@"%@?%@", url, [self queryString:parameters]] : url)];
-        request = [NSMutableURLRequest requestWithURL:aURL cachePolicy:NSURLRequestReloadIgnoringLocalCacheData timeoutInterval:30];
-        [request setHTTPMethod:@"GET"];
-    }
-    //header参数
-    for (NSString *filedkey in headers) {
-        [request setValue:headers[filedkey] forHTTPHeaderField:filedkey];
-    }
-    [request setHTTPShouldHandleCookies:NO];
-    if (![request valueForHTTPHeaderField:@"Content-Type"]) {
-        [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
-    }
-    [request setValue:@"iPhone" forHTTPHeaderField:@"User-Agent"];
-    
-    NSURLSession *session = [NSURLSession sharedSession];
-    NSLog(@"👉-ios-request--api发起请求");
-    NSLog(@"%@", @{
-        @"request-url": request.URL.absoluteString,
-        @"js-url": url,
-        @"js-method": method,
-        @"js-params": parameters,
-        @"js-headers": headers
-    });
-    
-    //创建请求 Task
-    NSURLSessionDataTask *dataTask = [session dataTaskWithRequest:request completionHandler:
-                                      ^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
-        if (!callBack) return;
-        //解析返回的数据
-        dispatch_async(dispatch_get_main_queue(), ^{
-            NSError * (^createError) (NSString *desc) = ^(NSString *desc){
-                return [NSError errorWithDomain:@"-request-" code:404 userInfo:@{NSLocalizedDescriptionKey: desc}];
-            };
-            NSLog(@"👉-ios-request--api请求回调");
-            NSLog(@"%@", @{
-                @"url": response.URL.absoluteString?:@""
-            });
-            
-            if (error) {
-                callBack(nil, error);
-                return;
-            }
-            if (!data) {
-                callBack(nil, createError(@"没有数据"));
-                return;
-            }
-            if (!response || ![response isKindOfClass:[NSHTTPURLResponse class]]) {
-                callBack(nil, createError((response ? @"不是NSHTTPURLResponse响应" : @"response为空")));
-                return;
-            }
-            
-            id result = nil;
-            NSError *jsonError = nil;
-//            [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-            result = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:&jsonError];
-            if (jsonError || !result) {
-                callBack(nil, createError(@"解析json失败"));
-                return;
-            }
-            NSLog(@"👉-ios-request--api回调数据");
-            NSLog(@"%@",result);
-            callBack(@{@"data": result?:@{},
-                       @"statusCode": @([(NSHTTPURLResponse *)response statusCode])
-            }, nil);
-        });
-    }];
-    [dataTask resume];
-}
-- (NSString *)queryString:(NSDictionary *)parameters{
-    __block NSMutableArray *arguments = [NSMutableArray array];
-    [parameters enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
-        if (obj == [NSNull null] ||
-            ![key isKindOfClass:[NSString class]]) return;
-        if ([obj isKindOfClass:[NSString class]] || [obj isKindOfClass:[NSNumber class]]) {
-            obj = [NSString stringWithFormat:@"%@", obj];
-        }else{
-            return;
-        }
-        NSString *encodedKey   = [key stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
-        NSString *encodedValue = [obj stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
-        NSString *kvPair       = [NSString stringWithFormat:@"%@=%@", encodedKey, encodedValue];
-        [arguments addObject:kvPair];
-    }];
-    return [arguments componentsJoinedByString:@"&"];
-}
-
-- (NSDictionary *)js_getJsonSync:(NSDictionary *)params{
-    return @{@"sdfd": @"22222", @"sf": @(YES)};
-}
-- (NSNumber *)js_getNumberSync:(NSDictionary *)params{
-    return @(22);
-}
-- (NSNumber *)js_getBoolSync:(NSDictionary *)params{
-    return @(YES);
-}
-- (NSString *)js_getStringSync:(NSDictionary *)params{
-    return @"dfgewrefdwd";
-}
-- (void)js_commonLinkTo:(NSDictionary *)params{
-    NSLog(@"-------commonLinkTo------------");
-    NSLog(@"%@",params);
-}
-
-#ifdef DEBUG
-//socket链接调试
-- (void)js_socketDidOpen:(NSDictionary *)params{
-    [self.handler.webView socketDidOpen:params];
-}
-- (void)js_socketDidReceiveMessage:(NSDictionary *)params{
-    [self.handler.webView socketDidReceiveMessage:params];
-}
-- (void)js_socketDidError:(NSDictionary *)params{
-    [self.handler.webView socketDidError:params];
-}
-- (void)js_socketDidClose:(NSDictionary *)params{
-    [self.handler.webView socketDidClose:params];
-}
-#endif
-
-
 #pragma mark - init
 
-- (instancetype)init{
+- (instancetype)initWithApiHandler:(id <ZHJSApiProtocol>)apiHandler{
     self = [super init];
     if (self) {
-        self.apiMethodMap = [self getAllApiMethodMap];
+        self.internalApiHandler = [[ZHJSInternalApiHandler alloc] init];
+        self.internalApiHandler.apiHandler = self;
+        
+        self.outsideApiHandler = apiHandler;
+        
+        self.internalApiMap = [self fetchInternalApiMap];
+        self.outsideApiMap = [self fetchOutsideApiMap];
+        
+        NSMutableDictionary *apiMap = [NSMutableDictionary dictionary];
+        NSString *jsPrefix = [self fetchInternalJSApiPrefix];
+        if (jsPrefix.length) {
+            [apiMap setValue:@{@"handler": self.internalApiHandler, @"map": self.internalApiMap} forKey:jsPrefix];
+        }
+        jsPrefix = [self fetchOutsideJSApiPrefix];
+        if (jsPrefix.length) {
+            [apiMap setValue:@{@"handler": self.outsideApiHandler, @"map": self.outsideApiMap} forKey:jsPrefix];
+        }
+        self.apiMap = [apiMap copy];
     }
     return self;
 }
 
-- (NSString *)methodPrefix{
-    return @"js_";
+//获取方法映射表
+- (NSDictionary *)fetchInternalApiMap{
+    return [self fetchApiMap:self.internalApiHandler];
 }
-
-- (NSDictionary *)getAllApiMethodMap{
+- (NSDictionary *)fetchOutsideApiMap{
+    return [self fetchApiMap:self.outsideApiHandler];
+}
+- (NSDictionary *)fetchApiMap:(id <ZHJSApiProtocol>)api{
+    NSString *nativeMethodPrefix = [self fetchNativeApiPrefix:api];
+    if (!nativeMethodPrefix || nativeMethodPrefix.length == 0) return @{};
+    
     NSMutableDictionary <NSString *, ZHJSApiMethodItem *> *resMethodMap = [@{} mutableCopy];
     
     unsigned int count;
-    Method *methods = class_copyMethodList([self class], &count);
+    Method *methods = class_copyMethodList([api class], &count);
     
     for (int i = 0; i < count; i++){
         Method method = methods[i];
         SEL selector = method_getName(method);
         NSString *nativeName = NSStringFromSelector(selector);
-        if (![nativeName hasPrefix:self.methodPrefix]) continue;
+        if (![nativeName hasPrefix:nativeMethodPrefix]) continue;
         
-        NSString *jsName = [nativeName substringFromIndex:self.methodPrefix.length];
+        NSString *jsName = [nativeName substringFromIndex:nativeMethodPrefix.length];
         if ([jsName containsString:@":"]) {
             NSArray *subNames = [jsName componentsSeparatedByString:@":"];
             jsName = (subNames.count > 0 ? subNames[0] : jsName);
@@ -238,30 +90,73 @@
     return [resMethodMap copy];
 }
 
+//查找原生api方法前缀js_
+- (NSString *)fetchNativeApiPrefix:(id <ZHJSApiProtocol>)api{
+    if (!api) return nil;
+    if (api && [api respondsToSelector:@selector(zh_iosApiPrefixName)]) {
+        NSString *res = [api zh_iosApiPrefixName];
+        if ([res isKindOfClass:[NSString class]] && res.length) {
+            return res;
+        }
+    }
+    return nil;
+}
+
+//查找js api方法前缀fund
+- (NSString *)fetchInternalJSApiPrefix{
+    return [self fetchJSApiPrefix:self.internalApiHandler];
+}
+- (NSString *)fetchOutsideJSApiPrefix{
+    return [self fetchJSApiPrefix:self.outsideApiHandler];
+}
+- (NSString *)fetchJSApiPrefix:(id <ZHJSApiProtocol>)api{
+    if (!api) return nil;
+    if (api && [api respondsToSelector:@selector(zh_jsApiPrefixName)]) {
+        NSString *res = [api zh_jsApiPrefixName];
+        if ([res isKindOfClass:[NSString class]] && res.length) {
+            return res;
+        }
+    }
+    return nil;
+}
+
 #pragma mark - public
 
-//api方法名
-- (NSString *)fetchApiMethodPrefixName{
-    return @"fund";
-}
-
-//api方法映射表
-- (NSDictionary <NSString *, ZHJSApiMethodItem *> *)fetchApiMethodMap{
-    return [self.apiMethodMap copy];
-}
-
 //获取方法名
-- (SEL)fetchSelectorByName:(NSString *)name{
-    if (!name || name.length == 0 || ![self.apiMethodMap.allKeys containsObject:name]) return nil;
+- (void)fetchSelectorByName:(NSString *)methodName apiPrefix:(NSString *)apiPrefix callBack:(void (^) (id target, SEL sel))callBack{
+    if (!callBack) return;
     
-    ZHJSApiMethodItem *item = self.apiMethodMap[name];
-    if (!item || !item.nativeMethodName) return nil;
+    if (!methodName ||
+        ![methodName isKindOfClass:[NSString class]] ||
+        methodName.length == 0 ||
+        !apiPrefix ||
+        ![apiPrefix isKindOfClass:[NSString class]] ||
+        apiPrefix.length == 0 ){
+        callBack(nil, nil);
+        return;
+    }
+    NSDictionary *map = [self.apiMap valueForKey:apiPrefix];
+    if (!map){
+        callBack(nil, nil);
+        return;
+    }
+    
+    id <ZHJSApiProtocol> handler = [map valueForKey:@"handler"];
+    NSDictionary *apiMap = [map valueForKey:@"map"];
+    
+    ZHJSApiMethodItem *item = apiMap[methodName];
+    if (!item || !item.nativeMethodName) {
+        callBack(nil, nil);
+        return;
+    }
     
     SEL sel = NSSelectorFromString(item.nativeMethodName);
-    if (![self respondsToSelector:sel]) return nil;
-    return sel;
+    if (!handler || ![handler respondsToSelector:sel]) {
+        callBack(nil, nil);
+        return;
+    }
+    callBack(handler, sel);
 }
-
 - (void)dealloc{
     NSLog(@"-------%s---------", __func__);
 }

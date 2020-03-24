@@ -17,7 +17,7 @@ window.WebSocket = function (url, protocols) {
                 if (Object.prototype.toString.call(data) == '[object Array]' && data.length > 0) {
                     data = JSON.parse(data[0]);
                     formatData.push(data);
-                    fund.socketDidReceiveMessage(data);
+                    zheng.socketDidReceiveMessage(data);
                 } else {
                     formatData = data;
                 }

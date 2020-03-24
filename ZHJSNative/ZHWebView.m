@@ -12,10 +12,15 @@
 #import "ZHWebViewDelegate.h"
 
 @interface ZHWebView ()<UIGestureRecognizerDelegate>
+
 @property (nonatomic,copy) void (^loadFinish) (BOOL success);
 @property (nonatomic, assign) BOOL loadSuccess;
 @property (nonatomic, assign) BOOL loadFail;
+
 @property (nonatomic,strong) UIGestureRecognizer *pressGes;
+
+@property (nonatomic, strong) ZHJSHandler *handler;
+@property (nonatomic,strong) ZHWebViewDelegate *zh_delegate;
 @end
 
 @implementation ZHWebView
@@ -24,6 +29,101 @@
     self = [super initWithFrame:frame configuration:configuration];
     if (self) {
         [self configGesture];
+    }
+    return self;
+}
+
+
+- (instancetype)initWithApiHandler:(id <ZHJSApiProtocol>)apiHandler{
+    ZHJSHandler *handler = [[ZHJSHandler alloc] initWithApiHandler:apiHandler];
+    
+    WKUserContentController *userContent = [[WKUserContentController alloc] init];
+    
+    //注入log
+    {
+        NSString *code = [handler fetchWebViewLogApi];
+        if (code.length) {
+            WKUserScript *script = [[WKUserScript alloc] initWithSource:code injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:YES];
+            [userContent addUserScript:script];
+        }
+    }
+    //注入error
+    {
+        NSString *code = [handler fetchWebViewErrorApi];
+        if (code.length) {
+            WKUserScript *script = [[WKUserScript alloc] initWithSource:code injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:YES];
+            [userContent addUserScript:script];
+        }
+    }
+#ifdef DEBUG
+    //注入websocket js用于监听socket链接
+    {
+        NSString *code = [handler fetchWebViewSocketApi];
+        if (code.length) {
+            WKUserScript *script = [[WKUserScript alloc] initWithSource:code injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:YES];
+            [userContent addUserScript:script];
+        }
+    }
+    //禁用webview长按弹出菜单
+    {
+        NSString *code = [handler fetchWebViewTouchCalloutApi];
+        if (code.length) {
+            WKUserScript *script = [[WKUserScript alloc] initWithSource:code injectionTime:WKUserScriptInjectionTimeAtDocumentEnd forMainFrameOnly:YES];
+            [userContent addUserScript:script];
+        }
+    }
+#endif
+    //注入api js
+    {
+        NSString *code = [handler fetchWebViewApi];
+        if (code.length) {
+            WKUserScript *script = [[WKUserScript alloc] initWithSource:code injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:YES];
+            [userContent addUserScript:script];
+        }
+    }
+    
+    //监听js
+    NSArray *handlerNames = [ZHWebView fetchHandlerNames];
+    for (NSString *key in handlerNames) {
+        [userContent addScriptMessageHandler:handler name:key];
+    }
+    
+    WKWebViewConfiguration *config = [[WKWebViewConfiguration alloc] init];
+    // 设置偏好设置
+    config.preferences = [[WKPreferences alloc] init];
+    // 默认为0
+    config.preferences.minimumFontSize = 10;
+    // 默认认为YES
+    config.preferences.javaScriptEnabled = YES;
+    //允许视频
+    config.allowsInlineMediaPlayback = YES;
+    config.userContentController = userContent;
+    
+    self = [self initWithFrame:CGRectZero configuration:config];
+    if (self) {
+        self.backgroundColor = [UIColor colorWithRed:245.0/255.0 green:245.0/255.0 blue:245.0/255.0 alpha:1.0];
+        //    self.scrollView.bounces = NO;
+        //    self.scrollView.alwaysBounceVertical = NO;
+        //    self.scrollView.alwaysBounceHorizontal = NO;
+        self.scrollView.showsVerticalScrollIndicator = YES;
+        //设置流畅滑动【否则 滑动效果没有减速过快】
+        self.scrollView.decelerationRate = UIScrollViewDecelerationRateNormal;
+        //禁用链接预览
+        //    [webView setAllowsLinkPreview:NO];
+        
+        if (@available(iOS 11.0, *)) {
+            self.scrollView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
+        }
+        
+        self.handler = handler;
+        handler.webView = self;
+        self.zh_delegate = [[ZHWebViewDelegate alloc] init];
+        self.zh_delegate.webView = self;
+        
+        //设置代理
+        self.UIDelegate = self.zh_delegate;
+        self.navigationDelegate = self.zh_delegate;
+        self.scrollView.delegate = self.zh_delegate;
     }
     return self;
 }
@@ -76,109 +176,13 @@
 #pragma mark - UIGestureRecognizerDelegate
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer{
-    NSLog(@"%@--%@",NSStringFromClass([gestureRecognizer class]), NSStringFromClass([otherGestureRecognizer class]));
+//    NSLog(@"%@--%@",NSStringFromClass([gestureRecognizer class]), NSStringFromClass([otherGestureRecognizer class]));
     if ([otherGestureRecognizer isKindOfClass:[UILongPressGestureRecognizer class]]) {
         //只有当手势为长按手势时反馈，非长按手势将阻止。
         return YES;
     }else{
         return NO;
     }
-}
-
-#pragma mark - init
-
-+ (ZHWebView *)createWebView{
-    ZHJSHandler *handler = [[ZHJSHandler alloc] init];
-    
-    WKUserContentController *userContent = [[WKUserContentController alloc] init];
-    
-    //注入log
-    {
-        NSString *code = [handler fetchWebViewLogApi];
-        if (code.length) {
-            WKUserScript *script = [[WKUserScript alloc] initWithSource:code injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:YES];
-            [userContent addUserScript:script];
-        }
-    }
-    //注入error
-    {
-        NSString *code = [handler fetchWebViewErrorApi];
-        if (code.length) {
-            WKUserScript *script = [[WKUserScript alloc] initWithSource:code injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:YES];
-            [userContent addUserScript:script];
-        }
-    }
-#ifdef DEBUG
-    //注入websocket js用于监听socket链接
-    {
-        NSString *code = [handler fetchWebViewSocketApi];
-        if (code.length) {
-            WKUserScript *script = [[WKUserScript alloc] initWithSource:code injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:YES];
-            [userContent addUserScript:script];
-        }
-    }
-    //禁用webview长按弹出菜单
-    {
-        NSString *code = [handler fetchWebViewTouchCalloutApi];
-        if (code.length) {
-            WKUserScript *script = [[WKUserScript alloc] initWithSource:code injectionTime:WKUserScriptInjectionTimeAtDocumentEnd forMainFrameOnly:YES];
-            [userContent addUserScript:script];
-        }
-    }
-#endif
-    //注入api js
-    {
-        NSString *code = [handler fetchWebViewApi];
-        if (code.length) {
-            WKUserScript *script = [[WKUserScript alloc] initWithSource:code injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:YES];
-            [userContent addUserScript:script];
-        }
-    }
-    
-    //监听js
-    NSArray *handlerNames = [self fetchHandlerNames];
-    for (NSString *key in handlerNames) {
-        [userContent addScriptMessageHandler:handler name:key];
-    }
-    
-    WKWebViewConfiguration *config = [[WKWebViewConfiguration alloc] init];
-    // 设置偏好设置
-    config.preferences = [[WKPreferences alloc] init];
-    // 默认为0
-    config.preferences.minimumFontSize = 10;
-    // 默认认为YES
-    config.preferences.javaScriptEnabled = YES;
-    //允许视频
-    config.allowsInlineMediaPlayback = YES;
-    config.userContentController = userContent;
-    
-    
-    ZHWebView *webView = [[ZHWebView alloc] initWithFrame:CGRectZero configuration:config];
-    webView.backgroundColor = [UIColor colorWithRed:245.0/255.0 green:245.0/255.0 blue:245.0/255.0 alpha:1.0];
-//    webView.scrollView.bounces = NO;
-//    webView.scrollView.alwaysBounceVertical = NO;
-//    webView.scrollView.alwaysBounceHorizontal = NO;
-    webView.scrollView.showsVerticalScrollIndicator = YES;
-    //设置流畅滑动【否则 滑动效果没有减速过快】
-    webView.scrollView.decelerationRate = UIScrollViewDecelerationRateNormal;
-    //禁用链接预览
-//    [webView setAllowsLinkPreview:NO];
-    
-    if (@available(iOS 11.0, *)) {
-        webView.scrollView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
-    }
-
-    webView.handler = handler;
-    handler.webView = webView;
-    webView.zh_delegate = [[ZHWebViewDelegate alloc] init];
-    webView.zh_delegate.webView = webView;
-    
-    //设置代理
-    webView.UIDelegate = webView.zh_delegate;
-    webView.navigationDelegate = webView.zh_delegate;
-    webView.scrollView.delegate = webView.zh_delegate;
-    
-    return webView;
 }
 
 #pragma mark - handler

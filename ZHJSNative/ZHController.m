@@ -10,6 +10,7 @@
 #import "ZHWebView.h"
 #import "ZHUtil.h"
 #import "ZHJSContext.h"
+#import "ZHCustomApiHandler.h"
 
 @interface ZHController ()<ZHWebViewSocketDebugDelegate>
 @property (nonatomic, strong) ZHWebView *webView;
@@ -24,8 +25,10 @@
     [self config];
     
     //运算js
-//    self.context = [ZHJSContext createContext];
-//    [self.context evaluateScript:[NSString stringWithContentsOfURL:[NSURL fileURLWithPath:[ZHUtil jsPath]] encoding:NSUTF8StringEncoding error:nil]];
+//    self.context = [[ZHJSContext alloc] initWithApiHandler:[[ZHCustomApiHandler alloc] init]];
+//    NSURL *url = [NSURL fileURLWithPath:[ZHUtil jsPath]];
+//    url = [NSURL fileURLWithPath:@"/Users/em/Desktop/My/ZHCode/GitHubCode/ZHJSNative/ZHJSNative/TestBundle.bundle/test.js"];
+//    [self.context evaluateScript:[NSString stringWithContentsOfURL:url encoding:NSUTF8StringEncoding error:nil]];
 }
 
 - (void)viewDidLayoutSubviews {
@@ -70,11 +73,11 @@
 }
 
 - (void)configWebView{
-    ZHWebView *webView = [ZHWebView createWebView];
+    ZHWebView *webView = [[ZHWebView alloc] initWithApiHandler:[[ZHCustomApiHandler alloc] init]];
     NSURL *url = [NSURL fileURLWithPath:[ZHUtil htmlPath]];
     
 //    url = [NSURL fileURLWithPath:@"/Users/em/Desktop/My/ZHCode/GitHubCode/ZHJSNative/ZHJSNative/TestBundle.bundle/test.html"];
-//    url = [NSURL URLWithString:@"http://172.31.35.80:8081"];
+//    url = [NSURL URLWithString:@"http://172.31.35.80:8080"];
     
     __weak __typeof__(self) __self = self;
     [webView loadUrl:url finish:^(BOOL success) {

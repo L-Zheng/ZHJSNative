@@ -5,7 +5,7 @@
  * 最小化该js文件： 
  * uglify-es库地址 ：https://github.com/mishoo/UglifyJS2
  * npm install -g uglify-es
- * uglifyjs event.js -b beautify=false,quote_style=1 -o min.js
+ * uglifyjs event.js -b beautify=false,quote_style=1 -o min-event.js
  * uglifyjs logEvent.js -b beautify=false,quote_style=1 -o min-log.js
  * uglifyjs errorEvent.js -b beautify=false,quote_style=1 -o min-error.js
  * uglifyjs socketEvent.js -b beautify=false,quote_style=1 -o min-socket.js
@@ -31,6 +31,8 @@ const FNCommonAPI = {
     commonLinkTo: {
         sync: false
     }
+};
+const FNZhengInternalAPI = {
 };
 /** 发送消息name:与iOS原生保持一致 */
 const FNJSToNativeHandlerName = 'ZHJSEventHandler';
@@ -151,7 +153,7 @@ const FNHandleCallBackParams = (methodName, params) => {
 };
 
 /** 构造发送参数 */
-const FNSendParams = (methodName, params, sync = false) => {
+const FNSendParams = (apiPrefix, methodName, params, sync = false) => {
     /** js发送消息 以此为key包裹消息体 */
     let newParams = params;
     let res = {};
@@ -161,15 +163,17 @@ const FNSendParams = (methodName, params, sync = false) => {
     const haveParms = !(FNJSType.isNull(newParams) || FNJSType.isUndefined(newParams));
     res = haveParms ? {
         methodName,
+        apiPrefix,
         params: newParams
     } : {
-        methodName
+        methodName,
+        apiPrefix
     };
     /** 必须这样【JSON.parse(JSON.stringify())】 否则js运行window.webkit.messageHandlers  会报错cannot be cloned */
     return sync ? res : JSON.parse(JSON.stringify(res));
 };
-const FNSendParamsSync = (methodName, params) => {
-    return FNSendParams(methodName, params, true);
+const FNSendParamsSync = (apiPrefix, methodName, params) => {
+    return FNSendParams(apiPrefix, methodName, params, true);
 };
 const FNSendNative = (params) => {
     const handler = window.webkit.messageHandlers[FNJSToNativeHandlerName]
@@ -186,8 +190,7 @@ const FNSendNativeSync = (params) => {
     }
     return null;
 };
-const fund = (() => {
-    const apiMap = FNCommonAPI;
+const FNGeneratorAPI = (apiPrefix, apiMap) => {
     let res = {};
     for (const key in apiMap) {
         if (!apiMap.hasOwnProperty(key)) {
@@ -198,11 +201,13 @@ const fund = (() => {
         const isSync = config.hasOwnProperty('sync') ? config.sync : false;
         /** 生成function */
         const func = isSync ? ((params) => {
-            return FNSendNativeSync(FNSendParamsSync(key, params));
+            return FNSendNativeSync(FNSendParamsSync(apiPrefix, key, params));
         }) : ((params) => {
-            FNSendNative(FNSendParams(key, params));
+            FNSendNative(FNSendParams(apiPrefix, key, params));
         });
         res[key] = func
     }
     return res;
-})();
+};
+const fund = FNGeneratorAPI('fund', FNCommonAPI);
+const zheng = FNGeneratorAPI('zheng', FNZhengInternalAPI);

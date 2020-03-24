@@ -26,6 +26,8 @@
 		0F0798A72401089A004AAFBC /* TestBundle.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 0F0798A62401089A004AAFBC /* TestBundle.bundle */; };
 		0F0798AA240108F6004AAFBC /* ZHUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F0798A9240108F6004AAFBC /* ZHUtil.m */; };
 		0F6807DD24016A0500E6B4C6 /* ZHJSApiHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F6807DC24016A0500E6B4C6 /* ZHJSApiHandler.m */; };
+		856980822429E0F50042755A /* ZHCustomApiHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 856980812429E0F50042755A /* ZHCustomApiHandler.m */; };
+		856980862429EB9A0042755A /* ZHJSInternalApiHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 856980852429EB9A0042755A /* ZHJSInternalApiHandler.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -81,6 +83,11 @@
 		0F0798A9240108F6004AAFBC /* ZHUtil.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHUtil.m; sourceTree = "<group>"; };
 		0F6807DB24016A0500E6B4C6 /* ZHJSApiHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHJSApiHandler.h; sourceTree = "<group>"; };
 		0F6807DC24016A0500E6B4C6 /* ZHJSApiHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHJSApiHandler.m; sourceTree = "<group>"; };
+		856980802429E0F50042755A /* ZHCustomApiHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHCustomApiHandler.h; sourceTree = "<group>"; };
+		856980812429E0F50042755A /* ZHCustomApiHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHCustomApiHandler.m; sourceTree = "<group>"; };
+		856980832429E13F0042755A /* ZHJSApiProtocol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHJSApiProtocol.h; sourceTree = "<group>"; };
+		856980842429EB9A0042755A /* ZHJSInternalApiHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHJSInternalApiHandler.h; sourceTree = "<group>"; };
+		856980852429EB9A0042755A /* ZHJSInternalApiHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHJSInternalApiHandler.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -145,6 +152,11 @@
 				0F07989E24010627004AAFBC /* ZHController.m */,
 				0F0798A8240108F6004AAFBC /* ZHUtil.h */,
 				0F0798A9240108F6004AAFBC /* ZHUtil.m */,
+				856980802429E0F50042755A /* ZHCustomApiHandler.h */,
+				856980812429E0F50042755A /* ZHCustomApiHandler.m */,
+				856980842429EB9A0042755A /* ZHJSInternalApiHandler.h */,
+				856980852429EB9A0042755A /* ZHJSInternalApiHandler.m */,
+				856980832429E13F0042755A /* ZHJSApiProtocol.h */,
 				0F6807DB24016A0500E6B4C6 /* ZHJSApiHandler.h */,
 				0F6807DC24016A0500E6B4C6 /* ZHJSApiHandler.m */,
 				0F0798A024010647004AAFBC /* ZHJSHandler.h */,
@@ -326,10 +338,12 @@
 				0F07985F240104FA004AAFBC /* AppDelegate.m in Sources */,
 				0F079899240105E3004AAFBC /* ZHJSContext.m in Sources */,
 				0F0798A524010655004AAFBC /* ZHWebViewDelegate.m in Sources */,
+				856980862429EB9A0042755A /* ZHJSInternalApiHandler.m in Sources */,
 				0F07989F24010627004AAFBC /* ZHController.m in Sources */,
 				0F0798AA240108F6004AAFBC /* ZHUtil.m in Sources */,
 				0F079870240104FB004AAFBC /* main.m in Sources */,
 				0F0798A224010647004AAFBC /* ZHJSHandler.m in Sources */,
+				856980822429E0F50042755A /* ZHCustomApiHandler.m in Sources */,
 				0F079862240104FA004AAFBC /* SceneDelegate.m in Sources */,
 				0F6807DD24016A0500E6B4C6 /* ZHJSApiHandler.m in Sources */,
 				0F07989C2401060A004AAFBC /* ZHWebView.m in Sources */,

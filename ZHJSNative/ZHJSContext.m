@@ -17,24 +17,25 @@
 
 @implementation ZHJSContext
 
-+ (ZHJSContext *)createContext{
+- (instancetype)initWithApiHandler:(id <ZHJSApiProtocol>)apiHandler{
     //创建虚拟机
     JSVirtualMachine *vm = [[JSVirtualMachine alloc] init];
-    ZHJSContext *context = [[ZHJSContext alloc] initWithVirtualMachine:vm];
-    
-    //事件
-    context.handler = [[ZHJSHandler alloc] init];
-    context.handler.jsContext = context;
-    
-    //注入api
-    [context registerException];
-    [context registerLogAPI];
-    [context registerAPI];
-    
-    //运算js
-//    [context evaluateScript:[NSString stringWithContentsOfURL:[NSURL fileURLWithPath:[ZHUtil jsPath]] encoding:NSUTF8StringEncoding error:nil]];
-    
-    return context;
+    self = [self initWithVirtualMachine:vm];
+    if (self) {
+        //事件
+        self.handler = [[ZHJSHandler alloc] initWithApiHandler:apiHandler];
+        self.handler.jsContext = self;
+        
+        //注入api
+        [self registerException];
+        [self registerLogAPI];
+        [self registerAPI];
+        
+        //运算js
+        //    [self evaluateScript:[NSString stringWithContentsOfURL:[NSURL fileURLWithPath:[ZHUtil jsPath]] encoding:NSUTF8StringEncoding error:nil]];
+        
+    }
+    return self;
 }
 
 - (void)registerException{
@@ -63,7 +64,10 @@
 - (void)registerAPI{
     __weak __typeof__(self) __self = self;
     [self.handler fetchJSContextApi:^(NSString *apiPrefix, NSDictionary *apiBlockMap) {
-        if (apiBlockMap.allKeys.count == 0) return;
+        if (!apiPrefix || !apiBlockMap) return;
+        if (![apiPrefix isKindOfClass:[NSString class]] ||
+            ![apiBlockMap isKindOfClass:[NSDictionary class]]) return;
+        if (apiPrefix.length == 0 || apiBlockMap.allKeys.count == 0) return;
         [__self setObject:apiBlockMap forKeyedSubscript:apiPrefix];
     }];
 }

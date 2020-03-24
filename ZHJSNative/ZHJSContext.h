@@ -8,12 +8,13 @@
 
 #import <UIKit/UIKit.h>
 #import <JavaScriptCore/JavaScriptCore.h>
+#import "ZHJSApiProtocol.h"
 
 //NS_ASSUME_NONNULL_BEGIN
 
 @interface ZHJSContext : JSContext
 
-+ (ZHJSContext *)createContext;
+- (instancetype)initWithApiHandler:(id <ZHJSApiProtocol>)apiHandler;
 
 - (JSValue *)runJsFunc:(NSString *)funcName arguments:(NSArray *)arguments;
 

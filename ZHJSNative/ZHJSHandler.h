@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <WebKit/WebKit.h>
 #import <JavaScriptCore/JavaScriptCore.h>
+#import "ZHJSApiProtocol.h"
 @class ZHJSContext;
 @class ZHWebView;
 @class ZHJSApiHandler;
@@ -20,6 +21,8 @@ static NSString * const ZHJSHandlerLogName = @"ZHJSLogEventHandler";
 static NSString * const ZHJSHandlerErrorName = @"ZHJSErrorEventHandler";
 
 @interface ZHJSHandler : NSObject<WKScriptMessageHandler>
+
+- (instancetype)initWithApiHandler:(id <ZHJSApiProtocol>)apiHandler;
 
 @property (nonatomic,strong) ZHJSApiHandler *apiHandler;
 

@@ -7,24 +7,27 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "ZHJSApiProtocol.h"
 @class ZHJSHandler;
 @class ZHJSApiMethodItem;
 
 //NS_ASSUME_NONNULL_BEGIN
 
-typedef void(^ZHJSApiBlock)(id result, NSError *error);
-typedef void(^ZHJSApiAliveBlock)(id result, NSError *error, BOOL alive);
-
 @interface ZHJSApiHandler : NSObject
 
+- (instancetype)initWithApiHandler:(id <ZHJSApiProtocol>)apiHandler;
+
 @property (nonatomic,weak) ZHJSHandler *handler;
+@property (nonatomic,strong) id <ZHJSApiProtocol> outsideApiHandler;
+
+@property (nonatomic,strong, readonly) NSDictionary <NSString *, ZHJSApiMethodItem *> *internalApiMap;
+@property (nonatomic,strong, readonly) NSDictionary <NSString *, ZHJSApiMethodItem *> *outsideApiMap;
 
 //api方法名
-- (NSString *)fetchApiMethodPrefixName;
-//api方法map
-- (NSDictionary <NSString *, ZHJSApiMethodItem *> *)fetchApiMethodMap;
+- (NSString *)fetchInternalJSApiPrefix;
+- (NSString *)fetchOutsideJSApiPrefix;
 //获取方法名
-- (SEL)fetchSelectorByName:(NSString *)name;
+- (void)fetchSelectorByName:(NSString *)methodName apiPrefix:(NSString *)apiPrefix callBack:(void (^) (id target, SEL sel))callBack;
 
 @end
 
