@@ -66,7 +66,6 @@
 }
 
 - (void)configNavigaitonBar:(BOOL)animated{
-    [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleDefault];
     [self.navigationController setNavigationBarHidden:NO animated:animated];
     UINavigationBar *bar = self.navigationController.navigationBar;
     bar.translucent = NO;
