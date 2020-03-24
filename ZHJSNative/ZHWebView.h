@@ -20,6 +20,11 @@
 - (void)webViewRefresh:(ZHWebView *)webView;
 @end
 
+@protocol ZHWKNavigationDelegate <WKNavigationDelegate>
+@end
+@protocol ZHWKUIDelegate <WKUIDelegate>
+@end
+
 
 @interface ZHWebView : WKWebView
 
@@ -31,6 +36,8 @@
 @property (nonatomic, assign, readonly) BOOL loadFail;
 
 @property (nonatomic,weak) id <ZHWebViewSocketDebugDelegate> socketDebugDelegate;
+@property (nonatomic,weak) id <ZHWKNavigationDelegate> zh_navigationDelegate;
+@property (nonatomic,weak) id <ZHWKUIDelegate> zh_UIDelegate;
 
 + (ZHWebView *)createWebView;
 

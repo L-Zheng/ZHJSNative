@@ -17,18 +17,69 @@
 
 @implementation ZHWebViewDelegate
 
-#pragma mark - Webview Delegate
+- (id <ZHWKNavigationDelegate>)fetchNaviDelegate{
+    return self.webView.zh_navigationDelegate;
+}
+- (id <ZHWKUIDelegate>)fetchUIDelegate{
+    return self.webView.zh_UIDelegate;
+}
+
+#pragma mark - WKNavigationDelegate
 
 - (void)webView:(ZHWebView *)webView didFailNavigation:(WKNavigation *)navigation withError:(NSError *)error{
     if (webView.loadFinish) {
         webView.loadFinish(NO);
     }
+    [[self fetchNaviDelegate] webView:webView didFailNavigation:navigation withError:error];
 }
+
 - (void)webView:(ZHWebView *)webView didFinishNavigation:(WKNavigation *)navigation{
     if (webView.loadFinish) {
         webView.loadFinish(YES);
     }
+    [[self fetchNaviDelegate] webView:webView didFinishNavigation:navigation];
 }
+
+- (void)webView:(ZHWebView *)webView didFailProvisionalNavigation:(WKNavigation *)navigation withError:(NSError *)error{
+    NSLog(@"-----❌didFailProvisionalNavigation---------------");
+    NSLog(@"%@",error);
+    [[self fetchNaviDelegate] webView:webView didFailProvisionalNavigation:navigation withError:error];
+}
+
+- (void)webView:(ZHWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler{
+    
+    id <ZHWKNavigationDelegate> de = [self fetchNaviDelegate];
+    if (de) {
+        [de webView:webView decidePolicyForNavigationAction:navigationAction decisionHandler:decisionHandler];
+        return;
+    }
+    
+    if ([navigationAction.request.URL.scheme isEqualToString:@"file"]) {
+        if (decisionHandler) {
+            decisionHandler(WKNavigationActionPolicyAllow);
+        }
+        return;
+    }
+    if (decisionHandler) {
+        decisionHandler(WKNavigationActionPolicyAllow);
+    }
+}
+
+#pragma mark - WKUIDelegate
+
+// 页面是弹出窗口 _blank 处理
+- (WKWebView *)webView:(ZHWebView *)webView createWebViewWithConfiguration:(WKWebViewConfiguration *)configuration forNavigationAction:(WKNavigationAction *)navigationAction windowFeatures:(WKWindowFeatures *)windowFeatures {
+    id <ZHWKUIDelegate> de = [self fetchUIDelegate];
+    if (de) {
+        return [de webView:webView createWebViewWithConfiguration:configuration forNavigationAction:navigationAction windowFeatures:windowFeatures];
+    }
+    
+    if (!navigationAction.targetFrame.isMainFrame) {
+        [webView loadRequest:navigationAction.request];
+    }
+    return nil;
+}
+
 //处理js的同步消息
 -(void)webView:(WKWebView *)webView runJavaScriptTextInputPanelWithPrompt:(NSString *)prompt defaultText:(NSString *)defaultText initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(NSString * _Nullable))completionHandler{
     NSError *error;
@@ -56,33 +107,6 @@
     }
     if (completionHandler) completionHandler([[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]);
 }
-- (void)webView:(WKWebView *)webView didFailProvisionalNavigation:(WKNavigation *)navigation withError:(NSError *)error{
-    NSLog(@"-----❌didFailProvisionalNavigation---------------");
-    NSLog(@"%@",error);
-}
-
-- (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler{
-    
-    if ([navigationAction.request.URL.scheme isEqualToString:@"file"]) {
-        if (decisionHandler) {
-            decisionHandler(WKNavigationActionPolicyAllow);
-        }
-        return;
-    }
-    
-    if (decisionHandler) {
-        decisionHandler(WKNavigationActionPolicyAllow);
-    }
-}
-
-// 页面是弹出窗口 _blank 处理
-- (WKWebView *)webView:(WKWebView *)webView createWebViewWithConfiguration:(WKWebViewConfiguration *)configuration forNavigationAction:(WKNavigationAction *)navigationAction windowFeatures:(WKWindowFeatures *)windowFeatures {
-    if (!navigationAction.targetFrame.isMainFrame) {
-        [webView loadRequest:navigationAction.request];
-    }
-    return nil;
-}
-
 
 - (void)dealloc{
     NSLog(@"-------%s---------", __func__);
