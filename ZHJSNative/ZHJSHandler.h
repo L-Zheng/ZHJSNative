@@ -24,8 +24,6 @@ static NSString * const ZHJSHandlerErrorName = @"ZHJSErrorEventHandler";
 
 - (instancetype)initWithApiHandler:(id <ZHJSApiProtocol>)apiHandler;
 
-@property (nonatomic,strong) ZHJSApiHandler *apiHandler;
-
 @property (nonatomic,weak) ZHWebView *webView;
 @property (nonatomic,weak) ZHJSContext *jsContext;
 

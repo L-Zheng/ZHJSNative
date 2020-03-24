@@ -22,7 +22,6 @@
 		0F07989C2401060A004AAFBC /* ZHWebView.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F07989B2401060A004AAFBC /* ZHWebView.m */; };
 		0F07989F24010627004AAFBC /* ZHController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F07989E24010627004AAFBC /* ZHController.m */; };
 		0F0798A224010647004AAFBC /* ZHJSHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F0798A124010647004AAFBC /* ZHJSHandler.m */; };
-		0F0798A524010655004AAFBC /* ZHWebViewDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F0798A424010655004AAFBC /* ZHWebViewDelegate.m */; };
 		0F0798A72401089A004AAFBC /* TestBundle.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 0F0798A62401089A004AAFBC /* TestBundle.bundle */; };
 		0F0798AA240108F6004AAFBC /* ZHUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F0798A9240108F6004AAFBC /* ZHUtil.m */; };
 		0F6807DD24016A0500E6B4C6 /* ZHJSApiHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F6807DC24016A0500E6B4C6 /* ZHJSApiHandler.m */; };
@@ -76,8 +75,6 @@
 		0F07989E24010627004AAFBC /* ZHController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHController.m; sourceTree = "<group>"; };
 		0F0798A024010647004AAFBC /* ZHJSHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHJSHandler.h; sourceTree = "<group>"; };
 		0F0798A124010647004AAFBC /* ZHJSHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHJSHandler.m; sourceTree = "<group>"; };
-		0F0798A324010655004AAFBC /* ZHWebViewDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHWebViewDelegate.h; sourceTree = "<group>"; };
-		0F0798A424010655004AAFBC /* ZHWebViewDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHWebViewDelegate.m; sourceTree = "<group>"; };
 		0F0798A62401089A004AAFBC /* TestBundle.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = TestBundle.bundle; sourceTree = "<group>"; };
 		0F0798A8240108F6004AAFBC /* ZHUtil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHUtil.h; sourceTree = "<group>"; };
 		0F0798A9240108F6004AAFBC /* ZHUtil.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHUtil.m; sourceTree = "<group>"; };
@@ -165,8 +162,6 @@
 				0F079898240105E3004AAFBC /* ZHJSContext.m */,
 				0F07989A2401060A004AAFBC /* ZHWebView.h */,
 				0F07989B2401060A004AAFBC /* ZHWebView.m */,
-				0F0798A324010655004AAFBC /* ZHWebViewDelegate.h */,
-				0F0798A424010655004AAFBC /* ZHWebViewDelegate.m */,
 				0F079866240104FA004AAFBC /* Main.storyboard */,
 				0F079869240104FB004AAFBC /* Assets.xcassets */,
 				0F07986B240104FB004AAFBC /* LaunchScreen.storyboard */,
@@ -337,7 +332,6 @@
 				0F079865240104FA004AAFBC /* ViewController.m in Sources */,
 				0F07985F240104FA004AAFBC /* AppDelegate.m in Sources */,
 				0F079899240105E3004AAFBC /* ZHJSContext.m in Sources */,
-				0F0798A524010655004AAFBC /* ZHWebViewDelegate.m in Sources */,
 				856980862429EB9A0042755A /* ZHJSInternalApiHandler.m in Sources */,
 				0F07989F24010627004AAFBC /* ZHController.m in Sources */,
 				0F0798AA240108F6004AAFBC /* ZHUtil.m in Sources */,

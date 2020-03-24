@@ -25,6 +25,10 @@ case cType:{\
     break;\
 }
 
+@interface ZHJSHandler ()
+@property (nonatomic,strong) ZHJSApiHandler *apiHandler;
+@end
+
 @implementation ZHJSHandler
 
 #pragma mark - init

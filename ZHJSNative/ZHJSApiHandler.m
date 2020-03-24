@@ -16,6 +16,8 @@
 @property (nonatomic,strong) NSDictionary <NSString *, NSDictionary *> *apiMap;
 @property (nonatomic,strong) NSDictionary <NSString *, ZHJSApiMethodItem *> *internalApiMap;
 @property (nonatomic,strong) NSDictionary <NSString *, ZHJSApiMethodItem *> *outsideApiMap;
+
+@property (nonatomic,strong) id <ZHJSApiProtocol> outsideApiHandler;
 @property (nonatomic,strong) ZHJSInternalApiHandler <ZHJSApiProtocol> *internalApiHandler;
 @end
 

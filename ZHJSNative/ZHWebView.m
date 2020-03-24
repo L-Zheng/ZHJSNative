@@ -9,9 +9,14 @@
 #import "ZHWebView.h"
 #import "ZHJSHandler.h"
 #import "ZHUtil.h"
-#import "ZHWebViewDelegate.h"
 
-@interface ZHWebView ()<UIGestureRecognizerDelegate>
+//创建 error
+__attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
+    if (!delegate || !sel) return NO;
+    return [delegate respondsToSelector:sel];
+}
+
+@interface ZHWebView ()<WKNavigationDelegate, WKUIDelegate, UIScrollViewDelegate, UIGestureRecognizerDelegate>
 
 @property (nonatomic,copy) void (^loadFinish) (BOOL success);
 @property (nonatomic, assign) BOOL loadSuccess;
@@ -20,19 +25,11 @@
 @property (nonatomic,strong) UIGestureRecognizer *pressGes;
 
 @property (nonatomic, strong) ZHJSHandler *handler;
-@property (nonatomic,strong) ZHWebViewDelegate *zh_delegate;
+//外部handler
+@property (nonatomic,strong) id <ZHJSApiProtocol> apiHandler;
 @end
 
 @implementation ZHWebView
-
-- (instancetype)initWithFrame:(CGRect)frame configuration:(WKWebViewConfiguration *)configuration{
-    self = [super initWithFrame:frame configuration:configuration];
-    if (self) {
-        [self configGesture];
-    }
-    return self;
-}
-
 
 - (instancetype)initWithApiHandler:(id <ZHJSApiProtocol>)apiHandler{
     ZHJSHandler *handler = [[ZHJSHandler alloc] initWithApiHandler:apiHandler];
@@ -117,13 +114,23 @@
         
         self.handler = handler;
         handler.webView = self;
-        self.zh_delegate = [[ZHWebViewDelegate alloc] init];
-        self.zh_delegate.webView = self;
         
         //设置代理
-        self.UIDelegate = self.zh_delegate;
-        self.navigationDelegate = self.zh_delegate;
-        self.scrollView.delegate = self.zh_delegate;
+        self.UIDelegate = self;
+        self.navigationDelegate = self;
+        self.scrollView.delegate = self;
+        
+        //设置外部handler
+        self.apiHandler = apiHandler;
+    }
+    return self;
+}
+
+
+- (instancetype)initWithFrame:(CGRect)frame configuration:(WKWebViewConfiguration *)configuration{
+    self = [super initWithFrame:frame configuration:configuration];
+    if (self) {
+        [self configGesture];
     }
     return self;
 }
@@ -171,18 +178,6 @@
 - (UIScrollView *)fetchSuperScrollView{
     UIView *view = self;
     return [self fetchInScrollView:view];
-}
-
-#pragma mark - UIGestureRecognizerDelegate
-
-- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer{
-//    NSLog(@"%@--%@",NSStringFromClass([gestureRecognizer class]), NSStringFromClass([otherGestureRecognizer class]));
-    if ([otherGestureRecognizer isKindOfClass:[UILongPressGestureRecognizer class]]) {
-        //只有当手势为长按手势时反馈，非长按手势将阻止。
-        return YES;
-    }else{
-        return NO;
-    }
 }
 
 #pragma mark - handler
@@ -255,35 +250,6 @@
     [self loadRequest:request];
 }
 
-#pragma mark - keyboard
-
-// 键盘已经弹起（不能用willShow事件，iOS 8、9在willShow之后底层的webkit又在改偏移）
-- (void)keyboardDidShow:(NSNotification *)notification {
-    // 获取键盘的高度
-//    CGRect frame = [[[notification userInfo] objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
-//    CGRect begin = [[[notification userInfo] objectForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue];
-//    CGRect end = [[[notification userInfo] objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
-//    CGFloat duration = [[[notification userInfo] objectForKey:UIKeyboardAnimationDurationUserInfoKey] floatValue];
-//    duration = duration > 0 ? duration : 0.25;
-//
-//
-//    UIWindow *keyWindow = [UIApplication sharedApplication].keyWindow;
-//    CGRect rect = [self.superview convertRect:self.frame toView:keyWindow];
-//
-//    // webview 距屏幕底部距离
-//    CGFloat bottom = keyWindow.frame.size.height - (rect.origin.y + rect.size.height);
-//
-//    // 三方键盘会执行多次，最后一次是准的，所以这里做判断
-//    if(begin.size.height>0 && (begin.origin.y - end.origin.y > 0)){
-//        [self.scrollView setContentOffset:CGPointMake(0, frame.size.height - bottom)];
-//    }
-}
-
-// 键盘已经消失
-- (void)keyboardDidHide:(NSNotification *)notification {
-//    [self.scrollView setContentOffset:CGPointMake(0, 0)];
-}
-
 - (void)dealloc{
     @try {
         WKUserContentController *userContent = self.configuration.userContentController;
@@ -302,7 +268,7 @@
     NSLog(@"-------%s---------", __func__);
 }
 
-#pragma mark - js
+#pragma mark - run js
 
 /** evaluateJavaScript方法运行js函数的参数：
  尽量包裹一层数据【使用NSDictionary-->转成NSString-->utf-8编码】：js端再解析出来【utf-8解码-->JSON.parse()-->json】
@@ -337,6 +303,118 @@
         }
     }];
 }
+- (void)evaluateJs:(NSString *)js completionHandler:(void (^)(id res, NSError *error))completionHandler{
+    __weak __typeof__(self) __self = self;
+    [self evaluateJavaScript:js completionHandler:^(id res, NSError *error) {
+        if (error) {
+            [__self.handler showWebViewException:error.userInfo];
+        }
+        if (completionHandler) completionHandler(res, error);
+    }];
+}
+
+
+#pragma mark - UIGestureRecognizerDelegate
+
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer{
+//    NSLog(@"%@--%@",NSStringFromClass([gestureRecognizer class]), NSStringFromClass([otherGestureRecognizer class]));
+    if ([otherGestureRecognizer isKindOfClass:[UILongPressGestureRecognizer class]]) {
+        //只有当手势为长按手势时反馈，非长按手势将阻止。
+        return YES;
+    }else{
+        return NO;
+    }
+}
+
+#pragma mark - WKNavigationDelegate
+
+- (void)webView:(ZHWebView *)webView didFailNavigation:(WKNavigation *)navigation withError:(NSError *)error{
+    if (webView.loadFinish) webView.loadFinish(NO);
+    
+    id <ZHWKNavigationDelegate> de = self.zh_navigationDelegate;
+    if (ZHCheckDelegate(de, @selector(webView:didFailNavigation:withError:))) {
+        [de webView:webView didFailNavigation:navigation withError:error];
+    }
+}
+
+- (void)webView:(ZHWebView *)webView didFinishNavigation:(WKNavigation *)navigation{
+    if (webView.loadFinish) webView.loadFinish(YES);
+    
+    id <ZHWKNavigationDelegate> de = self.zh_navigationDelegate;
+    if (ZHCheckDelegate(de, @selector(webView:didFinishNavigation:))) {
+        [de webView:webView didFinishNavigation:navigation];
+    }
+}
+
+- (void)webView:(ZHWebView *)webView didFailProvisionalNavigation:(WKNavigation *)navigation withError:(NSError *)error{
+    NSLog(@"-----❌didFailProvisionalNavigation---------------");
+    NSLog(@"%@",error);
+    
+    id <ZHWKNavigationDelegate> de = self.zh_navigationDelegate;
+    if (ZHCheckDelegate(de, @selector(webView:didFailProvisionalNavigation:withError:))) {
+        [de webView:webView didFailProvisionalNavigation:navigation withError:error];
+    }
+}
+
+- (void)webView:(ZHWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler{
+    
+    id <ZHWKNavigationDelegate> de = self.zh_navigationDelegate;
+    if (ZHCheckDelegate(de, @selector(webView:decidePolicyForNavigationAction:decisionHandler:))) {
+        [de webView:webView decidePolicyForNavigationAction:navigationAction decisionHandler:decisionHandler];
+        return;
+    }
+    
+    if ([navigationAction.request.URL.scheme isEqualToString:@"file"]) {
+        if (decisionHandler) decisionHandler(WKNavigationActionPolicyAllow);
+        return;
+    }
+    if (decisionHandler) decisionHandler(WKNavigationActionPolicyAllow);
+}
+
+#pragma mark - WKUIDelegate
+
+// 页面是弹出窗口 _blank 处理
+- (WKWebView *)webView:(ZHWebView *)webView createWebViewWithConfiguration:(WKWebViewConfiguration *)configuration forNavigationAction:(WKNavigationAction *)navigationAction windowFeatures:(WKWindowFeatures *)windowFeatures {
+    id <ZHWKUIDelegate> de = self.zh_UIDelegate;
+    if (ZHCheckDelegate(de, @selector(webView:createWebViewWithConfiguration:forNavigationAction:windowFeatures:))) {
+        return [de webView:webView createWebViewWithConfiguration:configuration forNavigationAction:navigationAction windowFeatures:windowFeatures];
+    }
+    
+    if (!navigationAction.targetFrame.isMainFrame) {
+        [webView loadRequest:navigationAction.request];
+    }
+    return nil;
+}
+
+//处理js的同步消息
+-(void)webView:(WKWebView *)webView runJavaScriptTextInputPanelWithPrompt:(NSString *)prompt defaultText:(NSString *)defaultText initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(NSString * _Nullable))completionHandler{
+    NSError *error;
+    NSDictionary *receiveInfo = [NSJSONSerialization JSONObjectWithData:[prompt dataUsingEncoding:NSUTF8StringEncoding] options:0 error:&error];
+    
+    id result = [self.handler handleScriptMessage:receiveInfo];
+    if (!result) {
+        if (completionHandler) completionHandler(nil);
+        return;
+    }
+    /** 包裹一层数据：js端再解析出来
+     作用：原生传数据可在js正常解析出类型
+     不包裹：
+         completionHandler回调@(YES)   js解析为Number类型
+         completionHandler回调@(1111)   js解析为Number类型
+     包裹：
+         result ：@(YES)  @(NO)  js解析为Boolean类型  可直接使用
+         result ：@(111)  js解析为Number类型
+     */
+    result = @{@"data": result};
+    NSData *data = [NSJSONSerialization dataWithJSONObject:result options:0 error:nil];
+    if (!data) {
+        if (completionHandler) completionHandler(nil);
+        return;
+    }
+    if (completionHandler) completionHandler([[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]);
+}
+
+#pragma mark - UIScrollViewDelegate
 
 #pragma mark - socket debug
 #ifdef DEBUG
@@ -350,13 +428,13 @@
     NSString *type = [params valueForKey:@"type"];
     if (![type isKindOfClass:[NSString class]]) return;
     if ([type isEqualToString:@"invalid"]) {
-        if ([self.socketDebugDelegate respondsToSelector:@selector(webViewReadyRefresh:)]) {
+        if (ZHCheckDelegate(self.socketDebugDelegate, @selector(webViewReadyRefresh:))) {
             [self.socketDebugDelegate webViewReadyRefresh:self];
         }
         return;
     }
     if ([type isEqualToString:@"hash"]) {
-        if ([self.socketDebugDelegate respondsToSelector:@selector(webViewRefresh:)]) {
+        if (ZHCheckDelegate(self.socketDebugDelegate, @selector(webViewRefresh:))) {
             [self.socketDebugDelegate webViewRefresh:self];
         }
         return;

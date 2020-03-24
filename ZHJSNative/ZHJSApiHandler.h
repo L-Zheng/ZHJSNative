@@ -18,8 +18,8 @@
 - (instancetype)initWithApiHandler:(id <ZHJSApiProtocol>)apiHandler;
 
 @property (nonatomic,weak) ZHJSHandler *handler;
-@property (nonatomic,strong) id <ZHJSApiProtocol> outsideApiHandler;
 
+//api映射表
 @property (nonatomic,strong, readonly) NSDictionary <NSString *, ZHJSApiMethodItem *> *internalApiMap;
 @property (nonatomic,strong, readonly) NSDictionary <NSString *, ZHJSApiMethodItem *> *outsideApiMap;
 

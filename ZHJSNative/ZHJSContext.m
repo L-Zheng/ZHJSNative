@@ -11,8 +11,9 @@
 #import "ZHJSHandler.h"
 
 @interface ZHJSContext ()
-//事件处理
 @property (nonatomic,strong) ZHJSHandler *handler;
+//外部handler
+@property (nonatomic,strong) id <ZHJSApiProtocol> apiHandler;
 @end
 
 @implementation ZHJSContext
@@ -26,13 +27,15 @@
         self.handler = [[ZHJSHandler alloc] initWithApiHandler:apiHandler];
         self.handler.jsContext = self;
         
+        self.apiHandler = apiHandler;
+        
         //注入api
         [self registerException];
         [self registerLogAPI];
         [self registerAPI];
         
         //运算js
-        //    [self evaluateScript:[NSString stringWithContentsOfURL:[NSURL fileURLWithPath:[ZHUtil jsPath]] encoding:NSUTF8StringEncoding error:nil]];
+//            [self evaluateScript:[NSString stringWithContentsOfURL:[NSURL fileURLWithPath:[ZHUtil jsPath]] encoding:NSUTF8StringEncoding error:nil]];
         
     }
     return self;

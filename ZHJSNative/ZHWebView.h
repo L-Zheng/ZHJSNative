@@ -8,28 +8,28 @@
 
 #import <UIKit/UIKit.h>
 #import <WebKit/WebKit.h>
-#import <JavaScriptCore/JavaScriptCore.h>
 #import "ZHJSApiProtocol.h"
-@class ZHJSHandler;
-@class ZHWebViewDelegate;
 @class ZHWebView;
 
 //NS_ASSUME_NONNULL_BEGIN
 
+/** socket调试代理 */
 @protocol ZHWebViewSocketDebugDelegate <NSObject>
+@optional
 - (void)webViewReadyRefresh:(ZHWebView *)webView;
 - (void)webViewRefresh:(ZHWebView *)webView;
 @end
 
+/** 重写系统代理 */
 @protocol ZHWKNavigationDelegate <WKNavigationDelegate>
 @end
 @protocol ZHWKUIDelegate <WKUIDelegate>
 @end
+@protocol ZHScrollViewDelegate <UIScrollViewDelegate>
+@end
 
 
 @interface ZHWebView : WKWebView
-
-@property (nonatomic, strong, readonly) ZHJSHandler *handler;
 
 #pragma mark - load call
 
@@ -42,10 +42,12 @@
 @property (nonatomic,weak) id <ZHWebViewSocketDebugDelegate> socketDebugDelegate;
 @property (nonatomic,weak) id <ZHWKNavigationDelegate> zh_navigationDelegate;
 @property (nonatomic,weak) id <ZHWKUIDelegate> zh_UIDelegate;
+@property (nonatomic,weak) id <ZHScrollViewDelegate> zh_scrollViewDelegate;
 
 #pragma mark - init
 
 - (instancetype)initWithApiHandler:(id <ZHJSApiProtocol>)apiHandler;
+@property (nonatomic,strong, readonly) id <ZHJSApiProtocol> apiHandler;
 
 #pragma mark - load
 
@@ -54,17 +56,7 @@
 
 /** 发送js消息 */
 - (void)postMessageToJs:(NSString *)funcName params:(NSDictionary *)params completionHandler:(void (^)(id res, NSError *error))completionHandler;
-
-#pragma mark - socket
-
-#ifdef DEBUG
-//socket链接调试
-- (void)socketDidOpen:(NSDictionary *)params;
-- (void)socketDidReceiveMessage:(NSDictionary *)params;
-- (void)socketDidError:(NSDictionary *)params;
-- (void)socketDidClose:(NSDictionary *)params;
-#endif
-
+- (void)evaluateJs:(NSString *)js completionHandler:(void (^)(id res, NSError *error))completionHandler;
 @end
 
 //NS_ASSUME_NONNULL_END

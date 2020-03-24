@@ -15,6 +15,7 @@
 @interface ZHJSContext : JSContext
 
 - (instancetype)initWithApiHandler:(id <ZHJSApiProtocol>)apiHandler;
+@property (nonatomic,strong, readonly) id <ZHJSApiProtocol> apiHandler;
 
 - (JSValue *)runJsFunc:(NSString *)funcName arguments:(NSArray *)arguments;
 
