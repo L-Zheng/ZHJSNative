@@ -39,7 +39,7 @@
 
 #pragma mark - delegate
 
-@property (nonatomic,weak) id <ZHWebViewSocketDebugDelegate> socketDebugDelegate;
+@property (nonatomic,weak) id <ZHWebViewSocketDebugDelegate> zh_socketDebugDelegate;
 @property (nonatomic,weak) id <ZHWKNavigationDelegate> zh_navigationDelegate;
 @property (nonatomic,weak) id <ZHWKUIDelegate> zh_UIDelegate;
 @property (nonatomic,weak) id <ZHScrollViewDelegate> zh_scrollViewDelegate;

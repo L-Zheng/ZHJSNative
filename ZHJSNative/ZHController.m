@@ -86,7 +86,7 @@
     [self configWebViewFrame:webView];
     [self.view addSubview:webView];
     self.webView = webView;
-    webView.socketDebugDelegate = self;
+    webView.zh_socketDebugDelegate = self;
 }
 
 - (void)configWebViewFrame:(WKWebView *)webView{

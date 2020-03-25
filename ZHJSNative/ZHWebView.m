@@ -428,14 +428,14 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
     NSString *type = [params valueForKey:@"type"];
     if (![type isKindOfClass:[NSString class]]) return;
     if ([type isEqualToString:@"invalid"]) {
-        if (ZHCheckDelegate(self.socketDebugDelegate, @selector(webViewReadyRefresh:))) {
-            [self.socketDebugDelegate webViewReadyRefresh:self];
+        if (ZHCheckDelegate(self.zh_socketDebugDelegate, @selector(webViewReadyRefresh:))) {
+            [self.zh_socketDebugDelegate webViewReadyRefresh:self];
         }
         return;
     }
     if ([type isEqualToString:@"hash"]) {
-        if (ZHCheckDelegate(self.socketDebugDelegate, @selector(webViewRefresh:))) {
-            [self.socketDebugDelegate webViewRefresh:self];
+        if (ZHCheckDelegate(self.zh_socketDebugDelegate, @selector(webViewRefresh:))) {
+            [self.zh_socketDebugDelegate webViewRefresh:self];
         }
         return;
     }
