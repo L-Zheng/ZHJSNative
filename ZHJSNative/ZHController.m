@@ -22,7 +22,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    [self config];
+    [self config:NO];
     
     //运算js
 //    self.context = [[ZHJSContext alloc] initWithApiHandler:[[ZHCustomApiHandler alloc] init]];
@@ -54,9 +54,9 @@
 //    });
 }
 
-- (void)config{
+- (void)config:(BOOL)debugReload{
     [self configView];
-    [self configWebView];
+    [self configWebView:debugReload];
 }
 
 - (void)configView{
@@ -71,14 +71,22 @@
     bar.translucent = NO;
 }
 
-- (void)configWebView{
-    ZHWebView *webView = [[ZHWebView alloc] initWithApiHandler:[[ZHCustomApiHandler alloc] init]];
+- (void)configWebView:(BOOL)debugReload{
+    
     NSURL *url = [NSURL fileURLWithPath:[ZHUtil htmlPath]];
     
 //    url = [NSURL fileURLWithPath:@"/Users/em/Desktop/My/ZHCode/GitHubCode/ZHJSNative/ZHJSNative/TestBundle.bundle/test.html"];
-//    url = [NSURL URLWithString:@"http://172.31.35.80:8080"];
+    url = [NSURL URLWithString:@"http://172.31.35.80:8080"];
     
     __weak __typeof__(self) __self = self;
+    if (debugReload) {
+        [self.webView loadUrl:url finish:^(BOOL success) {
+            [__self configDebugOption:@"刷新"];
+        }];
+        return;
+    }
+    
+    ZHWebView *webView = [[ZHWebView alloc] initWithApiHandler:[[ZHCustomApiHandler alloc] init]];
     [webView loadUrl:url finish:^(BOOL success) {
         [__self configDebugOption:@"刷新"];
     }];
@@ -174,8 +182,10 @@
 
 - (void)refreshWebView{
     [self configDebugOption:@"刷新中..."];
-    [self.webView removeFromSuperview];
-    [self config];
+    if ([self.presentedViewController isKindOfClass:[UIAlertController class]]) {
+        [self dismissViewControllerAnimated:YES completion:nil];
+    }
+    [self config:YES];
 }
 
 - (void)configDebugOption:(NSString *)title{

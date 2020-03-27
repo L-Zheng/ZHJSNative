@@ -406,7 +406,15 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
          result ：@(111)  js解析为Number类型
      */
     result = @{@"data": result};
-    NSData *data = [NSJSONSerialization dataWithJSONObject:result options:0 error:nil];
+    NSData *data = nil;
+    @try {
+        data = [NSJSONSerialization dataWithJSONObject:result options:0 error:nil];
+    } @catch (NSException *exception) {
+        NSLog(@"❌-------%s---------", __func__);
+        NSLog(@"%@",exception);
+    } @finally {
+        
+    }
     if (!data) {
         if (completionHandler) completionHandler(nil);
         return;
@@ -422,29 +430,44 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
     
 }
 - (void)socketDidReceiveMessage:(NSDictionary *)params{
-    NSLog(@"---------js_socketDidReceiveMessage-----------");
-    NSLog(@"%@",params);
-    if (![params isKindOfClass:[NSDictionary class]]) return;
-    NSString *type = [params valueForKey:@"type"];
-    if (![type isKindOfClass:[NSString class]]) return;
-    if ([type isEqualToString:@"invalid"]) {
-        if (ZHCheckDelegate(self.zh_socketDebugDelegate, @selector(webViewReadyRefresh:))) {
-            [self.zh_socketDebugDelegate webViewReadyRefresh:self];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSLog(@"---------js_socketDidReceiveMessage-----------");
+        NSLog(@"%@",params);
+        if (![params isKindOfClass:[NSDictionary class]]) return;
+        NSString *type = [params valueForKey:@"type"];
+        if (![type isKindOfClass:[NSString class]]) return;
+        if ([type isEqualToString:@"invalid"]) {
+            [self performSelector:@selector(socketCallReadyRefresh) withObject:nil];
+            [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(socketCallRefresh) object:nil];
+            return;
         }
-        return;
-    }
-    if ([type isEqualToString:@"hash"]) {
-        if (ZHCheckDelegate(self.zh_socketDebugDelegate, @selector(webViewRefresh:))) {
-            [self.zh_socketDebugDelegate webViewRefresh:self];
+        if ([type isEqualToString:@"hash"]) {
+            [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(socketCallRefresh) object:nil];
+//            [self performSelector:@selector(socketCallRefresh) withObject:nil afterDelay:0.5];
+            return;
         }
-        return;
-    }
+        if ([type isEqualToString:@"ok"]) {
+            [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(socketCallRefresh) object:nil];
+            [self performSelector:@selector(socketCallRefresh) withObject:nil afterDelay:0.3];
+            return;
+        }
+    });
 }
 - (void)socketDidError:(NSDictionary *)params{
     
 }
 - (void)socketDidClose:(NSDictionary *)params{
     
+}
+- (void)socketCallReadyRefresh{
+    if (ZHCheckDelegate(self.zh_socketDebugDelegate, @selector(webViewReadyRefresh:))) {
+        [self.zh_socketDebugDelegate webViewReadyRefresh:self];
+    }
+}
+- (void)socketCallRefresh{
+    if (ZHCheckDelegate(self.zh_socketDebugDelegate, @selector(webViewRefresh:))) {
+        [self.zh_socketDebugDelegate webViewRefresh:self];
+    }
 }
 #endif
 
