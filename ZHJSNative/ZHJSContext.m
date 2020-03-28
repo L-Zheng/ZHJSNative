@@ -13,21 +13,21 @@
 @interface ZHJSContext ()
 @property (nonatomic,strong) ZHJSHandler *handler;
 //外部handler
-@property (nonatomic,strong) id <ZHJSApiProtocol> apiHandler;
+@property (nonatomic,strong) NSArray <id <ZHJSApiProtocol>> *apiHandlers;
 @end
 
 @implementation ZHJSContext
 
-- (instancetype)initWithApiHandler:(id <ZHJSApiProtocol>)apiHandler{
+- (instancetype)initWithApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers{
     //创建虚拟机
     JSVirtualMachine *vm = [[JSVirtualMachine alloc] init];
     self = [self initWithVirtualMachine:vm];
     if (self) {
         //事件
-        self.handler = [[ZHJSHandler alloc] initWithApiHandler:apiHandler];
+        self.handler = [[ZHJSHandler alloc] initWithApiHandlers:apiHandlers];
         self.handler.jsContext = self;
         
-        self.apiHandler = apiHandler;
+        self.apiHandlers = apiHandlers;
         
         //注入api
         [self registerException];

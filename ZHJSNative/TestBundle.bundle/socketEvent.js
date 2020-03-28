@@ -1,9 +1,9 @@
 
-window.interceptedWebsockets = [];
-window.NativeWebsocket = WebSocket;
+window.ZhengInterceptedWebsockets = [];
+window.ZhengNativeWebsocket = WebSocket;
 window.WebSocket = function (url, protocols) {
-    var ws = new NativeWebsocket(url, protocols);
-    window.interceptedWebsockets.push(ws);
+    var ws = new ZhengNativeWebsocket(url, protocols);
+    window.ZhengInterceptedWebsockets.push(ws);
 
     /** 1s后监听链接消息  因为刚建立链接时会有消息接收 */
     setTimeout(() => {
@@ -17,7 +17,7 @@ window.WebSocket = function (url, protocols) {
                 if (Object.prototype.toString.call(data) == '[object Array]' && data.length > 0) {
                     data = JSON.parse(data[0]);
                     formatData.push(data);
-                    zheng.socketDidReceiveMessage(data);
+                    ZhengReplaceSocketIosHandler.socketDidReceiveMessage(data);
                 } else {
                     formatData = data;
                 }

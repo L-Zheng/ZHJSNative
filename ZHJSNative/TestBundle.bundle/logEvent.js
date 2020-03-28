@@ -1,6 +1,6 @@
 
 /** 发送消息name:与iOS原生保持一致 */
-const FNJSToNativeLogHandlerName = 'ZHJSLogEventHandler';
+const ZhengJSToNativeLogHandlerName = 'ZhengReplaceJSIosLogEventHandler';
 console.log = ((oriLogFunc) => {
   return function (...args) {
     /**发送至webview控制台*/
@@ -60,7 +60,7 @@ console.log = ((oriLogFunc) => {
       }
     }
     try {
-      const handler = window.webkit.messageHandlers[FNJSToNativeLogHandlerName];
+      const handler = window.webkit.messageHandlers[ZhengJSToNativeLogHandlerName];
       handler.postMessage(JSON.parse(JSON.stringify(iosRes)));
     } catch (error) { }
     /**检测到log error弹窗提醒*/

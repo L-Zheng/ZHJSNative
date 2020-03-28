@@ -22,7 +22,7 @@ static NSString * const ZHJSHandlerErrorName = @"ZHJSErrorEventHandler";
 
 @interface ZHJSHandler : NSObject<WKScriptMessageHandler>
 
-- (instancetype)initWithApiHandler:(id <ZHJSApiProtocol>)apiHandler;
+- (instancetype)initWithApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers;
 
 @property (nonatomic,weak) ZHWebView *webView;
 @property (nonatomic,weak) ZHJSContext *jsContext;

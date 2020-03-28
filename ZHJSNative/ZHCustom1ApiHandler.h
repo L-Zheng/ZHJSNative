@@ -7,10 +7,11 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "ZHJSApiProtocol.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface ZHCustom1ApiHandler : NSObject
+@interface ZHCustom1ApiHandler : NSObject<ZHJSApiProtocol>
 
 @end
 

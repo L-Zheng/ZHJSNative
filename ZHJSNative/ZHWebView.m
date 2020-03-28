@@ -26,57 +26,59 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
 
 @property (nonatomic, strong) ZHJSHandler *handler;
 //外部handler
-@property (nonatomic,strong) id <ZHJSApiProtocol> apiHandler;
+@property (nonatomic,strong) NSArray <id <ZHJSApiProtocol>> *apiHandlers;
 @end
 
 @implementation ZHWebView
 
-- (instancetype)initWithApiHandler:(id <ZHJSApiProtocol>)apiHandler{
-    ZHJSHandler *handler = [[ZHJSHandler alloc] initWithApiHandler:apiHandler];
+- (instancetype)initWithApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers{
+    
+    ZHJSHandler *handler = [[ZHJSHandler alloc] initWithApiHandlers:apiHandlers];
     
     WKUserContentController *userContent = [[WKUserContentController alloc] init];
     
-    //注入log
-    {
-        NSString *code = [handler fetchWebViewLogApi];
-        if (code.length) {
-            WKUserScript *script = [[WKUserScript alloc] initWithSource:code injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:YES];
-            [userContent addUserScript:script];
-        }
-    }
-    //注入error
-    {
-        NSString *code = [handler fetchWebViewErrorApi];
-        if (code.length) {
-            WKUserScript *script = [[WKUserScript alloc] initWithSource:code injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:YES];
-            [userContent addUserScript:script];
-        }
-    }
+    //注入api
+    NSArray *apis = @[
+        //log
+        @{
+            @"code": [handler fetchWebViewLogApi]?:@"",
+            @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentStart),
+            @"mainFrameOnly": @(YES)
+        },
+        //error
+        @{
+            @"code": [handler fetchWebViewErrorApi]?:@"",
+            @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentStart),
+            @"mainFrameOnly": @(YES)
+        },
 #ifdef DEBUG
-    //注入websocket js用于监听socket链接
-    {
-        NSString *code = [handler fetchWebViewSocketApi];
-        if (code.length) {
-            WKUserScript *script = [[WKUserScript alloc] initWithSource:code injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:YES];
-            [userContent addUserScript:script];
-        }
-    }
-    //禁用webview长按弹出菜单
-    {
-        NSString *code = [handler fetchWebViewTouchCalloutApi];
-        if (code.length) {
-            WKUserScript *script = [[WKUserScript alloc] initWithSource:code injectionTime:WKUserScriptInjectionTimeAtDocumentEnd forMainFrameOnly:YES];
-            [userContent addUserScript:script];
-        }
-    }
+        //websocket js用于监听socket链接
+        @{
+            @"code": [handler fetchWebViewSocketApi]?:@"",
+            @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentStart),
+            @"mainFrameOnly": @(YES)
+        },
+        //禁用webview长按弹出菜单
+        @{
+            @"code": [handler fetchWebViewTouchCalloutApi]?:@"",
+            @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentEnd),
+            @"mainFrameOnly": @(YES)
+        },
 #endif
-    //注入api js
-    {
-        NSString *code = [handler fetchWebViewApi];
-        if (code.length) {
-            WKUserScript *script = [[WKUserScript alloc] initWithSource:code injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:YES];
-            [userContent addUserScript:script];
+        //api js
+        @{
+            @"code": [handler fetchWebViewApi]?:@"",
+            @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentStart),
+            @"mainFrameOnly": @(YES)
         }
+    ];
+    for (NSDictionary *map in apis) {
+        NSString *code = [map valueForKey:@"code"];
+        if (code.length == 0) continue;
+        NSNumber *jectionTime = [map valueForKey:@"jectionTime"];
+        NSNumber *mainFrameOnly = [map valueForKey:@"mainFrameOnly"];
+        WKUserScript *script = [[WKUserScript alloc] initWithSource:code injectionTime:jectionTime.integerValue forMainFrameOnly:mainFrameOnly.boolValue];
+        [userContent addUserScript:script];
     }
     
     //监听js
@@ -121,7 +123,7 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
         self.scrollView.delegate = self;
         
         //设置外部handler
-        self.apiHandler = apiHandler;
+        self.apiHandlers = apiHandlers;
     }
     return self;
 }
@@ -431,8 +433,6 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
 }
 - (void)socketDidReceiveMessage:(NSDictionary *)params{
     dispatch_async(dispatch_get_main_queue(), ^{
-        NSLog(@"---------js_socketDidReceiveMessage-----------");
-        NSLog(@"%@",params);
         if (![params isKindOfClass:[NSDictionary class]]) return;
         NSString *type = [params valueForKey:@"type"];
         if (![type isKindOfClass:[NSString class]]) return;

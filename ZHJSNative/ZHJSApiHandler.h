@@ -15,19 +15,15 @@
 
 @interface ZHJSApiHandler : NSObject
 
-- (instancetype)initWithApiHandler:(id <ZHJSApiProtocol>)apiHandler;
+- (instancetype)initWithApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers;
 
 @property (nonatomic,weak) ZHJSHandler *handler;
 
 //api映射表
-@property (nonatomic,strong, readonly) NSDictionary <NSString *, ZHJSApiMethodItem *> *internalApiMap;
-@property (nonatomic,strong, readonly) NSDictionary <NSString *, ZHJSApiMethodItem *> *outsideApiMap;
+- (void)enumApiMap:(BOOL (^)(NSString *apiPrefix, id <ZHJSApiProtocol> handler, NSDictionary *apiMap))block;
 
-//api方法名
-- (NSString *)fetchInternalJSApiPrefix;
-- (NSString *)fetchOutsideJSApiPrefix;
 //获取方法名
-- (void)fetchSelectorByName:(NSString *)methodName apiPrefix:(NSString *)apiPrefix callBack:(void (^) (id target, SEL sel))callBack;
+- (void)fetchSelectorByName:(NSString *)jsMethodName apiPrefix:(NSString *)apiPrefix callBack:(void (^) (id target, SEL sel))callBack;
 
 @end
 

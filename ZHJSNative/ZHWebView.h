@@ -46,10 +46,10 @@
 
 #pragma mark - init
 
-- (instancetype)initWithApiHandler:(id <ZHJSApiProtocol>)apiHandler;
-@property (nonatomic,strong, readonly) id <ZHJSApiProtocol> apiHandler;
+- (instancetype)initWithApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers;
+@property (nonatomic,strong,readonly) NSArray <id <ZHJSApiProtocol>> *apiHandlers;
 
-#pragma mark - load
+#pragma mark - loads
 
 /** 加载h5 */
 - (void)loadUrl:(NSURL *)url finish:(void (^) (BOOL success))finish;

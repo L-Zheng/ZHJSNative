@@ -10,7 +10,7 @@ Vue.config.errorHandler = ((oriFunc) => {
 */
 
 /** 发送消息name:与iOS原生保持一致 */
-const FNJSToNativeErrorHandlerName = 'ZHJSErrorEventHandler';
+const ZhengJSToNativeErrorHandlerName = 'ZhengReplaceJSErrorEventHandler';
 window.onerror = ((oriFunc) => {
     /**不能使用箭头函数 否则arguments找不到*/
     return function (...args) {
@@ -39,7 +39,7 @@ window.onerror = ((oriFunc) => {
         };
         const res = JSON.parse(JSON.stringify(iosRes));
         try {
-            const handler = window.webkit.messageHandlers[FNJSToNativeErrorHandlerName];
+            const handler = window.webkit.messageHandlers[ZhengJSToNativeErrorHandlerName];
             handler.postMessage(res);
         } catch (error) { }
     }
