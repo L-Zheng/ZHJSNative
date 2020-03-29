@@ -446,7 +446,7 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
 //            [self performSelector:@selector(socketCallRefresh) withObject:nil afterDelay:0.5];
             return;
         }
-        if ([type isEqualToString:@"ok"]) {
+        if ([type isEqualToString:@"ok"] || [type isEqualToString:@"warnings"]) {
             [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(socketCallRefresh) object:nil];
             [self performSelector:@selector(socketCallRefresh) withObject:nil afterDelay:0.3];
             return;

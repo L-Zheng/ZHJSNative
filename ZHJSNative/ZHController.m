@@ -95,7 +95,12 @@
     [self configWebViewFrame:webView];
     [self.view addSubview:webView];
     self.webView = webView;
-    webView.zh_socketDebugDelegate = self;
+    [self configWebViewDelegate:webView target:self];
+}
+- (void)configWebViewDelegate:(ZHWebView *)webView target:(id)target{
+    webView.zh_navigationDelegate = target;
+    webView.zh_UIDelegate = target;
+    webView.zh_socketDebugDelegate = target;
 }
 
 - (void)configWebViewFrame:(WKWebView *)webView{
@@ -183,9 +188,13 @@
 
 - (void)refreshWebView{
     [self configDebugOption:@"刷新中..."];
-    if ([self.presentedViewController isKindOfClass:[UIAlertController class]]) {
-        [self dismissViewControllerAnimated:YES completion:nil];
-    }
+    
+    /** presented 与dismiss同时进行 会crash */
+//    if ([self.presentedViewController isKindOfClass:[UIAlertController class]]) {
+//        [self dismissViewControllerAnimated:YES completion:nil];
+//    }
+    //清除代理
+    [self configWebViewDelegate:self.webView target:nil];
     [self config:YES];
 }
 
