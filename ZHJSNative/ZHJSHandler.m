@@ -230,6 +230,11 @@ case cType:{\
     
     return [res copy];
 }
+- (NSString *)fetchWebViewApiFinish{
+    //api注入完成通知
+    NSString *jsCode = [NSString stringWithFormat:@"var ZhengReadyEvent = document.createEvent('Event');ZhengReadyEvent.initEvent('%@');window.dispatchEvent(ZhengReadyEvent);", self.fetchWebViewApiFinishFlag];
+    return jsCode;
+}
 
 #pragma mark - exception
 
@@ -509,6 +514,9 @@ case cType:{\
 }
 - (NSString *)fetchWebViewCallCompleteFuncKey{
     return @"ZhengCallBackCompleteKey";
+}
+- (NSString *)fetchWebViewApiFinishFlag{
+    return @"ZhengJSBridgeReady";
 }
 
 - (void)dealloc{

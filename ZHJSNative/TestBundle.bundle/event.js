@@ -211,3 +211,7 @@ const zheng = ZhengGeneratorAPI('zheng', {
 
 });
  */
+
+// var ZhengReadyEvent = document.createEvent('Event');
+// ZhengReadyEvent.initEvent('ZhengJSBridgeReady');
+// window.dispatchEvent(ZhengReadyEvent);

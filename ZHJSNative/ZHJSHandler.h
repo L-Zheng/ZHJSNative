@@ -36,6 +36,7 @@ static NSString * const ZHJSHandlerErrorName = @"ZHJSErrorEventHandler";
 - (NSString *)fetchWebViewSocketApi;
 - (NSString *)fetchWebViewTouchCalloutApi;
 - (NSString *)fetchWebViewApi;
+- (NSString *)fetchWebViewApiFinish;
 //异常弹窗
 - (void)showWebViewException:(NSDictionary *)exception;
 - (void)showJSContextException:(NSDictionary *)exception;

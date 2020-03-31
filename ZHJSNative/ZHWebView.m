@@ -70,6 +70,12 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
             @"code": [handler fetchWebViewApi]?:@"",
             @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentStart),
             @"mainFrameOnly": @(YES)
+        },
+        //api 注入完成
+        @{
+            @"code": [handler fetchWebViewApiFinish]?:@"",
+            @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentEnd),
+            @"mainFrameOnly": @(YES)
         }
     ];
     for (NSDictionary *map in apis) {
