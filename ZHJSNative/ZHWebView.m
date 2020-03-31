@@ -126,7 +126,12 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
         //设置代理
         self.UIDelegate = self;
         self.navigationDelegate = self;
-        self.scrollView.delegate = self;
+        /**
+         iOS9设备  设置了WKWebView的scrollView.delegate  要在使用WKWebView的地方
+         dealloc时 清空代理scrollView.delegate = nil;   不能在WKWebView的dealloc方法里面清空代理
+         否则crash
+         */
+//        self.scrollView.delegate = self;
         
         //设置外部handler
         self.apiHandlers = apiHandlers;
