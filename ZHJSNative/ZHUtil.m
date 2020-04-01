@@ -27,16 +27,16 @@
     return [self pathWithName:@"test.js"];
 }
 + (NSString *)jsEventPath{
-    return [self pathWithName:@"event.js"];
+    return [self pathWithName:@"min-event.js"];
 }
 + (NSString *)jsLogEventPath{
-    return [self pathWithName:@"logEvent.js"];
+    return [self pathWithName:@"min-log.js"];
 }
 + (NSString *)jsErrorEventPath{
-    return [self pathWithName:@"errorEvent.js"];
+    return [self pathWithName:@"min-error.js"];
 }
 + (NSString *)jsSocketEventPath{
-    return [self pathWithName:@"socketEvent.js"];
+    return [self pathWithName:@"min-socket.js"];
 }
 
 #pragma mark - encode

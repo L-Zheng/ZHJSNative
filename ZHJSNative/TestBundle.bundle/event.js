@@ -1,6 +1,10 @@
 /** js语句必须带有 ;  注释方式使用带有闭合标签的
  * 【iOS原生是把该文件读取成字符串执行，没有结束标志js代码出错】
  *  var变量的作用区域 当前function上下文 
+ */
+/** ❌ios9 特殊处理
+ * 不识别  let变量、() => {}箭头函数 、function函数不能有默认值 如：function(params = {})() 、多参数函数 function (...args)
+ *         识别 const、 var、 function(){}
  *    如果当前function里面又调用了其他function  var作用域不会延伸到其它function
  *    如果当前function里面有其他function函数体  var作用域会延伸到其它function函数体
  */
@@ -14,14 +18,14 @@
  * uglifyjs socketEvent.js -b beautify=false,quote_style=1 -o min-socket.js
  */
 /** 发送消息name:与iOS原生保持一致 */
-const ZhengJSToNativeHandlerName = 'ZhengReplaceJSEventHandler';
-const ZhengCallBackSuccessKey = 'ZhengReplaceCallBackSuccessKey';
-const ZhengCallBackFailKey = 'ZhengReplaceCallBackFailKey';
-const ZhengCallBackCompleteKey = 'ZhengReplaceCallBackCompleteKey';
-const ZhengJSType = (function() {
-    let type = {};
-    const typeArr = ['String', 'Object', 'Number', 'Array', 'Undefined', 'Function', 'Null', 'Symbol', 'Boolean'];
-    for (let i = 0; i < typeArr.length; i++) {
+var ZhengJSToNativeHandlerName = 'ZhengReplaceJSEventHandler';
+var ZhengCallBackSuccessKey = 'ZhengReplaceCallBackSuccessKey';
+var ZhengCallBackFailKey = 'ZhengReplaceCallBackFailKey';
+var ZhengCallBackCompleteKey = 'ZhengReplaceCallBackCompleteKey';
+var ZhengJSType = (function() {
+    var type = {};
+    var typeArr = ['String', 'Object', 'Number', 'Array', 'Undefined', 'Function', 'Null', 'Symbol', 'Boolean'];
+    for (var i = 0; i < typeArr.length; i++) {
         (function(name) {
             type['is' + name] = function(obj) {
                 return Object.prototype.toString.call(obj) == '[object ' + name + ']';
@@ -30,33 +34,33 @@ const ZhengJSType = (function() {
     }
     return type;
 })();
-const ZhengCallBackMap = {};
-const ZhengReplaceIosCallBack = function(params) {
+var ZhengCallBackMap = {};
+var ZhengReplaceIosCallBack = function(params) {
     if (!ZhengJSType.isString(params) || !params) {
         return;
     }
-    const newParams = JSON.parse(decodeURIComponent(params));
+    var newParams = JSON.parse(decodeURIComponent(params));
     if (!ZhengJSType.isObject(newParams)) {
         return;
     }
-    const funcId = newParams.funcId;
-    const res = newParams.data;
-    const alive = newParams.alive;
+    var funcId = newParams.funcId;
+    var res = newParams.data;
+    var alive = newParams.alive;
 
-    let randomKey = '',
+    var randomKey = '',
         funcNameKey = '';
-    const matchKey = function(key) {
+    var matchKey = function(key) {
         if (!funcId.endsWith(key)) return false;
         randomKey = funcId.replace(new RegExp(key, 'g'), '');
         funcNameKey = key;
         return true;
     };
-    const matchRes = (matchKey(ZhengCallBackSuccessKey) || matchKey(ZhengCallBackFailKey) || matchKey(ZhengCallBackCompleteKey));
+    var matchRes = (matchKey(ZhengCallBackSuccessKey) || matchKey(ZhengCallBackFailKey) || matchKey(ZhengCallBackCompleteKey));
     if (!matchRes) return;
 
-    let funcMap = ZhengCallBackMap[randomKey];
+    var funcMap = ZhengCallBackMap[randomKey];
     if (!ZhengJSType.isObject(funcMap)) return;
-    const func = funcMap[funcNameKey];
+    var func = funcMap[funcNameKey];
     if (!ZhengJSType.isFunction(func)) return;
     try {
         /** 
@@ -83,10 +87,10 @@ const ZhengReplaceIosCallBack = function(params) {
     }
 }
  */
-const ZhengAddCallBack = function(randomKey, funcNameKey, func) {
-    let funcMap = ZhengCallBackMap[randomKey];
+var ZhengAddCallBack = function(randomKey, funcNameKey, func) {
+    var funcMap = ZhengCallBackMap[randomKey];
     if (!ZhengJSType.isObject(funcMap)) {
-        const map = {};
+        var map = {};
         map[funcNameKey] = func;
         ZhengCallBackMap[randomKey] = map;
         return;
@@ -95,36 +99,36 @@ const ZhengAddCallBack = function(randomKey, funcNameKey, func) {
     funcMap[funcNameKey] = func;
     ZhengCallBackMap[randomKey] = funcMap;
 };
-const ZhengRemoveCallBack = function(randomKey) {
+var ZhengRemoveCallBack = function(randomKey) {
     if (!ZhengCallBackMap.hasOwnProperty(randomKey)) return;
     delete ZhengCallBackMap[randomKey];
 };
-const ZhengHandleCallBackParams = function(methodName, params) {
+var ZhengHandleCallBackParams = function(methodName, params) {
     if (!ZhengJSType.isObject(params)) {
         return params;
     }
     /** 0-10000的随机整数 */
-    const randomKey = `-${methodName}-${new Date().getTime()}-${Math.floor(Math.random() * 10000)}-`;
+    var randomKey = `-${methodName}-${new Date().getTime()}-${Math.floor(Math.random() * 10000)}-`;
     /** 参数 */
-    let newParams = params;
-    let funcId = '';
+    var newParams = params;
+    var funcId = '';
 
     /** 成功回调 */
-    const success = params.success;
+    var success = params.success;
     if (success && ZhengJSType.isFunction(success)) {
         funcId = randomKey + ZhengCallBackSuccessKey;
         ZhengAddCallBack(randomKey, ZhengCallBackSuccessKey, success);
         newParams[ZhengCallBackSuccessKey] = funcId;
     }
     /** 失败回调 */
-    const fail = params.fail;
+    var fail = params.fail;
     if (fail && ZhengJSType.isFunction(fail)) {
         funcId = randomKey + ZhengCallBackFailKey;
         ZhengAddCallBack(randomKey, ZhengCallBackFailKey, fail);
         newParams[ZhengCallBackFailKey] = funcId;
     }
     /** 完成回调 */
-    const complete = params.complete;
+    var complete = params.complete;
     if (complete && ZhengJSType.isFunction(complete)) {
         funcId = randomKey + ZhengCallBackCompleteKey;
         ZhengAddCallBack(randomKey, ZhengCallBackCompleteKey, complete);
@@ -134,14 +138,14 @@ const ZhengHandleCallBackParams = function(methodName, params) {
 };
 
 /** 构造发送参数 */
-const ZhengSendParams = function(apiPrefix, methodName, params, sync) {
+var ZhengSendParams = function(apiPrefix, methodName, params, sync) {
     /** js发送消息 以此为key包裹消息体 */
-    let newParams = params;
-    let res = {};
+    var newParams = params;
+    var res = {};
     if (!sync) {
         newParams = ZhengHandleCallBackParams(methodName, params);
     }
-    const haveParms = !(ZhengJSType.isNull(newParams) || ZhengJSType.isUndefined(newParams));
+    var haveParms = !(ZhengJSType.isNull(newParams) || ZhengJSType.isUndefined(newParams));
     res = haveParms ? {
         methodName,
         apiPrefix,
@@ -153,12 +157,12 @@ const ZhengSendParams = function(apiPrefix, methodName, params, sync) {
     /** 必须这样【JSON.parse(JSON.stringify())】 否则js运行window.webkit.messageHandlers  会报错cannot be cloned */
     return sync ? res : JSON.parse(JSON.stringify(res));
 };
-const ZhengSendNative = function(params) {
-    const handler = window.webkit.messageHandlers[ZhengJSToNativeHandlerName]
+var ZhengSendNative = function(params) {
+    var handler = window.webkit.messageHandlers[ZhengJSToNativeHandlerName]
     handler.postMessage(params);
 };
-const ZhengSendNativeSync = function(params) {
-    let res = prompt(JSON.stringify(params));
+var ZhengSendNativeSync = function(params) {
+    var res = prompt(JSON.stringify(params));
     try {
         res = JSON.parse(res);
         return res.data;
@@ -168,17 +172,17 @@ const ZhengSendNativeSync = function(params) {
     }
     return null;
 };
-const ZhengReplaceGeneratorAPI = function(apiPrefix, apiMap) {
+var ZhengReplaceGeneratorAPI = function(apiPrefix, apiMap) {
     if (!apiPrefix || !ZhengJSType.isString(apiPrefix) || !ZhengJSType.isObject(apiMap)) {
         return {};
     }
-    let res = {};
-    let mapKeys = Object.keys(apiMap);
-    for (let i = 0; i < mapKeys.length; i++) {
+    var res = {};
+    var mapKeys = Object.keys(apiMap);
+    for (var i = 0; i < mapKeys.length; i++) {
         (function(name) {
             /** 获取配置：isSync */
-            const config = apiMap[name];
-            const isSync = config.hasOwnProperty('sync') ? config.sync : false;
+            var config = apiMap[name];
+            var isSync = config.hasOwnProperty('sync') ? config.sync : false;
             /** 生成function */
             res[name] = isSync ? (function (params) {
                 return ZhengSendNativeSync(ZhengSendParams(apiPrefix, name, params, true));
@@ -191,7 +195,7 @@ const ZhengReplaceGeneratorAPI = function(apiPrefix, apiMap) {
 };
 /** ❗️❗️Api配置说明：sync：是否是同步方法 */
 /**
-const fund = ZhengGeneratorAPI('fund', {
+var fund = ZhengGeneratorAPI('fund', {
     request: {
         sync: false
     },
@@ -211,7 +215,7 @@ const fund = ZhengGeneratorAPI('fund', {
         sync: false
     }
 });
-const zheng = ZhengGeneratorAPI('zheng', {
+var zheng = ZhengGeneratorAPI('zheng', {
 
 });
  */

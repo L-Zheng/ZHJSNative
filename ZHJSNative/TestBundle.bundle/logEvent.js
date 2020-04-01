@@ -1,16 +1,16 @@
 
 /** 发送消息name:与iOS原生保持一致 */
-const ZhengJSToNativeLogHandlerName = 'ZhengReplaceJSIosLogEventHandler';
-console.log = ((oriLogFunc) => {
-  return function (...args) {
+var ZhengJSToNativeLogHandlerName = 'ZhengReplaceJSIosLogEventHandler';
+console.log = (function (oriLogFunc) {
+  return function () {
     /**发送至webview控制台*/
-    oriLogFunc.call(console, ...args);
+    oriLogFunc.call(console, arguments);
     /**保留error信息*/
-    let errorRes = [];
+    var errorRes = [];
     /**解析数据*/
-    const parseData = (data) => {
-      let res = null;
-      const type = Object.prototype.toString.call(data);
+    var parseData = function (data) {
+      var res = null;
+      var type = Object.prototype.toString.call(data);
       if (type == '[object Null]' || type == '[object String]' || type == '[object Number]') {
         res = data;
       } else if (type == '[object Function]') {
@@ -21,13 +21,15 @@ console.log = ((oriLogFunc) => {
         res = data ? 'true' : 'false';
       } else if (type == '[object Object]') {
         res = {};
-        for (const key in data) {
-          const el = data[key];
-          res[key] = parseData(el);
+        var mapKeys = Object.keys(data);
+        for (var i = 0; i < mapKeys.length; i++) {
+            (function(key) {
+              res[key] = parseData(data[key]);
+            })(mapKeys[i]);
         }
       } else if (type == '[object Array]') {
         res = [];
-        data.forEach(el => {
+        data.forEach(function (el) {
           res.push(parseData(el));
         });
       } else if (type == '[object Error]') {
@@ -41,26 +43,26 @@ console.log = ((oriLogFunc) => {
       return res;
     };
     /**获取参数*/
-    const params = arguments;
-    const type = Object.prototype.toString.call(params);
-    const argCount = params.length;
+    var params = arguments;
+    var type = Object.prototype.toString.call(params);
+    var argCount = params.length;
     /**发送至iOS原生*/
     if (type != '[object Arguments]') return;
     /**保留发送error*/
-    let iosRes = [];
-    const fetchVaule = (idx) => {
+    var iosRes = [];
+    var fetchVaule = function (idx) {
       return argCount > idx ? params[idx] : '无此参数';
     };
     if (argCount == 0) return;
     if (argCount == 1) {
       iosRes = parseData(fetchVaule(0));
     } else {
-      for (let idx = 0; idx < argCount; idx++) {
+      for (var idx = 0; idx < argCount; idx++) {
         iosRes.push(parseData(fetchVaule(idx)));
       }
     }
     try {
-      const handler = window.webkit.messageHandlers[ZhengJSToNativeLogHandlerName];
+      var handler = window.webkit.messageHandlers[ZhengJSToNativeLogHandlerName];
       handler.postMessage(JSON.parse(JSON.stringify(iosRes)));
     } catch (error) { }
     /**检测到log error弹窗提醒*/
@@ -68,7 +70,7 @@ console.log = ((oriLogFunc) => {
     if (errorRes.length == 0) return;
     if (!window.onerror) return;
     try {
-      errorRes.forEach(el => {
+      errorRes.forEach(function (el) {
         window.onerror(el);
       });
     } catch (error) {

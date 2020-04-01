@@ -155,26 +155,19 @@ case cType:{\
 #pragma mark - WebView api
 //WebView注入的api
 - (NSString *)fetchWebViewLogApi{
-//        NSString *handlerJS = [NSString stringWithContentsOfFile:[ZHUtil jsLogEventPath] encoding:NSUTF8StringEncoding error:nil];
-//        return handlerJS;
-    
     //以下代码由logEvent.js压缩而成
-    NSString *jsCode = [NSString stringWithFormat:
-    @"const ZhengJSToNativeLogHandlerName='%@';console.log=(oriLogFunc=>{return function(...args){oriLogFunc.call(console,...args);let errorRes=[];const parseData=data=>{let res=null;const type=Object.prototype.toString.call(data);if(type=='[object Null]'||type=='[object String]'||type=='[object Number]'){res=data}else if(type=='[object Function]'){res=data.toString()}else if(type=='[object Undefined]'){res='Undefined'}else if(type=='[object Boolean]'){res=data?'true':'false'}else if(type=='[object Object]'){res={};for(const key in data){const el=data[key];res[key]=parseData(el)}}else if(type=='[object Array]'){res=[];data.forEach(el=>{res.push(parseData(el))})}else if(type=='[object Error]'){res=data;errorRes.push(res)}else if(type=='[object Window]'){res=data.toString()}else{res=data}return res};const params=arguments;const type=Object.prototype.toString.call(params);const argCount=params.length;if(type!='[object Arguments]')return;let iosRes=[];const fetchVaule=idx=>{return argCount>idx?params[idx]:'无此参数'};if(argCount==0)return;if(argCount==1){iosRes=parseData(fetchVaule(0))}else{for(let idx=0;idx<argCount;idx++){iosRes.push(parseData(fetchVaule(idx)))}}try{const handler=window.webkit.messageHandlers[ZhengJSToNativeLogHandlerName];handler.postMessage(JSON.parse(JSON.stringify(iosRes)))}catch(error){}return;if(errorRes.length==0)return;if(!window.onerror)return;try{errorRes.forEach(el=>{window.onerror(el)})}catch(error){}}})(console.log);", ZHJSHandlerLogName];
+    NSString *formatJS = [NSString stringWithContentsOfFile:[ZHUtil jsLogEventPath] encoding:NSUTF8StringEncoding error:nil];
+    NSString *jsCode = [NSString stringWithFormat:formatJS, ZHJSHandlerLogName];
     return jsCode;
 }
 - (NSString *)fetchWebViewErrorApi{
-//        NSString *handlerJS = [NSString stringWithContentsOfFile:[ZHUtil jsErrorEventPath] encoding:NSUTF8StringEncoding error:nil];
-//        return handlerJS;
-    
     //以下代码由errorEvent.js压缩而成
-    NSString *jsCode = [NSString stringWithFormat:@"const ZhengJSToNativeErrorHandlerName='%@';window.onerror=(oriFunc=>{return function(...args){if(oriFunc)oriFunc.apply(window,args);const params=arguments;const type=Object.prototype.toString.call(params);const argCount=params.length;if(type!='[object Arguments]')return;if(argCount==0)return;const fetchVaule=idx=>{return argCount>idx?params[idx]:'no this params'};const firstParma=fetchVaule(0);const isErrorParam=Object.prototype.toString.call(firstParma)=='[object Error]';const iosRes={message:isErrorParam?firstParma.message:fetchVaule(0),sourceURL:isErrorParam?firstParma.sourceURL:fetchVaule(1),line:isErrorParam?firstParma.line:fetchVaule(2),column:isErrorParam?firstParma.column:fetchVaule(3),stack:isErrorParam?firstParma.stack.toString():fetchVaule(4)};const res=JSON.parse(JSON.stringify(iosRes));try{const handler=window.webkit.messageHandlers[ZhengJSToNativeErrorHandlerName];handler.postMessage(res)}catch(error){}}})(window.onerror);", ZHJSHandlerErrorName];
+    NSString *formatJS = [NSString stringWithContentsOfFile:[ZHUtil jsErrorEventPath] encoding:NSUTF8StringEncoding error:nil];
+    NSString *jsCode = [NSString stringWithFormat:formatJS, ZHJSHandlerErrorName];
 //    jsCode = @"";
     return jsCode;
 }
 - (NSString *)fetchWebViewSocketApi{
-//    return [NSString stringWithContentsOfFile:[ZHUtil jsSocketEventPath] encoding:NSUTF8StringEncoding error:nil];
-    
     __block NSString *jsPrefix = nil;
     
     [self.apiHandler enumApiMap:^BOOL(NSString *apiPrefix, id <ZHJSApiProtocol> handler, NSDictionary *apiMap) {
@@ -188,7 +181,8 @@ case cType:{\
     
     if (jsPrefix.length == 0) return nil;
     //以下代码由socketEvent.js压缩而成
-    NSString *jsCode = [NSString stringWithFormat:@"window.ZhengInterceptedWebsockets=[];window.ZhengNativeWebsocket=WebSocket;window.WebSocket=function(url,protocols){var ws=new ZhengNativeWebsocket(url,protocols);window.ZhengInterceptedWebsockets.push(ws);setTimeout(()=>{ws.addEventListener('message',function(event){let data=event.data;let formatData=[];if(data.length<=1){formatData=data}else{data=JSON.parse(data.substring(1));if(Object.prototype.toString.call(data)=='[object Array]'&&data.length>0){data=JSON.parse(data[0]);formatData.push(data);%@.socketDidReceiveMessage(data)}else{formatData=data}}})},1e3);return ws};", jsPrefix];
+    NSString *formatJS = [NSString stringWithContentsOfFile:[ZHUtil jsSocketEventPath] encoding:NSUTF8StringEncoding error:nil];
+    NSString *jsCode = [NSString stringWithFormat:formatJS, jsPrefix];
     return jsCode;
 }
 - (NSString *)fetchWebViewTouchCalloutApi{
@@ -196,12 +190,10 @@ case cType:{\
     return jsCode;
 }
 - (NSString *)fetchWebViewApi{
-    //    NSString *handlerJS = [NSString stringWithContentsOfFile:[ZHUtil jsEventPath] encoding:NSUTF8StringEncoding error:nil];
-    //    return handlerJS;
-    
     //以下代码由event.js压缩而成
+    NSString *formatJS = [NSString stringWithContentsOfFile:[ZHUtil jsEventPath] encoding:NSUTF8StringEncoding error:nil];
     __block NSMutableString *res = [NSMutableString string];
-    [res appendFormat:@"var ZhengJSToNativeHandlerName='%@';var ZhengCallBackSuccessKey='%@';var ZhengCallBackFailKey='%@';var ZhengCallBackCompleteKey='%@';var ZhengJSType=function(){var type={};var typeArr=['String','Object','Number','Array','Undefined','Function','Null','Symbol','Boolean'];for(var i=0;i<typeArr.length;i++){(function(name){type['is'+name]=function(obj){return Object.prototype.toString.call(obj)=='[object '+name+']'}})(typeArr[i])}return type}();var ZhengCallBackMap={};var %@=function(params){if(!ZhengJSType.isString(params)||!params){return}var newParams=JSON.parse(decodeURIComponent(params));if(!ZhengJSType.isObject(newParams)){return}var funcId=newParams.funcId;var res=newParams.data;var alive=newParams.alive;var randomKey='',funcNameKey='';var matchKey=function(key){if(!funcId.endsWith(key))return false;randomKey=funcId.replace(new RegExp(key,'g'),'');funcNameKey=key;return true};var matchRes=matchKey(ZhengCallBackSuccessKey)||matchKey(ZhengCallBackFailKey)||matchKey(ZhengCallBackCompleteKey);if(!matchRes)return;var funcMap=ZhengCallBackMap[randomKey];if(!ZhengJSType.isObject(funcMap))return;var func=funcMap[funcNameKey];if(!ZhengJSType.isFunction(func))return;try{func(res)}catch(error){console.log('CallBack-error');console.log(error)}if(alive)return;if(funcNameKey==ZhengCallBackCompleteKey){ZhengRemoveCallBack(randomKey)}};var ZhengAddCallBack=function(randomKey,funcNameKey,func){var funcMap=ZhengCallBackMap[randomKey];if(!ZhengJSType.isObject(funcMap)){var map={};map[funcNameKey]=func;ZhengCallBackMap[randomKey]=map;return}if(funcMap.hasOwnProperty(funcNameKey))return;funcMap[funcNameKey]=func;ZhengCallBackMap[randomKey]=funcMap};var ZhengRemoveCallBack=function(randomKey){if(!ZhengCallBackMap.hasOwnProperty(randomKey))return;delete ZhengCallBackMap[randomKey]};var ZhengHandleCallBackParams=function(methodName,params){if(!ZhengJSType.isObject(params)){return params}var randomKey=`-${methodName}-${(new Date).getTime()}-${Math.floor(Math.random()*1e4)}-`;var newParams=params;var funcId='';var success=params.success;if(success&&ZhengJSType.isFunction(success)){funcId=randomKey+ZhengCallBackSuccessKey;ZhengAddCallBack(randomKey,ZhengCallBackSuccessKey,success);newParams[ZhengCallBackSuccessKey]=funcId}var fail=params.fail;if(fail&&ZhengJSType.isFunction(fail)){funcId=randomKey+ZhengCallBackFailKey;ZhengAddCallBack(randomKey,ZhengCallBackFailKey,fail);newParams[ZhengCallBackFailKey]=funcId}var complete=params.complete;if(complete&&ZhengJSType.isFunction(complete)){funcId=randomKey+ZhengCallBackCompleteKey;ZhengAddCallBack(randomKey,ZhengCallBackCompleteKey,complete);newParams[ZhengCallBackCompleteKey]=funcId}return newParams};var ZhengSendParams=function(apiPrefix,methodName,params,sync){var newParams=params;var res={};if(!sync){newParams=ZhengHandleCallBackParams(methodName,params)}var haveParms=!(ZhengJSType.isNull(newParams)||ZhengJSType.isUndefined(newParams));res=haveParms?{methodName:methodName,apiPrefix:apiPrefix,params:newParams}:{methodName:methodName,apiPrefix:apiPrefix};return sync?res:JSON.parse(JSON.stringify(res))};var ZhengSendNative=function(params){var handler=window.webkit.messageHandlers[ZhengJSToNativeHandlerName];handler.postMessage(params)};var ZhengSendNativeSync=function(params){var res=prompt(JSON.stringify(params));try{res=JSON.parse(res);return res.data}catch(error){console.log('❌SendNativeSync--error');console.log(error)}return null};var %@=function(apiPrefix,apiMap){if(!apiPrefix||!ZhengJSType.isString(apiPrefix)||!ZhengJSType.isObject(apiMap)){return{}}var res={};var mapKeys=Object.keys(apiMap);for(var i=0;i<mapKeys.length;i++){(function(name){var config=apiMap[name];var isSync=config.hasOwnProperty('sync')?config.sync:false;res[name]=isSync?function(params){return ZhengSendNativeSync(ZhengSendParams(apiPrefix,name,params,true))}:function(params){ZhengSendNative(ZhengSendParams(apiPrefix,name,params,false))}})(mapKeys[i])}return res};",
+    [res appendFormat:formatJS,
      ZHJSHandlerName,
      self.fetchWebViewCallSuccessFuncKey,
      self.fetchWebViewCallFailFuncKey,

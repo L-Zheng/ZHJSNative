@@ -38,46 +38,45 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
     WKUserContentController *userContent = [[WKUserContentController alloc] init];
     
     //注入api
-    NSArray *apis = @[
-        //log
-        @{
-            @"code": [handler fetchWebViewLogApi]?:@"",
-            @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentStart),
-            @"mainFrameOnly": @(YES)
-        },
-        //error
-        @{
-            @"code": [handler fetchWebViewErrorApi]?:@"",
-            @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentStart),
-            @"mainFrameOnly": @(YES)
-        },
+    NSMutableArray *apis = [NSMutableArray array];
 #ifdef DEBUG
-        //websocket js用于监听socket链接
-        @{
-            @"code": [handler fetchWebViewSocketApi]?:@"",
-            @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentStart),
-            @"mainFrameOnly": @(YES)
-        },
-        //禁用webview长按弹出菜单
-        @{
-            @"code": [handler fetchWebViewTouchCalloutApi]?:@"",
-            @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentEnd),
-            @"mainFrameOnly": @(YES)
-        },
+    //log
+    [apis addObject:@{
+        @"code": [handler fetchWebViewLogApi]?:@"",
+        @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentStart),
+        @"mainFrameOnly": @(YES)
+    }];
+    //error
+    [apis addObject:@{
+        @"code": [handler fetchWebViewErrorApi]?:@"",
+        @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentStart),
+        @"mainFrameOnly": @(YES)
+    }];
+    //websocket js用于监听socket链接
+    [apis addObject:@{
+        @"code": [handler fetchWebViewSocketApi]?:@"",
+        @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentStart),
+        @"mainFrameOnly": @(YES)
+    }];
+    //禁用webview长按弹出菜单
+    [apis addObject:@{
+        @"code": [handler fetchWebViewTouchCalloutApi]?:@"",
+        @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentEnd),
+        @"mainFrameOnly": @(YES)
+    }];
 #endif
-        //api js
-        @{
-            @"code": [handler fetchWebViewApi]?:@"",
-            @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentStart),
-            @"mainFrameOnly": @(YES)
-        },
-        //api 注入完成
-        @{
-            @"code": [handler fetchWebViewApiFinish]?:@"",
-            @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentEnd),
-            @"mainFrameOnly": @(YES)
-        }
-    ];
+    //api js
+    [apis addObject:@{
+        @"code": [handler fetchWebViewApi]?:@"",
+        @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentStart),
+        @"mainFrameOnly": @(YES)
+    }];
+    //api 注入完成
+    [apis addObject:@{
+        @"code": [handler fetchWebViewApiFinish]?:@"",
+        @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentEnd),
+        @"mainFrameOnly": @(YES)
+    }];
     for (NSDictionary *map in apis) {
         NSString *code = [map valueForKey:@"code"];
         if (code.length == 0) continue;
@@ -131,7 +130,7 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
          dealloc时 清空代理scrollView.delegate = nil;   不能在WKWebView的dealloc方法里面清空代理
          否则crash
          */
-//        self.scrollView.delegate = self;
+        //        self.scrollView.delegate = self;
         
         //设置外部handler
         self.apiHandlers = apiHandlers;
