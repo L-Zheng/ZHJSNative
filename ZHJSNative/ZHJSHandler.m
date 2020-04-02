@@ -265,12 +265,19 @@ case cType:{\
     }
     if (stackRes) [info setValue:stackRes forKey:@"stack"];
     
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:title message:[info description] preferredStyle:UIAlertControllerStyleAlert];
-    __weak __typeof__(alert) weakAlert = alert;
+    ZHErrorAlertController *alert = [ZHErrorAlertController alertControllerWithTitle:title message:[info description] preferredStyle:UIAlertControllerStyleAlert];
+    __weak __typeof__(self) __self = self;
     UIAlertAction *action = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
-        [weakAlert.presentingViewController dismissViewControllerAnimated:YES completion:nil];
+    }];
+    UIAlertAction *action1 = [UIAlertAction actionWithTitle:@"关闭所有" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
+        UIViewController *last = [__self fetchActivityCtrl].presentingViewController;
+        while ([last isKindOfClass:[ZHErrorAlertController class]]) {
+            last = last.presentingViewController;
+        }
+        [last dismissViewControllerAnimated:YES completion:nil];
     }];
     [alert addAction:action];
+    [alert addAction:action1];
     [[self fetchActivityCtrl] presentViewController:alert animated:YES completion:nil];
 #endif
 }
@@ -514,4 +521,7 @@ case cType:{\
 - (void)dealloc{
     NSLog(@"-------%s---------", __func__);
 }
+@end
+
+@implementation ZHErrorAlertController
 @end

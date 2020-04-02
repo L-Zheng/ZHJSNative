@@ -46,4 +46,10 @@ static NSString * const ZHJSHandlerErrorName = @"ZHJSErrorEventHandler";
 - (id)handleScriptMessage:(NSDictionary *)jsInfo;
 @end
 
+
+
+@interface ZHErrorAlertController : UIAlertController
+@end
+
+
 //NS_ASSUME_NONNULL_END
