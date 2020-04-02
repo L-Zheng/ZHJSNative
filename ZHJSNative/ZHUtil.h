@@ -12,6 +12,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface ZHUtil : NSObject
 
++ (NSString *)bundlePath;
++ (NSString *)pathWithName:(NSString *)name;
 + (NSString *)htmlPath;
 + (NSString *)jsPath;
 + (NSString *)jsEventPath;

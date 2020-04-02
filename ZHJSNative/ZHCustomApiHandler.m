@@ -173,6 +173,14 @@
 }
 
 
+- (NSDictionary *)js_getEmotionResourceSync:(NSDictionary *)params{
+    return self.emotionMap;
+}
+//获取大表情资源
+- (NSDictionary *)js_getBigEmotionResourceSync:(NSDictionary *)params{
+    return self.bigEmotionMap;
+}
+
 
 //js api方法名前缀  如：fund
 - (NSString *)zh_jsApiPrefixName{

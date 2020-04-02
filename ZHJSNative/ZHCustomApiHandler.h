@@ -13,6 +13,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface ZHCustomApiHandler : NSObject <ZHJSApiProtocol>
 
+@property (nonatomic,strong) NSDictionary *emotionMap;
+@property (nonatomic,strong) NSDictionary *bigEmotionMap;
+
 @end
 
 NS_ASSUME_NONNULL_END

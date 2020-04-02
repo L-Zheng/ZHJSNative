@@ -200,7 +200,23 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
 
 #pragma mark - load
 
-- (void)loadUrl:(NSURL *)url finish:(void (^) (BOOL success))finish{
+/** 加载资源的问题
+真机上的目录   这俩目录的base路径不一样
+ Documents：///var/mobile/Containers/Data/Application/32053764-FAB0-4C1A-A770-E41440D3E175/Documents
+ Temp:           ///private/var/mobile/Containers/Data/Application/D2EAEA82-D1C0-42EE-9FBC-C5816CE1BDC0/tmp
+ 
+ 加载的 index.html位于沙盒内 【Documents、Temp】                       img标签的src 资源文件 可以访问  xx.app/xx.bundle中的资源图片
+ 加载的 index.html位于 xx.app/xx.bundle内   img标签的src 资源文件 可以访问  xx.app/xx.bundle中的资源图片
+ 
+ 加载的 index.html位于沙盒内【Documents】    img标签的src 要访问沙盒中资源文件  需设置readAccessURL = Documents目录
+ 加载的 index.html位于沙盒内【Temp】    img标签的src 要访问沙盒中资源文件  需设置readAccessURL = Temp目录
+ 加载的 index.html位于 xx.app/xx.bundle内   img标签的src 不能访问沙盒中资源文件
+ 
+ 
+ 结果：ios9以上 加载的 index.html位于沙盒内【Documents】设置readAccessURL = Documents目录
+ ios9以下 加载的 index.html拷贝到【Temp】文件夹下  需要的资源也要拷贝
+ */
+- (void)loadUrl:(NSURL *)url allowingReadAccessToURL:(NSURL *)readAccessURL finish:(void (^) (BOOL success))finish{
     //回调
     void (^callBack)(BOOL) = ^(BOOL success){
         if (finish) finish(success);
@@ -246,7 +262,7 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
             return;
         }
         setWebViewFinish();
-        [self loadFileURL:fileURL allowingReadAccessToURL:[NSURL fileURLWithPath:path.stringByDeletingLastPathComponent]];
+        [self loadFileURL:fileURL allowingReadAccessToURL:readAccessURL?:[NSURL fileURLWithPath:path.stringByDeletingLastPathComponent]];
         return;
     }
     

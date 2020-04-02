@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta content="text/html" charset="UTF-8" http-queiv="Content-Type" />
+	<meta name="viewport"
+		content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" />
+	<meta content="ios demo" name="description" />
+
+	<style>
+		#wrap {
+			position: relative;
+			width: 500px;
+			height: 500px;
+			background-color: orange;
+		}
+
+		#title {
+			position: absolute;
+			width: 300px;
+			height: 300px;
+			background-color: cyan;
+		}
+	</style>
+</head>
+
+<body>
+	<img src="/Users/em/Desktop/11.png" alt="">
+	<div id="wrap" id="wrap">
+		<div id="title"></div>
+	</div>
+</body>
+
+<script>
+	var wrap = document.querySelector('#wrap')
+	var title = document.querySelector('#title')
+	wrap.addEventListener("click", (e) => {
+		console.log('wrap')
+		// e.stopPropagation()
+	}, false);
+	title.addEventListener("click", (e) => {
+		console.log('title')
+		// e.stopPropagation()
+	}, false);
+</script>
+
+</html>

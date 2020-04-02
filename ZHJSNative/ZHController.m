@@ -12,17 +12,90 @@
 #import "ZHJSContext.h"
 #import "ZHCustomApiHandler.h"
 #import "ZHCustom1ApiHandler.h"
+#import "ZhengFile.h"
 
 @interface ZHController ()<ZHWebViewSocketDebugDelegate>
 @property (nonatomic, strong) ZHWebView *webView;
 @property (nonatomic, strong) ZHJSContext *context;
 
+
+@property (nonatomic,strong) ZHCustomApiHandler *customApiHandler;
 @end
 
 @implementation ZHController
 
+- (void)handlerEmotion{
+    
+    NSString *bundlePath = [[NSBundle mainBundle] pathForResource:@"EFEmoji" ofType:@"bundle"];
+    
+    NSString *imagesPath = [[NSBundle bundleWithPath:bundlePath] pathForResource:@"images" ofType:nil];
+    NSString *jsonPath = [[NSBundle bundleWithPath:bundlePath] pathForResource:@"ef_emoji" ofType:@"json"];
+    
+    NSData *data = [NSData dataWithContentsOfFile:jsonPath];
+    NSArray *emojiArr = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+    
+    //key值转换 @{@"[滴汗]": @"common_ef_emot07.png"}
+    NSMutableDictionary *callInfo = [@{} mutableCopy];
+    
+    for (NSDictionary *emojiInfo in emojiArr) {
+        NSString *mean = [emojiInfo valueForKey:@"emojimeaning"];
+        NSString *fileName = [emojiInfo valueForKey:@"emojiname"];
+        
+        //bundle资源
+        NSString *imagePath = [imagesPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@",fileName]]?:@"";
+                
+        [callInfo setValue:imagePath forKey:[NSString stringWithFormat:@"[%@]", mean]];
+    }
+    self.customApiHandler.emotionMap = [callInfo copy];
+}
+- (void)copyBigEmotion{
+    NSString *bundlePath = [[NSBundle mainBundle] pathForResource:@"EFEmoji" ofType:@"bundle"];
+    NSString *imagesPath = [[NSBundle bundleWithPath:bundlePath] pathForResource:@"BigEmotin" ofType:nil];
+    
+    NSString *targetEmotionPath = [[ZhengFile getDocumentPath] stringByAppendingPathComponent:@"BigEmotion"];
+     
+    [ZhengFile copySourceFile:imagesPath toDesPath:targetEmotionPath];
+    
+    NSData *data = [NSData dataWithContentsOfFile:[targetEmotionPath stringByAppendingPathComponent:@"index.json"]];
+    NSArray *emojiArr = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+    
+    //key值转换 @{@"[滴汗]": @"common_ef_emot07.png"}
+    NSMutableDictionary *callInfo = [@{} mutableCopy];
+    
+    for (NSDictionary *emojiInfo in emojiArr) {
+        NSString *mean = [emojiInfo valueForKey:@"text"];
+        NSString *fileName = [emojiInfo valueForKey:@"path"];
+        
+        //bundle资源
+//        NSString *imagePath = [imagesPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@",fileName]]?:@"";
+        
+        //沙盒资源
+        NSString *imagePath = [targetEmotionPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@",fileName]]?:@"";
+
+        [callInfo setValue:imagePath forKey:[NSString stringWithFormat:@"[%@]", mean]];
+    }
+    
+    self.customApiHandler.bigEmotionMap = [callInfo copy];
+    
+}
+
+- (void)copyHtmlFile{
+    [ZhengFile copySourceFile:[[NSBundle bundleWithPath:[ZHUtil bundlePath]] pathForResource:@"release" ofType:nil] toDesPath:[[ZhengFile getDocumentPath] stringByAppendingPathComponent:@"release"]];
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
+    self.customApiHandler = [[ZHCustomApiHandler alloc] init];
+    
+    //拷贝表情
+    [self handlerEmotion];
+    [self copyBigEmotion];
+    
+    //拷贝html文件
+    [self copyHtmlFile];
+    
+    
     [self config:NO];
     
     //运算js
@@ -75,20 +148,21 @@
 - (void)configWebView:(BOOL)debugReload{
     
     NSURL *url = [NSURL fileURLWithPath:[ZHUtil htmlPath]];
-    
-    url = [NSURL fileURLWithPath:@"/Users/zheng/Desktop/ZHCode/GitHubCode/ZHJSNative/ZHJSNative/TestBundle.bundle/test.html"];
+//    url = [NSURL fileURLWithPath:@"/Users/em/Desktop/My/ZHCode/GitHubCode/ZHJSNative/ZHJSNative/TestBundle.bundle/test.html"];
+//    url = [NSURL fileURLWithPath:@"/Users/em/Desktop/My/ZHCode/GitHubCode/ZHJSNative/template/release/index.html"];
 //    url = [NSURL URLWithString:@"http://172.31.35.80:8080"];
+    url = [NSURL fileURLWithPath:[[[ZhengFile getDocumentPath] stringByAppendingPathComponent:@"release"] stringByAppendingPathComponent:@"index.html"]];
     
     __weak __typeof__(self) __self = self;
     if (debugReload) {
-        [self.webView loadUrl:url finish:^(BOOL success) {
+        [self.webView loadUrl:url allowingReadAccessToURL:[NSURL fileURLWithPath:[ZhengFile getDocumentPath]] finish:^(BOOL success) {
             [__self configDebugOption:@"刷新"];
         }];
         return;
     }
     
-    ZHWebView *webView = [[ZHWebView alloc] initWithApiHandlers:@[[[ZHCustomApiHandler alloc] init], [[ZHCustom1ApiHandler alloc] init]]];
-    [webView loadUrl:url finish:^(BOOL success) {
+    ZHWebView *webView = [[ZHWebView alloc] initWithApiHandlers:@[self.customApiHandler, [[ZHCustom1ApiHandler alloc] init]]];
+    [webView loadUrl:url allowingReadAccessToURL:[NSURL fileURLWithPath:[ZhengFile getDocumentPath]] finish:^(BOOL success) {
         [__self configDebugOption:@"刷新"];
     }];
     

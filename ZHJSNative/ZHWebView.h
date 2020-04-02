@@ -52,7 +52,7 @@
 #pragma mark - loads
 
 /** 加载h5 */
-- (void)loadUrl:(NSURL *)url finish:(void (^) (BOOL success))finish;
+- (void)loadUrl:(NSURL *)url allowingReadAccessToURL:(NSURL *)readAccessURL finish:(void (^) (BOOL success))finish;
 
 /** 发送js消息 */
 - (void)postMessageToJs:(NSString *)funcName params:(NSDictionary *)params completionHandler:(void (^)(id res, NSError *error))completionHandler;
