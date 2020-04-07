@@ -141,6 +141,7 @@
             NSTextCheckingResult *matchP = matches[matches.count - hierarchy - 1];
             NSRange matchRangeP = matchP.range;
             NSString *folderName = [srcPath substringWithRange:NSMakeRange(matchRangeP.location + matchRangeP.length, matchRange.location - matchRangeP.location - matchRangeP.length)];
+            folderName = [NSString stringWithFormat:@"ZHWebViewHtml/%@_%u", folderName, arc4random_uniform(10)];
             dstPath = [NSString stringWithFormat:@"%@%@",temDirURL,folderName];
             [self copyItemAtPath:currentPath toPath:dstPath];
             NSString *result = [NSString stringWithFormat:@"%@/%@",dstPath,lastPath];
