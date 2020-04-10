@@ -7,7 +7,6 @@
 //
 
 #import "ZHJSContext.h"
-#import "ZHUtil.h"
 #import "ZHJSHandler.h"
 
 @interface ZHJSContext ()
@@ -35,7 +34,7 @@
         [self registerAPI];
         
         //运算js
-//            [self evaluateScript:[NSString stringWithContentsOfURL:[NSURL fileURLWithPath:[ZHUtil jsPath]] encoding:NSUTF8StringEncoding error:nil]];
+//            [self evaluateScript:[NSString stringWithContentsOfURL:[NSURL fileURLWithPath:[ZHPath jsPath]] encoding:NSUTF8StringEncoding error:nil]];
         
     }
     return self;

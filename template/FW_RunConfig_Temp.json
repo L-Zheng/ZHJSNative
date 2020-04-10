@@ -1,5 +1,5 @@
 {
+    "isUsePreWebView": 1,
     "isSocket": 0,
-    "socketDebugUrl": "http://172.31.35.80:8080",
-    "isUsePreWebView": 0
+    "socketDebugUrl": "http://172.31.35.80:8080"
 }

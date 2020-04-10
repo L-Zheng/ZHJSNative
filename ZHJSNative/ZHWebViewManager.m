@@ -87,15 +87,18 @@
     return [[ZHWebView alloc] initWithFrame:[UIScreen mainScreen].bounds apiHandlers:[self apiHandlers]];
 }
 - (void)loadWebView:(ZHWebView *)webView finish:(void (^) (BOOL success))finish{
-    NSURL *url = [NSURL fileURLWithPath:[ZHUtil htmlPath]];
-    url = [ZHWebViewManager sourceTemplate];
-    //    url = [NSURL fileURLWithPath:@"/Users/em/Desktop/My/ZHCode/GitHubCode/ZHJSNative/ZHJSNative/TestBundle.bundle/test.html"];
-    //    url = [NSURL fileURLWithPath:@"/Users/em/Desktop/My/ZHCode/GitHubCode/ZHJSNative/template/release/index.html"];
-    //    url = [NSURL URLWithString:@"http://172.31.35.80:8080"];
-    //    url = [NSURL fileURLWithPath:[[[ZhengFile getDocumentPath] stringByAppendingPathComponent:@"release"] stringByAppendingPathComponent:@"index.html"]];
-//    url = [NSURL URLWithString:@"https://www.baidu.com"];
+    NSBundle *bundle = [NSBundle bundleWithPath:[[NSBundle mainBundle] pathForResource:@"TestBundle" ofType:@"bundle"]];
+    NSString *destPath = [bundle pathForResource:@"test.html".stringByDeletingPathExtension ofType:@"test.html".pathExtension];
     
-    [webView loadUrl:url allowingReadAccessToURL:(![ZHWebViewManager isUsePreWebView] ? nil : [NSURL fileURLWithPath:[ZHWebViewManager getDocumentPath]]) finish:finish];
+    NSURL *url = [NSURL fileURLWithPath:destPath];
+    NSURL *accessURL = nil;
+    
+    
+//    accessURL = (![ZHWebViewManager isUsePreWebView] ? nil : [NSURL fileURLWithPath:[ZHWebViewManager getDocumentPath]]);
+//    url = [ZHWebViewManager sourceTemplate];
+    
+    
+    [webView loadUrl:url allowingReadAccessToURL:accessURL finish:finish];
 }
 
 #pragma mark - path
@@ -174,7 +177,7 @@
     path = [path stringByAppendingPathComponent:@"release"];
     NSString *targetPath = [[self getDocumentPath] stringByAppendingPathComponent:@"ZHHtml"];
     targetPath = [NSString stringWithFormat:@"%@/template_%u", targetPath, arc4random_uniform(10)];
-    [ZHUtil copyItemAtPath:path toPath:targetPath];
+    [ZhengFile copySourceFile:path toDesPath:targetPath];
     return [NSURL fileURLWithPath:[targetPath stringByAppendingPathComponent:@"index.html"]];
 }
 

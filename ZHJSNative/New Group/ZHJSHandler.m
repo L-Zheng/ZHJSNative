@@ -7,7 +7,6 @@
 //
 
 #import "ZHJSHandler.h"
-#import "ZHUtil.h"
 #import "ZHJSContext.h"
 #import "ZHWebView.h"
 #import "ZHJSApiHandler.h"
@@ -156,13 +155,13 @@ case cType:{\
 //WebView注入的api
 - (NSString *)fetchWebViewLogApi{
     //以下代码由logEvent.js压缩而成
-    NSString *formatJS = [NSString stringWithContentsOfFile:[ZHUtil jsLogEventPath] encoding:NSUTF8StringEncoding error:nil];
+    NSString *formatJS = [NSString stringWithContentsOfFile:[ZHJSHandler jsLogEventPath] encoding:NSUTF8StringEncoding error:nil];
     NSString *jsCode = [NSString stringWithFormat:formatJS, ZHJSHandlerLogName];
     return jsCode;
 }
 - (NSString *)fetchWebViewErrorApi{
     //以下代码由errorEvent.js压缩而成
-    NSString *formatJS = [NSString stringWithContentsOfFile:[ZHUtil jsErrorEventPath] encoding:NSUTF8StringEncoding error:nil];
+    NSString *formatJS = [NSString stringWithContentsOfFile:[ZHJSHandler jsErrorEventPath] encoding:NSUTF8StringEncoding error:nil];
     NSString *jsCode = [NSString stringWithFormat:formatJS, ZHJSHandlerErrorName];
 //    jsCode = @"";
     return jsCode;
@@ -181,7 +180,7 @@ case cType:{\
     
     if (jsPrefix.length == 0) return nil;
     //以下代码由socketEvent.js压缩而成
-    NSString *formatJS = [NSString stringWithContentsOfFile:[ZHUtil jsSocketEventPath] encoding:NSUTF8StringEncoding error:nil];
+    NSString *formatJS = [NSString stringWithContentsOfFile:[ZHJSHandler jsSocketEventPath] encoding:NSUTF8StringEncoding error:nil];
     NSString *jsCode = [NSString stringWithFormat:formatJS, jsPrefix];
     return jsCode;
 }
@@ -191,7 +190,7 @@ case cType:{\
 }
 - (NSString *)fetchWebViewApi{
     //以下代码由event.js压缩而成
-    NSString *formatJS = [NSString stringWithContentsOfFile:[ZHUtil jsEventPath] encoding:NSUTF8StringEncoding error:nil];
+    NSString *formatJS = [NSString stringWithContentsOfFile:[ZHJSHandler jsEventPath] encoding:NSUTF8StringEncoding error:nil];
     __block NSMutableString *res = [NSMutableString string];
     [res appendFormat:formatJS,
      ZHJSHandlerName,
@@ -520,6 +519,26 @@ case cType:{\
 
 - (void)dealloc{
     NSLog(@"-------%s---------", __func__);
+}
+
+
+#pragma mark - File Path
++ (NSString *)jsEventPath{
+    return [self pathWithName:@"min-event.js"];
+}
++ (NSString *)jsLogEventPath{
+    return [self pathWithName:@"min-log.js"];
+}
++ (NSString *)jsErrorEventPath{
+    return [self pathWithName:@"min-error.js"];
+}
++ (NSString *)jsSocketEventPath{
+    return [self pathWithName:@"min-socket.js"];
+}
++ (NSString *)pathWithName:(NSString *)name{
+    NSBundle *bundle = [NSBundle bundleWithPath:[[NSBundle mainBundle] pathForResource:@"TestBundle" ofType:@"bundle"]];
+    NSString *destPath = [bundle pathForResource:name.stringByDeletingPathExtension ofType:name.pathExtension];
+    return destPath;
 }
 @end
 
