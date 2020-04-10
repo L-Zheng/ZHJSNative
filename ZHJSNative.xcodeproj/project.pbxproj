@@ -29,6 +29,8 @@
 		0F6807DD24016A0500E6B4C6 /* ZHJSApiHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F6807DC24016A0500E6B4C6 /* ZHJSApiHandler.m */; };
 		856980822429E0F50042755A /* ZHCustomApiHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 856980812429E0F50042755A /* ZHCustomApiHandler.m */; };
 		856980862429EB9A0042755A /* ZHJSInternalApiHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 856980852429EB9A0042755A /* ZHJSInternalApiHandler.m */; };
+		856B86C02440479000C900E4 /* ZHFloatView.m in Sources */ = {isa = PBXBuildFile; fileRef = 856B86BF2440478F00C900E4 /* ZHFloatView.m */; };
+		856B86C224404BC200C900E4 /* applet-icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 856B86C124404BC200C900E4 /* applet-icon.png */; };
 		85A4A30F243FF80A002AE903 /* ZHWebViewManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 85A4A30E243FF80A002AE903 /* ZHWebViewManager.m */; };
 		85A4A3122440003C002AE903 /* ZHEmotion.m in Sources */ = {isa = PBXBuildFile; fileRef = 85A4A3112440003C002AE903 /* ZHEmotion.m */; };
 		85B4FC9924349EA300CD910B /* EFEmoji.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 85B4FC9824349EA300CD910B /* EFEmoji.bundle */; };
@@ -95,6 +97,9 @@
 		856980832429E13F0042755A /* ZHJSApiProtocol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHJSApiProtocol.h; sourceTree = "<group>"; };
 		856980842429EB9A0042755A /* ZHJSInternalApiHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHJSInternalApiHandler.h; sourceTree = "<group>"; };
 		856980852429EB9A0042755A /* ZHJSInternalApiHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHJSInternalApiHandler.m; sourceTree = "<group>"; };
+		856B86BE2440478F00C900E4 /* ZHFloatView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZHFloatView.h; sourceTree = "<group>"; };
+		856B86BF2440478F00C900E4 /* ZHFloatView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZHFloatView.m; sourceTree = "<group>"; };
+		856B86C124404BC200C900E4 /* applet-icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "applet-icon.png"; sourceTree = "<group>"; };
 		85A4A30D243FF80A002AE903 /* ZHWebViewManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHWebViewManager.h; sourceTree = "<group>"; };
 		85A4A30E243FF80A002AE903 /* ZHWebViewManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHWebViewManager.m; sourceTree = "<group>"; };
 		85A4A3102440003C002AE903 /* ZHEmotion.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHEmotion.h; sourceTree = "<group>"; };
@@ -215,6 +220,9 @@
 		85A4A3132440062C002AE903 /* New Group */ = {
 			isa = PBXGroup;
 			children = (
+				856B86C124404BC200C900E4 /* applet-icon.png */,
+				856B86BE2440478F00C900E4 /* ZHFloatView.h */,
+				856B86BF2440478F00C900E4 /* ZHFloatView.m */,
 				0F079897240105E3004AAFBC /* ZHJSContext.h */,
 				0F079898240105E3004AAFBC /* ZHJSContext.m */,
 				0F07989A2401060A004AAFBC /* ZHWebView.h */,
@@ -341,6 +349,7 @@
 				0F07986A240104FB004AAFBC /* Assets.xcassets in Resources */,
 				85B4FC9924349EA300CD910B /* EFEmoji.bundle in Resources */,
 				0F079868240104FA004AAFBC /* Main.storyboard in Resources */,
+				856B86C224404BC200C900E4 /* applet-icon.png in Resources */,
 				0F0798A72401089A004AAFBC /* TestBundle.bundle in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -371,6 +380,7 @@
 				85A4A30F243FF80A002AE903 /* ZHWebViewManager.m in Sources */,
 				85B4FC9C2435702900CD910B /* ZhengFile.m in Sources */,
 				0F079899240105E3004AAFBC /* ZHJSContext.m in Sources */,
+				856B86C02440479000C900E4 /* ZHFloatView.m in Sources */,
 				856980862429EB9A0042755A /* ZHJSInternalApiHandler.m in Sources */,
 				0F5E33D6242F038000623068 /* ZHJSInternalCustomApiHandler.m in Sources */,
 				0F5E33D3242F02D800623068 /* ZHJSInternalSocketApiHandler.m in Sources */,

@@ -1,7 +1,7 @@
 <template>
 <div>
-  <!-- <div style="width:100px;height:100px;background-color:orange;">
-  </div> -->
+  <div style="width:100px;height:100px;background-color:orange;">
+  </div>
   <div>
     <div v-html="testEmotion"></div>
     <div v-html="testBigEmotion"></div>

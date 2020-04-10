@@ -8,6 +8,7 @@
 
 #import "ZHWebView.h"
 #import "ZHJSHandler.h"
+#import "ZHFloatView.h"
 
 //创建 error
 __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
@@ -26,6 +27,10 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
 @property (nonatomic, strong) ZHJSHandler *handler;
 //外部handler
 @property (nonatomic,strong) NSArray <id <ZHJSApiProtocol>> *apiHandlers;
+
+#ifdef DEBUG
+@property (nonatomic,strong) ZHFloatView *floatView;
+#endif
 @end
 
 @implementation ZHWebView
@@ -149,6 +154,14 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
     return self;
 }
 
+#pragma mark - layout
+
+- (void)layoutSubviews{
+    [super layoutSubviews];
+    
+    [self showFlowView];
+}
+
 #pragma mark - config gesture
 
 - (void)configGesture{
@@ -248,13 +261,14 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
  ios9以下 加载的 index.html拷贝到【Temp】文件夹下  需要的资源也要拷贝
  */
 - (void)loadUrl:(NSURL *)url allowingReadAccessToURL:(NSURL *)readAccessURL finish:(void (^) (BOOL success))finish{
-    self.didTerminate = NO;
+    [self updateFloatViewTitle:@"刷新中..."];
+    __weak __typeof__(self) __self = self;
     //回调
     void (^callBack)(BOOL) = ^(BOOL success){
         if (finish) finish(success);
+        [__self updateFloatViewTitle:@"刷新"];
     };
     //webView加载完成回调
-    __weak __typeof__(self) __self = self;
     void (^setWebViewFinish)(void) = ^(){
         __self.loadFinish = ^(BOOL success) {
             __self.loadSuccess = success;
@@ -529,11 +543,13 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
     
 }
 - (void)socketCallReadyRefresh{
+    [self updateFloatViewTitle:@"准备中..."];
     if (ZHCheckDelegate(self.zh_socketDebugDelegate, @selector(webViewReadyRefresh:))) {
         [self.zh_socketDebugDelegate webViewReadyRefresh:self];
     }
 }
 - (void)socketCallRefresh{
+    [self updateFloatViewTitle:@"刷新中..."];
     if (ZHCheckDelegate(self.zh_socketDebugDelegate, @selector(webViewRefresh:))) {
         [self.zh_socketDebugDelegate webViewRefresh:self];
     }
@@ -699,4 +715,33 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
     }
     return [res stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
 }
+
+#pragma mark - float view
+
+- (void)showFlowView{
+#ifdef DEBUG
+    [self.floatView showInView:self];
+#endif
+}
+- (void)updateFloatViewTitle:(NSString *)title{
+#ifdef DEBUG
+    [self.floatView updateTitle:title];
+#endif
+}
+
+#pragma mark - getter
+
+#ifdef DEBUG
+- (ZHFloatView *)floatView{
+    if (!_floatView) {
+        _floatView = [ZHFloatView floatView];
+        __weak __typeof__(self) __self = self;
+        _floatView.tapClickBlock = ^{
+            [__self socketCallRefresh];
+        };
+    }
+    return _floatView;
+}
+#endif
+
 @end
