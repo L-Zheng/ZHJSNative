@@ -180,21 +180,7 @@
 				856980812429E0F50042755A /* ZHCustomApiHandler.m */,
 				0F5E33D7242F084E00623068 /* ZHCustom1ApiHandler.h */,
 				0F5E33D8242F084E00623068 /* ZHCustom1ApiHandler.m */,
-				856980842429EB9A0042755A /* ZHJSInternalApiHandler.h */,
-				856980852429EB9A0042755A /* ZHJSInternalApiHandler.m */,
-				0F5E33D4242F038000623068 /* ZHJSInternalCustomApiHandler.h */,
-				0F5E33D5242F038000623068 /* ZHJSInternalCustomApiHandler.m */,
-				0F5E33D1242F02D800623068 /* ZHJSInternalSocketApiHandler.h */,
-				0F5E33D2242F02D800623068 /* ZHJSInternalSocketApiHandler.m */,
-				856980832429E13F0042755A /* ZHJSApiProtocol.h */,
-				0F6807DB24016A0500E6B4C6 /* ZHJSApiHandler.h */,
-				0F6807DC24016A0500E6B4C6 /* ZHJSApiHandler.m */,
-				0F0798A024010647004AAFBC /* ZHJSHandler.h */,
-				0F0798A124010647004AAFBC /* ZHJSHandler.m */,
-				0F079897240105E3004AAFBC /* ZHJSContext.h */,
-				0F079898240105E3004AAFBC /* ZHJSContext.m */,
-				0F07989A2401060A004AAFBC /* ZHWebView.h */,
-				0F07989B2401060A004AAFBC /* ZHWebView.m */,
+				85A4A3132440062C002AE903 /* New Group */,
 				0F079866240104FA004AAFBC /* Main.storyboard */,
 				0F079869240104FB004AAFBC /* Assets.xcassets */,
 				0F07986B240104FB004AAFBC /* LaunchScreen.storyboard */,
@@ -229,6 +215,28 @@
 				0F079893240105BC004AAFBC /* JavaScriptCore.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		85A4A3132440062C002AE903 /* New Group */ = {
+			isa = PBXGroup;
+			children = (
+				0F079897240105E3004AAFBC /* ZHJSContext.h */,
+				0F079898240105E3004AAFBC /* ZHJSContext.m */,
+				0F07989A2401060A004AAFBC /* ZHWebView.h */,
+				0F07989B2401060A004AAFBC /* ZHWebView.m */,
+				0F0798A024010647004AAFBC /* ZHJSHandler.h */,
+				0F0798A124010647004AAFBC /* ZHJSHandler.m */,
+				856980832429E13F0042755A /* ZHJSApiProtocol.h */,
+				0F6807DB24016A0500E6B4C6 /* ZHJSApiHandler.h */,
+				0F6807DC24016A0500E6B4C6 /* ZHJSApiHandler.m */,
+				856980842429EB9A0042755A /* ZHJSInternalApiHandler.h */,
+				856980852429EB9A0042755A /* ZHJSInternalApiHandler.m */,
+				0F5E33D4242F038000623068 /* ZHJSInternalCustomApiHandler.h */,
+				0F5E33D5242F038000623068 /* ZHJSInternalCustomApiHandler.m */,
+				0F5E33D1242F02D800623068 /* ZHJSInternalSocketApiHandler.h */,
+				0F5E33D2242F02D800623068 /* ZHJSInternalSocketApiHandler.m */,
+			);
+			path = "New Group";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
