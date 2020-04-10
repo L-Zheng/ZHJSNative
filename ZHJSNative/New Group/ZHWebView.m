@@ -8,7 +8,6 @@
 
 #import "ZHWebView.h"
 #import "ZHJSHandler.h"
-#import "ZHUtil.h"
 
 //创建 error
 __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
