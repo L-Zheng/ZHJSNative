@@ -93,8 +93,8 @@
     NSURL *accessURL = nil;
     
     
-//    accessURL = (![ZHWebViewManager isUsePreWebView] ? nil : [NSURL fileURLWithPath:[ZHWebViewManager getDocumentPath]]);
-//    url = [ZHWebViewManager sourceTemplate];
+    accessURL = (![ZHWebViewManager isUsePreWebView] ? nil : [NSURL fileURLWithPath:[ZHWebViewManager getDocumentPath]]);
+    url = [ZHWebViewManager sourceTemplate];
     
     
     [webView loadUrl:url allowingReadAccessToURL:accessURL finish:finish];

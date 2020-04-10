@@ -1,12 +1,16 @@
 <template>
-<div>
-  <div style="width:100px;height:100px;background-color:orange;">
+  <div class="main-wrap">
+    <div style="width:100px;height:100px;background-color:orange;"></div>
+    <div style="word-break:break-all;">
+      <a href="" >@Hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhspfdlk</a>
+      加油吧少年
+      <a href="">@Hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhspfdlk</a>
+    </div>
+    <div>
+      <div v-html="testEmotion"></div>
+      <div v-html="testBigEmotion"></div>
+    </div>
   </div>
-  <div>
-    <div v-html="testEmotion"></div>
-    <div v-html="testBigEmotion"></div>
-  </div>
-</div>
 </template>
 
 <script>
@@ -38,12 +42,11 @@ function preventDefault(e) {
 
 var vm = {
   name: "app",
-  components: {
-  },
+  components: {},
   data() {
     return {
-      testEmotion: '',
-      testBigEmotion: ''
+      testEmotion: "",
+      testBigEmotion: ""
     };
   },
   created() {
@@ -52,10 +55,19 @@ var vm = {
   },
   computed: {},
   mounted() {
-    const emotionMap = fund.getEmotionResourceSync()
-    const bigEmotionMap = fund.getBigEmotionResourceSync()
-    this.testEmotion = Emotion.getEmotionText(emotionMap, bigEmotionMap, '[微笑][大笑]')
-    this.testBigEmotion = Emotion.getEmotionText(emotionMap, bigEmotionMap, '[厉害了]', 100)
+    const emotionMap = fund.getEmotionResourceSync();
+    const bigEmotionMap = fund.getBigEmotionResourceSync();
+    this.testEmotion = Emotion.getEmotionText(
+      emotionMap,
+      bigEmotionMap,
+      "[微笑][大笑]"
+    );
+    this.testBigEmotion = Emotion.getEmotionText(
+      emotionMap,
+      bigEmotionMap,
+      "[厉害了]",
+      100
+    );
   },
   methods: {
     configVue() {
@@ -77,10 +89,10 @@ var vm = {
       };
       //渲染
       window.render = () => {
-        this.prepareRender()
+        this.prepareRender();
       };
     },
-    prepareRender(){
+    prepareRender() {
       try {
         //检查fund api
         console.log(fund);
@@ -98,11 +110,8 @@ export default vm;
 
 
 <style lang="scss" scoped>
-html {
-  overflow-x: hidden !important;
-  -webkit-tap-highlight-color: transparent;
-}
 .main-wrap {
+  width: 100%;
   /* fallback */
   /* -webkit-overflow-scrolling: touch;  此句代码会导致webview的scroll的bounds【滑动bounds】会遮盖住fix定位的元素 */
   height: 100%;
@@ -110,44 +119,5 @@ html {
   overflow: auto;
   position: relative;
   overflow-x: hidden !important;
-}
-.comment-filter-anchor {
-  position: relative;
-  z-index: 199;
-  width: 100%;
-  height: 47px;
-}
-.comment-filter {
-  position: relative;
-  z-index: 199;
-  width: 100%;
-  top: 0;
-  left: 0;
-}
-.popup-wrap {
-  -webkit-overflow-scrolling: touch;
-  width: 100%;
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  z-index: 200;
-  overflow: auto;
-  overflow-x: hidden !important;
-}
-.place-holder {
-  height: 49px;
-}
-.article-wrap {
-  overflow-x: hidden;
-}
-.all-comment {
-  background: #ffffff;
-  padding: 0 15px;
-  border-bottom: 1px solid #eeeeee99;
-  line-height: 40px;
-  font-size: 14px;
-  -webkit-box-sizing: border-box;
-  box-sizing: border-box;
-  color: #000000;
 }
 </style>
