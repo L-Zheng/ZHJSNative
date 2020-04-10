@@ -10,99 +10,24 @@
 #import "ZHWebView.h"
 #import "ZHUtil.h"
 #import "ZHJSContext.h"
-#import "ZHCustomApiHandler.h"
-#import "ZHCustom1ApiHandler.h"
-#import "ZhengFile.h"
+#import "ZHWebViewManager.h"
 
 @interface ZHController ()<ZHWebViewSocketDebugDelegate>
 @property (nonatomic, strong) ZHWebView *webView;
 @property (nonatomic, strong) ZHJSContext *context;
-
-
-@property (nonatomic,strong) ZHCustomApiHandler *customApiHandler;
 @end
 
 @implementation ZHController
 
-- (void)handlerEmotion{
-    
-    NSString *bundlePath = [[NSBundle mainBundle] pathForResource:@"EFEmoji" ofType:@"bundle"];
-    
-    NSString *imagesPath = [[NSBundle bundleWithPath:bundlePath] pathForResource:@"images" ofType:nil];
-    NSString *jsonPath = [[NSBundle bundleWithPath:bundlePath] pathForResource:@"ef_emoji" ofType:@"json"];
-    
-    NSData *data = [NSData dataWithContentsOfFile:jsonPath];
-    NSArray *emojiArr = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
-    
-    //key值转换 @{@"[滴汗]": @"common_ef_emot07.png"}
-    NSMutableDictionary *callInfo = [@{} mutableCopy];
-    
-    for (NSDictionary *emojiInfo in emojiArr) {
-        NSString *mean = [emojiInfo valueForKey:@"emojimeaning"];
-        NSString *fileName = [emojiInfo valueForKey:@"emojiname"];
-        
-        //bundle资源
-        NSString *imagePath = [imagesPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@",fileName]]?:@"";
-                
-        [callInfo setValue:imagePath forKey:[NSString stringWithFormat:@"[%@]", mean]];
-    }
-    self.customApiHandler.emotionMap = [callInfo copy];
-}
-- (void)copyBigEmotion{
-    NSString *bundlePath = [[NSBundle mainBundle] pathForResource:@"EFEmoji" ofType:@"bundle"];
-    NSString *imagesPath = [[NSBundle bundleWithPath:bundlePath] pathForResource:@"BigEmotin" ofType:nil];
-    
-    NSString *targetEmotionPath = [[ZhengFile getDocumentPath] stringByAppendingPathComponent:@"BigEmotion"];
-     
-    [ZhengFile copySourceFile:imagesPath toDesPath:targetEmotionPath];
-    
-    NSData *data = [NSData dataWithContentsOfFile:[targetEmotionPath stringByAppendingPathComponent:@"index.json"]];
-    NSArray *emojiArr = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
-    
-    //key值转换 @{@"[滴汗]": @"common_ef_emot07.png"}
-    NSMutableDictionary *callInfo = [@{} mutableCopy];
-    
-    for (NSDictionary *emojiInfo in emojiArr) {
-        NSString *mean = [emojiInfo valueForKey:@"text"];
-        NSString *fileName = [emojiInfo valueForKey:@"path"];
-        
-        //bundle资源
-//        NSString *imagePath = [imagesPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@",fileName]]?:@"";
-        
-        //沙盒资源
-        NSString *imagePath = [targetEmotionPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@",fileName]]?:@"";
-
-        [callInfo setValue:imagePath forKey:[NSString stringWithFormat:@"[%@]", mean]];
-    }
-    
-    self.customApiHandler.bigEmotionMap = [callInfo copy];
-    
-}
-
-- (void)copyHtmlFile{
-    [ZhengFile copySourceFile:[[NSBundle bundleWithPath:[ZHUtil bundlePath]] pathForResource:@"release" ofType:nil] toDesPath:[[ZhengFile getDocumentPath] stringByAppendingPathComponent:@"release"]];
-}
-
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
-    self.customApiHandler = [[ZHCustomApiHandler alloc] init];
-    
-    //拷贝表情
-    [self handlerEmotion];
-    [self copyBigEmotion];
-    
-    //拷贝html文件
-    [self copyHtmlFile];
-    
-    
     [self config:NO];
     
     //运算js
-//    self.context = [[ZHJSContext alloc] initWithApiHandlers:@[[[ZHCustomApiHandler alloc] init], [[ZHCustom1ApiHandler alloc] init]]];
-//    NSURL *url = [NSURL fileURLWithPath:[ZHUtil jsPath]];
-//    url = [NSURL fileURLWithPath:@"/Users/zheng/Desktop/ZHCode/GitHubCode/ZHJSNative/ZHJSNative/TestBundle.bundle/test.js"];
-//    [self.context evaluateScript:[NSString stringWithContentsOfURL:url encoding:NSUTF8StringEncoding error:nil]];
+    //    self.context = [[ZHJSContext alloc] initWithApiHandlers:@[[[ZHCustomApiHandler alloc] init], [[ZHCustom1ApiHandler alloc] init]]];
+    //    NSURL *url = [NSURL fileURLWithPath:[ZHUtil jsPath]];
+    //    url = [NSURL fileURLWithPath:@"/Users/zheng/Desktop/ZHCode/GitHubCode/ZHJSNative/ZHJSNative/TestBundle.bundle/test.js"];
+    //    [self.context evaluateScript:[NSString stringWithContentsOfURL:url encoding:NSUTF8StringEncoding error:nil]];
 }
 
 - (void)viewDidLayoutSubviews {
@@ -120,12 +45,6 @@
     [super viewDidAppear:animated];
     NSLog(@"----✅viewDidAppear----");
     [self configGesture];
-    
-//    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-//        [self.webView loadUrl:[NSURL fileURLWithPath:[ZHUtil htmlPath]] finish:^(BOOL success) {
-//            
-//        }];
-//    });
 }
 
 - (void)config:(BOOL)debugReload{
@@ -136,7 +55,6 @@
 - (void)configView{
     self.automaticallyAdjustsScrollViewInsets = NO;
     self.view.backgroundColor = [UIColor whiteColor];
-//    self.view.backgroundColor = [UIColor colorWithRed:arc4random_uniform(255.0)/ 255.0 green:arc4random_uniform(255.0)/ 255.0 blue:arc4random_uniform(255.0)/ 255.0 alpha:1.0];
 }
 
 - (void)configNavigaitonBar:(BOOL)animated{
@@ -146,30 +64,67 @@
 }
 
 - (void)configWebView:(BOOL)debugReload{
-    
-    NSURL *url = [NSURL fileURLWithPath:[ZHUtil htmlPath]];
-//    url = [NSURL fileURLWithPath:@"/Users/em/Desktop/My/ZHCode/GitHubCode/ZHJSNative/ZHJSNative/TestBundle.bundle/test.html"];
-//    url = [NSURL fileURLWithPath:@"/Users/em/Desktop/My/ZHCode/GitHubCode/ZHJSNative/template/release/index.html"];
-//    url = [NSURL URLWithString:@"http://172.31.35.80:8080"];
-    url = [NSURL fileURLWithPath:[[[ZhengFile getDocumentPath] stringByAppendingPathComponent:@"release"] stringByAppendingPathComponent:@"index.html"]];
-    
+    ZHWebViewManager *mg = [ZHWebViewManager shareManager];
     __weak __typeof__(self) __self = self;
+    //渲染
+    void (^render)(ZHWebView *) = ^(ZHWebView *webView){
+        __self.navigationItem.title = webView.title;
+//        [__self readyRender:nil];
+    };
+    
+    //配置
+    void (^config)(ZHWebView *) = ^(ZHWebView *webView){
+        //配置view
+        [__self configWebViewFrame:webView];
+        if (!webView.superview) [__self.view addSubview:webView];
+        __self.webView = webView;
+        //配置代理
+        [__self configWebViewDelegate:webView target:__self];
+        //配置handler
+    };
+    
     if (debugReload) {
-        [self.webView loadUrl:url allowingReadAccessToURL:[NSURL fileURLWithPath:[ZhengFile getDocumentPath]] finish:^(BOOL success) {
-            [__self configDebugOption:@"刷新"];
+        [mg loadWebView:self.webView finish:^(BOOL success) {
+            if (success) {
+                config(__self.webView);
+                render(__self.webView);
+                [__self configDebugOption:@"刷新"];
+            }
         }];
         return;
     }
+
     
-    ZHWebView *webView = [[ZHWebView alloc] initWithApiHandlers:@[self.customApiHandler, [[ZHCustom1ApiHandler alloc] init]]];
-    [webView loadUrl:url allowingReadAccessToURL:[NSURL fileURLWithPath:[ZhengFile getDocumentPath]] finish:^(BOOL success) {
-        [__self configDebugOption:@"刷新"];
+    //查找可用WebView
+    ZHWebView *webView = nil;
+    if (![ZHWebViewManager isUsePreWebView]) {
+        webView = nil;
+    }else{
+        webView = [mg fetchWebView];
+    }
+    
+    if (webView) {
+        //检查是否异常
+        ZHWebViewExceptionOperate operate = [webView checkException];
+        if (operate == ZHWebViewExceptionOperateNothing) {
+            config(webView);
+            render(webView);
+            return;
+        }else if (operate == ZHWebViewExceptionOperateReload){
+        }else if (operate == ZHWebViewExceptionOperateNewInit){
+            webView = [mg createWebView];
+        }
+    }else{
+        webView = [mg createWebView];
+    }
+    [mg loadWebView:webView finish:^(BOOL success) {
+        if (success) {
+            config(webView);
+            render(webView);
+            [__self configDebugOption:@"刷新"];
+        }
     }];
-    
-    [self configWebViewFrame:webView];
-    [self.view addSubview:webView];
-    self.webView = webView;
-    [self configWebViewDelegate:webView target:self];
+    if (!webView.superview) [self.view addSubview:webView];
 }
 - (void)configWebViewDelegate:(ZHWebView *)webView target:(id)target{
     webView.zh_navigationDelegate = target;

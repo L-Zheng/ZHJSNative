@@ -39,6 +39,9 @@ NS_ASSUME_NONNULL_BEGIN
  */
 + (NSString *)copyToTempWithPath:(NSString *)srcPath hierarchy:(NSInteger)hierarchy;
 
+
+/**拷贝文件(文件夹)*/
++ (BOOL)copyItemAtPath:(NSString *)srcPath toPath:(NSString *)dstPath;
 @end
 
 NS_ASSUME_NONNULL_END

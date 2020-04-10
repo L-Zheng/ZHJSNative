@@ -9,10 +9,10 @@ yarn build
 BundleDir=${CUR_DIR}'/../ZHJSNative/TestBundle.bundle/release'
 if [ -e "${BundleDir}" ]
 then
-    echo '\n👉删除iOS项目 EFNewsHtmlBundle文件\n'
+    echo '\n👉删除iOS项目 TestBundle文件\n'
     rm -rf "${BundleDir}"/*
 
-    echo '👉拷贝 新建EFNewsHtmlBundle文件\n'
+    echo '👉拷贝 新建TestBundle\n'
     SourceDir=${CUR_DIR}'/release'
     if [ -e "${SourceDir}" ]
     then

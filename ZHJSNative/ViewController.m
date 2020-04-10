@@ -8,6 +8,7 @@
 
 #import "ViewController.h"
 #import "ZHController.h"
+#import "ZHWebViewManager.h"
 
 @interface ViewController ()
 
@@ -23,6 +24,9 @@
     btn.backgroundColor = [UIColor orangeColor];
     [btn addTarget:self action:@selector(btnClick) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:btn];
+    
+    
+    [ZHWebViewManager install];
 }
 
 - (void)btnClick{

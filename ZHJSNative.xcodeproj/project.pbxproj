@@ -30,6 +30,8 @@
 		0F6807DD24016A0500E6B4C6 /* ZHJSApiHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F6807DC24016A0500E6B4C6 /* ZHJSApiHandler.m */; };
 		856980822429E0F50042755A /* ZHCustomApiHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 856980812429E0F50042755A /* ZHCustomApiHandler.m */; };
 		856980862429EB9A0042755A /* ZHJSInternalApiHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 856980852429EB9A0042755A /* ZHJSInternalApiHandler.m */; };
+		85A4A30F243FF80A002AE903 /* ZHWebViewManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 85A4A30E243FF80A002AE903 /* ZHWebViewManager.m */; };
+		85A4A3122440003C002AE903 /* ZHEmotion.m in Sources */ = {isa = PBXBuildFile; fileRef = 85A4A3112440003C002AE903 /* ZHEmotion.m */; };
 		85B4FC9924349EA300CD910B /* EFEmoji.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 85B4FC9824349EA300CD910B /* EFEmoji.bundle */; };
 		85B4FC9C2435702900CD910B /* ZhengFile.m in Sources */ = {isa = PBXBuildFile; fileRef = 85B4FC9A2435702900CD910B /* ZhengFile.m */; };
 /* End PBXBuildFile section */
@@ -96,6 +98,10 @@
 		856980832429E13F0042755A /* ZHJSApiProtocol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHJSApiProtocol.h; sourceTree = "<group>"; };
 		856980842429EB9A0042755A /* ZHJSInternalApiHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHJSInternalApiHandler.h; sourceTree = "<group>"; };
 		856980852429EB9A0042755A /* ZHJSInternalApiHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHJSInternalApiHandler.m; sourceTree = "<group>"; };
+		85A4A30D243FF80A002AE903 /* ZHWebViewManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHWebViewManager.h; sourceTree = "<group>"; };
+		85A4A30E243FF80A002AE903 /* ZHWebViewManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHWebViewManager.m; sourceTree = "<group>"; };
+		85A4A3102440003C002AE903 /* ZHEmotion.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHEmotion.h; sourceTree = "<group>"; };
+		85A4A3112440003C002AE903 /* ZHEmotion.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHEmotion.m; sourceTree = "<group>"; };
 		85B4FC9824349EA300CD910B /* EFEmoji.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = EFEmoji.bundle; sourceTree = "<group>"; };
 		85B4FC9A2435702900CD910B /* ZhengFile.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZhengFile.m; sourceTree = "<group>"; };
 		85B4FC9B2435702900CD910B /* ZhengFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZhengFile.h; sourceTree = "<group>"; };
@@ -164,6 +170,10 @@
 				85B4FC9A2435702900CD910B /* ZhengFile.m */,
 				0F07989D24010627004AAFBC /* ZHController.h */,
 				0F07989E24010627004AAFBC /* ZHController.m */,
+				85A4A3102440003C002AE903 /* ZHEmotion.h */,
+				85A4A3112440003C002AE903 /* ZHEmotion.m */,
+				85A4A30D243FF80A002AE903 /* ZHWebViewManager.h */,
+				85A4A30E243FF80A002AE903 /* ZHWebViewManager.m */,
 				0F0798A8240108F6004AAFBC /* ZHUtil.h */,
 				0F0798A9240108F6004AAFBC /* ZHUtil.m */,
 				856980802429E0F50042755A /* ZHCustomApiHandler.h */,
@@ -355,6 +365,7 @@
 			files = (
 				0F079865240104FA004AAFBC /* ViewController.m in Sources */,
 				0F07985F240104FA004AAFBC /* AppDelegate.m in Sources */,
+				85A4A30F243FF80A002AE903 /* ZHWebViewManager.m in Sources */,
 				85B4FC9C2435702900CD910B /* ZhengFile.m in Sources */,
 				0F079899240105E3004AAFBC /* ZHJSContext.m in Sources */,
 				856980862429EB9A0042755A /* ZHJSInternalApiHandler.m in Sources */,
@@ -365,6 +376,7 @@
 				0F079870240104FB004AAFBC /* main.m in Sources */,
 				0F0798A224010647004AAFBC /* ZHJSHandler.m in Sources */,
 				856980822429E0F50042755A /* ZHCustomApiHandler.m in Sources */,
+				85A4A3122440003C002AE903 /* ZHEmotion.m in Sources */,
 				0F079862240104FA004AAFBC /* SceneDelegate.m in Sources */,
 				0F6807DD24016A0500E6B4C6 /* ZHJSApiHandler.m in Sources */,
 				0F5E33D9242F084E00623068 /* ZHCustom1ApiHandler.m in Sources */,
@@ -537,15 +549,18 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = Z9922QR99N;
 				INFOPLIST_FILE = ZHJSNative/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = Zheng.ZHJSNative;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = libaozheng;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -554,15 +569,18 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = Z9922QR99N;
 				INFOPLIST_FILE = ZHJSNative/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = Zheng.ZHJSNative;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = libaozheng;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;

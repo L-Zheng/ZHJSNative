@@ -11,6 +11,12 @@
 #import "ZHJSApiProtocol.h"
 @class ZHWebView;
 
+typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
+    ZHWebViewExceptionOperateNothing     = 0,//不做任何操作
+    ZHWebViewExceptionOperateReload      = 1,//WebView重新load
+    ZHWebViewExceptionOperateNewInit      = 2,//重新初始化新的WebView
+};
+
 //NS_ASSUME_NONNULL_BEGIN
 
 /** socket调试代理 */
@@ -47,7 +53,13 @@
 #pragma mark - init
 
 - (instancetype)initWithApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers;
+- (instancetype)initWithFrame:(CGRect)frame apiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers;
 @property (nonatomic,strong,readonly) NSArray <id <ZHJSApiProtocol>> *apiHandlers;
+
+#pragma mark - Exception
+
+/** 检查WebView异常 ：白屏*/
+- (ZHWebViewExceptionOperate)checkException;
 
 #pragma mark - loads
 

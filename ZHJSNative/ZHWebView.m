@@ -22,8 +22,8 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
 @property (nonatomic, assign) BOOL loadSuccess;
 @property (nonatomic, assign) BOOL loadFail;
 
+@property (nonatomic, assign) BOOL didTerminate;//WebContentProcess进程被终结
 @property (nonatomic,strong) UIGestureRecognizer *pressGes;
-
 @property (nonatomic, strong) ZHJSHandler *handler;
 //外部handler
 @property (nonatomic,strong) NSArray <id <ZHJSApiProtocol>> *apiHandlers;
@@ -32,6 +32,9 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
 @implementation ZHWebView
 
 - (instancetype)initWithApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers{
+    return [self initWithFrame:CGRectZero apiHandlers:apiHandlers];
+}
+- (instancetype)initWithFrame:(CGRect)frame apiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers{
     
     ZHJSHandler *handler = [[ZHJSHandler alloc] initWithApiHandlers:apiHandlers];
     
@@ -103,7 +106,7 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
     config.allowsInlineMediaPlayback = YES;
     config.userContentController = userContent;
     
-    self = [self initWithFrame:CGRectZero configuration:config];
+    self = [self initWithFrame:frame configuration:config];
     if (self) {
         self.backgroundColor = [UIColor colorWithRed:245.0/255.0 green:245.0/255.0 blue:245.0/255.0 alpha:1.0];
         //    self.scrollView.bounces = NO;
@@ -198,6 +201,35 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
     return @[ZHJSHandlerLogName, ZHJSHandlerName, ZHJSHandlerErrorName];
 }
 
+#pragma mark - Exception
+
+/**白屏时
+ 页面 webView.titile 会被置空
+ 页面 URL 会被置空
+ WKCompositingView控件会被销毁
+ */
+- (ZHWebViewExceptionOperate)checkException{
+    if (self.didTerminate) return ZHWebViewExceptionOperateNewInit;
+    
+    BOOL isBlank = [self isBlankView:self];
+    if (isBlank) return ZHWebViewExceptionOperateNewInit;
+    
+    BOOL isTitle = (self.title.length > 0);
+    BOOL isURL = (self.URL != nil);
+    if (!isTitle || !isURL) return ZHWebViewExceptionOperateReload;
+    
+    return ZHWebViewExceptionOperateNothing;
+}
+//检查WKCompositingView是否被系统回收
+- (BOOL)isBlankView:(UIView *)webView {
+    if ([webView isKindOfClass:NSClassFromString(@"WKCompositingView")]) return NO;
+    NSArray *subViews = webView.subviews;
+    for (UIView *subView in subViews) {
+        if (![self isBlankView:subView]) return NO;
+    }
+    return YES;
+}
+
 #pragma mark - load
 
 /** 加载资源的问题
@@ -217,6 +249,7 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
  ios9以下 加载的 index.html拷贝到【Temp】文件夹下  需要的资源也要拷贝
  */
 - (void)loadUrl:(NSURL *)url allowingReadAccessToURL:(NSURL *)readAccessURL finish:(void (^) (BOOL success))finish{
+    self.didTerminate = NO;
     //回调
     void (^callBack)(BOOL) = ^(BOOL success){
         if (finish) finish(success);
@@ -397,6 +430,17 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
         return;
     }
     if (decisionHandler) decisionHandler(WKNavigationActionPolicyAllow);
+}
+
+//当WKWebView总体内存占用过大，页面即将白屏的时候，系统会调用上面的回调函数，我们在该函数里执行[webView reload]（这个时候webView.URL取值尚不为零）解决白屏问题。在一些高内存消耗的页面可能会频繁刷新当前页面
+- (void)webViewWebContentProcessDidTerminate:(WKWebView *)webView{
+    if (@available(iOS 9.0, *)) {
+        id <ZHWKNavigationDelegate> de = self.zh_navigationDelegate;
+        if (ZHCheckDelegate(de, @selector(webViewWebContentProcessDidTerminate:))) {
+            [de webViewWebContentProcessDidTerminate:webView];
+        }
+        self.didTerminate = YES;
+    }
 }
 
 #pragma mark - WKUIDelegate

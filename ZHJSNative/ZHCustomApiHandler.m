@@ -7,6 +7,7 @@
 //
 
 #import "ZHCustomApiHandler.h"
+#import "ZHEmotion.h"
 
 @implementation ZHCustomApiHandler
 #pragma mark - api
@@ -174,11 +175,11 @@
 
 
 - (NSDictionary *)js_getEmotionResourceSync:(NSDictionary *)params{
-    return self.emotionMap;
+    return [ZHEmotion shareManager].emotionMap;
 }
 //获取大表情资源
 - (NSDictionary *)js_getBigEmotionResourceSync:(NSDictionary *)params{
-    return self.bigEmotionMap;
+    return [ZHEmotion shareManager].bigEmotionMap;
 }
 
 
