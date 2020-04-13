@@ -215,7 +215,7 @@ case cType:{\
         }
         [code appendString:@"}"];
         
-        [res appendFormat:@"const %@=%@('%@',%@);",apiPrefix, self.fetchWebViewGeneratorApiFuncName, apiPrefix, code];
+        [res appendFormat:@"var %@=%@('%@',%@);",apiPrefix, self.fetchWebViewGeneratorApiFuncName, apiPrefix, code];
         return NO;
     }];
     
