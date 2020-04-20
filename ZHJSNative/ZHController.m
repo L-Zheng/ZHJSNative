@@ -259,15 +259,6 @@
 
 - (void)refreshWebView{
     [self configDebugOption:@"刷新中..."];
-    
-    /** presented 与dismiss同时进行 会crash */
-//    if ([self.presentedViewController isKindOfClass:[UIAlertController class]]) {
-//        [self dismissViewControllerAnimated:YES completion:nil];
-//    }
-    //清除代理
-    [self configWebViewDelegate:self.webView target:nil];
-    //清除缓存【否则不会实时刷新最新的改动】
-    [self.webView clearCache];
     [self config:YES];
 }
 

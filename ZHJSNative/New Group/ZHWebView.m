@@ -550,8 +550,23 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
 }
 - (void)socketCallRefresh{
     [self updateFloatViewTitle:@"刷新中..."];
-    if (ZHCheckDelegate(self.zh_socketDebugDelegate, @selector(webViewRefresh:))) {
-        [self.zh_socketDebugDelegate webViewRefresh:self];
+        
+        /** presented 与dismiss同时进行 会crash */
+    //    if ([self.presentedViewController isKindOfClass:[UIAlertController class]]) {
+    //        [self dismissViewControllerAnimated:YES completion:nil];
+    //    }
+    
+    //获取代理
+    id <ZHWebViewSocketDebugDelegate> socketDebugDelegate = self.zh_socketDebugDelegate;
+    //清除代理
+    self.zh_navigationDelegate = nil;
+    self.zh_UIDelegate = nil;
+    self.zh_socketDebugDelegate = nil;
+    //清除缓存【否则ios11以上不会实时刷新最新的改动】
+    [self clearCache];
+    //回调
+    if (ZHCheckDelegate(socketDebugDelegate, @selector(webViewRefresh:))) {
+        [socketDebugDelegate webViewRefresh:self];
     }
 }
 #endif

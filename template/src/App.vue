@@ -88,13 +88,23 @@ var vm = {
         NativeMsg.post(parmas);
       };
       //渲染  ❌此处不要使用async方法  ios原生会报错：JavaScript execution returned a result of an unsupported type
+      //但可以在方法里面使用async方法
       window.render = (parmas) => {
         const json = JSON.parse(decodeURIComponent(parmas));
         console.log('✅1111够oooowero1234sdffg')
         console.log(json)
-        this.prepareRender();
+        this.aaaa().then(res => {
+          console.log('✅22222')
+          console.log(res)
+        })
+        // this.prepareRender();
         return 'sdddd';
       };
+    },
+    async aaaa() {
+      return new Promise((resolve, reject) => {
+          resolve({sss:'ssss'});
+        })
     },
     prepareRender() {
       try {
