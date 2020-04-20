@@ -68,7 +68,7 @@
     //渲染
     void (^render)(ZHWebView *) = ^(ZHWebView *webView){
         __self.navigationItem.title = webView.title;
-//        [__self readyRender:nil];
+        [__self readyRender:nil];
     };
     
     //配置
@@ -152,6 +152,37 @@
     }
 }
 
+- (void)readyRender:(NSDictionary *)info{
+    info = @{
+        @"code": @"cccccc",
+    };
+    if (!info) return;
+        
+    id (^block)(id res) = ^(id res){
+        return [ZHWebView encodeObj:res];
+    };
+    
+    NSString *jsonStr = block(info);
+    
+    NSString *desc = @"renderFundDetail";
+    
+    NSLog(@"----✅start %@---", desc);
+    NSLog(@"----👇jsCode %@ start--", desc);
+    
+    NSString *js = [NSString stringWithFormat:@"render(\"%@\")",jsonStr];
+    NSLog(@"%@", js);
+    NSLog(@"----☝️jsCode %@ end--", desc);
+    //    NSString *js = [NSString stringWithFormat:@"renderA(\"%@\")",type];
+    __weak __typeof__(self) __self = self;
+    [self.webView evaluateJs:js completionHandler:^(id res, NSError *error) {
+        if (error) {
+            NSLog(@"----❌%@--%@--", desc, error);
+        }else{
+            NSLog(@"----✅%@---", desc);
+        }
+    }];
+}
+
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context{
     if (object == self.webView) {
         if ([keyPath isEqualToString:@"loading"]) {
@@ -202,6 +233,18 @@
 }
 
 - (void)dealloc{
+    //清空代理 【scrollView.delegate】 否则iOS8上会崩溃
+    if (!_webView) return;
+    _webView.scrollView.delegate = nil;
+    _webView.UIDelegate = nil;
+    _webView.navigationDelegate = nil;
+    
+    _webView.zh_scrollViewDelegate = nil;
+    _webView.zh_UIDelegate = nil;
+    _webView.zh_navigationDelegate = nil;
+    
+    if (_webView.superview) [_webView removeFromSuperview];
+    _webView = nil;
     NSLog(@"-------%s---------", __func__);
 }
 
@@ -223,6 +266,8 @@
 //    }
     //清除代理
     [self configWebViewDelegate:self.webView target:nil];
+    //清除缓存【否则不会实时刷新最新的改动】
+    [self.webView clearCache];
     [self config:YES];
 }
 

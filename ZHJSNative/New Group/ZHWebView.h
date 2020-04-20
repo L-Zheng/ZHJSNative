@@ -61,6 +61,10 @@ typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
 /** 检查WebView异常 ：白屏*/
 - (ZHWebViewExceptionOperate)checkException;
 
+#pragma mark - encode
+
++ (NSString *)encodeObj:(id)data;
+
 #pragma mark - loads
 
 /** 加载h5 */
@@ -69,6 +73,11 @@ typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
 /** 发送js消息 */
 - (void)postMessageToJs:(NSString *)funcName params:(NSDictionary *)params completionHandler:(void (^)(id res, NSError *error))completionHandler;
 - (void)evaluateJs:(NSString *)js completionHandler:(void (^)(id res, NSError *error))completionHandler;
+
+#pragma mark - clear
+
+- (void)clearCache;
+
 @end
 
 //NS_ASSUME_NONNULL_END

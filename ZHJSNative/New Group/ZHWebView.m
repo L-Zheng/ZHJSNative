@@ -716,6 +716,32 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
     return [res stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
 }
 
+#pragma mark - clear
+
+- (void)clearCache{
+    if (@available(iOS 9.0, *)) {
+        WKWebsiteDataStore *dataSource = [WKWebsiteDataStore defaultDataStore];
+        [dataSource removeDataOfTypes:[WKWebsiteDataStore allWebsiteDataTypes] modifiedSince:[NSDate dateWithTimeIntervalSince1970:0] completionHandler:^{
+        }];
+        return;
+    }
+    NSFileManager *mg = [NSFileManager defaultManager];
+    void (^removeFolder)(NSString *) = ^(NSString *folder){
+        if ([mg fileExistsAtPath:folder]) {
+            [mg removeItemAtPath:folder error:nil];
+        }
+    };
+    NSString *bundleId = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleIdentifier"];
+    NSString *libraryDir = NSSearchPathForDirectoriesInDomains(NSLibraryDirectory,NSUserDomainMask, YES)[0];
+    NSString *tempDir = NSTemporaryDirectory();
+    NSString *path1 = [NSString stringWithFormat:@"%@/WebKit/%@/WebsiteData", libraryDir, bundleId];
+    NSString *path2 = [NSString stringWithFormat:@"%@/Caches/%@/WebKit", libraryDir, bundleId];
+    NSString *path3 = [NSString stringWithFormat:@"%@/%@/WebKit", tempDir, bundleId];
+    removeFolder(path1);
+    removeFolder(path2);
+    removeFolder(path3);
+}
+
 #pragma mark - float view
 
 - (void)showFlowView{

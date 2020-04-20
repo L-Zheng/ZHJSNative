@@ -87,9 +87,13 @@ var vm = {
       window.receiveNativeMessage = parmas => {
         NativeMsg.post(parmas);
       };
-      //渲染
-      window.render = () => {
+      //渲染  ❌此处不要使用async方法  ios原生会报错：JavaScript execution returned a result of an unsupported type
+      window.render = (parmas) => {
+        const json = JSON.parse(decodeURIComponent(parmas));
+        console.log('✅1111够oooowero1234sdffg')
+        console.log(json)
         this.prepareRender();
+        return 'sdddd';
       };
     },
     prepareRender() {
