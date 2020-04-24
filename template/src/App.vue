@@ -1,15 +1,19 @@
 <template>
   <div class="main-wrap">
-    <div style="width:100px;height:100px;background-color:orange;"></div>
-    <div style="word-break:break-all;">
-      <a href="" >@Hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhspfdlk</a>
-      加油吧少年
-      <a href="">@Hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhspfdlk</a>
-    </div>
-    <div>
-      <div v-html="testEmotion"></div>
-      <div v-html="testBigEmotion"></div>
-    </div>
+    <PullRefresh @refresh="onRefresh">
+      <div style="width:100px;height:100px;background-color:orange;"></div>
+      <div style="word-break:break-all;">
+        <a href="" >@Hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhspfdlk</a>
+        加油吧少年
+        <a href="">@Hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhspfdlk</a>
+      </div>
+      <div>
+        <div v-html="testEmotion"></div>
+        <div v-html="testBigEmotion"></div>
+      </div>
+      <div class="bottom">
+      </div>
+    </PullRefresh>
   </div>
 </template>
 
@@ -34,6 +38,7 @@ import {
   requestArticleBriefInfo
 } from "./base/news-request.js";
 import { urlInit } from "./base/url.js";
+import PullRefresh from "./components/PullRefreshView.vue";
 
 import eventBus from "@/base/eventBus";
 function preventDefault(e) {
@@ -42,7 +47,9 @@ function preventDefault(e) {
 
 var vm = {
   name: "app",
-  components: {},
+  components: {
+    PullRefresh,
+  },
   data() {
     return {
       testEmotion: "",
@@ -116,6 +123,11 @@ var vm = {
           this.render();
         });
       }
+    },
+    onRefresh(done) {
+      setTimeout(() => {  
+          done(); //我就想说这里，把状态归0
+      }, 2000);
     }
   }
 };
@@ -133,5 +145,13 @@ export default vm;
   overflow: auto;
   position: relative;
   overflow-x: hidden !important;
+}
+.bottom{
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 50px;
+  background-color: orange;
 }
 </style>
