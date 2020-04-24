@@ -719,7 +719,7 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
               [data isKindOfClass:[NSArray class]]){
         NSError *jsonError;
         NSData *jsonData = [NSJSONSerialization dataWithJSONObject:data options:0 error:&jsonError];
-        res = jsonError ? jsonError.localizedDescription : [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+        res = jsonError ? jsonError.userInfo[NSLocalizedDescriptionKey] : [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
         if (jsonError) return nil;
         res = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
     }else if ([data isKindOfClass:[NSObject class]]){

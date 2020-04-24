@@ -133,7 +133,7 @@ case cType:{\
                 //                [paramsValue invokeMethod:success withArguments:@[result]];
                 if (successFunc) [successFunc callWithArguments:@[result]];
             }else{
-                NSString *errorDesc = error.localizedDescription;
+                NSString *errorDesc = error.userInfo[NSLocalizedDescriptionKey];
                 id desc = error ? (errorDesc.length ? errorDesc : @"发生错误") : @"没有数据";
                 //运行参数里的fail方法
                 //                [paramsValue invokeMethod:fail withArguments:@[result]];
@@ -360,7 +360,7 @@ case cType:{\
         if (!error && result) {
             if (successId.length) [__self callBackJsFunc:successId data:result alive:alive callBack:nil];
         }else{
-            NSString *errorDesc = error.localizedDescription;
+            NSString *errorDesc = error.userInfo[NSLocalizedDescriptionKey];
             id desc = error ? (errorDesc.length ? errorDesc : @"发生错误") : @"没有数据";
             if (failId.length) [__self callBackJsFunc:failId data:desc alive:alive callBack:nil];
         }
