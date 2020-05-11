@@ -8,6 +8,11 @@
  *    如果当前function里面又调用了其他function  var作用域不会延伸到其它function
  *    如果当前function里面有其他function函数体  var作用域会延伸到其它function函数体
  */
+/** ❌ios8 特殊处理
+ * 不识别  let、const变量、() => {}箭头函数 、function函数不能有默认值 如：function(params = {})() 、多参数函数 function (...args)
+ * 不识别模板字符串语法  `--${}`
+ * 不识别语法  endsWith
+ */
 /**
  * 最小化该js文件： 
  * uglify-es库地址 ：https://github.com/mishoo/UglifyJS2
@@ -50,7 +55,13 @@ var ZhengReplaceIosCallBack = function(params) {
     var randomKey = '',
         funcNameKey = '';
     var matchKey = function(key) {
-        if (!funcId.endsWith(key)) return false;
+        var matchNumber = funcId.length - key.length;
+        if ((matchNumber >= 0) && funcId.lastIndexOf(key) == matchNumber) {
+        }else{
+            return false;
+        }
+        //ios 8不识别此语法
+        // if (!funcId.endsWith(key)) return false;
         randomKey = funcId.replace(new RegExp(key, 'g'), '');
         funcNameKey = key;
         return true;
@@ -108,7 +119,7 @@ var ZhengHandleCallBackParams = function(methodName, params) {
         return params;
     }
     /** 0-10000的随机整数 */
-    var randomKey = `-${methodName}-${new Date().getTime()}-${Math.floor(Math.random() * 10000)}-`;
+    var randomKey = '-' + methodName + '-' + new Date().getTime().toString() + '-' + Math.floor(Math.random() * 10000).toString() + '-';
     /** 参数 */
     var newParams = params;
     var funcId = '';
@@ -195,7 +206,7 @@ var ZhengReplaceGeneratorAPI = function(apiPrefix, apiMap) {
 };
 /** ❗️❗️Api配置说明：sync：是否是同步方法 */
 /**
-var fund = ZhengGeneratorAPI('fund', {
+var fund = ZhengReplaceGeneratorAPI('fund', {
     request: {
         sync: false
     },
@@ -215,7 +226,7 @@ var fund = ZhengGeneratorAPI('fund', {
         sync: false
     }
 });
-var zheng = ZhengGeneratorAPI('zheng', {
+var zheng = ZhengReplaceGeneratorAPI('zheng', {
 
 });
  */

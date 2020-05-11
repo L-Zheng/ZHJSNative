@@ -15,6 +15,7 @@
 @interface ZHWebViewManager ()
 //初始化配置资源
 @property (nonatomic, strong) NSMutableArray <ZHWebView *> *webs;
+@property (nonatomic, strong) NSMutableArray <ZHWebView *> *loadingWebs;
 @property (nonatomic,strong) NSLock *lock;
 @end
 
@@ -33,19 +34,9 @@
 }
 
 - (void)install{
-    __weak __typeof__(self) weakSelf = self;
-    
-    NSInteger count = 3 - self.webs.count;
-    if (count > 0) {
-        for (NSInteger i = 0; i < count; i++) {
-            ZHWebView *webView = [self createWebView];
-            [self loadWebView:webView finish:^(BOOL success) {
-                [weakSelf.lock lock];
-                if (success) [weakSelf.webs addObject:webView];
-                [weakSelf.lock unlock];
-            }];
-        }
-    }
+    if (self.webs.count >= 1) return;
+    if (self.loadingWebs.count >= 1) return;
+    [self preReadyWebView];
 }
 
 #pragma mark - webview
@@ -56,6 +47,7 @@
     NSMutableArray *arr = [self.webs mutableCopy];
     if (arr.count == 0) {
         [self.lock unlock];
+        [self preReadyWebView];
         return nil;
     }
     
@@ -65,7 +57,28 @@
     self.webs = [arr mutableCopy];
     
     [self.lock unlock];
+    
+    [self preReadyWebView];
     return webView;
+}
+
+- (void)preReadyWebView{
+    if (self.webs.count >= 3) return;
+    if (self.loadingWebs.count >= 3) return;
+    
+    __weak __typeof__(self) weakSelf = self;
+    ZHWebView *newWebView = [self createWebView];
+    
+    [self.lock lock];
+    [self.loadingWebs addObject:newWebView];
+    [self.lock unlock];
+    
+    [self loadWebView:newWebView finish:^(BOOL success) {
+        [weakSelf.lock lock];
+        [weakSelf.loadingWebs removeObject:newWebView];
+        if (success) [weakSelf.webs addObject:newWebView];
+        [weakSelf.lock unlock];
+    }];
 }
 
 - (void)recycleWebView:(ZHWebView *)webView{
@@ -145,7 +158,8 @@
 }
 
 + (NSString *)localPath{
-    return @"/Users/em/Desktop/My/ZHCode/GitHubCode/ZHJSNative/template";
+    NSString *macUserName = <#MacUserName#>;
+    return [NSString stringWithFormat:@"/Users/%@/Desktop/My/ZHCode/GitHubCode/ZHJSNative/template", macUserName];
 }
 + (NSString *)bundlePathName{
     return @"TestBundle";

@@ -104,8 +104,7 @@ var vm = {
           console.log('✅22222')
           console.log(res)
         })
-        // this.prepareRender();
-        return 'sdddd';
+        this.prepareRender();
       };
     },
     async aaaa() {

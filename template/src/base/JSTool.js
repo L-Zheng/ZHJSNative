@@ -52,7 +52,14 @@ class JSTool {
     isError(value) {
         return JSTool.Type.isError(value)
     }
-    
+    /** 以下方法可改造  类似iOS的category
+        String.prototype.endWith=function(endStr){
+              var d=this.length-endStr.length;
+              return (d>=0&&this.lastIndexOf(endStr)==d);
+         }
+        var str = "abcdef";
+        alert(str.endWidth("ef"));
+    */
     fetchData(json, key, type) {
         const emptyData = function (type) {
             if (type == 'Object') return {}
