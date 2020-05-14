@@ -67,13 +67,13 @@ case cType:{\
 
     __weak __typeof__(self) __self = self;
     
-    [self.apiHandler enumApiMap:^BOOL(NSString *apiPrefix, id <ZHJSApiProtocol> handler, NSDictionary *apiMap) {
+    [self.apiHandler enumApiMap:^BOOL(NSString *apiPrefix, id <ZHJSApiProtocol> handler, NSDictionary <NSString *, NSArray <ZHJSApiMethodItem *> *> *apiMap) {
         if (![apiPrefix isKindOfClass:[NSString class]] || apiPrefix.length == 0) {
             callBack(nil, nil);
             return NO;
         }
         NSMutableDictionary *resMap = [NSMutableDictionary dictionary];
-        [apiMap enumerateKeysAndObjectsUsingBlock:^(NSString *jsMethod, ZHJSApiMethodItem *item, BOOL *stop) {
+        [apiMap enumerateKeysAndObjectsUsingBlock:^(NSString *jsMethod, NSArray<ZHJSApiMethodItem *> *obj, BOOL *stop) {
             //设置方法实现
             [resMap setValue:[__self jsContextApiMapBlock:jsMethod apiPrefix:apiPrefix] forKey:jsMethod];
         }];
@@ -169,7 +169,7 @@ case cType:{\
 - (NSString *)fetchWebViewSocketApi{
     __block NSString *jsPrefix = nil;
     
-    [self.apiHandler enumApiMap:^BOOL(NSString *apiPrefix, id <ZHJSApiProtocol> handler, NSDictionary *apiMap) {
+    [self.apiHandler enumApiMap:^BOOL(NSString *apiPrefix, id <ZHJSApiProtocol> handler, NSDictionary <NSString *, NSArray <ZHJSApiMethodItem *> *> *apiMap) {
         if (![apiPrefix isKindOfClass:[NSString class]] || apiPrefix.length == 0) return NO;
         if ([handler isKindOfClass:[ZHJSInternalSocketApiHandler class]]) {
             jsPrefix = [(ZHJSInternalSocketApiHandler *)handler zh_jsApiPrefixName];
@@ -200,13 +200,15 @@ case cType:{\
      self.fetchWebViewCallFuncName,
      self.fetchWebViewGeneratorApiFuncName];
     
-    [self.apiHandler enumApiMap:^BOOL(NSString *apiPrefix, id <ZHJSApiProtocol> handler, NSDictionary *apiMap) {
+    [self.apiHandler enumApiMap:^BOOL(NSString *apiPrefix, id <ZHJSApiProtocol> handler, NSDictionary <NSString *, NSArray <ZHJSApiMethodItem *> *> *apiMap) {
         if (![apiPrefix isKindOfClass:[NSString class]] || apiPrefix.length == 0) return NO;
         
         NSMutableString *code = [NSMutableString string];
         [code appendString:@"{"];
-        [apiMap enumerateKeysAndObjectsUsingBlock:^(NSString *jsMethod, ZHJSApiMethodItem *item, BOOL *stop) {
-            [code appendFormat:@"%@:{sync:%@},", jsMethod, (item.isSync ? @"true" : @"false")];
+        [apiMap enumerateKeysAndObjectsUsingBlock:^(NSString *jsMethod, NSArray<ZHJSApiMethodItem *> *obj, BOOL *stop) {
+            if (obj.count > 0) {
+                [code appendFormat:@"%@:{sync:%@},", jsMethod, (obj[0].isSync ? @"true" : @"false")];
+            }
         }];
         // 删除最后一个逗号
         NSRange range = [code rangeOfString:@"," options:NSBackwardsSearch];

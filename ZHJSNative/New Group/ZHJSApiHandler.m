@@ -14,6 +14,23 @@
 #import <objc/runtime.h>
 
 @interface ZHJSApiHandler ()
+/**
+@{
+    @"fund": @{
+            @"handler": id <ZHJSApiProtocol>,
+            @"map" : @{
+                    @"getSystemInfoSync": @[
+                            //本类
+                            ZHJSApiMethodItem1,
+                            //父类
+                            ZHJSApiMethodItem2,
+                            //父类的父类
+                            ZHJSApiMethodItem3
+                    ]
+            }
+    }
+}    
+ */
 @property (nonatomic,strong) NSDictionary <NSString *, NSDictionary *> *apiMap;
 
 @property (nonatomic,strong) NSArray <ZHJSInternalApiHandler <ZHJSApiProtocol> *> *internalApiHandlers;
@@ -47,7 +64,10 @@
             for (id <ZHJSApiProtocol> handler in handlers) {
                 NSString *jsPrefix = [__self fetchJSApiPrefix:handler];
                 if (!jsPrefix || jsPrefix.length == 0) continue;
-                [apiMap setValue:@{@"handler": handler, @"map": [__self fetchApiMap:handler]} forKey:jsPrefix];
+                [apiMap setValue:@{
+                    @"handler": handler,
+                    @"map": [__self fetchApiMap:handler]
+                } forKey:jsPrefix];
             }
         };
         block(self.internalApiHandlers);
@@ -62,33 +82,50 @@
     NSString *nativeMethodPrefix = [self fetchNativeApiPrefix:api];
     if (!nativeMethodPrefix || nativeMethodPrefix.length == 0) return @{};
     
-    NSMutableDictionary <NSString *, ZHJSApiMethodItem *> *resMethodMap = [@{} mutableCopy];
+    NSMutableDictionary <NSString *, NSArray <ZHJSApiMethodItem *> *> *resMethodMap = [@{} mutableCopy];
     
-    unsigned int count;
-    Method *methods = class_copyMethodList([api class], &count);
+    //运行时 仅能获取本类中的所有方法 父类中的拿不到
+    Class opCalss = object_getClass(api);
     
-    for (int i = 0; i < count; i++){
-        Method method = methods[i];
-        SEL selector = method_getName(method);
-        NSString *nativeName = NSStringFromSelector(selector);
-        if (![nativeName hasPrefix:nativeMethodPrefix]) continue;
+    while (opCalss &&
+           ![NSStringFromClass(opCalss) isEqualToString:NSStringFromClass([NSObject class])]) {
         
-        NSString *jsName = [nativeName substringFromIndex:nativeMethodPrefix.length];
-        if ([jsName containsString:@":"]) {
-            NSArray *subNames = [jsName componentsSeparatedByString:@":"];
-            jsName = (subNames.count > 0 ? subNames[0] : jsName);
-        }
-        ZHJSApiMethodItem *item = [[ZHJSApiMethodItem alloc] init];
-        item.jsMethodName = jsName;
-        item.nativeMethodName = nativeName;
-        [resMethodMap setValue:item forKey:jsName];
-        //        执行方法
+        unsigned int count;
+        Method *methods = class_copyMethodList(opCalss, &count);
+        
+        for (int i = 0; i < count; i++){
+            SEL selector = method_getName(methods[i]);
+            
+            NSString *nativeName = NSStringFromSelector(selector);
+            if (![nativeName hasPrefix:nativeMethodPrefix]) continue;
+            
+            NSString *jsName = [nativeName substringFromIndex:nativeMethodPrefix.length];
+            if (jsName.length == 0) continue;
+            
+            if ([jsName containsString:@":"]) {
+                NSArray *subNames = [jsName componentsSeparatedByString:@":"];
+                if (subNames.count == 0) continue;
+                jsName = subNames[0];
+            }
+            
+            ZHJSApiMethodItem *item = [[ZHJSApiMethodItem alloc] init];
+            item.jsMethodName = jsName;
+            item.nativeMethodName = nativeName;
+            
+            NSMutableArray <ZHJSApiMethodItem *> *items = [resMethodMap valueForKey:jsName] ?: [@[] mutableCopy];
+            [items addObject:item];
+            
+            [resMethodMap setValue:items forKey:jsName];
+            
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
-        //        [self performSelector:NSSelectorFromString(name) withObject:nil];
+            //        [self performSelector:NSSelectorFromString(name) withObject:nil];
 #pragma clang diagnostic pop
+        }
+        free(methods);
+        
+        opCalss = class_getSuperclass(opCalss);
     }
-    free(methods);
     
     return [resMethodMap copy];
 }
@@ -120,11 +157,11 @@
 #pragma mark - public
 
 //遍历方法映射表
-- (void)enumApiMap:(BOOL (^)(NSString *apiPrefix, id <ZHJSApiProtocol> handler, NSDictionary *apiMap))block{
+- (void)enumApiMap:(BOOL (^)(NSString *apiPrefix, id <ZHJSApiProtocol> handler, NSDictionary <NSString *, NSArray <ZHJSApiMethodItem *> *> *apiMap))block{
     if (!block) return;
     [self.apiMap enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSDictionary *obj, BOOL *stop) {
         NSString *apiPrefix = key;
-        NSDictionary *apiMap = [obj valueForKey:@"map"];
+        NSDictionary <NSString *, NSArray <ZHJSApiMethodItem *> *> *apiMap = [obj valueForKey:@"map"];
         id <ZHJSApiProtocol> handler = [obj valueForKey:@"handler"];
         
         BOOL isStop = block(apiPrefix, handler, apiMap);
@@ -152,9 +189,14 @@
     }
     
     id <ZHJSApiProtocol> handler = [map valueForKey:@"handler"];
-    NSDictionary *apiMap = [map valueForKey:@"map"];
+    NSDictionary <NSString *, NSArray <ZHJSApiMethodItem *> *> *apiMap = [map valueForKey:@"map"];
     
-    ZHJSApiMethodItem *item = apiMap[jsMethodName];
+    NSArray <ZHJSApiMethodItem *> *items = apiMap[jsMethodName];
+    if (items.count == 0) {
+        callBack(nil, nil);
+        return;
+    }
+    ZHJSApiMethodItem *item = items[0];
     if (!item || !item.nativeMethodName) {
         callBack(nil, nil);
         return;
