@@ -20,7 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (BOOL)isUsePreWebView;
 
 #pragma mark - webview
-
+- (ZHWebView *)createWebView;
 - (ZHWebView *)fetchWebView;
 - (void)recycleWebView:(ZHWebView *)webView;
 

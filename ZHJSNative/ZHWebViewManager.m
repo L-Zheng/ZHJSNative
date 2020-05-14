@@ -28,9 +28,11 @@
 #pragma mark - config
 
 + (void)install{
-    [ZhengFile deleteFileOrFolder:[[self getDocumentPath] stringByAppendingPathComponent:@"ZHHtml"]];
+//    [ZhengFile deleteFileOrFolder:[[self getDocumentPath] stringByAppendingPathComponent:@"ZHHtml"]];
     
-    [[ZHWebViewManager shareManager] install];
+    if ([self isUsePreWebView]) {
+        [[ZHWebViewManager shareManager] install];
+    }
 }
 
 - (void)install{
@@ -99,15 +101,9 @@
     return [[ZHWebView alloc] initWithFrame:[UIScreen mainScreen].bounds apiHandlers:[self apiHandlers]];
 }
 - (void)loadWebView:(ZHWebView *)webView finish:(void (^) (BOOL success))finish{
-    NSBundle *bundle = [NSBundle bundleWithPath:[[NSBundle mainBundle] pathForResource:@"TestBundle" ofType:@"bundle"]];
-    NSString *destPath = [bundle pathForResource:@"test.html".stringByDeletingPathExtension ofType:@"test.html".pathExtension];
     
-    NSURL *url = [NSURL fileURLWithPath:destPath];
-    NSURL *accessURL = nil;
-    
-    
-    accessURL = (![ZHWebViewManager isUsePreWebView] ? nil : [NSURL fileURLWithPath:[ZHWebViewManager getDocumentPath]]);
-    url = [ZHWebViewManager sourceTemplate];
+    NSURL *accessURL = (![ZHWebViewManager isUsePreWebView] ? nil : [NSURL fileURLWithPath:[ZHWebViewManager getDocumentPath]]);
+    NSURL *url = [ZHWebViewManager sourceTemplate];
     
     
     [webView loadUrl:url allowingReadAccessToURL:accessURL finish:finish];
@@ -138,6 +134,10 @@
 #pragma mark - other
 //是否使用预先加载的webview
 + (BOOL)isUsePreWebView{
+    if (TARGET_OS_SIMULATOR) {
+        return NO;
+    }
+    return YES;
     NSDictionary *res = [self readLocalConfig];
     if (!res) return YES;
     return [(NSNumber *)[res valueForKey:@"isUsePreWebView"] boolValue];
@@ -164,10 +164,26 @@
 + (NSString *)bundlePathName{
     return @"TestBundle";
 }
+//载入test.html文件
++ (NSURL *)loadBundleTestHtml{
+    NSString *name = @"test.html";
+    
+    BOOL isLocal = YES;
+    NSString *destPath = nil;
+    if (isLocal) {
+        destPath = [[[self localPath] stringByAppendingPathComponent:@"../ZHJSNative/TestBundle.bundle"] stringByAppendingPathComponent:name];
+    }else{
+        destPath = [[NSBundle bundleWithPath:[[NSBundle mainBundle] pathForResource:@"TestBundle" ofType:@"bundle"]] pathForResource:name.stringByDeletingPathExtension ofType:name.pathExtension];
+    }
+    return [NSURL fileURLWithPath:destPath];
+}
 //模板资源文件
 + (NSURL *)sourceTemplate{
     NSString *name = @"release/index.html";
     if (![ZHWebViewManager isUsePreWebView]) {
+        
+//        return [self loadBundleTestHtml];
+        
         //检查本地调试信息
         NSDictionary *res = [self readLocalConfig];
         BOOL isSocket = [(NSNumber *)[res valueForKey:@"isSocket"] boolValue];
@@ -184,7 +200,6 @@
     }
     
     NSString *path = nil;
-    
     //拷贝bundle文件
     path = [[NSBundle mainBundle] pathForResource:[self bundlePathName] ofType:@"bundle"];
     path = [path stringByAppendingPathComponent:@"release"];

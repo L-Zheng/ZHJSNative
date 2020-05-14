@@ -37,6 +37,10 @@
     </script>
     
 <script>
+    window.render = function (params) {
+        const json = JSON.parse(decodeURIComponent(params));
+        console.log(json)
+    }
 
 // const fff = function(t){
 //     console.log(gg)

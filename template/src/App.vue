@@ -98,10 +98,8 @@ var vm = {
       //但可以在方法里面使用async方法
       window.render = (parmas) => {
         const json = JSON.parse(decodeURIComponent(parmas));
-        console.log('✅1111够oooowero1234sdffg')
         console.log(json)
         this.aaaa().then(res => {
-          console.log('✅22222')
           console.log(res)
         })
         this.prepareRender();
@@ -114,7 +112,8 @@ var vm = {
     },
     prepareRender() {
       try {
-        //检查fund api
+        //检查fund api  
+        // ❌不能使用 if(fund)来判断 如果fund没有 js直接报错 代码不再向下运行
         console.log(fund);
         this.render();
       } catch (error) {
@@ -122,6 +121,9 @@ var vm = {
           this.render();
         });
       }
+    },
+    render(){
+
     },
     onRefresh(done) {
       setTimeout(() => {  
