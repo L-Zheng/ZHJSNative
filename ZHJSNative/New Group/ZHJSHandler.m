@@ -67,18 +67,17 @@ case cType:{\
 
     __weak __typeof__(self) __self = self;
     
-    [self.apiHandler enumApiMap:^BOOL(NSString *apiPrefix, id <ZHJSApiProtocol> handler, NSDictionary <NSString *, NSArray <ZHJSApiMethodItem *> *> *apiMap) {
+    [self.apiHandler enumRegsiterApiMap:^(NSString *apiPrefix, NSDictionary<NSString *,ZHJSApiMethodItem *> *apiMap) {
         if (![apiPrefix isKindOfClass:[NSString class]] || apiPrefix.length == 0) {
             callBack(nil, nil);
-            return NO;
+            return;
         }
         NSMutableDictionary *resMap = [NSMutableDictionary dictionary];
-        [apiMap enumerateKeysAndObjectsUsingBlock:^(NSString *jsMethod, NSArray<ZHJSApiMethodItem *> *obj, BOOL *stop) {
+        [apiMap enumerateKeysAndObjectsUsingBlock:^(NSString *jsMethod, ZHJSApiMethodItem *item, BOOL *stop) {
             //设置方法实现
             [resMap setValue:[__self jsContextApiMapBlock:jsMethod apiPrefix:apiPrefix] forKey:jsMethod];
         }];
         callBack(apiPrefix, [resMap copy]);
-        return NO;
     }];
 }
 //JSContext调用原生实现
@@ -167,16 +166,11 @@ case cType:{\
     return jsCode;
 }
 - (NSString *)fetchWebViewSocketApi{
-    __block NSString *jsPrefix = nil;
+    ZHJSInternalSocketApiHandler *socketHandler = [[ZHJSInternalSocketApiHandler alloc] init];
+    if (![socketHandler conformsToProtocol:@protocol(ZHJSApiProtocol)] ||
+        ![socketHandler respondsToSelector:@selector(zh_jsApiPrefixName)]) return nil;
     
-    [self.apiHandler enumApiMap:^BOOL(NSString *apiPrefix, id <ZHJSApiProtocol> handler, NSDictionary <NSString *, NSArray <ZHJSApiMethodItem *> *> *apiMap) {
-        if (![apiPrefix isKindOfClass:[NSString class]] || apiPrefix.length == 0) return NO;
-        if ([handler isKindOfClass:[ZHJSInternalSocketApiHandler class]]) {
-            jsPrefix = [(ZHJSInternalSocketApiHandler *)handler zh_jsApiPrefixName];
-            return YES;
-        }
-        return NO;
-    }];
+    NSString *jsPrefix = [socketHandler zh_jsApiPrefixName];
     
     if (jsPrefix.length == 0) return nil;
     //以下代码由socketEvent.js压缩而成
@@ -200,15 +194,12 @@ case cType:{\
      self.fetchWebViewCallFuncName,
      self.fetchWebViewGeneratorApiFuncName];
     
-    [self.apiHandler enumApiMap:^BOOL(NSString *apiPrefix, id <ZHJSApiProtocol> handler, NSDictionary <NSString *, NSArray <ZHJSApiMethodItem *> *> *apiMap) {
-        if (![apiPrefix isKindOfClass:[NSString class]] || apiPrefix.length == 0) return NO;
-        
+    [self.apiHandler enumRegsiterApiMap:^(NSString *apiPrefix, NSDictionary<NSString *,ZHJSApiMethodItem *> *apiMap) {
+        if (![apiPrefix isKindOfClass:[NSString class]] || apiPrefix.length == 0) return;
         NSMutableString *code = [NSMutableString string];
         [code appendString:@"{"];
-        [apiMap enumerateKeysAndObjectsUsingBlock:^(NSString *jsMethod, NSArray<ZHJSApiMethodItem *> *obj, BOOL *stop) {
-            if (obj.count > 0) {
-                [code appendFormat:@"%@:{sync:%@},", jsMethod, (obj[0].isSync ? @"true" : @"false")];
-            }
+        [apiMap enumerateKeysAndObjectsUsingBlock:^(NSString *jsMethod, ZHJSApiMethodItem *item, BOOL *stop) {
+            [code appendFormat:@"%@:{sync:%@},", jsMethod, (item.isSync ? @"true" : @"false")];
         }];
         // 删除最后一个逗号
         NSRange range = [code rangeOfString:@"," options:NSBackwardsSearch];
@@ -218,7 +209,6 @@ case cType:{\
         [code appendString:@"}"];
         
         [res appendFormat:@"var %@=%@('%@',%@);",apiPrefix, self.fetchWebViewGeneratorApiFuncName, apiPrefix, code];
-        return NO;
     }];
     
     return [res copy];

@@ -1,14 +1,14 @@
 //
-//  ZHCustom1ApiHandler.m
+//  ZHCustom2ApiHandler.m
 //  ZHJSNative
 //
-//  Created by Zheng on 2020/3/28.
+//  Created by EM on 2020/5/15.
 //  Copyright © 2020 Zheng. All rights reserved.
 //
 
-#import "ZHCustom1ApiHandler.h"
+#import "ZHCustom2ApiHandler.h"
 
-@implementation ZHCustom1ApiHandler
+@implementation ZHCustom2ApiHandler
 
 - (void)js_commonLinkTo11:(NSDictionary *)params{
     NSLog(@"-------%s---------", __func__);
@@ -27,4 +27,5 @@
 - (void)dealloc{
     NSLog(@"-------%s---------", __func__);
 }
+
 @end

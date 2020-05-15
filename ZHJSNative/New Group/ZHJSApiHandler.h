@@ -20,7 +20,7 @@
 @property (nonatomic,weak) ZHJSHandler *handler;
 
 //api映射表
-- (void)enumApiMap:(BOOL (^)(NSString *apiPrefix, id <ZHJSApiProtocol> handler, NSDictionary <NSString *, NSArray <ZHJSApiMethodItem *> *> *apiMap))block;
+- (void)enumRegsiterApiMap:(void (^)(NSString *apiPrefix, NSDictionary <NSString *, ZHJSApiMethodItem *> *apiMap))block;
 
 //获取方法名
 - (void)fetchSelectorByName:(NSString *)jsMethodName apiPrefix:(NSString *)apiPrefix callBack:(void (^) (id target, SEL sel))callBack;

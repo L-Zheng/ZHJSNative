@@ -62,6 +62,12 @@ var vm = {
   },
   computed: {},
   mounted() {
+
+    // setTimeout(() => {
+    //   fund1.commonLinkTo11({lll: 'llll'})
+    //   fund1.commonLinkTo22({dddd: 'dddd'})
+    // }, 3000);
+
     const emotionMap = fund.getEmotionResourceSync();
     const bigEmotionMap = fund.getBigEmotionResourceSync();
     this.testEmotion = Emotion.getEmotionText(

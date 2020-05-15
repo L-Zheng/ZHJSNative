@@ -10,6 +10,7 @@
 #import "ZHWebView.h"
 #import "ZHCustomApiHandler.h"
 #import "ZHCustom1ApiHandler.h"
+#import "ZHCustom2ApiHandler.h"
 #import "ZhengFile.h"
 
 @interface ZHWebViewManager ()
@@ -22,7 +23,7 @@
 @implementation ZHWebViewManager
 
 - (NSArray *)apiHandlers{
-    return @[[[ZHCustomApiHandler alloc] init], [[ZHCustom1ApiHandler alloc] init]];
+    return @[[[ZHCustomApiHandler alloc] init], [[ZHCustom1ApiHandler alloc] init], [[ZHCustom2ApiHandler alloc] init]];
 }
 
 #pragma mark - config

@@ -1,4 +1,4 @@
 {
-    "isSocket": 1,
+    "isSocket": 0,
     "socketDebugUrl": "http://172.31.35.80:8080"
 }

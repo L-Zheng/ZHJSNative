@@ -16,22 +16,24 @@
 @interface ZHJSApiHandler ()
 /**
 @{
-    @"fund": @{
-            @"handler": id <ZHJSApiProtocol>,
-            @"map" : @{
-                    @"getSystemInfoSync": @[
-                            //本类
-                            ZHJSApiMethodItem1,
-                            //父类
-                            ZHJSApiMethodItem2,
-                            //父类的父类
-                            ZHJSApiMethodItem3
-                    ]
-            }
-    }
-}    
+    @"fund": @[
+                @{
+                    @"handler": id <ZHJSApiProtocol>,
+                    @"map" : @{
+                            @"getSystemInfoSync": @[
+                                    //本类
+                                    ZHJSApiMethodItem1,
+                                    //父类
+                                    ZHJSApiMethodItem2,
+                                    //父类的父类
+                                    ZHJSApiMethodItem3
+                            ]
+                    }
+                }
+    ]
+}
  */
-@property (nonatomic,strong) NSDictionary <NSString *, NSDictionary *> *apiMap;
+@property (nonatomic,strong) NSDictionary <NSString *, NSArray *> *apiMap;
 
 @property (nonatomic,strong) NSArray <ZHJSInternalApiHandler <ZHJSApiProtocol> *> *internalApiHandlers;
 @property (nonatomic,strong) NSArray <id <ZHJSApiProtocol>> *outsideApiHandlers;
@@ -44,7 +46,7 @@
 - (instancetype)initWithApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers{
     self = [super init];
     if (self) {
-        //m默认内部api
+        //默认内部api
         NSArray *internalApiHandlers = @[
             [[ZHJSInternalSocketApiHandler alloc] init],
             [[ZHJSInternalCustomApiHandler alloc] init]
@@ -56,7 +58,7 @@
         //外部api
         self.outsideApiHandlers = apiHandlers;
         
-        //设置
+        //查找api
         __weak __typeof__(self) __self = self;
         __block NSMutableDictionary *apiMap = [NSMutableDictionary dictionary];
         
@@ -64,14 +66,20 @@
             for (id <ZHJSApiProtocol> handler in handlers) {
                 NSString *jsPrefix = [__self fetchJSApiPrefix:handler];
                 if (!jsPrefix || jsPrefix.length == 0) continue;
-                [apiMap setValue:@{
+                
+                NSMutableArray *items = ([apiMap objectForKey:jsPrefix] ?: [@[] mutableCopy]);
+                [items insertObject:@{
                     @"handler": handler,
                     @"map": [__self fetchApiMap:handler]
-                } forKey:jsPrefix];
+                } atIndex:0];
+                
+                [apiMap setObject:items forKey:jsPrefix];
             }
         };
+        
         block(self.internalApiHandlers);
         block(self.outsideApiHandlers);
+        
         self.apiMap = [apiMap copy];
     }
     return self;
@@ -112,10 +120,10 @@
             item.jsMethodName = jsName;
             item.nativeMethodName = nativeName;
             
-            NSMutableArray <ZHJSApiMethodItem *> *items = [resMethodMap valueForKey:jsName] ?: [@[] mutableCopy];
+            NSMutableArray <ZHJSApiMethodItem *> *items = [resMethodMap objectForKey:jsName] ?: [@[] mutableCopy];
             [items addObject:item];
             
-            [resMethodMap setValue:items forKey:jsName];
+            [resMethodMap setObject:items forKey:jsName];
             
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
@@ -157,15 +165,38 @@
 #pragma mark - public
 
 //遍历方法映射表
-- (void)enumApiMap:(BOOL (^)(NSString *apiPrefix, id <ZHJSApiProtocol> handler, NSDictionary <NSString *, NSArray <ZHJSApiMethodItem *> *> *apiMap))block{
+- (void)enumRegsiterApiMap:(void (^)(NSString *apiPrefix, NSDictionary <NSString *, ZHJSApiMethodItem *> *apiMap))block{
     if (!block) return;
-    [self.apiMap enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSDictionary *obj, BOOL *stop) {
-        NSString *apiPrefix = key;
-        NSDictionary <NSString *, NSArray <ZHJSApiMethodItem *> *> *apiMap = [obj valueForKey:@"map"];
-        id <ZHJSApiProtocol> handler = [obj valueForKey:@"handler"];
+    
+    //合并api
+    NSMutableDictionary *mergeApiMap = [@{} mutableCopy];
+    
+    [self.apiMap enumerateKeysAndObjectsUsingBlock:^(NSString *apiPrefix, NSArray *handlerMaps, BOOL *stop) {
+        NSMutableDictionary <NSString *, ZHJSApiMethodItem *> *apiMap = [@{} mutableCopy];
         
-        BOOL isStop = block(apiPrefix, handler, apiMap);
-        if (isStop) *stop = YES;
+        [handlerMaps enumerateObjectsUsingBlock:^(NSDictionary *handlerMap, NSUInteger idx, BOOL *handlerStop) {
+//            id <ZHJSApiProtocol> handler = [handlerMap objectForKey:@"handler"];
+            NSDictionary *map = [handlerMap objectForKey:@"map"];
+            [map enumerateKeysAndObjectsUsingBlock:^(NSString *jsMethod, NSArray *methodItems, BOOL *mapStop) {
+                if (methodItems.count > 0) {
+                    [apiMap setObject:methodItems[0] forKey:jsMethod];
+                }
+            }];
+            
+        }];
+        
+        /**
+         @{
+             @"fund" : @{
+                     @"getSystemInfoSync" : ZHJSApiMethodItem
+             }
+         }
+         */
+        [mergeApiMap setObject:apiMap forKey:apiPrefix];
+    }];
+    
+    [mergeApiMap enumerateKeysAndObjectsUsingBlock:^(NSString *apiPrefix, NSDictionary *apiMap, BOOL *stop) {
+        if (block) block(apiPrefix, apiMap);
     }];
 }
 
@@ -182,32 +213,36 @@
         callBack(nil, nil);
         return;
     }
-    NSDictionary *map = [self.apiMap valueForKey:apiPrefix];
-    if (!map){
+    
+    NSArray *handlerMaps = [self.apiMap objectForKey:apiPrefix];
+    if (!handlerMaps || handlerMaps.count == 0) {
         callBack(nil, nil);
         return;
     }
     
-    id <ZHJSApiProtocol> handler = [map valueForKey:@"handler"];
-    NSDictionary <NSString *, NSArray <ZHJSApiMethodItem *> *> *apiMap = [map valueForKey:@"map"];
+    SEL selRes = nil;
+    id targetRes = nil;
     
-    NSArray <ZHJSApiMethodItem *> *items = apiMap[jsMethodName];
-    if (items.count == 0) {
-        callBack(nil, nil);
-        return;
-    }
-    ZHJSApiMethodItem *item = items[0];
-    if (!item || !item.nativeMethodName) {
-        callBack(nil, nil);
-        return;
+    for (NSDictionary *handlerMap in handlerMaps) {
+        id <ZHJSApiProtocol> handler = [handlerMap objectForKey:@"handler"];
+        NSDictionary *map = [handlerMap objectForKey:@"map"];
+        
+        NSArray <ZHJSApiMethodItem *> *items = map[jsMethodName];
+        
+        if (items.count == 0) continue;
+        
+        ZHJSApiMethodItem *item = items[0];
+        if (!item || !item.nativeMethodName) continue;
+
+        SEL sel = NSSelectorFromString(item.nativeMethodName);
+        if (!handler || ![handler respondsToSelector:sel]) continue;
+        
+        selRes = sel;
+        targetRes = handler;
+        break;
     }
     
-    SEL sel = NSSelectorFromString(item.nativeMethodName);
-    if (!handler || ![handler respondsToSelector:sel]) {
-        callBack(nil, nil);
-        return;
-    }
-    callBack(handler, sel);
+    callBack(targetRes, selRes);
 }
 - (void)dealloc{
     NSLog(@"-------%s---------", __func__);
