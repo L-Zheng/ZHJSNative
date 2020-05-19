@@ -100,29 +100,32 @@ NSInteger const ZHWebViewPreLoadMaxCount = 1;
         return;
     }
     
-    NSString *preLoadFolder = [self createPreLoadTemplateFolder:webView];
-    
-    if (![ZHWebView checkString:preLoadFolder]) {
-        if (finish) finish(NO);
-        return;
-    }
-    NSString *htmlPath = [preLoadFolder stringByAppendingPathComponent:[ZHWebViewManager templateHtmlName]];
-    if (![self.fm fileExistsAtPath:htmlPath]) {
-        if (finish) finish(NO);
-        return;
-    }
-    
-    //获取上级目录
-    NSString *superFolder = [ZHWebView fetchSuperiorFolder:htmlPath];
-    if (!superFolder) {
-        if (finish) finish(NO);
-        return;
-    }
-    
-    NSURL *accessURL = [NSURL fileURLWithPath:preLoadFolder];
-    NSURL *url = [NSURL fileURLWithPath:htmlPath];
-    
-    [webView loadUrl:url baseURL:[NSURL fileURLWithPath:superFolder isDirectory:YES] allowingReadAccessToURL:accessURL finish:finish];
+    __weak __typeof__(self) __self = self;
+    [self createPreLoadTemplateFolder:webView callBack:^(NSString *loadFolder, NSError *error) {
+        //检查
+        if (![ZHWebView checkString:loadFolder] || error) {
+            if (finish) finish(NO);
+            return;
+        }
+        NSString *htmlPath = [loadFolder stringByAppendingPathComponent:[ZHWebViewManager templateHtmlName]];
+        if (![__self.fm fileExistsAtPath:htmlPath]) {
+            if (finish) finish(NO);
+            return;
+        }
+        
+        //获取上级目录
+        NSString *superFolder = [ZHWebView fetchSuperiorFolder:htmlPath];
+        if (!superFolder) {
+            if (finish) finish(NO);
+            return;
+        }
+        
+        //加载
+        NSURL *accessURL = [NSURL fileURLWithPath:loadFolder];
+        NSURL *url = [NSURL fileURLWithPath:htmlPath];
+        
+        [webView loadUrl:url baseURL:[NSURL fileURLWithPath:superFolder isDirectory:YES] allowingReadAccessToURL:accessURL finish:finish];
+    }];
 }
 
 #pragma mark - file
@@ -162,78 +165,84 @@ NSInteger const ZHWebViewPreLoadMaxCount = 1;
 #pragma mark - path
 
 //获取WebView预加载目录
-- (NSString *)createPreLoadTemplateFolder:(ZHWebView *)webView{
+- (void)createPreLoadTemplateFolder:(ZHWebView *)webView callBack:(void (^) (NSString *loadFolder, NSError *error))callBack{
     if (!webView || ![webView isKindOfClass:[ZHWebView class]]) {
-        return nil;
+        if (callBack) callBack(nil, [NSError new]);
     }
     
     //获取webView模板文件路径
-    NSString *templateFolder = [self fetchTemplateFolder];
-    if (!templateFolder) {
-        return nil;
-    }
-    
-    //目标路径
-    NSString *resFolder = [webView fetchRunSandBox];
-    if (!resFolder) {
-        return nil;
-    }
-    
-    BOOL result = NO;
-    NSError *error = nil;
-    
-    [self.lock lock];
-    
-    //删除目录
-    if ([self.fm fileExistsAtPath:resFolder]) {
-        result = [self.fm removeItemAtPath:resFolder error:&error];
+    __weak __typeof__(self) __self = self;
+    [self fetchTemplateFolder:^(NSString *templateFolder, NSError *error) {
+        if (!templateFolder || error) {
+            if (callBack) callBack(nil, error?:[NSError new]);
+            return;
+        }
         
-        if (!result || error) {
-            [self.lock unlock];
-            return nil;
+        //目标路径
+        NSString *resFolder = [webView fetchRunSandBox];
+        if (!resFolder) {
+            if (callBack) callBack(nil, [NSError new]);
+            return;
         }
-    }else{
-        //创建上级目录 否则拷贝失败
-        NSString *superFolder = [ZHWebView fetchSuperiorFolder:resFolder];
-        if (!superFolder) {
-            [self.lock unlock];
-            return nil;
-        }
-        if (![self.fm fileExistsAtPath:superFolder]) {
-            result = [self.fm createDirectoryAtPath:superFolder withIntermediateDirectories:YES attributes:nil error:&error];
-            if (!result || error) {
-                [self.lock unlock];
-                return nil;
+        
+        BOOL result = NO;
+        NSError *fileError = nil;
+        
+        [__self.lock lock];
+        
+        //删除目录
+        if ([__self.fm fileExistsAtPath:resFolder]) {
+            result = [__self.fm removeItemAtPath:resFolder error:&fileError];
+            
+            if (!result || fileError) {
+                [__self.lock unlock];
+                if (callBack) callBack(nil, fileError?:[NSError new]);
+                return;
+            }
+        }else{
+            //创建上级目录 否则拷贝失败
+            NSString *superFolder = [ZHWebView fetchSuperiorFolder:resFolder];
+            if (!superFolder) {
+                [__self.lock unlock];
+                if (callBack) callBack(nil, [NSError new]);
+                return;
+            }
+            if (![__self.fm fileExistsAtPath:superFolder]) {
+                result = [__self.fm createDirectoryAtPath:superFolder withIntermediateDirectories:YES attributes:nil error:&fileError];
+                if (!result || fileError) {
+                    [__self.lock unlock];
+                    if (callBack) callBack(nil, fileError?:[NSError new]);
+                    return;
+                }
             }
         }
-    }
-    
-    //拷贝模板文件
-    result = [self.fm copyItemAtPath:templateFolder toPath:resFolder error:&error];
-    if (!result || error) {
-        [self.lock unlock];
-        return nil;
-    }
-    
-    [self.lock unlock];
-    return resFolder;
+        
+        //拷贝模板文件
+        result = [__self.fm copyItemAtPath:templateFolder toPath:resFolder error:&fileError];
+        if (!result || fileError) {
+            [__self.lock unlock];
+            if (callBack) callBack(nil, fileError?:[NSError new]);
+            return;
+        }
+        
+        [__self.lock unlock];
+        if (callBack) callBack(resFolder, nil);
+    }];
 }
 //模板文件路径
-- (NSString *)fetchTemplateFolder{
+- (void)fetchTemplateFolder:(void (^) (NSString *templateFolder, NSError *error))callBack{
     //调试配置 使用本地路径文件
     if ([self.class isDebug] && [self.class isSimulator]) {
         NSString *path = [self.class localDebugTemplateFolder];
         if ([self.fm fileExistsAtPath:path]) {
-            return path;
+            if (callBack) callBack(path, nil);
+            return;
         }
     }
     //获取路径
-    NSString *folder = [self.class localReleaseTemplateFolder];
-    if (!folder) {
-        [self updateTemplate];
-        return nil;
-    }
-    return folder;
+    [self.class localReleaseTemplateFolder:^(NSString *templateFolder, NSError *error) {
+        if (callBack) callBack(templateFolder, error);
+    }];
 }
 
 #pragma mark - template
@@ -246,22 +255,31 @@ NSInteger const ZHWebViewPreLoadMaxCount = 1;
     return @{@"appId": @"xxxx"};
 }
 
-- (void)updateTemplate{
+- (void)updateTemplate:(void (^) (NSString *downFolder, NSError *error))callBack{
+    if (callBack) callBack(@"", nil);
 }
 
 
 #pragma mark - debug
 
 //
-+ (NSString *)localReleaseTemplateFolder{
++ (void)localReleaseTemplateFolder:(void (^) (NSString *templateFolder, NSError *error))callBack{
     NSString *folder = nil;
     folder = [[NSBundle mainBundle] pathForResource:[self bundlePathName] ofType:@"bundle"];
     folder = [folder stringByAppendingPathComponent:@"release"];
     
-    if (![[NSFileManager defaultManager] fileExistsAtPath:folder]) {
-        return nil;
+    if ([[NSFileManager defaultManager] fileExistsAtPath:folder]) {
+        if (callBack) callBack(folder, nil);
+        [[self shareManager] updateTemplate:nil];
+        return;
     }
-    return folder;
+    [[self shareManager] updateTemplate:^(NSString *downFolder, NSError *error) {
+        if (downFolder && !error) {
+            if (callBack) callBack(downFolder, nil);
+        }else{
+            if (callBack) callBack(nil, error ? error : [NSError new]);
+        }
+    }];
 }
 
 + (NSString *)localDebugTemplateFolder{

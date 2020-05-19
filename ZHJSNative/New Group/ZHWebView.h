@@ -69,7 +69,7 @@ typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
 
 /// 加载h5
 /// @param url 加载的url路径
-/// @param baseURL 【WebView运行的沙盒目录】仅在iOS8下拷贝所需资源使用
+/// @param baseURL 【WebView运行所需的资源根目录】仅在iOS8下拷贝所需资源使用
 /// @param readAccessURL 允许WebView读取的目录
 /// @param finish 回调
 - (void)loadUrl:(NSURL *)url baseURL:(NSURL *)baseURL allowingReadAccessToURL:(NSURL *)readAccessURL finish:(void (^) (BOOL success))finish;

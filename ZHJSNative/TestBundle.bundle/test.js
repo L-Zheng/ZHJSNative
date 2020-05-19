@@ -1,3 +1,23 @@
+
+
+const sss = []
+// const dd = sss.b
+// console.log(dd)
+console.log({
+    fff: false,
+    ddd: true,
+    qqq: {
+        ppp: 'lll'
+    },
+    rrr: null,
+    eee: 5452,
+    www: 'ttttt',
+    yyy: [null, undefined],
+    uuu: sss.v
+})
+console.log(this)
+
+
 // const aaa = [] 
 //         aaa.forEach(el, index => { });
 
