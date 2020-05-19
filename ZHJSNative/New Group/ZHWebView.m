@@ -31,6 +31,9 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
 #ifdef DEBUG
 @property (nonatomic,strong) ZHFloatView *floatView;
 #endif
+
+@property (nonatomic, strong) NSLock *lock;
+
 @end
 
 @implementation ZHWebView
@@ -122,7 +125,7 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
         //禁用链接预览
         //    [webView setAllowsLinkPreview:NO];
         
-        if (@available(iOS 11.0, *)) {
+        if ([self.class isAvailableIOS11]) {
             self.scrollView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
         }
         
@@ -260,7 +263,7 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
  结果：ios9以上 加载的 index.html位于沙盒内【Documents】设置readAccessURL = Documents目录
  ios9以下 加载的 index.html拷贝到【Temp】文件夹下  需要的资源也要拷贝
  */
-- (void)loadUrl:(NSURL *)url allowingReadAccessToURL:(NSURL *)readAccessURL finish:(void (^) (BOOL success))finish{
+- (void)loadUrl:(NSURL *)url baseURL:(NSURL *)baseURL allowingReadAccessToURL:(NSURL *)readAccessURL finish:(void (^) (BOOL success))finish{
     [self updateFloatViewTitle:@"刷新中..."];
     __weak __typeof__(self) __self = self;
     //回调
@@ -284,7 +287,7 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
         callBack(NO);
         return;
     }
-
+    
     NSString *path = url.path;
     
     //远程Url
@@ -301,7 +304,7 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
         callBack(NO);
         return;
     }
-    if (@available(iOS 9.0, *)) {
+    if ([self.class isAvailableIOS9]) {
         NSURL *fileURL = [ZHWebView fileURLWithPath:path isDirectory:NO];
         if (!fileURL) {
             callBack(NO);
@@ -312,8 +315,56 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
         return;
     }
     
-    //iOS8及以下要拷贝目录到temp
-    NSString *newPath = [ZHWebView copyToTempWithPath:path hierarchy:1];
+    //iOS8
+    //检查路径是否在tmp目录
+    BOOL isInTmpFolder = [path containsString:[self.class getTemporaryFolder]];
+    NSString *newPath = path;
+    //拷贝到tmp目录下
+    if (!isInTmpFolder) {
+        //没有传沙盒路径 默认url的上一级目录为沙盒目录
+        if (!baseURL) {
+            NSString *superFolder = [self.class fetchSuperiorFolder:url.path];
+            if (!superFolder) {
+                callBack(NO);
+                return;
+            }
+            baseURL = [NSURL fileURLWithPath:superFolder];
+            if (![fm fileExistsAtPath:baseURL.path]) {
+                callBack(NO);
+                return;
+            }
+        }
+        //获取相对路径
+        NSArray *baseURLComs = [baseURL pathComponents];
+        NSMutableArray *URLComs = [[url pathComponents] mutableCopy];
+        [URLComs removeObjectsInArray:baseURLComs];
+        NSString *relativePath = [URLComs componentsJoinedByString:@"/"];
+        if (relativePath.length == 0) {
+            callBack(NO);
+            return;
+        }
+        
+        //拷贝
+        BOOL result = NO;
+        NSError *error = nil;
+        
+        NSString *iOS8TargetFolder = [self fetchRunSandBox];
+        if ([fm fileExistsAtPath:iOS8TargetFolder]) {
+            result = [fm removeItemAtPath:iOS8TargetFolder error:&error];
+            if (!result || error) {
+                callBack(NO);
+                return;
+            }
+        }
+        result = [fm copyItemAtPath:baseURL.path toPath:iOS8TargetFolder error:&error];
+        if (!result || error) {
+            callBack(NO);
+            return;
+        }
+        
+        newPath = [iOS8TargetFolder stringByAppendingPathComponent:relativePath];
+    }
+    
     NSURL *fileURL = [ZHWebView fileURLWithPath:newPath isDirectory:NO];
     if (!fileURL) {
         callBack(NO);
@@ -323,6 +374,76 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
     NSURLRequest *request = [NSURLRequest requestWithURL:fileURL];
     [self loadRequest:request];
 }
+
+//渲染js页面
+- (void)render:(NSURL *)jsSourceBaseURL jsSourceURL:(NSURL *)jsSourceURL completionHandler:(void (^)(id res, NSError *error))completionHandler{
+    
+    void (^callBlock)(id, NSError *) = ^(id res, NSError *error){
+        if (completionHandler) completionHandler(res, error);
+    };
+    
+    NSString *sandBox = [self fetchRunSandBox];
+    
+    if (![self.fm fileExistsAtPath:sandBox] ||
+        ![self.class checkURL:jsSourceBaseURL] || ![self.fm fileExistsAtPath:jsSourceBaseURL.path] ||
+        ![self.class checkURL:jsSourceURL] || ![self.fm fileExistsAtPath:jsSourceURL.path]) {
+        
+        callBlock(nil, [NSError errorWithDomain:@"ZHWebViewManager" code:900 userInfo:@{NSLocalizedDescriptionKey: [NSString stringWithFormat:@"loadPath is nil >> %@", jsSourceURL.absoluteString]}]);
+        return;
+    }
+    
+    //拷贝资源、js到沙盒
+    [self.lock lock];
+    
+    BOOL result = NO;
+    NSError *error = nil;
+
+    //获取子目录
+    NSArray *array = [self.fm subpathsAtPath:jsSourceBaseURL.path];
+    NSEnumerator *childFile = [array objectEnumerator];
+    NSString *subpath;
+    
+    while ((subpath = [childFile nextObject]) != nil) {
+        NSString *newSourcePath = [jsSourceBaseURL.path stringByAppendingPathComponent:subpath];
+        NSString *newTargetPath = [sandBox stringByAppendingPathComponent:subpath];
+        if ([self.fm fileExistsAtPath:newTargetPath]) {
+            result = [self.fm removeItemAtPath:newTargetPath error:&error];
+            if (!result || error) {
+                callBlock(nil, error ? error : [NSError errorWithDomain:@"ZHWebViewManager" code:900 userInfo:@{NSLocalizedDescriptionKey: [NSString stringWithFormat:@"remove file is failed. >>> path [%@]", newTargetPath]}]);
+                [self.lock unlock];
+                return;
+            }
+        }
+        result = [self.fm copyItemAtPath:newSourcePath toPath:newTargetPath error:&error];
+        if (!result || error) {
+            callBlock(nil, error ? error : [NSError errorWithDomain:@"ZHWebViewManager" code:900 userInfo:@{NSLocalizedDescriptionKey: [NSString stringWithFormat:@"copy is failed. >>> from path [%@] to path [%@]", newSourcePath, newTargetPath]}]);
+            [self.lock unlock];
+            return;
+        }
+    }
+    
+    NSArray *jsSourceBaseURLComs = [jsSourceBaseURL pathComponents];
+    NSMutableArray *jsSourceURLComs = [[jsSourceURL pathComponents] mutableCopy];
+    [jsSourceURLComs removeObjectsInArray:jsSourceBaseURLComs];
+    NSString *relativePath = [jsSourceURLComs componentsJoinedByString:@"/"];
+    
+    if (![self.class checkString:relativePath]) {
+        callBlock(nil, [NSError errorWithDomain:@"ZHWebViewManager" code:900 userInfo:@{NSLocalizedDescriptionKey: [NSString stringWithFormat:@"loadPath is nil >> path [%@]", jsSourceURL.absoluteString]}]);
+        [self.lock unlock];
+        return;
+    }
+    
+    //渲染
+        NSString *jsonStr = [self.class encodeObj:relativePath];
+        NSString *js = [NSString stringWithFormat:@"loadPage(\"%@\")",jsonStr];
+        __weak __typeof__(self) __self = self;
+        [self evaluateJs:js completionHandler:^(id res, NSError *error) {
+            [__self.lock unlock];
+            if (completionHandler) completionHandler(res, error);
+        }];
+    }
+
+
 
 - (void)dealloc{
     @try {
@@ -447,7 +568,7 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
 
 //当WKWebView总体内存占用过大，页面即将白屏的时候，系统会调用上面的回调函数，我们在该函数里执行[webView reload]（这个时候webView.URL取值尚不为零）解决白屏问题。在一些高内存消耗的页面可能会频繁刷新当前页面
 - (void)webViewWebContentProcessDidTerminate:(WKWebView *)webView{
-    if (@available(iOS 9.0, *)) {
+    if ([self.class isAvailableIOS9]) {
         id <ZHWKNavigationDelegate> de = self.zh_navigationDelegate;
         if (ZHCheckDelegate(de, @selector(webViewWebContentProcessDidTerminate:))) {
             [de webViewWebContentProcessDidTerminate:webView];
@@ -563,7 +684,7 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
     self.zh_UIDelegate = nil;
     self.zh_socketDebugDelegate = nil;
     //清除缓存【否则ios11以上不会实时刷新最新的改动】
-    [self clearCache];
+    [self clearWebViewSystemCache];
     //回调
     if (ZHCheckDelegate(socketDebugDelegate, @selector(webViewRefresh:))) {
         [socketDebugDelegate webViewRefresh:self];
@@ -733,8 +854,8 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
 
 #pragma mark - clear
 
-- (void)clearCache{
-    if (@available(iOS 9.0, *)) {
+- (void)clearWebViewSystemCache{
+    if ([self.class isAvailableIOS9]) {
         WKWebsiteDataStore *dataSource = [WKWebsiteDataStore defaultDataStore];
         [dataSource removeDataOfTypes:[WKWebsiteDataStore allWebsiteDataTypes] modifiedSince:[NSDate dateWithTimeIntervalSince1970:0] completionHandler:^{
         }];
@@ -757,6 +878,89 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
     removeFolder(path3);
 }
 
+#pragma mark - debug
+
++ (BOOL)isAvailableIOS11{
+#ifdef DEBUG
+    if (@available(iOS 11.0, *)) {
+        return YES;
+    }
+    return NO;
+#endif
+    if (@available(iOS 11.0, *)) {
+        return YES;
+    }
+    return NO;
+}
+
++ (BOOL)isAvailableIOS9{
+#ifdef DEBUG
+    //❌
+//    return NO;
+    if (@available(iOS 9.0, *)) {
+        return YES;
+    }
+    return NO;
+#endif
+    if (@available(iOS 9.0, *)) {
+        return YES;
+    }
+    return NO;
+}
+
+#pragma mark - file
+
+- (NSFileManager *)fm{
+    return [NSFileManager defaultManager];
+}
+
+#pragma mark - check
+
++ (BOOL)checkString:(NSString *)string{
+    return !(!string || ![string isKindOfClass:[NSString class]] || string.length == 0);
+}
+
++ (BOOL)checkURL:(NSURL *)URL{
+    return !(!URL || ![URL isKindOfClass:[NSURL class]] || URL.absoluteString.length == 0);
+}
+
+
+#pragma mark - path
+
++ (NSString *)getDocumentFolder{
+    NSArray *userPaths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    return [userPaths objectAtIndex:0];
+}
++ (NSString *)getCacheFolder{
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
+    return [paths objectAtIndex:0];
+}
++ (NSString *)getTemporaryFolder{
+    return NSTemporaryDirectory();
+}
+
+//获取webView运行沙盒
+- (NSString *)fetchRunSandBox{
+    NSString *boxFolder = [NSString stringWithFormat:@"%p", self];
+    if ([self.class isAvailableIOS9]) {
+        return [ZHWebViewFolder() stringByAppendingPathComponent:boxFolder];
+    }
+    return [ZHWebViewTmpFolder() stringByAppendingPathComponent:boxFolder];
+}
+
+//获取路径的上级目录
++ (NSString *)fetchSuperiorFolder:(NSString *)path{
+    if (!path || ![path isKindOfClass:[NSString class]] || path.length == 0) return nil;
+
+    NSMutableArray *pathComs = [[path pathComponents] mutableCopy];
+    if (pathComs.count <= 1) {
+        return nil;
+    }
+    [pathComs removeLastObject];
+    return [pathComs componentsJoinedByString:@"/"];
+}
+
+
 #pragma mark - float view
 
 - (void)showFlowView{
@@ -771,6 +975,14 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
 }
 
 #pragma mark - getter
+
+- (NSLock *)lock{
+    if (!_lock) {
+        _lock = [[NSLock alloc] init];
+    }
+    return _lock;
+}
+
 
 #ifdef DEBUG
 - (ZHFloatView *)floatView{

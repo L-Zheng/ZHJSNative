@@ -67,8 +67,14 @@ typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
 
 #pragma mark - loads
 
-/** 加载h5 */
-- (void)loadUrl:(NSURL *)url allowingReadAccessToURL:(NSURL *)readAccessURL finish:(void (^) (BOOL success))finish;
+/// 加载h5
+/// @param url 加载的url路径
+/// @param baseURL 【WebView运行的沙盒目录】仅在iOS8下拷贝所需资源使用
+/// @param readAccessURL 允许WebView读取的目录
+/// @param finish 回调
+- (void)loadUrl:(NSURL *)url baseURL:(NSURL *)baseURL allowingReadAccessToURL:(NSURL *)readAccessURL finish:(void (^) (BOOL success))finish;
+//渲染js页面
+- (void)render:(NSURL *)jsSourceBaseURL jsSourceURL:(NSURL *)jsSourceURL completionHandler:(void (^)(id res, NSError *error))completionHandler;
 
 /** 发送js消息 */
 - (void)postMessageToJs:(NSString *)funcName params:(NSDictionary *)params completionHandler:(void (^)(id res, NSError *error))completionHandler;
@@ -76,8 +82,46 @@ typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
 
 #pragma mark - clear
 
-- (void)clearCache;
+- (void)clearWebViewSystemCache;
+
+#pragma mark - debug
+
++ (BOOL)isAvailableIOS11;
+
++ (BOOL)isAvailableIOS9;
+
+#pragma mark - path
+
++ (NSString *)getDocumentFolder;
++ (NSString *)getCacheFolder;
++ (NSString *)getTemporaryFolder;
+
+//获取webView运行沙盒
+- (NSString *)fetchRunSandBox;
+
+//获取路径的上级目录
++ (NSString *)fetchSuperiorFolder:(NSString *)path;
+
+#pragma mark - check
+
++ (BOOL)checkString:(NSString *)string;
+
++ (BOOL)checkURL:(NSURL *)URL;
 
 @end
+//目标路径
+__attribute__((unused)) static NSString * ZHWebViewTargetFolder(NSString *home, NSString *name) {
+    NSString *envName = YES ? @"SDKRelease" : @"SDKDevelop";
+    NSString *grayName = (YES ? @"GrayScale" : @"UnGrayScale");
+    return [[[home stringByAppendingPathComponent:name] stringByAppendingPathComponent:envName] stringByAppendingPathComponent:grayName];
+}
+__attribute__((unused)) static NSString * ZHWebViewFolder() {
+    return ZHWebViewTargetFolder([ZHWebView getDocumentFolder], @"ZHWebView");
+}
+__attribute__((unused)) static NSString * ZHWebViewTmpFolder() {
+    return ZHWebViewTargetFolder([ZHWebView getTemporaryFolder], @"ZHWebView");
+}
+
+
 
 //NS_ASSUME_NONNULL_END

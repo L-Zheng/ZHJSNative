@@ -96,7 +96,7 @@
     
     //查找可用WebView
     ZHWebView *webView = nil;
-    if (![ZHWebViewManager isUsePreWebView]) {
+    if (![ZHWebViewManager isUsePreLoadWebView]) {
         webView = nil;
     }else{
         webView = [mg fetchWebView];
@@ -152,6 +152,11 @@
     }
 }
 
+- (void)readyRender11:(NSDictionary *)info{
+    [self.webView render:[NSURL fileURLWithPath:@"/Users/em/Desktop/EMCode/other-person/h5-hybrid/dist1"] jsSourceURL:[NSURL fileURLWithPath:@"/Users/em/Desktop/EMCode/other-person/h5-hybrid/dist1/js/index.js"] completionHandler:^(id res, NSError *error) {
+        NSLog(@"--------------------");
+    }];
+}
 - (void)readyRender:(NSDictionary *)info{
     info = @{
         @"code": @"cccccc",

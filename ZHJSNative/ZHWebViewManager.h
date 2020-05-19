@@ -17,14 +17,12 @@ NS_ASSUME_NONNULL_BEGIN
 + (void)install;
 
 //是否使用预先加载的webview
-+ (BOOL)isUsePreWebView;
++ (BOOL)isUsePreLoadWebView;
 
 #pragma mark - webview
 - (ZHWebView *)createWebView;
 - (ZHWebView *)fetchWebView;
-- (void)recycleWebView:(ZHWebView *)webView;
 
-- (ZHWebView *)createWebView;
 - (void)loadWebView:(ZHWebView *)webView finish:(void (^) (BOOL success))finish;
 @end
 

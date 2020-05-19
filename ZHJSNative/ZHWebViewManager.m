@@ -13,6 +13,8 @@
 #import "ZHCustom2ApiHandler.h"
 #import "ZhengFile.h"
 
+NSInteger const ZHWebViewPreLoadMaxCount = 1;
+
 @interface ZHWebViewManager ()
 //初始化配置资源
 @property (nonatomic, strong) NSMutableArray <ZHWebView *> *webs;
@@ -31,14 +33,18 @@
 + (void)install{
 //    [ZhengFile deleteFileOrFolder:[[self getDocumentPath] stringByAppendingPathComponent:@"ZHHtml"]];
     
-    if ([self isUsePreWebView]) {
+    if ([self isUsePreLoadWebView]) {
         [[ZHWebViewManager shareManager] install];
     }
 }
 
 - (void)install{
+    [self.lock lock];
+    
     if (self.webs.count >= 1) return;
     if (self.loadingWebs.count >= 1) return;
+    
+    [self.lock unlock];
     [self preReadyWebView];
 }
 
@@ -84,38 +90,258 @@
     }];
 }
 
-- (void)recycleWebView:(ZHWebView *)webView{
-    if (webView) webView = nil;
-    
-    if (self.webs.count >= 3) return;
-    
-    __weak __typeof__(self) weakSelf = self;
-    ZHWebView *newWebView = [self createWebView];
-    [self loadWebView:newWebView finish:^(BOOL success) {
-        [weakSelf.lock lock];
-        if (success) [weakSelf.webs addObject:newWebView];
-        [weakSelf.lock unlock];
-    }];
-}
-
 - (ZHWebView *)createWebView{
     return [[ZHWebView alloc] initWithFrame:[UIScreen mainScreen].bounds apiHandlers:[self apiHandlers]];
 }
 - (void)loadWebView:(ZHWebView *)webView finish:(void (^) (BOOL success))finish{
+    if ([self.class isDebug] && [self.class isDebugSocket]) {
+        NSURL *socketUrl = [self.class socketDebugUrl];
+        [webView loadUrl:socketUrl baseURL:nil allowingReadAccessToURL:[NSURL fileURLWithPath:[ZHWebView getDocumentFolder]] finish:finish];
+        return;
+    }
     
-    NSURL *accessURL = (![ZHWebViewManager isUsePreWebView] ? nil : [NSURL fileURLWithPath:[ZHWebViewManager getDocumentPath]]);
-    NSURL *url = [ZHWebViewManager sourceTemplate];
+    NSString *preLoadFolder = [self createPreLoadTemplateFolder:webView];
     
+    if (![ZHWebView checkString:preLoadFolder]) {
+        if (finish) finish(NO);
+        return;
+    }
+    NSString *htmlPath = [preLoadFolder stringByAppendingPathComponent:[ZHWebViewManager templateHtmlName]];
+    if (![self.fm fileExistsAtPath:htmlPath]) {
+        if (finish) finish(NO);
+        return;
+    }
     
-    [webView loadUrl:url allowingReadAccessToURL:accessURL finish:finish];
+    //获取上级目录
+    NSString *superFolder = [ZHWebView fetchSuperiorFolder:htmlPath];
+    if (!superFolder) {
+        if (finish) finish(NO);
+        return;
+    }
+    
+    NSURL *accessURL = [NSURL fileURLWithPath:preLoadFolder];
+    NSURL *url = [NSURL fileURLWithPath:htmlPath];
+    
+    [webView loadUrl:url baseURL:[NSURL fileURLWithPath:superFolder isDirectory:YES] allowingReadAccessToURL:accessURL finish:finish];
+}
+
+#pragma mark - file
+
+- (NSFileManager *)fm{
+    return [NSFileManager defaultManager];
+}
+
+#pragma mark - check
+
+- (BOOL)checkString:(NSString *)string{
+    return !(!string || ![string isKindOfClass:[NSString class]] || string.length == 0);
+}
+
+- (BOOL)checkURL:(NSURL *)URL{
+    return !(!URL || ![URL isKindOfClass:[NSURL class]] || URL.absoluteString.length == 0);
+}
+
+#pragma mark - cache
+
+//清理WebView预加载缓存
+- (void)cleanWebViewPreLoadCache{
+    __weak __typeof__(self) __self = self;
+    void (^block) (NSString *) = ^(NSString *folder){
+        if (![__self.fm fileExistsAtPath:folder]) {
+            return;
+        }
+        [__self.lock lock];
+        [__self.fm removeItemAtPath:folder error:nil];
+        [__self.lock unlock];
+    };
+    
+    block(ZHWebViewFolder());
+    block(ZHWebViewTmpFolder());
 }
 
 #pragma mark - path
 
-+ (NSString *)getDocumentPath{
-    NSArray *userPaths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    return [userPaths objectAtIndex:0];
+//获取WebView预加载目录
+- (NSString *)createPreLoadTemplateFolder:(ZHWebView *)webView{
+    if (!webView || ![webView isKindOfClass:[ZHWebView class]]) {
+        return nil;
+    }
+    
+    //获取webView模板文件路径
+    NSString *templateFolder = [self fetchTemplateFolder];
+    if (!templateFolder) {
+        return nil;
+    }
+    
+    //目标路径
+    NSString *resFolder = [webView fetchRunSandBox];
+    if (!resFolder) {
+        return nil;
+    }
+    
+    BOOL result = NO;
+    NSError *error = nil;
+    
+    [self.lock lock];
+    
+    //删除目录
+    if ([self.fm fileExistsAtPath:resFolder]) {
+        result = [self.fm removeItemAtPath:resFolder error:&error];
+        
+        if (!result || error) {
+            [self.lock unlock];
+            return nil;
+        }
+    }else{
+        //创建上级目录 否则拷贝失败
+        NSString *superFolder = [ZHWebView fetchSuperiorFolder:resFolder];
+        if (!superFolder) {
+            [self.lock unlock];
+            return nil;
+        }
+        if (![self.fm fileExistsAtPath:superFolder]) {
+            result = [self.fm createDirectoryAtPath:superFolder withIntermediateDirectories:YES attributes:nil error:&error];
+            if (!result || error) {
+                [self.lock unlock];
+                return nil;
+            }
+        }
+    }
+    
+    //拷贝模板文件
+    result = [self.fm copyItemAtPath:templateFolder toPath:resFolder error:&error];
+    if (!result || error) {
+        [self.lock unlock];
+        return nil;
+    }
+    
+    [self.lock unlock];
+    return resFolder;
 }
+//模板文件路径
+- (NSString *)fetchTemplateFolder{
+    //调试配置 使用本地路径文件
+    if ([self.class isDebug] && [self.class isSimulator]) {
+        NSString *path = [self.class localDebugTemplateFolder];
+        if ([self.fm fileExistsAtPath:path]) {
+            return path;
+        }
+    }
+    //获取路径
+    NSString *folder = [self.class localReleaseTemplateFolder];
+    if (!folder) {
+        [self updateTemplate];
+        return nil;
+    }
+    return folder;
+}
+
+#pragma mark - template
+
++ (NSString *)templateHtmlName{
+//    template.html  index.html
+    return <#loadHtmlName#>;
+}
++ (NSDictionary *)templateInfo{
+    return @{@"appId": @"xxxx"};
+}
+
+- (void)updateTemplate{
+}
+
+
+#pragma mark - debug
+
+//
++ (NSString *)localReleaseTemplateFolder{
+    NSString *folder = nil;
+    folder = [[NSBundle mainBundle] pathForResource:[self bundlePathName] ofType:@"bundle"];
+    folder = [folder stringByAppendingPathComponent:@"release"];
+    
+    if (![[NSFileManager defaultManager] fileExistsAtPath:folder]) {
+        return nil;
+    }
+    return folder;
+}
+
++ (NSString *)localDebugTemplateFolder{
+    // release  dist
+    NSString *packageName = <#packageName#>;
+    return [[self localDebugTemplatePrjFolder] stringByAppendingPathComponent:packageName];
+}
+
++ (NSString *)localDebugTemplatePrjFolder{
+    // em zheng
+    NSString *macName = <#MacName#>;//em zheng
+    //Desktop/My/ZHCode/GitHubCode/ZHJSNative/template
+    NSString *relativePath = <#prjPath#>;
+
+    return [NSString stringWithFormat:@"/Users/%@/%@", macName, relativePath];
+}
+
++ (NSDictionary *)readLocalDebugConfig{
+    if ([self isDebug] && [self isSimulator]) {
+        NSString *path = [NSString stringWithFormat:@"%@/%@",[self localDebugTemplatePrjFolder], @"FW_RunConfig_Temp.json"];
+        NSData *data = [NSData dataWithContentsOfFile:path];
+        if (!data) return nil;
+        
+        NSError *error = nil;
+        id fileData = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
+        if (!error && [fileData isKindOfClass:[NSDictionary class]]) {
+            return fileData;
+        }else{
+            return nil;
+        }
+    }
+    return nil;
+}
+
++ (BOOL)isDebugSocket{
+    if ([self isDebug]) {
+        NSDictionary *res = [self readLocalDebugConfig];
+        if (!res) return NO;
+        BOOL isSocket = [(NSNumber *)[res valueForKey:@"isSocket"] boolValue];
+        return isSocket;
+    }
+    return NO;
+}
+
++ (NSURL *)socketDebugUrl{
+    if ([self isDebug]) {
+        NSDictionary *res = [self readLocalDebugConfig];
+        if (!res) return nil;
+        NSString *socketUrl = res ? [res valueForKey:@"socketDebugUrl"] : nil;
+        socketUrl = socketUrl?:@"http://172.31.35.80:8080";
+        return [NSURL URLWithString:socketUrl];
+    }
+    return nil;
+}
+
++ (NSString *)bundlePathName{
+    return @"TestBundle";
+}
+
++ (BOOL)isSimulator{
+    if ([self isDebug]) {
+        return TARGET_OS_SIMULATOR ? YES : NO;
+    }
+    return NO;
+}
++ (BOOL)isDebug{
+#ifdef DEBUG
+    return YES;
+#endif
+    return NO;
+}
++ (BOOL)isUsePreLoadWebView{
+    //❌提交代码注释掉
+//    return YES;
+    if ([self isDebug]) {
+        return ![self isSimulator];
+    }
+    return YES;
+}
+
 
 #pragma mark - getter
 
@@ -132,82 +358,11 @@
     return _webs;
 }
 
-#pragma mark - other
-//是否使用预先加载的webview
-+ (BOOL)isUsePreWebView{
-    if (TARGET_OS_SIMULATOR) {
-        return NO;
+- (NSMutableArray<ZHWebView *> *)loadingWebs{
+    if (!_loadingWebs) {
+        _loadingWebs = [@[] mutableCopy];
     }
-    return YES;
-    NSDictionary *res = [self readLocalConfig];
-    if (!res) return YES;
-    return [(NSNumber *)[res valueForKey:@"isUsePreWebView"] boolValue];
-}
-
-+ (NSDictionary *)readLocalConfig{
-    NSString *path = [NSString stringWithFormat:@"%@/%@",[self localPath], @"FW_RunConfig_Temp.json"];
-    NSData *data = [NSData dataWithContentsOfFile:path];
-    if (!data) return nil;
-    
-    NSError *error = nil;
-    id fileData = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
-    if (!error && [fileData isKindOfClass:[NSDictionary class]]) {
-        return fileData;
-    }else{
-        return nil;
-    }
-}
-
-+ (NSString *)localPath{
-    NSString *macUserName = <#MacUserName#>;
-    return [NSString stringWithFormat:@"/Users/%@/Desktop/My/ZHCode/GitHubCode/ZHJSNative/template", macUserName];
-}
-+ (NSString *)bundlePathName{
-    return @"TestBundle";
-}
-//载入test.html文件
-+ (NSURL *)loadBundleTestHtml{
-    NSString *name = @"test.html";
-    
-    BOOL isLocal = YES;
-    NSString *destPath = nil;
-    if (isLocal) {
-        destPath = [[[self localPath] stringByAppendingPathComponent:@"../ZHJSNative/TestBundle.bundle"] stringByAppendingPathComponent:name];
-    }else{
-        destPath = [[NSBundle bundleWithPath:[[NSBundle mainBundle] pathForResource:@"TestBundle" ofType:@"bundle"]] pathForResource:name.stringByDeletingPathExtension ofType:name.pathExtension];
-    }
-    return [NSURL fileURLWithPath:destPath];
-}
-//模板资源文件
-+ (NSURL *)sourceTemplate{
-    NSString *name = @"release/index.html";
-    if (![ZHWebViewManager isUsePreWebView]) {
-        
-//        return [self loadBundleTestHtml];
-        
-        //检查本地调试信息
-        NSDictionary *res = [self readLocalConfig];
-        BOOL isSocket = [(NSNumber *)[res valueForKey:@"isSocket"] boolValue];
-        if (isSocket) {
-            NSString *socketUrl = res ? [res valueForKey:@"socketDebugUrl"] : nil;
-            socketUrl = socketUrl?:@"http://172.31.35.80:8080";
-            return [NSURL URLWithString:socketUrl];
-        }
-        
-        NSFileManager *fileMg = [NSFileManager defaultManager];
-        if ([fileMg fileExistsAtPath:[self localPath]]) {
-            return [NSURL fileURLWithPath:[NSString stringWithFormat:@"%@/%@",[self localPath], name]];
-        }
-    }
-    
-    NSString *path = nil;
-    //拷贝bundle文件
-    path = [[NSBundle mainBundle] pathForResource:[self bundlePathName] ofType:@"bundle"];
-    path = [path stringByAppendingPathComponent:@"release"];
-    NSString *targetPath = [[self getDocumentPath] stringByAppendingPathComponent:@"ZHHtml"];
-    targetPath = [NSString stringWithFormat:@"%@/template_%u", targetPath, arc4random_uniform(10)];
-    [ZhengFile copySourceFile:path toDesPath:targetPath];
-    return [NSURL fileURLWithPath:[targetPath stringByAppendingPathComponent:@"index.html"]];
+    return _loadingWebs;
 }
 
 #pragma mark - share
