@@ -33,15 +33,22 @@
     ]
 }
  */
-@property (nonatomic,strong) NSDictionary <NSString *, NSArray *> *apiMap;
+@property (nonatomic,strong) NSMutableDictionary <NSString *, NSArray *> *apiMap;
 
 @property (nonatomic,strong) NSArray <ZHJSInternalApiHandler <ZHJSApiProtocol> *> *internalApiHandlers;
-@property (nonatomic,strong) NSArray <id <ZHJSApiProtocol>> *outsideApiHandlers;
+@property (nonatomic,strong) NSMutableArray <id <ZHJSApiProtocol>> *outsideApiHandlers;
 @end
 
 @implementation ZHJSApiHandler
 
 #pragma mark - init
+
+- (NSMutableDictionary<NSString *,NSArray *> *)apiMap{
+    if (!_apiMap) {
+        _apiMap = [@{} mutableCopy];
+    }
+    return _apiMap;
+}
 
 - (instancetype)initWithApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers{
     self = [super init];
@@ -49,44 +56,109 @@
         //默认内部api
         NSArray *internalApiHandlers = @[
             [[ZHJSInternalSocketApiHandler alloc] init],
-            [[ZHJSInternalCustomApiHandler alloc] init]
+            [[ZHJSInternalCustomApiHandler alloc] init],
         ];
         for (ZHJSInternalApiHandler *handler in internalApiHandlers) {
             handler.apiHandler = self;
         }
         self.internalApiHandlers = [internalApiHandlers copy];
         //外部api
-        self.outsideApiHandlers = apiHandlers;
+        self.outsideApiHandlers = [apiHandlers mutableCopy];
         
         //查找api
-        __weak __typeof__(self) __self = self;
-        __block NSMutableDictionary *apiMap = [NSMutableDictionary dictionary];
-        
-        void (^block) (NSArray <id <ZHJSApiProtocol>> *) = ^(NSArray <id <ZHJSApiProtocol>> *handlers){
-            for (id <ZHJSApiProtocol> handler in handlers) {
-                NSString *jsPrefix = [__self fetchJSApiPrefix:handler];
-                if (!jsPrefix || jsPrefix.length == 0) continue;
-                
-                NSMutableArray *items = ([apiMap objectForKey:jsPrefix] ?: [@[] mutableCopy]);
-                [items insertObject:@{
-                    @"handler": handler,
-                    @"map": [__self fetchApiMap:handler]
-                } atIndex:0];
-                
-                [apiMap setObject:items forKey:jsPrefix];
-            }
-        };
-        
-        block(self.internalApiHandlers);
-        block(self.outsideApiHandlers);
-        
-        self.apiMap = [apiMap copy];
+        NSArray *mergeHandlers = [self.internalApiHandlers arrayByAddingObjectsFromArray:self.outsideApiHandlers];
+        [self addApiMap:self.apiMap handlers:mergeHandlers];
     }
     return self;
 }
 
-//获取方法映射表
-- (NSDictionary *)fetchApiMap:(id <ZHJSApiProtocol>)api{
+- (NSArray<id<ZHJSApiProtocol>> *)apiHandlers{
+    return [self.outsideApiHandlers copy];
+}
+
+//查找构造api
+- (void)addApiMap:(NSMutableDictionary *)apiMap handlers:(NSArray <id <ZHJSApiProtocol>> *)handlers{
+    for (id <ZHJSApiProtocol> handler in handlers) {
+        
+        NSString *jsPrefix = [self fetchJSApiPrefix:handler];
+        if (!jsPrefix || jsPrefix.length == 0) continue;
+        
+        NSMutableArray *items = ([apiMap objectForKey:jsPrefix] ?: [@[] mutableCopy]);
+        [items insertObject:@{
+            @"handler": handler,
+            @"map": [self fetchNativeApiMap:handler]
+        } atIndex:0];
+        
+        [apiMap setObject:items forKey:jsPrefix];
+    }
+}
+- (void)removeApiMap:(NSMutableDictionary *)apiMap handlers:(NSArray <id <ZHJSApiProtocol>> *)handlers{
+    
+    for (id <ZHJSApiProtocol> handler in handlers) {
+        
+        NSString *jsPrefix = [self fetchJSApiPrefix:handler];
+        if (!jsPrefix || jsPrefix.length == 0) continue;
+        
+        NSMutableArray *items = [[apiMap objectForKey:jsPrefix]?:@[] mutableCopy];
+        if (items.count == 0) continue;
+        
+        NSMutableArray *removeItems = [@[] mutableCopy];
+        
+        for (NSDictionary *map in items) {
+            id <ZHJSApiProtocol> handlerT = [map objectForKey:@"handler"];
+            if (![handler isEqual:handlerT]) continue;
+            [removeItems addObject:map];
+        }
+        if (removeItems.count > 0) {
+            [items removeObjectsInArray:removeItems];
+            [apiMap setObject:items forKey:jsPrefix];
+        }
+    }
+}
+
+//添加移除api
+- (void)addApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers completion:(void (^) (NSArray <id <ZHJSApiProtocol>> *successApiHandlers, NSArray <id <ZHJSApiProtocol>> *failApiHandlers, NSError *error))completion{
+    
+    NSMutableArray *successHandler = [@[] mutableCopy];
+    NSMutableArray *failHandler = [@[] mutableCopy];
+    
+    for (id <ZHJSApiProtocol> handler in apiHandlers) {
+        
+        if ([self.outsideApiHandlers containsObject:handler]) {
+            [failHandler addObject:handler];
+            continue;
+        }
+        
+        [self.outsideApiHandlers addObject:handler];
+        [self addApiMap:self.apiMap handlers:@[handler]];
+        
+        [successHandler addObject:handler];
+    }
+    
+    if (completion) completion([successHandler copy], [failHandler copy], nil);
+}
+- (void)removeApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers completion:(void (^) (NSArray <id <ZHJSApiProtocol>> *successApiHandlers, NSArray <id <ZHJSApiProtocol>> *failApiHandlers, NSError *error))completion{
+    
+    NSMutableArray *successHandler = [@[] mutableCopy];
+    NSMutableArray *failHandler = [@[] mutableCopy];
+    
+    for (id <ZHJSApiProtocol> handler in apiHandlers) {
+        
+        if (![self.outsideApiHandlers containsObject:handler]) {
+            [failHandler addObject:handler];
+            continue;
+        }
+        
+        [self.outsideApiHandlers removeObject:handler];
+        [self removeApiMap:self.apiMap handlers:@[handler]];
+        [successHandler addObject:handler];
+    }
+    
+    if (completion) completion(successHandler, failHandler, nil);
+}
+
+//获取某个handler的方法映射表
+- (NSDictionary *)fetchNativeApiMap:(id <ZHJSApiProtocol>)api{
     NSString *nativeMethodPrefix = [self fetchNativeApiPrefix:api];
     if (!nativeMethodPrefix || nativeMethodPrefix.length == 0) return @{};
     
@@ -164,27 +236,27 @@
 
 #pragma mark - public
 
-//遍历方法映射表
-- (void)enumRegsiterApiMap:(void (^)(NSString *apiPrefix, NSDictionary <NSString *, ZHJSApiMethodItem *> *apiMap))block{
-    if (!block) return;
-    
+//转换成注册api
+- (NSDictionary *)parseApiMapToRegsiterApiMap:(NSDictionary *)apiMap{
+    if (!apiMap || ![apiMap isKindOfClass:[NSDictionary class]] ||
+        apiMap.allKeys.count == 0) return nil;
     //合并api
     NSMutableDictionary *mergeApiMap = [@{} mutableCopy];
     
-    [self.apiMap enumerateKeysAndObjectsUsingBlock:^(NSString *apiPrefix, NSArray *handlerMaps, BOOL *stop) {
-        NSMutableDictionary <NSString *, ZHJSApiMethodItem *> *apiMap = [@{} mutableCopy];
+    [apiMap enumerateKeysAndObjectsUsingBlock:^(NSString *apiPrefix, NSArray *handlerMaps, BOOL *stop) {
+        
+        NSMutableDictionary <NSString *, ZHJSApiMethodItem *> *functionMap = [@{} mutableCopy];
         
         [handlerMaps enumerateObjectsUsingBlock:^(NSDictionary *handlerMap, NSUInteger idx, BOOL *handlerStop) {
-//            id <ZHJSApiProtocol> handler = [handlerMap objectForKey:@"handler"];
+            //            id <ZHJSApiProtocol> handler = [handlerMap objectForKey:@"handler"];
             NSDictionary *map = [handlerMap objectForKey:@"map"];
             [map enumerateKeysAndObjectsUsingBlock:^(NSString *jsMethod, NSArray *methodItems, BOOL *mapStop) {
                 if (methodItems.count > 0) {
-                    [apiMap setObject:methodItems[0] forKey:jsMethod];
+                    [functionMap setObject:methodItems[0] forKey:jsMethod];
                 }
             }];
             
         }];
-        
         /**
          @{
              @"fund" : @{
@@ -192,9 +264,32 @@
              }
          }
          */
-        [mergeApiMap setObject:apiMap forKey:apiPrefix];
+        [mergeApiMap setObject:functionMap forKey:apiPrefix];
     }];
+    return [mergeApiMap copy];
+}
+
+//遍历方法映射表
+- (void)enumRegsiterApiMap:(void (^)(NSString *apiPrefix, NSDictionary <NSString *, ZHJSApiMethodItem *> *apiMap))block{
+    if (!block) return;
     
+    //转换成注册api
+    NSDictionary *mergeApiMap = [self parseApiMapToRegsiterApiMap:self.apiMap];
+    [mergeApiMap enumerateKeysAndObjectsUsingBlock:^(NSString *apiPrefix, NSDictionary *apiMap, BOOL *stop) {
+        if (block) block(apiPrefix, apiMap);
+    }];
+}
+- (void)fetchRegsiterApiMap:(NSArray <id <ZHJSApiProtocol>> *)handlers block:(void (^)(NSString *apiPrefix, NSDictionary <NSString *, ZHJSApiMethodItem *> *apiMap))block{
+    if (!handlers || handlers.count == 0) {
+        if (block) block(nil, nil);
+        return;
+    }
+    //构造api
+    NSMutableDictionary *apiMap = [@{} mutableCopy];
+    [self addApiMap:apiMap handlers:handlers];
+    
+    //转换成注册api
+    NSDictionary *mergeApiMap = [self parseApiMapToRegsiterApiMap:apiMap];
     [mergeApiMap enumerateKeysAndObjectsUsingBlock:^(NSString *apiPrefix, NSDictionary *apiMap, BOOL *stop) {
         if (block) block(apiPrefix, apiMap);
     }];

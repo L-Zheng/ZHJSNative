@@ -12,7 +12,7 @@
 @interface ZHJSContext ()
 @property (nonatomic,strong) ZHJSHandler *handler;
 //外部handler
-@property (nonatomic,strong) NSArray <id <ZHJSApiProtocol>> *apiHandlers;
+//@property (nonatomic,strong) NSArray <id <ZHJSApiProtocol>> *apiHandlers;
 @end
 
 @implementation ZHJSContext
@@ -26,7 +26,7 @@
         self.handler = [[ZHJSHandler alloc] initWithApiHandlers:apiHandlers];
         self.handler.jsContext = self;
         
-        self.apiHandlers = apiHandlers;
+//        self.apiHandlers = apiHandlers;
         
         //注入api
         [self registerException];
@@ -38,6 +38,49 @@
         
     }
     return self;
+}
+
+- (NSArray<id<ZHJSApiProtocol>> *)apiHandlers{
+    return [self.handler apiHandlers];
+}
+
+//添加移除api
+- (void)addApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers completion:(void (^) (NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, id res, NSError *error))completion{
+    __weak __typeof__(self) __self = self;
+    [self.handler addApiHandlers:apiHandlers completion:^(NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, NSString *jsCode, NSError *error) {
+        if (error) {
+            if (completion) completion(successApiHandlers, failApiHandlers, nil, error?:[NSError errorWithDomain:@"" code:404 userInfo:@{NSLocalizedDescriptionKey: @"api注入失败"}]);
+            return;
+        }
+        [__self.handler fetchJSContextApiWithApiHandlers:successApiHandlers callBack:^(NSString *apiPrefix, NSDictionary *apiBlockMap) {
+            if (!apiPrefix || !apiBlockMap) return;
+            if (![apiPrefix isKindOfClass:[NSString class]] ||
+                ![apiBlockMap isKindOfClass:[NSDictionary class]]) return;
+            if (apiPrefix.length == 0 || apiBlockMap.allKeys.count == 0) return;
+            [__self setObject:apiBlockMap forKeyedSubscript:apiPrefix];
+            
+            if (completion) completion(successApiHandlers, failApiHandlers, @{}, nil);
+        }];
+    }];
+}
+- (void)removeApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers completion:(void (^) (NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, id res, NSError *error))completion{
+    __weak __typeof__(self) __self = self;
+    [self.handler removeApiHandlers:apiHandlers completion:^(NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, NSString *jsCode, NSError *error) {
+        if (error) {
+            if (completion) completion(successApiHandlers, failApiHandlers, nil, error?:[NSError errorWithDomain:@"" code:404 userInfo:@{NSLocalizedDescriptionKey: @"api移除失败"}]);
+            return;
+        }
+        [__self.handler fetchJSContextApiWithApiHandlers:successApiHandlers callBack:^(NSString *apiPrefix, NSDictionary *apiBlockMap) {
+            if (!apiPrefix || !apiBlockMap) return;
+            if (![apiPrefix isKindOfClass:[NSString class]] ||
+                ![apiBlockMap isKindOfClass:[NSDictionary class]]) return;
+            if (apiPrefix.length == 0 || apiBlockMap.allKeys.count == 0) return;
+            //因为要移除api  apiMap设定写死传@{}
+            [__self setObject:@{} forKeyedSubscript:apiPrefix];
+            
+            if (completion) completion(successApiHandlers, failApiHandlers, @{}, nil);
+        }];
+    }];
 }
 
 - (void)registerException{

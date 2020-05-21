@@ -183,6 +183,7 @@ var ZhengSendNativeSync = function(params) {
     }
     return null;
 };
+/** 当要移除api时 apiMap为{} */
 var ZhengReplaceGeneratorAPI = function(apiPrefix, apiMap) {
     if (!apiPrefix || !ZhengJSType.isString(apiPrefix) || !ZhengJSType.isObject(apiMap)) {
         return {};

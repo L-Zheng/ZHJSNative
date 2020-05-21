@@ -42,6 +42,44 @@ case cType:{\
     return self;
 }
 
+- (NSArray<id<ZHJSApiProtocol>> *)apiHandlers{
+    return [self.apiHandler apiHandlers];
+}
+
+//添加移除api
+- (void)addApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers completion:(void (^) (NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, NSString *jsCode, NSError *error))completion{
+    __weak __typeof__(self) __self = self;
+    [self.apiHandler addApiHandlers:apiHandlers completion:^(NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, NSError *error) {
+        if (error) {
+            if (completion) completion(successApiHandlers, failApiHandlers, nil, error);
+            return;
+        }
+        NSMutableString *jsCode = [NSMutableString string];
+        [__self.apiHandler fetchRegsiterApiMap:successApiHandlers block:^(NSString *apiPrefix, NSDictionary<NSString *,ZHJSApiMethodItem *> *apiMap) {
+            NSString *code = [__self fetchWebViewApiJsCode:apiPrefix apiMap:apiMap];
+            if (code) [jsCode appendString:code];
+        }];
+        if (completion) completion(successApiHandlers, failApiHandlers, jsCode, nil);
+    }];
+}
+- (void)removeApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers completion:(void (^) (NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, NSString *jsCode, NSError *error))completion{
+    
+    __weak __typeof__(self) __self = self;
+    [self.apiHandler removeApiHandlers:apiHandlers completion:^(NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, NSError *error) {
+        if (error) {
+            if (completion) completion(successApiHandlers, failApiHandlers, nil, error);
+            return;
+        }
+        NSMutableString *jsCode = [NSMutableString string];
+        [__self.apiHandler fetchRegsiterApiMap:successApiHandlers block:^(NSString *apiPrefix, NSDictionary<NSString *,ZHJSApiMethodItem *> *apiMap) {
+            //因为要移除api  apiMap设定写死传@{}
+            NSString *code = [__self fetchWebViewApiJsCode:apiPrefix apiMap:@{}];
+            if (code) [jsCode appendString:code];
+        }];
+        if (completion) completion(successApiHandlers, failApiHandlers, jsCode, nil);
+    }];
+}
+
 #pragma mark - JSContext api
 //JSContext注入的api
 - (void)fetchJSContextLogApi:(void (^) (NSString *apiPrefix, NSDictionary *apiBlockMap))callBack{
@@ -64,24 +102,36 @@ case cType:{\
 }
 - (void)fetchJSContextApi:(void (^) (NSString *apiPrefix, NSDictionary *apiBlockMap))callBack{
     if (!callBack) return;
-
     __weak __typeof__(self) __self = self;
     
     [self.apiHandler enumRegsiterApiMap:^(NSString *apiPrefix, NSDictionary<NSString *,ZHJSApiMethodItem *> *apiMap) {
-        if (![apiPrefix isKindOfClass:[NSString class]] || apiPrefix.length == 0) {
-            callBack(nil, nil);
-            return;
-        }
-        NSMutableDictionary *resMap = [NSMutableDictionary dictionary];
-        [apiMap enumerateKeysAndObjectsUsingBlock:^(NSString *jsMethod, ZHJSApiMethodItem *item, BOOL *stop) {
-            //设置方法实现
-            [resMap setValue:[__self jsContextApiMapBlock:jsMethod apiPrefix:apiPrefix] forKey:jsMethod];
-        }];
-        callBack(apiPrefix, [resMap copy]);
+        NSDictionary *resMap = [__self fetchJSContextNativeImpMap:apiPrefix apiMap:apiMap];
+        callBack(resMap ? apiPrefix : nil, resMap);
     }];
 }
+- (void)fetchJSContextApiWithApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers callBack:(void (^) (NSString *apiPrefix, NSDictionary *apiBlockMap))callBack{
+    if (!callBack) return;
+    __weak __typeof__(self) __self = self;
+    [self.apiHandler fetchRegsiterApiMap:apiHandlers block:^(NSString *apiPrefix, NSDictionary<NSString *,ZHJSApiMethodItem *> *apiMap) {
+        NSDictionary *resMap = [__self fetchJSContextNativeImpMap:apiPrefix apiMap:apiMap];
+        callBack(resMap ? apiPrefix : nil, resMap);
+    }];
+}
+
+- (NSDictionary *)fetchJSContextNativeImpMap:(NSString *)apiPrefix apiMap:(NSDictionary <NSString *,ZHJSApiMethodItem *> *)apiMap{
+    if (![apiPrefix isKindOfClass:[NSString class]] || apiPrefix.length == 0) {
+        return nil;
+    }
+    NSMutableDictionary *resMap = [NSMutableDictionary dictionary];
+    __weak __typeof__(self) __self = self;
+    [apiMap enumerateKeysAndObjectsUsingBlock:^(NSString *jsMethod, ZHJSApiMethodItem *item, BOOL *stop) {
+        //设置方法实现
+        [resMap setValue:[__self jsContextApiMapNativeImp:jsMethod apiPrefix:apiPrefix] forKey:jsMethod];
+    }];
+    return [resMap copy];
+}
 //JSContext调用原生实现
-- (id)jsContextApiMapBlock:(NSString *)key apiPrefix:(NSString *)apiPrefix{
+- (id)jsContextApiMapNativeImp:(NSString *)key apiPrefix:(NSString *)apiPrefix{
     if (!key || key.length == 0) return nil;
     __weak __typeof__(self) __self = self;
     
@@ -182,10 +232,10 @@ case cType:{\
     NSString *jsCode = @"document.documentElement.style.webkitUserSelect='none';document.documentElement.style.webkitTouchCallout='none';";
     return jsCode;
 }
-- (NSString *)fetchWebViewApi{
+- (NSString *)fetchWebViewSupportApi{
     //以下代码由event.js压缩而成
     NSString *formatJS = [NSString stringWithContentsOfFile:[ZHJSHandler jsEventPath] encoding:NSUTF8StringEncoding error:nil];
-    __block NSMutableString *res = [NSMutableString string];
+    NSMutableString *res = [NSMutableString string];
     [res appendFormat:formatJS,
      ZHJSHandlerName,
      self.fetchWebViewCallSuccessFuncKey,
@@ -193,26 +243,38 @@ case cType:{\
      self.fetchWebViewCallCompleteFuncKey,
      self.fetchWebViewCallFuncName,
      self.fetchWebViewGeneratorApiFuncName];
+    return [res copy];
+}
+
+- (NSString *)fetchWebViewApi{
+    NSMutableString *res = [NSMutableString string];
     
     [self.apiHandler enumRegsiterApiMap:^(NSString *apiPrefix, NSDictionary<NSString *,ZHJSApiMethodItem *> *apiMap) {
-        if (![apiPrefix isKindOfClass:[NSString class]] || apiPrefix.length == 0) return;
-        NSMutableString *code = [NSMutableString string];
-        [code appendString:@"{"];
-        [apiMap enumerateKeysAndObjectsUsingBlock:^(NSString *jsMethod, ZHJSApiMethodItem *item, BOOL *stop) {
-            [code appendFormat:@"%@:{sync:%@},", jsMethod, (item.isSync ? @"true" : @"false")];
-        }];
-        // 删除最后一个逗号
-        NSRange range = [code rangeOfString:@"," options:NSBackwardsSearch];
-        if (range.location != NSNotFound){
-            [code deleteCharactersInRange:range];
-        }
-        [code appendString:@"}"];
-        
-        [res appendFormat:@"var %@=%@('%@',%@);",apiPrefix, self.fetchWebViewGeneratorApiFuncName, apiPrefix, code];
+        NSString *jsCode = [self fetchWebViewApiJsCode:apiPrefix apiMap:apiMap];
+        if (jsCode) [res appendString:jsCode];
     }];
     
     return [res copy];
 }
+- (NSString *)fetchWebViewApiJsCode:(NSString *)apiPrefix apiMap:(NSDictionary <NSString *,ZHJSApiMethodItem *> *)apiMap{
+    if (![apiPrefix isKindOfClass:[NSString class]] || apiPrefix.length == 0) return nil;
+    
+    NSMutableString *code = [NSMutableString string];
+    
+    [code appendString:@"{"];
+    [apiMap enumerateKeysAndObjectsUsingBlock:^(NSString *jsMethod, ZHJSApiMethodItem *item, BOOL *stop) {
+        [code appendFormat:@"%@:{sync:%@},", jsMethod, (item.isSync ? @"true" : @"false")];
+    }];
+    // 删除最后一个逗号
+    NSRange range = [code rangeOfString:@"," options:NSBackwardsSearch];
+    if (range.location != NSNotFound){
+        [code deleteCharactersInRange:range];
+    }
+    [code appendString:@"}"];
+    
+    return [NSString stringWithFormat:@"var %@=%@('%@',%@);",apiPrefix, self.fetchWebViewGeneratorApiFuncName, apiPrefix, code];
+}
+
 - (NSString *)fetchWebViewApiFinish{
     //api注入完成通知
     NSString *jsCode = [NSString stringWithFormat:@"var ZhengReadyEvent = document.createEvent('Event');ZhengReadyEvent.initEvent('%@');window.dispatchEvent(ZhengReadyEvent);", self.fetchWebViewApiFinishFlag];

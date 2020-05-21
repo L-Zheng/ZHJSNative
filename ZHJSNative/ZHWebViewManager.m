@@ -94,7 +94,7 @@ NSInteger const ZHWebViewPreLoadMaxCount = 1;
     return [[ZHWebView alloc] initWithFrame:[UIScreen mainScreen].bounds apiHandlers:[self apiHandlers]];
 }
 - (void)loadWebView:(ZHWebView *)webView finish:(void (^) (BOOL success))finish{
-    if ([self.class isDebug] && [self.class isDebugSocket]) {
+    if ([self.class isDebug] && [self.class isDebugSocket] && ![self.class isUseReleaseWhenSimulator]) {
         NSURL *socketUrl = [self.class socketDebugUrl];
         [webView loadUrl:socketUrl baseURL:nil allowingReadAccessToURL:[NSURL fileURLWithPath:[ZHWebView getDocumentFolder]] finish:finish];
         return;
@@ -168,6 +168,7 @@ NSInteger const ZHWebViewPreLoadMaxCount = 1;
 - (void)createPreLoadTemplateFolder:(ZHWebView *)webView callBack:(void (^) (NSString *loadFolder, NSError *error))callBack{
     if (!webView || ![webView isKindOfClass:[ZHWebView class]]) {
         if (callBack) callBack(nil, [NSError new]);
+        return;
     }
     
     //获取webView模板文件路径
@@ -232,7 +233,7 @@ NSInteger const ZHWebViewPreLoadMaxCount = 1;
 //模板文件路径
 - (void)fetchTemplateFolder:(void (^) (NSString *templateFolder, NSError *error))callBack{
     //调试配置 使用本地路径文件
-    if ([self.class isDebug] && [self.class isSimulator]) {
+    if ([self.class isDebug] && [self.class isSimulator] && ![self.class isUseReleaseWhenSimulator]) {
         NSString *path = [self.class localDebugTemplateFolder];
         if ([self.fm fileExistsAtPath:path]) {
             if (callBack) callBack(path, nil);
@@ -262,7 +263,7 @@ NSInteger const ZHWebViewPreLoadMaxCount = 1;
 
 #pragma mark - debug
 
-//
+//加载线上资源
 + (void)localReleaseTemplateFolder:(void (^) (NSString *templateFolder, NSError *error))callBack{
     NSString *folder = nil;
     folder = [[NSBundle mainBundle] pathForResource:[self bundlePathName] ofType:@"bundle"];
@@ -314,23 +315,32 @@ NSInteger const ZHWebViewPreLoadMaxCount = 1;
     return nil;
 }
 
+//当运行模拟器时是否使用release环境
++ (BOOL)isUseReleaseWhenSimulator{
+    if ([self isDebug]) {
+        NSDictionary *res = [self readLocalDebugConfig];
+        if (!res) return NO;
+        return [(NSNumber *)[res valueForKey:@"isUseReleaseWhenSimulator"] boolValue];
+    }
+    return NO;
+}
+//是否使用Socket调试
 + (BOOL)isDebugSocket{
     if ([self isDebug]) {
         NSDictionary *res = [self readLocalDebugConfig];
         if (!res) return NO;
         BOOL isSocket = [(NSNumber *)[res valueForKey:@"isSocket"] boolValue];
-        return isSocket;
+        return isSocket && [self socketDebugUrl] ? YES : NO;
     }
     return NO;
 }
-
 + (NSURL *)socketDebugUrl{
     if ([self isDebug]) {
         NSDictionary *res = [self readLocalDebugConfig];
         if (!res) return nil;
         NSString *socketUrl = res ? [res valueForKey:@"socketDebugUrl"] : nil;
-        socketUrl = socketUrl?:@"http://172.31.35.80:8080";
-        return [NSURL URLWithString:socketUrl];
+//        @"http://172.31.35.80:8080"
+        return socketUrl ? [NSURL URLWithString:socketUrl] : nil;
     }
     return nil;
 }
@@ -353,11 +363,17 @@ NSInteger const ZHWebViewPreLoadMaxCount = 1;
 }
 + (BOOL)isUsePreLoadWebView{
     //❌提交代码注释掉
-//    return YES;
-    if ([self isDebug]) {
-        return ![self isSimulator];
+    //    return YES;
+    if (![self isDebug]) {
+        return YES;
     }
-    return YES;
+    if (![self isSimulator]) {
+        return YES;
+    }
+    if ([self isUseReleaseWhenSimulator]) {
+        return YES;
+    }
+    return NO;
 }
 
 

@@ -17,6 +17,10 @@
 - (instancetype)initWithApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers;
 @property (nonatomic,strong,readonly) NSArray <id <ZHJSApiProtocol>> *apiHandlers;
 
+//添加移除api
+- (void)addApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers completion:(void (^) (NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, id res, NSError *error))completion;
+- (void)removeApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers completion:(void (^) (NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, id res, NSError *error))completion;
+
 - (JSValue *)runJsFunc:(NSString *)funcName arguments:(NSArray *)arguments;
 
 @end

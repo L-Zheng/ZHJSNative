@@ -26,7 +26,7 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
 @property (nonatomic,strong) UIGestureRecognizer *pressGes;
 @property (nonatomic, strong) ZHJSHandler *handler;
 //外部handler
-@property (nonatomic,strong) NSArray <id <ZHJSApiProtocol>> *apiHandlers;
+//@property (nonatomic,strong) NSMutableArray <id <ZHJSApiProtocol>> *apiHandlers;
 
 #ifdef DEBUG
 @property (nonatomic,strong) ZHFloatView *floatView;
@@ -75,6 +75,12 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
         @"mainFrameOnly": @(YES)
     }];
 #endif
+    //api support js
+    [apis addObject:@{
+        @"code": [handler fetchWebViewSupportApi]?:@"",
+        @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentStart),
+        @"mainFrameOnly": @(YES)
+    }];
     //api js
     [apis addObject:@{
         @"code": [handler fetchWebViewApi]?:@"",
@@ -97,7 +103,7 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
     }
     
     //监听js
-    NSArray *handlerNames = [ZHWebView fetchHandlerNames];
+    NSArray *handlerNames = [self.class fetchHandlerNames];
     for (NSString *key in handlerNames) {
         [userContent addScriptMessageHandler:handler name:key];
     }
@@ -143,18 +149,86 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
         //        self.scrollView.delegate = self;
         
         //设置外部handler
-        self.apiHandlers = apiHandlers;
+//        self.apiHandlers = [apiHandlers mutableCopy];
     }
     return self;
 }
-
-
 - (instancetype)initWithFrame:(CGRect)frame configuration:(WKWebViewConfiguration *)configuration{
     self = [super initWithFrame:frame configuration:configuration];
     if (self) {
         [self configGesture];
     }
     return self;
+}
+
+- (NSArray<id<ZHJSApiProtocol>> *)apiHandlers{
+    return [self.handler apiHandlers];
+}
+
+//添加移除api
+- (void)addJsCode:(NSString *)jsCode completion:(void (^) (id res, NSError *error))completion{
+    //WebView 没有加载
+    if (!self.loadSuccess) {
+        WKUserContentController *userContent = self.configuration.userContentController;
+        WKUserScript *script = [[WKUserScript alloc] initWithSource:jsCode injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:YES];
+        [userContent addUserScript:script];
+        
+        if (completion) completion(@{}, nil);
+        return;
+    }
+    //webview已经加载
+    [self evaluateJs:jsCode completionHandler:^(id res, NSError *error) {
+        if (completion) completion(res, error);
+    }];
+}
+- (void)addApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers completion:(void (^) (NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, id res, NSError *error))completion{
+    __weak __typeof__(self) __self = self;
+    
+    [self.handler addApiHandlers:apiHandlers completion:^(NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, NSString *jsCode, NSError *error) {
+        if (jsCode.length == 0 || error) {
+            if (completion) completion(successApiHandlers, failApiHandlers, nil, error?:[NSError errorWithDomain:@"" code:404 userInfo:@{NSLocalizedDescriptionKey: @"api注入失败"}]);
+            return;
+        }
+
+        //WebView 没有加载
+        if (!__self.loadSuccess) {
+            WKUserContentController *userContent = __self.configuration.userContentController;
+            WKUserScript *script = [[WKUserScript alloc] initWithSource:jsCode injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:YES];
+            [userContent addUserScript:script];
+            
+            if (completion) completion(successApiHandlers, failApiHandlers, @{}, nil);
+            return;
+        }
+        //webview已经加载
+        [__self evaluateJs:jsCode completionHandler:^(id res, NSError *error) {
+            if (completion) completion(successApiHandlers, failApiHandlers, res, error);
+        }];
+    }];
+}
+- (void)removeApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers completion:(void (^) (NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, id res, NSError *error))completion{
+    __weak __typeof__(self) __self = self;
+    
+    [self.handler removeApiHandlers:apiHandlers completion:^(NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, NSString *jsCode, NSError *error) {
+        if (jsCode.length == 0 || error) {
+            if (completion) completion(successApiHandlers, failApiHandlers, nil, error?:[NSError errorWithDomain:@"" code:404 userInfo:@{NSLocalizedDescriptionKey: @"api移除失败"}]);
+            return;
+        }
+
+        //WebView 没有加载 【之后添加的addUserScript会覆盖之前的】
+        if (!__self.loadSuccess) {
+            WKUserContentController *userContent = __self.configuration.userContentController;
+            WKUserScript *script = [[WKUserScript alloc] initWithSource:jsCode injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:YES];
+            [userContent addUserScript:script];
+            
+            if (completion) completion(successApiHandlers, failApiHandlers, @{}, nil);
+            return;
+        }
+        
+        //webview已经加载
+        [__self evaluateJs:jsCode completionHandler:^(id res, NSError *error) {
+            if (completion) completion(successApiHandlers, failApiHandlers, res, error);
+        }];
+    }];
 }
 
 #pragma mark - layout
@@ -376,13 +450,21 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
 }
 
 //渲染js页面
-- (void)render:(NSURL *)jsSourceBaseURL jsSourceURL:(NSURL *)jsSourceURL completionHandler:(void (^)(id res, NSError *error))completionHandler{
+- (void)renderLoadPage:(NSURL *)jsSourceBaseURL jsSourceURL:(NSURL *)jsSourceURL completionHandler:(void (^)(id res, NSError *error))completionHandler{
+    [self render:@"loadPage" jsSourceBaseURL:jsSourceBaseURL jsSourceURL:jsSourceURL completionHandler:completionHandler];
+}
+- (void)render:(NSString *)renderFunctionName jsSourceBaseURL:(NSURL *)jsSourceBaseURL jsSourceURL:(NSURL *)jsSourceURL completionHandler:(void (^)(id res, NSError *error))completionHandler{
     
     void (^callBlock)(id, NSError *) = ^(id res, NSError *error){
         if (completionHandler) completionHandler(res, error);
     };
     
     NSString *sandBox = [self fetchRunSandBox];
+    
+    if (![self.class checkString:renderFunctionName]) {
+        callBlock(nil, [NSError errorWithDomain:@"ZHWebViewManager" code:900 userInfo:@{NSLocalizedDescriptionKey: @"renderFunctionName is nil >> %@"}]);
+        return;
+    }
     
     if (![self.fm fileExistsAtPath:sandBox] ||
         ![self.class checkURL:jsSourceBaseURL] || ![self.fm fileExistsAtPath:jsSourceBaseURL.path] ||
@@ -397,7 +479,7 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
     
     BOOL result = NO;
     NSError *error = nil;
-
+    
     //获取子目录
     NSArray *array = [self.fm subpathsAtPath:jsSourceBaseURL.path];
     NSEnumerator *childFile = [array objectEnumerator];
@@ -434,16 +516,14 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
     }
     
     //渲染
-        NSString *jsonStr = [self.class encodeObj:relativePath];
-        NSString *js = [NSString stringWithFormat:@"loadPage(\"%@\")",jsonStr];
-        __weak __typeof__(self) __self = self;
-        [self evaluateJs:js completionHandler:^(id res, NSError *error) {
-            [__self.lock unlock];
-            if (completionHandler) completionHandler(res, error);
-        }];
-    }
-
-
+    NSString *jsonStr = [self.class encodeObj:relativePath];
+    NSString *js = [NSString stringWithFormat:@"%@(\"%@\")",renderFunctionName, jsonStr];
+    __weak __typeof__(self) __self = self;
+    [self evaluateJs:js completionHandler:^(id res, NSError *error) {
+        [__self.lock unlock];
+        if (completionHandler) completionHandler(res, error);
+    }];
+}
 
 - (void)dealloc{
     @try {
@@ -691,112 +771,6 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
     }
 }
 #endif
-
-
-#pragma mark - File Copy
-
-/**拷贝文件(文件夹)到temp目录，hierarchy 需要拷贝的目录层级，
- hierarchy = 0表示仅拷贝srcPath
- hierarchy = 1表示拷贝和srcPath同层级的所有文件
- hierarchy = 2表示拷贝和srcPath同层级的所有文件及上一层所有
- hierarchy = 3表示和srcPath同层及其上2层
- 一次类推
- */
-+ (NSString *)copyToTempWithPath:(NSString *)srcPath hierarchy:(NSInteger)hierarchy {
-    
-    // 如果有参数先记下来
-    NSString *params = @"";
-    NSArray *array = [srcPath componentsSeparatedByString:@"?"];
-    if (array.count > 1) {
-        srcPath = array[0];
-        params = array[1];
-    }
-    
-    NSURL *fileURL = [NSURL fileURLWithPath:srcPath];
-    NSError *error = nil;
-    if (!fileURL.fileURL || ![fileURL checkResourceIsReachableAndReturnError:&error]) {
-        return nil;
-    }
-    // Create "/temp/www" directory
-    //    NSFileManager *fileManager= [NSFileManager defaultManager];
-    NSString *temDirURL = NSTemporaryDirectory();
-    NSString *currentPath = [NSString stringWithString:srcPath];
-    NSString *dstPath = @"";
-    NSString *lastPath = @"";
-    
-    if (hierarchy == 0) {
-        currentPath = srcPath;
-        dstPath = [NSString stringWithFormat:@"%@%@",temDirURL,srcPath.lastPathComponent];
-        [self copyItemAtPath:currentPath toPath:dstPath];
-    } else {
-        //寻找倒数第hierarchy个‘/’
-        NSRange range = NSMakeRange(0, srcPath.length);
-        NSRegularExpression *regx = [NSRegularExpression regularExpressionWithPattern:@"/" options:NSRegularExpressionCaseInsensitive | NSRegularExpressionIgnoreMetacharacters error:nil];
-        NSArray *matches = [regx matchesInString:srcPath options:0 range:range];
-        if (matches.count > hierarchy) {
-            //需要拷贝的那一层目录
-            NSTextCheckingResult *match = matches[matches.count - hierarchy];
-            NSRange matchRange = match.range;
-            currentPath = [srcPath substringToIndex:matchRange.location];
-            lastPath = [srcPath substringFromIndex:matchRange.location + matchRange.length];
-            
-            //找到上一个/来找到需要拷贝的目录名
-            NSTextCheckingResult *matchP = matches[matches.count - hierarchy - 1];
-            NSRange matchRangeP = matchP.range;
-            NSString *folderName = [srcPath substringWithRange:NSMakeRange(matchRangeP.location + matchRangeP.length, matchRange.location - matchRangeP.location - matchRangeP.length)];
-            folderName = [NSString stringWithFormat:@"ZHWebViewHtml/%@_%u", folderName, arc4random_uniform(10)];
-            dstPath = [NSString stringWithFormat:@"%@%@",temDirURL,folderName];
-            [self copyItemAtPath:currentPath toPath:dstPath];
-            NSString *result = [NSString stringWithFormat:@"%@/%@",dstPath,lastPath];
-            dstPath = result;
-        } else {
-            NSLog(@"错误：拷贝的目录层级超过总层级了");
-        }
-        
-    }
-    // 最后再把参数拼上
-    if (params.length > 0) {
-        dstPath = [NSString stringWithFormat:@"%@?%@", dstPath, params];
-    }
-    return dstPath;
-}
-/**创建目录*/
-+ (BOOL)creatDirectory:(NSString *)path {
-    BOOL isDir = NO;
-    NSFileManager *fileManager = [NSFileManager defaultManager];
-    BOOL existed = [fileManager fileExistsAtPath:path isDirectory:&isDir];
-    //目标路径的目录不存在则创建目录
-    if (!(isDir == YES && existed == YES)) {
-        return [fileManager createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:nil];
-    } else {
-        return NO;
-    }
-}
-/**拷贝文件(文件夹)*/
-+ (BOOL)copyItemAtPath:(NSString *)srcPath toPath:(NSString *)dstPath {
-    NSFileManager *fileManager = [NSFileManager defaultManager];
-    
-    if (srcPath.length < 1) {
-        return NO;
-    }
-    BOOL isDir = NO;
-    BOOL exist = [fileManager fileExistsAtPath:srcPath isDirectory:&isDir];
-    if (!exist) {
-        return NO;
-    }
-    
-    NSString *creatPath = dstPath;
-    if (!isDir) {
-        creatPath = [dstPath stringByDeletingLastPathComponent];
-    }
-    //如果不存在则创建目录
-    [self creatDirectory:creatPath];
-    
-    NSError *error;
-    
-    [fileManager removeItemAtPath:creatPath error:&error];
-    return [fileManager copyItemAtPath:srcPath toPath:creatPath error:&error];
-}
 
 #pragma mark - parse URL
 

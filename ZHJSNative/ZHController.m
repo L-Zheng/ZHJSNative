@@ -10,6 +10,9 @@
 #import "ZHWebView.h"
 #import "ZHJSContext.h"
 #import "ZHWebViewManager.h"
+#import "ZHCustomApiHandler.h"
+#import "ZHCustom1ApiHandler.h"
+#import "ZHCustomExtra1ApiHandler.h"
 
 @interface ZHController ()<ZHWebViewSocketDebugDelegate>
 @property (nonatomic, strong) ZHWebView *webView;
@@ -23,10 +26,9 @@
     [self config:NO];
     
     //运算js
-    //    self.context = [[ZHJSContext alloc] initWithApiHandlers:@[[[ZHCustomApiHandler alloc] init], [[ZHCustom1ApiHandler alloc] init]]];
-    //    NSURL *url = [NSURL fileURLWithPath:[ZHUtil jsPath]];
-    //    url = [NSURL fileURLWithPath:@"/Users/zheng/Desktop/ZHCode/GitHubCode/ZHJSNative/ZHJSNative/TestBundle.bundle/test.js"];
-    //    [self.context evaluateScript:[NSString stringWithContentsOfURL:url encoding:NSUTF8StringEncoding error:nil]];
+//        self.context = [[ZHJSContext alloc] initWithApiHandlers:@[[[ZHCustomApiHandler alloc] init], [[ZHCustom1ApiHandler alloc] init]]];
+//        NSURL *url = [NSURL fileURLWithPath:@"/Users/em/Desktop/My/ZHCode/GitHubCode/ZHJSNative/ZHJSNative/TestBundle.bundle/test.js"];
+//        [self.context evaluateScript:[NSString stringWithContentsOfURL:url encoding:NSUTF8StringEncoding error:nil]];
 }
 
 - (void)viewDidLayoutSubviews {
@@ -116,6 +118,10 @@
     }else{
         webView = [mg createWebView];
     }
+    
+    //❌添加api
+//    [webView addApiHandlers:@[[ZHCustomExtra1ApiHandler new]] completion:^(NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, id res, NSError *error) {
+//    }];
     [mg loadWebView:webView finish:^(BOOL success) {
         if (success) {
             config(webView);
@@ -153,7 +159,7 @@
 }
 
 - (void)readyRender11:(NSDictionary *)info{
-    [self.webView render:[NSURL fileURLWithPath:@"/Users/em/Desktop/EMCode/other-person/h5-hybrid/dist1"] jsSourceURL:[NSURL fileURLWithPath:@"/Users/em/Desktop/EMCode/other-person/h5-hybrid/dist1/js/index.js"] completionHandler:^(id res, NSError *error) {
+    [self.webView renderLoadPage:[NSURL fileURLWithPath:@"/Users/em/Desktop/EMCode/other-person/h5-hybrid/dist1"] jsSourceURL:[NSURL fileURLWithPath:@"/Users/em/Desktop/EMCode/other-person/h5-hybrid/dist1/js/index.js"] completionHandler:^(id res, NSError *error) {
         NSLog(@"--------------------");
     }];
 }
@@ -178,7 +184,6 @@
     NSLog(@"%@", js);
     NSLog(@"----☝️jsCode %@ end--", desc);
     //    NSString *js = [NSString stringWithFormat:@"renderA(\"%@\")",type];
-    __weak __typeof__(self) __self = self;
     [self.webView evaluateJs:js completionHandler:^(id res, NSError *error) {
         if (error) {
             NSLog(@"----❌%@--%@--", desc, error);

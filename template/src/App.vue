@@ -3,16 +3,15 @@
     <PullRefresh @refresh="onRefresh">
       <div style="width:100px;height:100px;background-color:orange;"></div>
       <div style="word-break:break-all;">
-        <a href="" >@Hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhspfdlk</a>
+        <a href>@Hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhspfdlk</a>
         加油吧少年
-        <a href="">@Hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhspfdlk</a>
+        <a href>@Hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhspfdlk</a>
       </div>
       <div>
         <div v-html="testEmotion"></div>
         <div v-html="testBigEmotion"></div>
       </div>
-      <div class="bottom">
-      </div>
+      <div class="bottom"></div>
     </PullRefresh>
   </div>
 </template>
@@ -48,7 +47,7 @@ function preventDefault(e) {
 var vm = {
   name: "app",
   components: {
-    PullRefresh,
+    PullRefresh
   },
   data() {
     return {
@@ -61,27 +60,7 @@ var vm = {
     this.addWindowFunc();
   },
   computed: {},
-  mounted() {
-
-    // setTimeout(() => {
-    //   fund1.commonLinkTo11({lll: 'llll'})
-    //   fund1.commonLinkTo22({dddd: 'dddd'})
-    // }, 3000);
-
-    const emotionMap = fund.getEmotionResourceSync();
-    const bigEmotionMap = fund.getBigEmotionResourceSync();
-    this.testEmotion = Emotion.getEmotionText(
-      emotionMap,
-      bigEmotionMap,
-      "[微笑][大笑]"
-    );
-    this.testBigEmotion = Emotion.getEmotionText(
-      emotionMap,
-      bigEmotionMap,
-      "[厉害了]",
-      100
-    );
-  },
+  mounted() {},
   methods: {
     configVue() {
       Vue.config.errorHandler = (oriFunc => {
@@ -100,27 +79,41 @@ var vm = {
       window.receiveNativeMessage = parmas => {
         NativeMsg.post(parmas);
       };
+      window.loadPage = (path, params) => {
+        const newSrc = decodeURIComponent(path);
+        let script = document.createElement("script");
+        script.src = newSrc;
+        script.onload = function() {
+          window.render(params)
+          // console.log('loaded', newSrc);
+          // callback && window[callback](true);
+        };
+        script.onerror = function() {};
+        document.body.append(script);
+      };
       //渲染  ❌此处不要使用async方法  ios原生会报错：JavaScript execution returned a result of an unsupported type
       //但可以在方法里面使用async方法
-      window.render = (parmas) => {
+      window.render = parmas => {
         const json = JSON.parse(decodeURIComponent(parmas));
-        console.log(json)
+        console.log(json);
         this.aaaa().then(res => {
-          console.log(res)
-        })
+          console.log(res);
+        });
         this.prepareRender();
       };
     },
     async aaaa() {
       return new Promise((resolve, reject) => {
-          resolve({sss:'ssss'});
-        })
+        resolve({ sss: "ssss" });
+      });
     },
     prepareRender() {
       try {
-        //检查fund api  
+        //检查fund api
         // ❌不能使用 if(fund)来判断 如果fund没有 js直接报错 代码不再向下运行
         console.log(fund);
+        console.log("window.fund");
+        console.log(window.fund);
         this.render();
       } catch (error) {
         HtmlWindow.addListener("fundJSBridgeReady", () => {
@@ -128,12 +121,29 @@ var vm = {
         });
       }
     },
-    render(){
+    render() {
+      // setTimeout(() => {
+      //   fundxxxxxxxxxxx.commonLinkTo1122({lll: 'fundxxxxxxxxxxx1122'})
+      //   fundxxxxxxxxxxx.commonLinkTo1133({dddd: 'fundxxxxxxxxxxx1133'})
+      // }, 5000);
 
+      const emotionMap = fund.getEmotionResourceSync();
+      const bigEmotionMap = fund.getBigEmotionResourceSync();
+      this.testEmotion = Emotion.getEmotionText(
+        emotionMap,
+        bigEmotionMap,
+        "[微笑][大笑]"
+      );
+      this.testBigEmotion = Emotion.getEmotionText(
+        emotionMap,
+        bigEmotionMap,
+        "[厉害了]",
+        100
+      );
     },
     onRefresh(done) {
-      setTimeout(() => {  
-          done(); //我就想说这里，把状态归0
+      setTimeout(() => {
+        done(); //我就想说这里，把状态归0
       }, 2000);
     }
   }
@@ -153,7 +163,7 @@ export default vm;
   position: relative;
   overflow-x: hidden !important;
 }
-.bottom{
+.bottom {
   position: fixed;
   left: 0;
   bottom: 0;
