@@ -75,13 +75,20 @@ typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
 
 /// 加载h5
 /// @param url 加载的url路径
-/// @param baseURL 【WebView运行所需的资源根目录】仅在iOS8下拷贝所需资源使用
+/// @param baseURL 【WebView运行所需的资源根目录，如果为nil，默认为url的上级目录】
 /// @param readAccessURL 允许WebView读取的目录
 /// @param finish 回调
 - (void)loadUrl:(NSURL *)url baseURL:(NSURL *)baseURL allowingReadAccessToURL:(NSURL *)readAccessURL finish:(void (^) (BOOL success))finish;
-//渲染js页面
+
+/// 渲染js页面
+/// @param jsSourceBaseURL 渲染该js文件所需的资源【jsSourceBaseURL的目录下包含有jsSourceURL文件】
+/// @param jsSourceURL js文件
+/// @param completionHandler 回调
 - (void)renderLoadPage:(NSURL *)jsSourceBaseURL jsSourceURL:(NSURL *)jsSourceURL completionHandler:(void (^)(id res, NSError *error))completionHandler;
 - (void)render:(NSString *)renderFunctionName jsSourceBaseURL:(NSURL *)jsSourceBaseURL jsSourceURL:(NSURL *)jsSourceURL completionHandler:(void (^)(id res, NSError *error))completionHandler;
+
+//webView运行的沙盒目录
+@property (nonatomic, copy, readonly) NSURL *runSandBoxURL;
 
 /** 发送js消息 */
 - (void)postMessageToJs:(NSString *)funcName params:(NSDictionary *)params completionHandler:(void (^)(id res, NSError *error))completionHandler;
@@ -103,8 +110,8 @@ typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
 + (NSString *)getCacheFolder;
 + (NSString *)getTemporaryFolder;
 
-//获取webView运行沙盒
-- (NSString *)fetchRunSandBox;
+//获取webView准备运行沙盒
+- (NSString *)fetchReadyRunSandBox;
 
 //获取路径的上级目录
 + (NSString *)fetchSuperiorFolder:(NSString *)path;
@@ -127,6 +134,13 @@ __attribute__((unused)) static NSString * ZHWebViewFolder() {
 }
 __attribute__((unused)) static NSString * ZHWebViewTmpFolder() {
     return ZHWebViewTargetFolder([ZHWebView getTemporaryFolder], @"ZHWebView");
+}
+__attribute__((unused)) static NSString * ZHWebViewDateString() {
+    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+    [dateFormatter setDateStyle:NSDateFormatterMediumStyle];
+    [dateFormatter setTimeStyle:NSDateFormatterShortStyle];
+    [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss.SSS"];
+    return [dateFormatter stringFromDate:[NSDate date]];
 }
 
 

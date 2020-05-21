@@ -18,6 +18,9 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
 
 @interface ZHWebView ()<WKNavigationDelegate, WKUIDelegate, UIScrollViewDelegate, UIGestureRecognizerDelegate>
 
+//webView运行的沙盒目录
+@property (nonatomic, copy) NSURL *runSandBoxURL;
+
 @property (nonatomic,copy) void (^loadFinish) (BOOL success);
 @property (nonatomic, assign) BOOL loadSuccess;
 @property (nonatomic, assign) BOOL loadFail;
@@ -378,6 +381,22 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
         callBack(NO);
         return;
     }
+    //获取运行沙盒目录
+    NSURL * (^fetchRunBoxFolderBlock) (void) = ^NSURL *(void){
+        if (baseURL) return baseURL;
+        
+        //没有传沙盒路径 默认url的上一级目录为沙盒目录
+        NSString *superFolder = [__self.class fetchSuperiorFolder:url.path];
+        if (!superFolder) {
+            return nil;
+        }
+        NSURL *superURL = [NSURL fileURLWithPath:superFolder];
+        if (![fm fileExistsAtPath:superURL.path]) {
+            return nil;
+        }
+        return superURL;
+    };
+    
     if ([self.class isAvailableIOS9]) {
         NSURL *fileURL = [ZHWebView fileURLWithPath:path isDirectory:NO];
         if (!fileURL) {
@@ -385,6 +404,7 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
             return;
         }
         setWebViewFinish();
+        self.runSandBoxURL = fetchRunBoxFolderBlock();
         [self loadFileURL:fileURL allowingReadAccessToURL:readAccessURL?:[NSURL fileURLWithPath:path.stringByDeletingLastPathComponent]];
         return;
     }
@@ -392,52 +412,70 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
     //iOS8
     //检查路径是否在tmp目录
     BOOL isInTmpFolder = [path containsString:[self.class getTemporaryFolder]];
-    NSString *newPath = path;
-    //拷贝到tmp目录下
-    if (!isInTmpFolder) {
-        //没有传沙盒路径 默认url的上一级目录为沙盒目录
-        if (!baseURL) {
-            NSString *superFolder = [self.class fetchSuperiorFolder:url.path];
-            if (!superFolder) {
-                callBack(NO);
-                return;
-            }
-            baseURL = [NSURL fileURLWithPath:superFolder];
-            if (![fm fileExistsAtPath:baseURL.path]) {
-                callBack(NO);
-                return;
-            }
-        }
-        //获取相对路径
-        NSArray *baseURLComs = [baseURL pathComponents];
-        NSMutableArray *URLComs = [[url pathComponents] mutableCopy];
-        [URLComs removeObjectsInArray:baseURLComs];
-        NSString *relativePath = [URLComs componentsJoinedByString:@"/"];
-        if (relativePath.length == 0) {
+    
+    //在tmp目录下
+    if (isInTmpFolder) {
+        NSURL *fileURL = [ZHWebView fileURLWithPath:path isDirectory:NO];
+        if (!fileURL) {
             callBack(NO);
             return;
         }
-        
-        //拷贝
-        BOOL result = NO;
-        NSError *error = nil;
-        
-        NSString *iOS8TargetFolder = [self fetchRunSandBox];
-        if ([fm fileExistsAtPath:iOS8TargetFolder]) {
-            result = [fm removeItemAtPath:iOS8TargetFolder error:&error];
+        setWebViewFinish();
+        NSURLRequest *request = [NSURLRequest requestWithURL:fileURL];
+        self.runSandBoxURL = fetchRunBoxFolderBlock();
+        [self loadRequest:request];
+        return;
+    }
+    
+    //拷贝到tmp目录下
+    NSURL *newBaseURL = fetchRunBoxFolderBlock();
+    if (!newBaseURL) {
+        callBack(NO);
+        return;
+    }
+    //获取相对路径
+    NSArray *newBaseURLComs = [newBaseURL pathComponents];
+    NSMutableArray *URLComs = [[url pathComponents] mutableCopy];
+    [URLComs removeObjectsInArray:newBaseURLComs];
+    NSString *relativePath = [URLComs componentsJoinedByString:@"/"];
+    if (relativePath.length == 0) {
+        callBack(NO);
+        return;
+    }
+    
+    //拷贝
+    BOOL result = NO;
+    NSError *error = nil;
+    
+    NSString *iOS8TargetFolder = [self fetchReadyRunSandBox];
+    if ([fm fileExistsAtPath:iOS8TargetFolder]) {
+        result = [fm removeItemAtPath:iOS8TargetFolder error:&error];
+        if (!result || error) {
+            callBack(NO);
+            return;
+        }
+    }else{
+        //创建上级目录 否则拷贝失败
+        NSString *superFolder = [self.class fetchSuperiorFolder:iOS8TargetFolder];
+        if (!superFolder) {
+            callBack(NO);
+            return;
+        }
+        if (![self.fm fileExistsAtPath:superFolder]) {
+            result = [self.fm createDirectoryAtPath:superFolder withIntermediateDirectories:YES attributes:nil error:&error];
             if (!result || error) {
                 callBack(NO);
                 return;
             }
         }
-        result = [fm copyItemAtPath:baseURL.path toPath:iOS8TargetFolder error:&error];
-        if (!result || error) {
-            callBack(NO);
-            return;
-        }
-        
-        newPath = [iOS8TargetFolder stringByAppendingPathComponent:relativePath];
     }
+    result = [fm copyItemAtPath:newBaseURL.path toPath:iOS8TargetFolder error:&error];
+    if (!result || error) {
+        callBack(NO);
+        return;
+    }
+    
+    NSString *newPath = [iOS8TargetFolder stringByAppendingPathComponent:relativePath];
     
     NSURL *fileURL = [ZHWebView fileURLWithPath:newPath isDirectory:NO];
     if (!fileURL) {
@@ -446,6 +484,7 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
     }
     setWebViewFinish();
     NSURLRequest *request = [NSURLRequest requestWithURL:fileURL];
+    self.runSandBoxURL = [NSURL fileURLWithPath:iOS8TargetFolder];
     [self loadRequest:request];
 }
 
@@ -459,7 +498,7 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
         if (completionHandler) completionHandler(res, error);
     };
     
-    NSString *sandBox = [self fetchRunSandBox];
+    NSString *sandBox = self.runSandBoxURL.path;
     
     if (![self.class checkString:renderFunctionName]) {
         callBlock(nil, [NSError errorWithDomain:@"ZHWebViewManager" code:900 userInfo:@{NSLocalizedDescriptionKey: @"renderFunctionName is nil >> %@"}]);
@@ -504,6 +543,7 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
         }
     }
     
+    //获取相对路径
     NSArray *jsSourceBaseURLComs = [jsSourceBaseURL pathComponents];
     NSMutableArray *jsSourceURLComs = [[jsSourceURL pathComponents] mutableCopy];
     [jsSourceURLComs removeObjectsInArray:jsSourceBaseURLComs];
@@ -913,8 +953,8 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
     return NSTemporaryDirectory();
 }
 
-//获取webView运行沙盒
-- (NSString *)fetchRunSandBox{
+//获取webView准备运行沙盒
+- (NSString *)fetchReadyRunSandBox{
     NSString *boxFolder = [NSString stringWithFormat:@"%p", self];
     if ([self.class isAvailableIOS9]) {
         return [ZHWebViewFolder() stringByAppendingPathComponent:boxFolder];

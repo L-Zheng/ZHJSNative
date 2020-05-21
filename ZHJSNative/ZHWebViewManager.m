@@ -107,7 +107,7 @@ NSInteger const ZHWebViewPreLoadMaxCount = 1;
             if (finish) finish(NO);
             return;
         }
-        NSString *htmlPath = [loadFolder stringByAppendingPathComponent:[ZHWebViewManager templateHtmlName]];
+        NSString *htmlPath = [loadFolder stringByAppendingPathComponent:[self.class templateHtmlName]];
         if (![__self.fm fileExistsAtPath:htmlPath]) {
             if (finish) finish(NO);
             return;
@@ -180,7 +180,7 @@ NSInteger const ZHWebViewPreLoadMaxCount = 1;
         }
         
         //目标路径
-        NSString *resFolder = [webView fetchRunSandBox];
+        NSString *resFolder = [webView fetchReadyRunSandBox];
         if (!resFolder) {
             if (callBack) callBack(nil, [NSError new]);
             return;
