@@ -122,6 +122,12 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
     config.allowsInlineMediaPlayback = YES;
     config.userContentController = userContent;
     
+    //设置跨域
+    [config.preferences setValue:@YES forKey:@"allowFileAccessFromFileURLs"];
+    if ([self.class isAvailableIOS10]) {
+        [config setValue:@YES forKey:@"allowUniversalAccessFromFileURLs"];
+    }
+    
     self = [self initWithFrame:frame configuration:config];
     if (self) {
         self.backgroundColor = [UIColor colorWithRed:245.0/255.0 green:245.0/255.0 blue:245.0/255.0 alpha:1.0];
@@ -879,6 +885,13 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
     return NO;
 #endif
     if (@available(iOS 11.0, *)) {
+        return YES;
+    }
+    return NO;
+}
+
++ (BOOL)isAvailableIOS10{
+    if (@available(iOS 10.0, *)) {
         return YES;
     }
     return NO;
