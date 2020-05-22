@@ -22,7 +22,7 @@
 
 //js api方法名前缀  如：fund
 - (NSString *)zh_jsApiPrefixName{
-    return @"fundxxxxxxxxxxx";
+    return @"ZhengExtra";
 }
 //ios api方法名前缀 如：js_
 - (NSString *)zh_iosApiPrefixName{

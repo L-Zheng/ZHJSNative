@@ -111,7 +111,11 @@
         }
         if (removeItems.count > 0) {
             [items removeObjectsInArray:removeItems];
-            [apiMap setObject:items forKey:jsPrefix];
+            if (items.count == 0) {
+                [apiMap removeObjectForKey:jsPrefix];
+            }else{
+                [apiMap setObject:items forKey:jsPrefix];
+            }
         }
     }
 }

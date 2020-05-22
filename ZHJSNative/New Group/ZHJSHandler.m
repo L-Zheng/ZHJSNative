@@ -54,29 +54,27 @@ case cType:{\
             if (completion) completion(successApiHandlers, failApiHandlers, nil, error);
             return;
         }
-        NSMutableString *jsCode = [NSMutableString string];
-        [__self.apiHandler fetchRegsiterApiMap:successApiHandlers block:^(NSString *apiPrefix, NSDictionary<NSString *,ZHJSApiMethodItem *> *apiMap) {
-            NSString *code = [__self fetchWebViewApiJsCode:apiPrefix apiMap:apiMap];
-            if (code) [jsCode appendString:code];
-        }];
+        //直接添加  会覆盖掉先前定义的
+        NSString *jsCode = [__self fetchWebViewApi:NO];
         if (completion) completion(successApiHandlers, failApiHandlers, jsCode, nil);
     }];
 }
 - (void)removeApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers completion:(void (^) (NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, NSString *jsCode, NSError *error))completion{
     
     __weak __typeof__(self) __self = self;
+    
+    //先重置掉原来定义的所有api
+    NSString *resetApiJsCode = [self fetchWebViewApi:YES];
+    
     [self.apiHandler removeApiHandlers:apiHandlers completion:^(NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, NSError *error) {
         if (error) {
             if (completion) completion(successApiHandlers, failApiHandlers, nil, error);
             return;
         }
-        NSMutableString *jsCode = [NSMutableString string];
-        [__self.apiHandler fetchRegsiterApiMap:successApiHandlers block:^(NSString *apiPrefix, NSDictionary<NSString *,ZHJSApiMethodItem *> *apiMap) {
-            //因为要移除api  apiMap设定写死传@{}
-            NSString *code = [__self fetchWebViewApiJsCode:apiPrefix apiMap:@{}];
-            if (code) [jsCode appendString:code];
-        }];
-        if (completion) completion(successApiHandlers, failApiHandlers, jsCode, nil);
+        //添加新的api
+        NSString *newApiJsCode = [__self fetchWebViewApi:NO];
+        NSString *resJsCode = [NSString stringWithFormat:@"%@%@", resetApiJsCode?:@"", newApiJsCode];
+        if (completion) completion(successApiHandlers, failApiHandlers, resJsCode, nil);
     }];
 }
 
@@ -109,14 +107,14 @@ case cType:{\
         callBack(resMap ? apiPrefix : nil, resMap);
     }];
 }
-- (void)fetchJSContextApiWithApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers callBack:(void (^) (NSString *apiPrefix, NSDictionary *apiBlockMap))callBack{
-    if (!callBack) return;
-    __weak __typeof__(self) __self = self;
-    [self.apiHandler fetchRegsiterApiMap:apiHandlers block:^(NSString *apiPrefix, NSDictionary<NSString *,ZHJSApiMethodItem *> *apiMap) {
-        NSDictionary *resMap = [__self fetchJSContextNativeImpMap:apiPrefix apiMap:apiMap];
-        callBack(resMap ? apiPrefix : nil, resMap);
-    }];
-}
+//- (void)fetchJSContextApiWithApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers callBack:(void (^) (NSString *apiPrefix, NSDictionary *apiBlockMap))callBack{
+//    if (!callBack) return;
+//    __weak __typeof__(self) __self = self;
+//    [self.apiHandler fetchRegsiterApiMap:apiHandlers block:^(NSString *apiPrefix, NSDictionary<NSString *,ZHJSApiMethodItem *> *apiMap) {
+//        NSDictionary *resMap = [__self fetchJSContextNativeImpMap:apiPrefix apiMap:apiMap];
+//        callBack(resMap ? apiPrefix : nil, resMap);
+//    }];
+//}
 
 - (NSDictionary *)fetchJSContextNativeImpMap:(NSString *)apiPrefix apiMap:(NSDictionary <NSString *,ZHJSApiMethodItem *> *)apiMap{
     if (![apiPrefix isKindOfClass:[NSString class]] || apiPrefix.length == 0) {
@@ -246,14 +244,13 @@ case cType:{\
     return [res copy];
 }
 
-- (NSString *)fetchWebViewApi{
+- (NSString *)fetchWebViewApi:(BOOL)isReset{
     NSMutableString *res = [NSMutableString string];
-    
     [self.apiHandler enumRegsiterApiMap:^(NSString *apiPrefix, NSDictionary<NSString *,ZHJSApiMethodItem *> *apiMap) {
-        NSString *jsCode = [self fetchWebViewApiJsCode:apiPrefix apiMap:apiMap];
+        //因为要移除api  apiMap设定写死传@{}
+        NSString *jsCode = [self fetchWebViewApiJsCode:apiPrefix apiMap:isReset ? @{} : apiMap];
         if (jsCode) [res appendString:jsCode];
     }];
-    
     return [res copy];
 }
 - (NSString *)fetchWebViewApiJsCode:(NSString *)apiPrefix apiMap:(NSDictionary <NSString *,ZHJSApiMethodItem *> *)apiMap{

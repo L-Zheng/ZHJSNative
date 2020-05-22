@@ -52,34 +52,25 @@
             if (completion) completion(successApiHandlers, failApiHandlers, nil, error?:[NSError errorWithDomain:@"" code:404 userInfo:@{NSLocalizedDescriptionKey: @"api注入失败"}]);
             return;
         }
-        [__self.handler fetchJSContextApiWithApiHandlers:successApiHandlers callBack:^(NSString *apiPrefix, NSDictionary *apiBlockMap) {
-            if (!apiPrefix || !apiBlockMap) return;
-            if (![apiPrefix isKindOfClass:[NSString class]] ||
-                ![apiBlockMap isKindOfClass:[NSDictionary class]]) return;
-            if (apiPrefix.length == 0 || apiBlockMap.allKeys.count == 0) return;
-            [__self setObject:apiBlockMap forKeyedSubscript:apiPrefix];
-            
-            if (completion) completion(successApiHandlers, failApiHandlers, @{}, nil);
-        }];
+        //直接添加  会覆盖掉先前定义的
+        [__self registerAPI];
+        if (completion) completion(successApiHandlers, failApiHandlers, @{}, nil);
     }];
 }
 - (void)removeApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers completion:(void (^) (NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, id res, NSError *error))completion{
     __weak __typeof__(self) __self = self;
+    
+    //先重置掉原来定义的所有api
+    [self removeAPI];
+    
     [self.handler removeApiHandlers:apiHandlers completion:^(NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, NSString *jsCode, NSError *error) {
         if (error) {
             if (completion) completion(successApiHandlers, failApiHandlers, nil, error?:[NSError errorWithDomain:@"" code:404 userInfo:@{NSLocalizedDescriptionKey: @"api移除失败"}]);
             return;
         }
-        [__self.handler fetchJSContextApiWithApiHandlers:successApiHandlers callBack:^(NSString *apiPrefix, NSDictionary *apiBlockMap) {
-            if (!apiPrefix || !apiBlockMap) return;
-            if (![apiPrefix isKindOfClass:[NSString class]] ||
-                ![apiBlockMap isKindOfClass:[NSDictionary class]]) return;
-            if (apiPrefix.length == 0 || apiBlockMap.allKeys.count == 0) return;
-            //因为要移除api  apiMap设定写死传@{}
-            [__self setObject:@{} forKeyedSubscript:apiPrefix];
-            
-            if (completion) completion(successApiHandlers, failApiHandlers, @{}, nil);
-        }];
+        //添加新的api
+        [__self registerAPI];
+        if (completion) completion(successApiHandlers, failApiHandlers, @{}, nil);
     }];
 }
 
@@ -107,12 +98,21 @@
     }];
 }
 - (void)registerAPI{
+    [self oprateAPIWithReset:NO];
+}
+- (void)removeAPI{
+    [self oprateAPIWithReset:YES];
+}
+- (void)oprateAPIWithReset:(BOOL)isReset{
     __weak __typeof__(self) __self = self;
     [self.handler fetchJSContextApi:^(NSString *apiPrefix, NSDictionary *apiBlockMap) {
-        if (!apiPrefix || !apiBlockMap) return;
-        if (![apiPrefix isKindOfClass:[NSString class]] ||
-            ![apiBlockMap isKindOfClass:[NSDictionary class]]) return;
-        if (apiPrefix.length == 0 || apiBlockMap.allKeys.count == 0) return;
+        if (!apiPrefix || ![apiPrefix isKindOfClass:[NSString class]] || apiPrefix.length == 0) return;
+        if (isReset) {
+            //因为要移除api  apiMap设定写死传@{}
+            [__self setObject:@{} forKeyedSubscript:apiPrefix];
+            return;
+        }
+        if (!apiBlockMap || ![apiBlockMap isKindOfClass:[NSDictionary class]] || apiBlockMap.allKeys.count == 0) return;
         [__self setObject:apiBlockMap forKeyedSubscript:apiPrefix];
     }];
 }

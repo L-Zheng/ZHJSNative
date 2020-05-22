@@ -26,9 +26,22 @@
     [self config:NO];
     
     //运算js
-//        self.context = [[ZHJSContext alloc] initWithApiHandlers:@[[[ZHCustomApiHandler alloc] init], [[ZHCustom1ApiHandler alloc] init]]];
-//        NSURL *url = [NSURL fileURLWithPath:@"/Users/em/Desktop/My/ZHCode/GitHubCode/ZHJSNative/ZHJSNative/TestBundle.bundle/test.js"];
-//        [self.context evaluateScript:[NSString stringWithContentsOfURL:url encoding:NSUTF8StringEncoding error:nil]];
+//    self.context = [[ZHJSContext alloc] initWithApiHandlers:@[[[ZHCustomApiHandler alloc] init], [[ZHCustom1ApiHandler alloc] init]]];
+//    NSURL *url = [NSURL fileURLWithPath:@"/Users/em/Desktop/My/ZHCode/GitHubCode/ZHJSNative/ZHJSNative/TestBundle.bundle/test.js"];
+//    [self.context evaluateScript:[NSString stringWithContentsOfURL:url encoding:NSUTF8StringEncoding error:nil]];
+//
+////    ZHCustomExtra1ApiHandler *extr1 = [ZHCustomExtra1ApiHandler new];
+////    [self.context addApiHandlers:@[extr1] completion:^(NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, id res, NSError *error) {
+////        JSValue *addApiTestValue = [self.context objectForKeyedSubscript:@"addApiTest"];
+////        [addApiTestValue callWithArguments:@[]];
+////
+////
+////        [self.context removeApiHandlers:@[extr1] completion:^(NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, id res, NSError *error) {
+////            JSValue *addApiTestValue = [self.context objectForKeyedSubscript:@"addApiTest"];
+////            [addApiTestValue callWithArguments:@[]];
+////
+////        }];
+////    }];
 }
 
 - (void)viewDidLayoutSubviews {
@@ -118,10 +131,6 @@
     }else{
         webView = [mg createWebView];
     }
-    
-    //❌添加api
-//    [webView addApiHandlers:@[[ZHCustomExtra1ApiHandler new]] completion:^(NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, id res, NSError *error) {
-//    }];
     [mg loadWebView:webView finish:^(BOOL success) {
         if (success) {
             config(webView);
@@ -190,6 +199,24 @@
         }else{
             NSLog(@"----✅%@---", desc);
         }
+//        ZHCustomExtra1ApiHandler *extraApi = [ZHCustomExtra1ApiHandler new];
+//        [self.webView addApiHandlers:@[extraApi] completion:^(NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, id res, NSError *error) {
+//            NSLog(@"--------------------");
+//            [self.webView evaluateJs:@"window.addApiTest();" completionHandler:^(id res, NSError *error) {
+//                NSLog(@"--------------------");
+//
+//
+//                [self.webView removeApiHandlers:@[extraApi] completion:^(NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, id res, NSError *error) {
+//                    NSLog(@"--------------------");
+//
+//                    [self.webView evaluateJs:@"window.addApiTest();" completionHandler:^(id res, NSError *error) {
+//                        NSLog(@"--------------------");
+//                    }];
+//
+//                }];
+//
+//            }];
+//        }];
     }];
 }
 

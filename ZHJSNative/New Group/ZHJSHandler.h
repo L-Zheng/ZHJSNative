@@ -33,7 +33,7 @@ static NSString * const ZHJSHandlerErrorName = @"ZHJSErrorEventHandler";
 
 //JSContext注入的api
 - (void)fetchJSContextApi:(void (^) (NSString *apiPrefix, NSDictionary *apiBlockMap))callBack;
-- (void)fetchJSContextApiWithApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers callBack:(void (^) (NSString *apiPrefix, NSDictionary *apiBlockMap))callBack;
+//- (void)fetchJSContextApiWithApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers callBack:(void (^) (NSString *apiPrefix, NSDictionary *apiBlockMap))callBack;
 - (void)fetchJSContextLogApi:(void (^) (NSString *apiPrefix, NSDictionary *apiBlockMap))callBack;
 //WebView注入的api
 - (NSString *)fetchWebViewLogApi;
@@ -41,7 +41,7 @@ static NSString * const ZHJSHandlerErrorName = @"ZHJSErrorEventHandler";
 - (NSString *)fetchWebViewSocketApi;
 - (NSString *)fetchWebViewTouchCalloutApi;
 - (NSString *)fetchWebViewSupportApi;
-- (NSString *)fetchWebViewApi;
+- (NSString *)fetchWebViewApi:(BOOL)isReset;
 - (NSString *)fetchWebViewApiFinish;
 //异常弹窗
 - (void)showWebViewException:(NSDictionary *)exception;

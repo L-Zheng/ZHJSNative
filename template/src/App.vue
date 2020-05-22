@@ -101,6 +101,10 @@ var vm = {
         });
         this.prepareRender();
       };
+      window.addApiTest = () => {
+        ZhengExtra.commonLinkTo1122({lll: 'fundxxxxxxxxxxx1122'})
+        ZhengExtra.commonLinkTo1133({dddd: 'fundxxxxxxxxxxx1133'})
+      };
     },
     async aaaa() {
       return new Promise((resolve, reject) => {
@@ -122,11 +126,6 @@ var vm = {
       }
     },
     render() {
-      // setTimeout(() => {
-      //   fundxxxxxxxxxxx.commonLinkTo1122({lll: 'fundxxxxxxxxxxx1122'})
-      //   fundxxxxxxxxxxx.commonLinkTo1133({dddd: 'fundxxxxxxxxxxx1133'})
-      // }, 5000);
-
       const emotionMap = fund.getEmotionResourceSync();
       const bigEmotionMap = fund.getBigEmotionResourceSync();
       this.testEmotion = Emotion.getEmotionText(

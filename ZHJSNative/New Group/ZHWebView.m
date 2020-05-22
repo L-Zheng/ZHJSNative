@@ -86,7 +86,7 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
     }];
     //api js
     [apis addObject:@{
-        @"code": [handler fetchWebViewApi]?:@"",
+        @"code": [handler fetchWebViewApi:NO]?:@"",
         @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentStart),
         @"mainFrameOnly": @(YES)
     }];
@@ -186,49 +186,26 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
 }
 - (void)addApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers completion:(void (^) (NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, id res, NSError *error))completion{
     __weak __typeof__(self) __self = self;
-    
     [self.handler addApiHandlers:apiHandlers completion:^(NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, NSString *jsCode, NSError *error) {
         if (jsCode.length == 0 || error) {
             if (completion) completion(successApiHandlers, failApiHandlers, nil, error?:[NSError errorWithDomain:@"" code:404 userInfo:@{NSLocalizedDescriptionKey: @"api注入失败"}]);
             return;
         }
-
-        //WebView 没有加载
-        if (!__self.loadSuccess) {
-            WKUserContentController *userContent = __self.configuration.userContentController;
-            WKUserScript *script = [[WKUserScript alloc] initWithSource:jsCode injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:YES];
-            [userContent addUserScript:script];
-            
-            if (completion) completion(successApiHandlers, failApiHandlers, @{}, nil);
-            return;
-        }
-        //webview已经加载
-        [__self evaluateJs:jsCode completionHandler:^(id res, NSError *error) {
+        //注入新的jsCode
+        [__self addJsCode:jsCode completion:^(id res, NSError *error) {
             if (completion) completion(successApiHandlers, failApiHandlers, res, error);
         }];
     }];
 }
 - (void)removeApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers completion:(void (^) (NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, id res, NSError *error))completion{
     __weak __typeof__(self) __self = self;
-    
     [self.handler removeApiHandlers:apiHandlers completion:^(NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, NSString *jsCode, NSError *error) {
         if (jsCode.length == 0 || error) {
             if (completion) completion(successApiHandlers, failApiHandlers, nil, error?:[NSError errorWithDomain:@"" code:404 userInfo:@{NSLocalizedDescriptionKey: @"api移除失败"}]);
             return;
         }
-
-        //WebView 没有加载 【之后添加的addUserScript会覆盖之前的】
-        if (!__self.loadSuccess) {
-            WKUserContentController *userContent = __self.configuration.userContentController;
-            WKUserScript *script = [[WKUserScript alloc] initWithSource:jsCode injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:YES];
-            [userContent addUserScript:script];
-            
-            if (completion) completion(successApiHandlers, failApiHandlers, @{}, nil);
-            return;
-        }
-        
-        //webview已经加载
-        [__self evaluateJs:jsCode completionHandler:^(id res, NSError *error) {
+        //注入新的jsCode
+        [__self addJsCode:jsCode completion:^(id res, NSError *error) {
             if (completion) completion(successApiHandlers, failApiHandlers, res, error);
         }];
     }];

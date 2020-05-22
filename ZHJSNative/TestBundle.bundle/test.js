@@ -18,6 +18,11 @@ console.log({
 console.log(this)
 
 
+function addApiTest() {
+    ZhengExtra.commonLinkTo1122({lll: 'fundxxxxxxxxxxx1122'})
+    ZhengExtra.commonLinkTo1133({dddd: 'fundxxxxxxxxxxx1133'})
+}
+
 // const aaa = [] 
 //         aaa.forEach(el, index => { });
 
