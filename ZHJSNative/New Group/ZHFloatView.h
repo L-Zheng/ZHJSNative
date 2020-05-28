@@ -10,10 +10,16 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+typedef NS_ENUM(NSInteger, ZHFloatLocation) {
+    ZHFloatLocationLeft     = 0,
+    ZHFloatLocationRight      = 1,
+};
+
 @interface ZHFloatView : UIView
 
 + (ZHFloatView *)floatView;
 - (void)showInView:(UIView *)view;
+- (void)showInView:(UIView *)view location:(ZHFloatLocation)location;
 
 - (void)updateWhenSuperViewLayout;
 - (void)updateTitle:(NSString *)title;

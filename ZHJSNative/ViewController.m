@@ -25,8 +25,6 @@
     [btn addTarget:self action:@selector(btnClick) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:btn];
     
-    
-    [ZHWebViewManager install];
 }
 
 - (void)btnClick{

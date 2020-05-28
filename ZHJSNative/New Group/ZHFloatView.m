@@ -8,11 +8,6 @@
 
 #import "ZHFloatView.h"
 
-typedef NS_ENUM(NSInteger, ZHFloatLocation) {
-    ZHFloatLocationLeft     = 0,
-    ZHFloatLocationRight      = 1,
-};
-
 @interface ZHFloatView ()<UIGestureRecognizerDelegate>
 @property (nonatomic,strong) UIImageView *imageView;
 @property (nonatomic,strong) UILabel *titleLabel;
@@ -21,6 +16,8 @@ typedef NS_ENUM(NSInteger, ZHFloatLocation) {
 
 @property (nonatomic, strong) NSTimer *timer;
 @property (nonatomic, assign) CGFloat timerCount;
+
+@property (nonatomic,assign) ZHFloatLocation location;
 @end
 
 @implementation ZHFloatView
@@ -32,7 +29,12 @@ typedef NS_ENUM(NSInteger, ZHFloatLocation) {
     return view;
 }
 - (void)showInView:(UIView *)view{
+    [self showInView:view location:ZHFloatLocationRight];
+}
+- (void)showInView:(UIView *)view location:(ZHFloatLocation)location{
     if (!view) return;
+    
+    self.location = location;
     
     if (!self.superview) {
         [view addSubview:self];
@@ -66,13 +68,20 @@ typedef NS_ENUM(NSInteger, ZHFloatLocation) {
     CGFloat selfW = 60;
     CGFloat selfH = 60;
     
-    self.frame = CGRectMake(superW - selfW, (superH - selfH) * 0.5, selfW, selfH);
+    
+    CGFloat X = 0;
+    if (self.location == ZHFloatLocationRight) {
+        X = superW - selfW;
+    }else if (self.location == ZHFloatLocationLeft){
+        X = 0;
+    }
+        
+    self.frame = CGRectMake(X, (superH - selfH) * 0.5, selfW, selfH);
     
     if (![self.superview isEqual:view]) {
         [view addSubview:self];
     }
     [self moveToScreenEdge:^(CGRect currentFrame, ZHFloatLocation location) {
-        
     }];
 }
 
@@ -115,6 +124,7 @@ typedef NS_ENUM(NSInteger, ZHFloatLocation) {
     ZHFloatLocation location = (self.center.x >= superW * 0.5) ? ZHFloatLocationRight : ZHFloatLocationLeft;
     
     if (CGPointEqualToPoint(targetCenter, self.center)) {
+        self.location = location;
         if (finishBlock) finishBlock(self.frame, location);
         [self updateUIWhenAnimateEnd:location];
         return;
@@ -122,6 +132,7 @@ typedef NS_ENUM(NSInteger, ZHFloatLocation) {
     __weak __typeof__(self) weakSelf = self;
     [UIView animateWithDuration:0.25 animations:^{
         weakSelf.center = targetCenter;
+        weakSelf.location = location;
         if (finishBlock) finishBlock(weakSelf.frame, location);
     } completion:^(BOOL finished) {
         [weakSelf updateUIWhenAnimateEnd:location];

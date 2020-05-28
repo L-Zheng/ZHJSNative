@@ -10,6 +10,9 @@
 #import "ZHJSHandler.h"
 #import "ZHFloatView.h"
 
+NSString * const ZHWebViewSocketDebugUrlKey = @"ZHWebViewSocketDebugUrlKey";
+NSString * const ZHWebViewLocalDebugUrlKey = @"ZHWebViewLocalDebugUrlKey";
+
 //创建 error
 __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
     if (!delegate || !sel) return NO;
@@ -33,26 +36,43 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
 
 #ifdef DEBUG
 @property (nonatomic,strong) ZHFloatView *floatView;
+@property (nonatomic,strong) ZHFloatView *debugModelFloatView;
+
+@property (nonatomic,copy) NSString *socketDebugUrlStr;
+@property (nonatomic,copy) NSString *localDebugUrlStr;
 #endif
 
 @property (nonatomic, strong) NSLock *lock;
+
+#pragma mark - debug
+
+@property (nonatomic, assign) ZHWebViewDebugModel debugModel;
 
 @end
 
 @implementation ZHWebView
 
 - (instancetype)initWithApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers{
-    return [self initWithFrame:CGRectZero apiHandlers:apiHandlers];
+    return [self initWithFrame:CGRectZero processPool:nil apiHandlers:apiHandlers];
 }
 - (instancetype)initWithFrame:(CGRect)frame apiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers{
+    return [self initWithFrame:frame processPool:nil apiHandlers:apiHandlers];
+}
+- (instancetype)initWithFrame:(CGRect)frame processPool:(WKProcessPool *)processPool apiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers{
     
-    ZHJSHandler *handler = [[ZHJSHandler alloc] initWithApiHandlers:apiHandlers];
+    ZHJSHandler *handler = [[ZHJSHandler alloc] initWithApiHandlers:apiHandlers?:@[]];
     
     WKUserContentController *userContent = [[WKUserContentController alloc] init];
     
     //注入api
     NSMutableArray *apis = [NSMutableArray array];
 #ifdef DEBUG
+    //webview log控制台
+//    [apis addObject:@{
+//        @"code": @"let ZhengVconsoleLog = document.createElement('script');ZhengVconsoleLog.src = 'http://wechatfe.github.io/vconsole/lib/vconsole.min.js?v=3.3.0';ZhengVconsoleLog.onload = function() {window.vConsole = new window.VConsole();};document.body.append(ZhengVconsoleLog);",
+//        @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentEnd),
+//        @"mainFrameOnly": @(YES)
+//    }];
     //log
     [apis addObject:@{
         @"code": [handler fetchWebViewLogApi]?:@"",
@@ -112,6 +132,10 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
     }
     
     WKWebViewConfiguration *config = [[WKWebViewConfiguration alloc] init];
+    //配置内容进程池
+    if (processPool) {
+        config.processPool = processPool;
+    }
     // 设置偏好设置
     config.preferences = [[WKPreferences alloc] init];
     // 默认为0
@@ -165,6 +189,7 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
 - (instancetype)initWithFrame:(CGRect)frame configuration:(WKWebViewConfiguration *)configuration{
     self = [super initWithFrame:frame configuration:configuration];
     if (self) {
+        [self showFlowView];
         [self configGesture];
     }
     return self;
@@ -222,7 +247,7 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
 - (void)layoutSubviews{
     [super layoutSubviews];
     
-    [self showFlowView];
+    [self updateFloatViewLocation];
 }
 
 #pragma mark - config gesture
@@ -388,7 +413,7 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
         }
         setWebViewFinish();
         self.runSandBoxURL = fetchRunBoxFolderBlock();
-        [self loadFileURL:fileURL allowingReadAccessToURL:readAccessURL?:[NSURL fileURLWithPath:path.stringByDeletingLastPathComponent]];
+        [self loadFileURL:fileURL allowingReadAccessToURL:readAccessURL?:self.runSandBoxURL];
         return;
     }
     
@@ -546,24 +571,6 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
         [__self.lock unlock];
         if (completionHandler) completionHandler(res, error);
     }];
-}
-
-- (void)dealloc{
-    @try {
-        WKUserContentController *userContent = self.configuration.userContentController;
-        [userContent removeAllUserScripts];
-
-        NSArray *handlerNames = [ZHWebView fetchHandlerNames];
-        for (NSString *key in handlerNames) {
-            [userContent removeScriptMessageHandlerForName:key];
-        }
-        [[NSNotificationCenter defaultCenter] removeObserver:self];
-    } @catch (NSException *exception) {
-        
-    } @finally {
-        
-    }
-    NSLog(@"-------%s---------", __func__);
 }
 
 #pragma mark - run js
@@ -744,18 +751,17 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
         NSString *type = [params valueForKey:@"type"];
         if (![type isKindOfClass:[NSString class]]) return;
         if ([type isEqualToString:@"invalid"]) {
-            [self performSelector:@selector(socketCallReadyRefresh) withObject:nil];
-            [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(socketCallRefresh) object:nil];
+            [self performSelector:@selector(webViewCallReadyRefresh) withObject:nil];
+            [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(webViewCallRefresh:) object:nil];
             return;
         }
         if ([type isEqualToString:@"hash"]) {
-            [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(socketCallRefresh) object:nil];
-//            [self performSelector:@selector(socketCallRefresh) withObject:nil afterDelay:0.5];
+            [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(webViewCallRefresh:) object:nil];
             return;
         }
         if ([type isEqualToString:@"ok"] || [type isEqualToString:@"warnings"]) {
-            [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(socketCallRefresh) object:nil];
-            [self performSelector:@selector(socketCallRefresh) withObject:nil afterDelay:0.3];
+            [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(webViewCallRefresh:) object:nil];
+            [self performSelector:@selector(webViewCallRefresh:) withObject:nil afterDelay:0.3];
             return;
         }
     });
@@ -766,13 +772,16 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
 - (void)socketDidClose:(NSDictionary *)params{
     
 }
-- (void)socketCallReadyRefresh{
+
+#pragma mark - Call ZHWebViewSocketDebugDelegate
+
+- (void)webViewCallReadyRefresh{
     [self updateFloatViewTitle:@"准备中..."];
     if (ZHCheckDelegate(self.zh_socketDebugDelegate, @selector(webViewReadyRefresh:))) {
         [self.zh_socketDebugDelegate webViewReadyRefresh:self];
     }
 }
-- (void)socketCallRefresh{
+- (void)webViewCallRefresh:(NSDictionary *)info{
     [self updateFloatViewTitle:@"刷新中..."];
         
         /** presented 与dismiss同时进行 会crash */
@@ -789,9 +798,115 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
     //清除缓存【否则ios11以上不会实时刷新最新的改动】
     [self clearWebViewSystemCache];
     //回调
-    if (ZHCheckDelegate(socketDebugDelegate, @selector(webViewRefresh:))) {
-        [socketDebugDelegate webViewRefresh:self];
+    if (ZHCheckDelegate(socketDebugDelegate, @selector(webViewRefresh:debugModel:info:))) {
+        
+        ZHWebViewDebugModel debugModel = self.debugModel;
+        if (debugModel == ZHWebViewDebugModelNo) {
+        }else if (debugModel == ZHWebViewDebugModelLocal){
+            info = info ?: @{ZHWebViewLocalDebugUrlKey: self.localDebugUrlStr};
+        }else if (debugModel == ZHWebViewDebugModelOnline){
+            info = info ?: @{ZHWebViewSocketDebugUrlKey: self.socketDebugUrlStr};
+        }
+        [socketDebugDelegate webViewRefresh:self debugModel:self.debugModel info:info];
     }
+}
+
+#pragma mark - alert
+
+//切换模式
+- (void)doSwitchDebugModel:(UIAlertAction *)action debugModel:(ZHWebViewDebugModel)debugModel info:(NSDictionary *)info{
+    self.debugModel = debugModel;
+    [self.debugModelFloatView updateTitle:action.title];
+    [self webViewCallReadyRefresh];
+    [self webViewCallRefresh:info];
+}
+//socket debug调试弹窗
+- (void)alertDebugModelOnline:(UIAlertAction *)action debugModel:(ZHWebViewDebugModel)debugModel{
+    NSString *socketDebugUrlCacheKey = @"ZHWebViewSocketDebugUrlCacheKey";
+    
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:action.title message:@"该模式将会监听代码改动，同步刷新页面UI。\n在WebView项目目录下运行 yarn serve，将http地址填在此处【如：http://192.168.2.21:8080，会自动填充上一次的地址】。" preferredStyle:UIAlertControllerStyleAlert];
+    __weak __typeof__(self) __self = self;
+    UIAlertAction *ac1 = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actionT){
+    }];
+    UIAlertAction *ac2 = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actionT) {
+        NSString *urlStr = [alert.textFields.firstObject text];
+        if (urlStr.length == 0) return;
+            
+        __self.socketDebugUrlStr = urlStr;
+        [[NSUserDefaults standardUserDefaults] setValue:urlStr forKey:socketDebugUrlCacheKey];
+        [[NSUserDefaults standardUserDefaults] synchronize];
+        [__self doSwitchDebugModel:action debugModel:debugModel info:@{ZHWebViewSocketDebugUrlKey: urlStr}];
+    }];
+    [alert addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {
+        textField.placeholder = @"输入socket调试地址";
+        NSString *cacheUrl = [[NSUserDefaults standardUserDefaults] valueForKey:socketDebugUrlCacheKey];
+        if (cacheUrl && cacheUrl.length > 0) {
+            textField.text = cacheUrl;
+        }
+    }];
+    [alert addAction:ac1];
+    [alert addAction:ac2];
+    [[self fetchActivityCtrl] presentViewController:alert animated:YES completion:nil];
+}
+//local debug调试弹窗
+- (void)alertDebugModelLocal:(UIAlertAction *)action debugModel:(ZHWebViewDebugModel)debugModel{
+    NSString *localDebugUrlCacheKey = @"ZHWebViewLocalDebugUrlCacheKey";
+    
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:action.title message:@"该模式将会运行本机WebView项目目录release文件下内容。\n将 本机WebView项目目录 填在此处【如：/Users/em/Desktop/EMCode/fund-projects/fund-details，会自动填充上一次的地址】\n在你改动代码后，运行yarn build，点击浮窗刷新。" preferredStyle:UIAlertControllerStyleAlert];
+    __weak __typeof__(self) __self = self;
+    UIAlertAction *ac1 = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actionT){
+    }];
+    UIAlertAction *ac2 = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actionT) {
+        NSString *urlStr = [alert.textFields.firstObject text];
+        if (urlStr.length == 0) return;
+        
+        __self.localDebugUrlStr = urlStr;
+        [[NSUserDefaults standardUserDefaults] setValue:urlStr forKey:localDebugUrlCacheKey];
+        [[NSUserDefaults standardUserDefaults] synchronize];
+        [__self doSwitchDebugModel:action debugModel:debugModel info:@{ZHWebViewLocalDebugUrlKey: urlStr}];
+    }];
+    [alert addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {
+        textField.placeholder = @"输入本机WebView项目目录地址";
+        NSString *cacheUrl = [[NSUserDefaults standardUserDefaults] valueForKey:localDebugUrlCacheKey];
+        if (cacheUrl && cacheUrl.length > 0) {
+            textField.text = cacheUrl;
+        }
+    }];
+    [alert addAction:ac1];
+    [alert addAction:ac2];
+    [[self fetchActivityCtrl] presentViewController:alert animated:YES completion:nil];
+}
+//sheet 弹窗选择
+- (void)alertSheetSelected:(UIAlertAction *)action debugModel:(ZHWebViewDebugModel)debugModel{
+    if (debugModel == ZHWebViewDebugModelNo) {
+        if (self.debugModel == debugModel) return;
+        [self doSwitchDebugModel:action debugModel:debugModel info:nil];
+    }else if (debugModel == ZHWebViewDebugModelLocal){
+        [self alertDebugModelLocal:action debugModel:debugModel];
+    }else if (debugModel == ZHWebViewDebugModelOnline){
+        [self alertDebugModelOnline:action debugModel:debugModel];
+    }
+}
+//sheet 弹窗
+- (void)alertDebugModelSheet{
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"切换调试模式" message:nil preferredStyle:UIAlertControllerStyleActionSheet];
+    __weak __typeof__(self) __self = self;
+    UIAlertAction *action = [UIAlertAction actionWithTitle:@"release调试模式" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [__self alertSheetSelected:action debugModel:ZHWebViewDebugModelNo];
+    }];
+    UIAlertAction *action1 = [UIAlertAction actionWithTitle:@"socket调试模式" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [__self alertSheetSelected:action debugModel:ZHWebViewDebugModelOnline];
+    }];
+    UIAlertAction *action2 = [UIAlertAction actionWithTitle:@"本机js调试模式" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [__self alertSheetSelected:action debugModel:ZHWebViewDebugModelLocal];
+    }];
+    UIAlertAction *action3 = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+    }];
+    [alert addAction:action];
+    [alert addAction:action1];
+    if (TARGET_OS_SIMULATOR) [alert addAction:action2];
+    [alert addAction:action3];
+    [[self fetchActivityCtrl] presentViewController:alert animated:YES completion:nil];
 }
 #endif
 
@@ -824,58 +939,13 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
     return urlComponents.URL;
 }
 
-#pragma mark - encode
-
-+ (NSString *)encodeObj:(id)data{
-    if (!data) return nil;
-    NSString *res = nil;
-    if ([data isKindOfClass:[NSString class]]) {
-        res = (NSString *)data;
-    }else if ([data isKindOfClass:[NSNumber class]]){
-        res = [NSString stringWithFormat:@"%@",data];
-    }else if ([data isKindOfClass:[NSDictionary class]] ||
-              [data isKindOfClass:[NSArray class]]){
-        NSError *jsonError;
-        NSData *jsonData = [NSJSONSerialization dataWithJSONObject:data options:0 error:&jsonError];
-        res = jsonError ? jsonError.userInfo[NSLocalizedDescriptionKey] : [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-        if (jsonError) return nil;
-        res = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-    }else if ([data isKindOfClass:[NSObject class]]){
-        res = [data description];
-    }else{
-        //默认obj作为BOOL值处理
-        res = [NSString stringWithFormat:@"%d",data];
-    }
-    return [res stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
-}
-
-#pragma mark - clear
-
-- (void)clearWebViewSystemCache{
-    if ([self.class isAvailableIOS9]) {
-        WKWebsiteDataStore *dataSource = [WKWebsiteDataStore defaultDataStore];
-        [dataSource removeDataOfTypes:[WKWebsiteDataStore allWebsiteDataTypes] modifiedSince:[NSDate dateWithTimeIntervalSince1970:0] completionHandler:^{
-        }];
-        return;
-    }
-    NSFileManager *mg = [NSFileManager defaultManager];
-    void (^removeFolder)(NSString *) = ^(NSString *folder){
-        if ([mg fileExistsAtPath:folder]) {
-            [mg removeItemAtPath:folder error:nil];
-        }
-    };
-    NSString *bundleId = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleIdentifier"];
-    NSString *libraryDir = NSSearchPathForDirectoriesInDomains(NSLibraryDirectory,NSUserDomainMask, YES)[0];
-    NSString *tempDir = NSTemporaryDirectory();
-    NSString *path1 = [NSString stringWithFormat:@"%@/WebKit/%@/WebsiteData", libraryDir, bundleId];
-    NSString *path2 = [NSString stringWithFormat:@"%@/Caches/%@/WebKit", libraryDir, bundleId];
-    NSString *path3 = [NSString stringWithFormat:@"%@/%@/WebKit", tempDir, bundleId];
-    removeFolder(path1);
-    removeFolder(path2);
-    removeFolder(path3);
-}
-
 #pragma mark - debug
+
+- (void)setDebugModel:(ZHWebViewDebugModel)debugModel{
+    if (_debugModel == debugModel) return;
+    _debugModel = debugModel;
+    
+}
 
 + (BOOL)isAvailableIOS11{
 #ifdef DEBUG
@@ -969,13 +1039,32 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
 
 - (void)showFlowView{
 #ifdef DEBUG
-    [self.floatView showInView:self];
+    [self.floatView showInView:self location:ZHFloatLocationRight];
+    [self.debugModelFloatView showInView:self location:ZHFloatLocationLeft];
 #endif
 }
 - (void)updateFloatViewTitle:(NSString *)title{
 #ifdef DEBUG
     [self.floatView updateTitle:title];
 #endif
+}
+- (void)updateFloatViewLocation{
+#ifdef DEBUG
+    [self.floatView updateWhenSuperViewLayout];
+    [self.debugModelFloatView updateWhenSuperViewLayout];
+#endif
+}
+
+#pragma mark - activityCtrl
+
+- (UIViewController *)fetchActivityCtrl:(UIViewController *)ctrl{
+    UIViewController *topCtrl = ctrl.presentedViewController;
+    if (!topCtrl) return ctrl;
+    return [self fetchActivityCtrl:topCtrl];
+}
+- (UIViewController *)fetchActivityCtrl{
+    UIViewController *ctrl = [UIApplication sharedApplication].keyWindow.rootViewController;
+    return [self fetchActivityCtrl:ctrl];
 }
 
 #pragma mark - getter
@@ -987,18 +1076,110 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
     return _lock;
 }
 
-
 #ifdef DEBUG
 - (ZHFloatView *)floatView{
     if (!_floatView) {
         _floatView = [ZHFloatView floatView];
         __weak __typeof__(self) __self = self;
         _floatView.tapClickBlock = ^{
-            [__self socketCallRefresh];
+            [__self webViewCallRefresh:nil];
         };
     }
     return _floatView;
 }
+- (ZHFloatView *)debugModelFloatView{
+    if (!_debugModelFloatView) {
+        _debugModelFloatView = [ZHFloatView floatView];
+        [_debugModelFloatView updateTitle:@"release调试模式"];
+        __weak __typeof__(self) __self = self;
+        _debugModelFloatView.tapClickBlock = ^{
+            [__self alertDebugModelSheet];
+        };
+    }
+    return _debugModelFloatView;
+}
 #endif
+
+#pragma mark - encode
+
++ (NSString *)encodeObj:(id)data{
+    if (!data) return nil;
+    NSString *res = nil;
+    if ([data isKindOfClass:[NSString class]]) {
+        res = (NSString *)data;
+    }else if ([data isKindOfClass:[NSNumber class]]){
+        res = [NSString stringWithFormat:@"%@",data];
+    }else if ([data isKindOfClass:[NSDictionary class]] ||
+              [data isKindOfClass:[NSArray class]]){
+        NSError *jsonError;
+        NSData *jsonData = [NSJSONSerialization dataWithJSONObject:data options:0 error:&jsonError];
+        res = jsonError ? jsonError.userInfo[NSLocalizedDescriptionKey] : [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+        if (jsonError) return nil;
+        res = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+    }else if ([data isKindOfClass:[NSObject class]]){
+        res = [data description];
+    }else{
+        //默认obj作为BOOL值处理
+        res = [NSString stringWithFormat:@"%d",data];
+    }
+    return [res stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
+}
+
+#pragma mark - clear
+
+- (void)clearWebViewSystemCache{
+    if ([self.class isAvailableIOS9]) {
+        WKWebsiteDataStore *dataSource = [WKWebsiteDataStore defaultDataStore];
+        [dataSource removeDataOfTypes:[WKWebsiteDataStore allWebsiteDataTypes] modifiedSince:[NSDate dateWithTimeIntervalSince1970:0] completionHandler:^{
+        }];
+        return;
+    }
+    NSFileManager *mg = [NSFileManager defaultManager];
+    void (^removeFolder)(NSString *) = ^(NSString *folder){
+        if ([mg fileExistsAtPath:folder]) {
+            [mg removeItemAtPath:folder error:nil];
+        }
+    };
+    NSString *bundleId = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleIdentifier"];
+    NSString *libraryDir = NSSearchPathForDirectoriesInDomains(NSLibraryDirectory,NSUserDomainMask, YES)[0];
+    NSString *tempDir = NSTemporaryDirectory();
+    NSString *path1 = [NSString stringWithFormat:@"%@/WebKit/%@/WebsiteData", libraryDir, bundleId];
+    NSString *path2 = [NSString stringWithFormat:@"%@/Caches/%@/WebKit", libraryDir, bundleId];
+    NSString *path3 = [NSString stringWithFormat:@"%@/%@/WebKit", tempDir, bundleId];
+    removeFolder(path1);
+    removeFolder(path2);
+    removeFolder(path3);
+}
+
+#pragma mark - dealloc
+
+- (void)dealloc{
+    @try {
+        WKUserContentController *userContent = self.configuration.userContentController;
+        [userContent removeAllUserScripts];
+
+        NSArray *handlerNames = [ZHWebView fetchHandlerNames];
+        for (NSString *key in handlerNames) {
+            [userContent removeScriptMessageHandlerForName:key];
+        }
+        [[NSNotificationCenter defaultCenter] removeObserver:self];
+    } @catch (NSException *exception) {
+        
+    } @finally {
+        
+    }
+    //清理缓存文件  dealloc里面不能用self
+    NSFileManager *fm = [NSFileManager defaultManager];
+    NSString *folder1 = [self fetchReadyRunSandBox];
+    NSString *folder2 = self.runSandBoxURL.path;
+    if ([fm fileExistsAtPath:folder1]) {
+        [fm removeItemAtPath:folder1 error:nil];
+    }
+    if ([fm fileExistsAtPath:folder2]) {
+        [fm removeItemAtPath:folder2 error:nil];
+    }
+    
+    NSLog(@"-------%s---------", __func__);
+}
 
 @end

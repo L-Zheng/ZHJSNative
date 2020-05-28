@@ -11,6 +11,17 @@
 #import "ZHJSApiProtocol.h"
 @class ZHWebView;
 
+//调试模式
+typedef NS_ENUM(NSInteger, ZHWebViewDebugModel) {
+    ZHWebViewDebugModelNo     = 0, //release模式
+    ZHWebViewDebugModelLocal      = 1, //本地拷贝js调试
+    ZHWebViewDebugModelOnline      = 2, //链接线上地址调试
+};
+
+FOUNDATION_EXPORT NSString * const ZHWebViewSocketDebugUrlKey;
+FOUNDATION_EXPORT NSString * const ZHWebViewLocalDebugUrlKey;
+
+
 typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
     ZHWebViewExceptionOperateNothing     = 0,//不做任何操作
     ZHWebViewExceptionOperateReload      = 1,//WebView重新load
@@ -23,7 +34,7 @@ typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
 @protocol ZHWebViewSocketDebugDelegate <NSObject>
 @optional
 - (void)webViewReadyRefresh:(ZHWebView *)webView;
-- (void)webViewRefresh:(ZHWebView *)webView;
+- (void)webViewRefresh:(ZHWebView *)webView debugModel:(ZHWebViewDebugModel)debugModel info:(NSDictionary *)info;
 @end
 
 /** 重写系统代理 */
@@ -54,6 +65,11 @@ typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
 
 - (instancetype)initWithApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers;
 - (instancetype)initWithFrame:(CGRect)frame apiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers;
+/// 创建
+/// @param frame frame
+/// @param processPool 内容进程池【传nil：会自动创建一个新的processPool，不同的WebView的processPool不同，内容数据不能共享。如要共享内容数据（如： localstorage）可自行创建processPool单例，不同的WebView共用此单例】
+/// @param apiHandlers 注入的api 【如： fund api】
+- (instancetype)initWithFrame:(CGRect)frame processPool:(WKProcessPool *)processPool apiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers;
 
 //添加移除api
 - (void)addJsCode:(NSString *)jsCode completion:(void (^) (id res, NSError *error))completion;
@@ -99,6 +115,8 @@ typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
 - (void)clearWebViewSystemCache;
 
 #pragma mark - debug
+
+@property (nonatomic, assign, readonly) ZHWebViewDebugModel debugModel;
 
 + (BOOL)isAvailableIOS11;
 

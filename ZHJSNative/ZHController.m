@@ -8,11 +8,16 @@
 
 #import "ZHController.h"
 #import "ZHWebView.h"
+#import "ZHJSApiProtocol.h"
 #import "ZHJSContext.h"
 #import "ZHWebViewManager.h"
 #import "ZHCustomApiHandler.h"
 #import "ZHCustom1ApiHandler.h"
 #import "ZHCustomExtra1ApiHandler.h"
+
+#import "ZHCustomApiHandler.h"
+#import "ZHCustom1ApiHandler.h"
+#import "ZHCustom2ApiHandler.h"
 
 @interface ZHController ()<ZHWebViewSocketDebugDelegate>
 @property (nonatomic, strong) ZHWebView *webView;
@@ -21,9 +26,39 @@
 
 @implementation ZHController
 
+- (NSArray <id <ZHJSApiProtocol>> *)apiHandlers{
+    return @[[[ZHCustomApiHandler alloc] init], [[ZHCustom1ApiHandler alloc] init], [[ZHCustom2ApiHandler alloc] init]];
+}
+
+- (NSString *)currentTemplateKey{
+    //appid
+    return @"preReadyWebViewKey";
+}
+
+- (NSString *)currentTemplateLoadName{
+    return @"index.html";
+}
+- (NSString *)currentTemplatePresetFolder{
+    return [[[NSBundle mainBundle] pathForResource:@"TestBundle" ofType:@"bundle"] stringByAppendingPathComponent:@"release"];
+}
+
+- (void)preLoad{
+    //预加载
+    [[ZHWebViewManager shareManager] preReadyWebView:[self currentTemplateKey] frame:[UIScreen mainScreen].bounds loadFileName:[self currentTemplateLoadName] presetFolder:[self currentTemplatePresetFolder] allowingReadAccessToURL:[NSURL fileURLWithPath:[ZHWebView getDocumentFolder]] apiHandlers:[self apiHandlers] finish:^(BOOL success) {
+        NSLog(@"--------------------");
+
+        //预加载完成不能立即使用： webView loadSuccess只是加载成功  里面的内容还没有配置完成
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            [self readyLoadWebView];
+        });
+    }];
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
-    [self config:NO];
+    [self configView];
+    
+    [self readyLoadWebView];
     
     //运算js
 //    self.context = [[ZHJSContext alloc] initWithApiHandlers:@[[[ZHCustomApiHandler alloc] init], [[ZHCustom1ApiHandler alloc] init]]];
@@ -61,11 +96,6 @@
     [self configGesture];
 }
 
-- (void)config:(BOOL)debugReload{
-    [self configView];
-    [self configWebView:debugReload];
-}
-
 - (void)configView{
     self.automaticallyAdjustsScrollViewInsets = NO;
     self.view.backgroundColor = [UIColor whiteColor];
@@ -77,75 +107,53 @@
     bar.translucent = NO;
 }
 
-- (void)configWebView:(BOOL)debugReload{
+- (void)readyLoadWebView{
     ZHWebViewManager *mg = [ZHWebViewManager shareManager];
-    __weak __typeof__(self) __self = self;
-    //渲染
-    void (^render)(ZHWebView *) = ^(ZHWebView *webView){
-        __self.navigationItem.title = webView.title;
-        [__self readyRender:nil];
-    };
-    
-    //配置
-    void (^config)(ZHWebView *) = ^(ZHWebView *webView){
-        //配置view
-        [__self configWebViewFrame:webView];
-        if (!webView.superview) [__self.view addSubview:webView];
-        __self.webView = webView;
-        //配置代理
-        [__self configWebViewDelegate:webView target:__self];
-        //配置handler
-    };
-    
-    if (debugReload) {
-        [mg loadWebView:self.webView finish:^(BOOL success) {
-            if (success) {
-                config(__self.webView);
-                render(__self.webView);
-                [__self configDebugOption:@"刷新"];
-            }
-        }];
-        return;
-    }
-
-    
     //查找可用WebView
-    ZHWebView *webView = nil;
-    if (![ZHWebViewManager isUsePreLoadWebView]) {
-        webView = nil;
-    }else{
-        webView = [mg fetchWebView];
-    }
-    
+    ZHWebView *webView = [mg fetchWebView:[self currentTemplateKey]];
     if (webView) {
         //检查是否异常
         ZHWebViewExceptionOperate operate = [webView checkException];
         if (operate == ZHWebViewExceptionOperateNothing) {
-            config(webView);
-            render(webView);
+            [self configWebView:webView];
+            [self renderWebView:webView];
             return;
         }else if (operate == ZHWebViewExceptionOperateReload){
         }else if (operate == ZHWebViewExceptionOperateNewInit){
-            webView = [mg createWebView];
+            webView = [mg createWebView:self.view.bounds apiHandlers:[self apiHandlers]];
         }
     }else{
-        webView = [mg createWebView];
+        webView = [mg createWebView:self.view.bounds apiHandlers:[self apiHandlers]];
     }
-    [mg loadWebView:webView finish:^(BOOL success) {
-        if (success) {
-            config(webView);
-            render(webView);
-            [__self configDebugOption:@"刷新"];
-        }
-    }];
+    
+    [self doLoadWebView:webView];
     if (!webView.superview) [self.view addSubview:webView];
 }
-- (void)configWebViewDelegate:(ZHWebView *)webView target:(id)target{
-    webView.zh_navigationDelegate = target;
-    webView.zh_UIDelegate = target;
-    webView.zh_socketDebugDelegate = target;
+
+- (void)doLoadWebView:(ZHWebView *)webView{
+    ZHWebViewManager *mg = [ZHWebViewManager shareManager];
+    
+    __weak __typeof__(self) __self = self;
+    [mg loadWebView:webView key:[self currentTemplateKey] loadFileName:[self currentTemplateLoadName] presetFolder:[self currentTemplatePresetFolder] allowingReadAccessToURL:[NSURL fileURLWithPath:[ZHWebView getDocumentFolder]] finish:^(BOOL success) {
+        if (!success) return;
+        [__self configWebView:webView];
+        [__self renderWebView:webView];
+    }];
 }
 
+- (void)renderWebView:(ZHWebView *)webView{
+    self.navigationItem.title = webView.title;
+    [self readyRender:nil];
+}
+- (void)configWebView:(ZHWebView *)webView{
+    //配置view
+    [self configWebViewFrame:webView];
+    if (!webView.superview) [self.view addSubview:webView];
+    self.webView = webView;
+    //配置代理
+    [self configWebViewDelegate:webView target:self];
+    //配置handler
+}
 - (void)configWebViewFrame:(WKWebView *)webView{
     if (@available(iOS 11.0, *)) {
         webView.frame = (CGRect){CGPointZero, {self.view.bounds.size.width, self.view.bounds.size.height - self.view.safeAreaInsets.bottom}};
@@ -153,6 +161,12 @@
         webView.frame = self.view.bounds;
     }
 }
+- (void)configWebViewDelegate:(ZHWebView *)webView target:(id)target{
+    webView.zh_navigationDelegate = target;
+    webView.zh_UIDelegate = target;
+    webView.zh_socketDebugDelegate = target;
+}
+
 - (void)configGesture{
     @try {
         NSArray *internalTargets = [self.navigationController.interactivePopGestureRecognizer valueForKey:@"targets"];
@@ -270,6 +284,11 @@
 }
 
 - (void)dealloc{
+    [self clear];
+    NSLog(@"-------%s---------", __func__);
+}
+
+- (void)clear{
     //清空代理 【scrollView.delegate】 否则iOS8上会崩溃
     if (!_webView) return;
     _webView.scrollView.delegate = nil;
@@ -282,32 +301,39 @@
     
     if (_webView.superview) [_webView removeFromSuperview];
     _webView = nil;
-    NSLog(@"-------%s---------", __func__);
 }
 
 #pragma mark - ZHWebViewSocketDebugDelegate
 
+#ifdef DEBUG
 - (void)webViewReadyRefresh:(ZHWebView *)webView{
-    [self configDebugOption:@"准备中..."];
 }
-- (void)webViewRefresh:(ZHWebView *)webView{
-    [self refreshWebView];
+- (void)webViewRefresh:(ZHWebView *)webView debugModel:(ZHWebViewDebugModel)debugModel info:(NSDictionary *)info{
+    
+    ZHWebViewManager *mg = [ZHWebViewManager shareManager];
+    __weak __typeof__(self) __self = self;
+    
+    void (^block)(BOOL success) = ^(BOOL success){
+        if (!success) return;
+        [__self configWebView:__self.webView];
+        [__self renderWebView:__self.webView];
+    };
+        
+    if (debugModel == ZHWebViewDebugModelNo) {
+        //清理原来的webview
+        [self clear];
+        [self readyLoadWebView];
+    }else if (debugModel == ZHWebViewDebugModelOnline){
+        NSString *socketUrlStr = [info valueForKey:ZHWebViewSocketDebugUrlKey];
+        [mg loadOnlineDebugWebView:webView key:[self currentTemplateKey] url:[NSURL URLWithString:socketUrlStr] finish:^(BOOL success) {
+            block(success);
+        }];
+    }else if (debugModel == ZHWebViewDebugModelLocal){
+        NSString *loadFolder = [info valueForKey:ZHWebViewLocalDebugUrlKey];
+        [mg loadLocalDebugWebView:webView key:[self currentTemplateKey] loadFolder:[loadFolder stringByAppendingPathComponent:@"release"] loadFileName:[self currentTemplateLoadName] allowingReadAccessToURL:[NSURL fileURLWithPath:[ZHWebView getDocumentFolder]] finish:^(BOOL success) {
+            block(success);
+        }];
+    }
 }
-
-- (void)refreshWebView{
-    [self configDebugOption:@"刷新中..."];
-    [self config:YES];
-}
-
-- (void)configDebugOption:(NSString *)title{
-    #ifdef DEBUG
-    UIBarButtonItem *item = [[UIBarButtonItem alloc] initWithTitle:title style:UIBarButtonItemStylePlain target:self action:@selector(refreshWebView)];
-    NSMutableArray *rightItems = [NSMutableArray array];
-//    if (self.navigationItem.rightBarButtonItems.count > 0) {
-//        [rightItems addObject:self.navigationItem.rightBarButtonItems.firstObject];
-//    }
-    [rightItems addObject:item];
-    self.navigationItem.rightBarButtonItems = rightItems;
-    #endif
-}
+#endif
 @end

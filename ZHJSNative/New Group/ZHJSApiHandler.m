@@ -63,7 +63,7 @@
         }
         self.internalApiHandlers = [internalApiHandlers copy];
         //外部api
-        self.outsideApiHandlers = [apiHandlers mutableCopy];
+        self.outsideApiHandlers = [apiHandlers?:@[] mutableCopy];
         
         //查找api
         NSArray *mergeHandlers = [self.internalApiHandlers arrayByAddingObjectsFromArray:self.outsideApiHandlers];
