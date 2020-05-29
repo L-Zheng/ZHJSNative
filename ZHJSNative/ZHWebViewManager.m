@@ -17,6 +17,8 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
 @property (nonatomic, strong) NSMutableDictionary <NSString *, NSArray <ZHWebView *> *> *websMap;
 @property (nonatomic, strong) NSMutableDictionary <NSString *, NSArray <ZHWebView *> *> *loadingWebsMap;
 @property (nonatomic,strong) NSLock *lock;
+/** 打开的webview页面 */
+@property (nonatomic, retain) NSMapTable *openedWebViewMapTable;
 @end
 
 @implementation ZHWebViewManager
@@ -172,7 +174,12 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
     NSURL *accessURL = readAccessURL?:[NSURL fileURLWithPath:loadFolder];
     NSURL *url = [NSURL fileURLWithPath:htmlPath];
     
-    [webView loadUrl:url baseURL:[NSURL fileURLWithPath:superFolder isDirectory:YES] allowingReadAccessToURL:accessURL finish:finish];
+    __weak __typeof__(self) __self = self;
+    [webView loadUrl:url baseURL:[NSURL fileURLWithPath:superFolder isDirectory:YES] allowingReadAccessToURL:accessURL finish:^(BOOL success) {
+        if (finish) finish(success);
+        //保留
+        [__self addWebView:webView];
+    }];
 }
 
 #pragma mark - file
@@ -283,24 +290,6 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
     }];
 }
 
-#pragma mark - cache
-
-//清理WebView加载缓存
-- (void)cleanWebViewLoadCache{
-    __weak __typeof__(self) __self = self;
-    void (^block) (NSString *) = ^(NSString *folder){
-        if (![__self.fm fileExistsAtPath:folder]) {
-            return;
-        }
-        [__self.lock lock];
-        [__self.fm removeItemAtPath:folder error:nil];
-        [__self.lock unlock];
-    };
-    
-    block(ZHWebViewFolder());
-    block(ZHWebViewTmpFolder());
-}
-
 #pragma mark - getter
 
 - (NSLock *)lock{
@@ -324,12 +313,117 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
     return _loadingWebsMap;
 }
 
+#pragma mark - notification
+
+- (void)addNotification{
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidEnterBackground:) name:UIApplicationDidEnterBackgroundNotification object:nil];
+}
+
+- (void)applicationDidEnterBackground:(NSNotification *)note{
+    [self cleanWebViewLoadCache];
+}
+
+#pragma mark - cache
+
+//清理WebView加载缓存
+- (void)cleanWebViewLoadCache{
+    [self.lock lock];
+    NSMapTable *mapTable = self.openedWebViewMapTable;
+    if (!mapTable) {
+        [self.lock unlock];
+        return;
+    }
+    NSMutableArray *cleanKeys = [@[] mutableCopy];
+    //遍历key
+    NSEnumerator *enumerator = [mapTable keyEnumerator];
+    id key;
+    while (key = [enumerator nextObject]) {
+        NSPointerArray *arr = [mapTable objectForKey:key];
+        if (!arr) {
+            [cleanKeys addObject:key];
+            continue;
+        }
+        //清除空对象
+        [arr addPointer:NULL];
+        [arr compact];
+        if (arr.count == 0 || arr.allObjects.count == 0) {
+            [cleanKeys addObject:key];
+            continue;
+        }
+    }
+    
+    //清理
+    for (NSString *cleanKey in cleanKeys) {
+        [mapTable removeObjectForKey:cleanKey];
+        
+        if (![self.fm fileExistsAtPath:cleanKey]) continue;
+        [self.fm removeItemAtPath:cleanKey error:nil];
+    }
+    [self.lock unlock];
+}
+
+- (void)addWebView:(ZHWebView *)webView{
+    if (!webView || ![webView isKindOfClass:[ZHWebView class]]) return;
+    
+    [self.lock lock];
+    //创建表
+    NSMapTable *mapTable = self.openedWebViewMapTable;
+    if (!mapTable) {
+        mapTable = [NSMapTable mapTableWithKeyOptions:NSPointerFunctionsCopyIn valueOptions:NSPointerFunctionsStrongMemory];
+    }
+    //生成key
+    NSString *key = webView.runSandBoxURL.path;
+    if (![ZHWebView checkString:key]) {
+        [self.lock unlock];
+        return;
+    }
+    //创建PointerArray
+    NSPointerArray *arr = [mapTable objectForKey:key];
+    if (!arr) {
+        arr = [NSPointerArray weakObjectsPointerArray];
+    }
+    //已经存在
+    if ([arr.allObjects containsObject:webView]) {
+        [self.lock unlock];
+        return;
+    }
+    //添加
+    [arr addPointer:(__bridge void * _Nullable)(webView)];
+    
+    [mapTable setObject:arr forKey:key];
+    self.openedWebViewMapTable = mapTable;
+    
+    [self.lock unlock];
+}
+
+- (void)cleanWebViewAllLoadCache{
+    __weak __typeof__(self) __self = self;
+    void (^block) (NSString *) = ^(NSString *folder){
+        if (![__self.fm fileExistsAtPath:folder]) {
+            return;
+        }
+        [__self.lock lock];
+        [__self.fm removeItemAtPath:folder error:nil];
+        [__self.lock unlock];
+    };
+    
+    block(ZHWebViewFolder());
+    block(ZHWebViewTmpFolder());
+}
+
+#pragma mark - dealloc
+
+- (void)dealloc{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
 #pragma mark - share
 
 - (instancetype)init{
     if (self = [super init]) {
         static dispatch_once_t onceToken;
         dispatch_once(&onceToken, ^{
+            [self addNotification];
         });
     }
     return self;

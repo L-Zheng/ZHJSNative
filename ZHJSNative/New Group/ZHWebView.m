@@ -1168,16 +1168,16 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
     } @finally {
         
     }
-    //清理缓存文件  dealloc里面不能用self
-    NSFileManager *fm = [NSFileManager defaultManager];
-    NSString *folder1 = [self fetchReadyRunSandBox];
-    NSString *folder2 = self.runSandBoxURL.path;
-    if ([fm fileExistsAtPath:folder1]) {
-        [fm removeItemAtPath:folder1 error:nil];
-    }
-    if ([fm fileExistsAtPath:folder2]) {
-        [fm removeItemAtPath:folder2 error:nil];
-    }
+//    //不能在此清理缓存文件  可能直接用的WebView加载路径 没有创建独立沙盒路径  dealloc里面不能用self
+//    NSFileManager *fm = [NSFileManager defaultManager];
+//    NSString *folder1 = [self fetchReadyRunSandBox];
+//    NSString *folder2 = self.runSandBoxURL.path;
+//    if ([fm fileExistsAtPath:folder1]) {
+//        [fm removeItemAtPath:folder1 error:nil];
+//    }
+//    if ([fm fileExistsAtPath:folder2]) {
+//        [fm removeItemAtPath:folder2 error:nil];
+//    }
     
     NSLog(@"-------%s---------", __func__);
 }

@@ -48,16 +48,18 @@
         NSLog(@"--------------------");
 
         //预加载完成不能立即使用： webView loadSuccess只是加载成功  里面的内容还没有配置完成
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-            [self readyLoadWebView];
-        });
+//        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+//            [self readyLoadWebView];
+//        });
     }];
 }
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    [self configView];
     
+//    [self preLoad];
+    
+    [self configView];
     [self readyLoadWebView];
     
     //运算js
