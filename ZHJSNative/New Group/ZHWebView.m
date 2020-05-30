@@ -446,7 +446,7 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
     NSMutableArray *URLComs = [[url pathComponents] mutableCopy];
     [URLComs removeObjectsInArray:newBaseURLComs];
     NSString *relativePath = [URLComs componentsJoinedByString:@"/"];
-    if (relativePath.length == 0) {
+    if (![self.class checkString:relativePath]) {
         callBack(NO);
         return;
     }
@@ -1029,6 +1029,10 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
     NSMutableArray *pathComs = [[path pathComponents] mutableCopy];
     if (pathComs.count <= 1) {
         return nil;
+    }
+    if ([pathComs.firstObject isKindOfClass:[NSString class]] &&
+        [(NSString *)pathComs.firstObject isEqualToString:@"/"]) {
+        [pathComs replaceObjectAtIndex:0 withObject:@""];
     }
     [pathComs removeLastObject];
     return [pathComs componentsJoinedByString:@"/"];

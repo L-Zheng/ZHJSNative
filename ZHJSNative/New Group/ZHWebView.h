@@ -64,12 +64,15 @@ typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
 #pragma mark - init
 
 - (instancetype)initWithApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers;
-- (instancetype)initWithFrame:(CGRect)frame apiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers;
+- (instancetype)initWithFrame:(CGRect)frame
+                  apiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers;
 /// 创建
 /// @param frame frame
-/// @param processPool 内容进程池【传nil：会自动创建一个新的processPool，不同的WebView的processPool不同，内容数据不能共享。如要共享内容数据（如： localstorage）可自行创建processPool单例，不同的WebView共用此单例】
+/// @param processPool 内容进程池【传nil：会自动创建一个新的processPool，不同的WebView的processPool不同，内容数据不能共享。如要共享内容数据（如： localstorage数据）可自行创建processPool单例，不同的WebView共用此单例】
 /// @param apiHandlers 注入的api 【如： fund api】
-- (instancetype)initWithFrame:(CGRect)frame processPool:(WKProcessPool *)processPool apiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers;
+- (instancetype)initWithFrame:(CGRect)frame
+                  processPool:(WKProcessPool *)processPool
+                  apiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers;
 
 //添加移除api
 - (void)addJsCode:(NSString *)jsCode completion:(void (^) (id res, NSError *error))completion;
@@ -94,21 +97,32 @@ typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
 /// @param baseURL 【WebView运行所需的资源根目录，如果为nil，默认为url的上级目录】
 /// @param readAccessURL 允许WebView读取的目录
 /// @param finish 回调
-- (void)loadUrl:(NSURL *)url baseURL:(NSURL *)baseURL allowingReadAccessToURL:(NSURL *)readAccessURL finish:(void (^) (BOOL success))finish;
+- (void)loadUrl:(NSURL *)url
+        baseURL:(NSURL *)baseURL
+allowingReadAccessToURL:(NSURL *)readAccessURL
+         finish:(void (^) (BOOL success))finish;
 
 /// 渲染js页面
 /// @param jsSourceBaseURL 渲染该js文件所需的资源【jsSourceBaseURL的目录下包含有jsSourceURL文件】
 /// @param jsSourceURL js文件
 /// @param completionHandler 回调
-- (void)renderLoadPage:(NSURL *)jsSourceBaseURL jsSourceURL:(NSURL *)jsSourceURL completionHandler:(void (^)(id res, NSError *error))completionHandler;
-- (void)render:(NSString *)renderFunctionName jsSourceBaseURL:(NSURL *)jsSourceBaseURL jsSourceURL:(NSURL *)jsSourceURL completionHandler:(void (^)(id res, NSError *error))completionHandler;
+- (void)renderLoadPage:(NSURL *)jsSourceBaseURL
+           jsSourceURL:(NSURL *)jsSourceURL
+     completionHandler:(void (^)(id res, NSError *error))completionHandler;
+- (void)render:(NSString *)renderFunctionName
+jsSourceBaseURL:(NSURL *)jsSourceBaseURL
+   jsSourceURL:(NSURL *)jsSourceURL
+completionHandler:(void (^)(id res, NSError *error))completionHandler;
 
 //webView运行的沙盒目录
 @property (nonatomic, copy, readonly) NSURL *runSandBoxURL;
 
 /** 发送js消息 */
-- (void)postMessageToJs:(NSString *)funcName params:(NSDictionary *)params completionHandler:(void (^)(id res, NSError *error))completionHandler;
-- (void)evaluateJs:(NSString *)js completionHandler:(void (^)(id res, NSError *error))completionHandler;
+- (void)postMessageToJs:(NSString *)funcName
+                 params:(NSDictionary *)params
+      completionHandler:(void (^)(id res, NSError *error))completionHandler;
+- (void)evaluateJs:(NSString *)js
+ completionHandler:(void (^)(id res, NSError *error))completionHandler;
 
 #pragma mark - clear
 

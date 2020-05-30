@@ -44,7 +44,14 @@
 
 - (void)preLoad{
     //预加载
-    [[ZHWebViewManager shareManager] preReadyWebView:[self currentTemplateKey] frame:[UIScreen mainScreen].bounds loadFileName:[self currentTemplateLoadName] presetFolder:[self currentTemplatePresetFolder] allowingReadAccessToURL:[NSURL fileURLWithPath:[ZHWebView getDocumentFolder]] apiHandlers:[self apiHandlers] finish:^(BOOL success) {
+    [[ZHWebViewManager shareManager] preReadyWebView:[self currentTemplateKey]
+                                               frame:[UIScreen mainScreen].bounds
+                                        loadFileName:[self currentTemplateLoadName]
+                                        presetFolder:[self currentTemplatePresetFolder]
+                                         processPool:nil
+                             allowingReadAccessToURL:[NSURL fileURLWithPath:[ZHWebView getDocumentFolder]]
+                                         apiHandlers:[self apiHandlers]
+                                              finish:^(BOOL success) {
         NSLog(@"--------------------");
 
         //预加载完成不能立即使用： webView loadSuccess只是加载成功  里面的内容还没有配置完成
@@ -122,10 +129,10 @@
             return;
         }else if (operate == ZHWebViewExceptionOperateReload){
         }else if (operate == ZHWebViewExceptionOperateNewInit){
-            webView = [mg createWebView:self.view.bounds apiHandlers:[self apiHandlers]];
+            webView = [mg createWebView:self.view.bounds processPool:nil apiHandlers:[self apiHandlers]];
         }
     }else{
-        webView = [mg createWebView:self.view.bounds apiHandlers:[self apiHandlers]];
+        webView = [mg createWebView:self.view.bounds processPool:nil apiHandlers:[self apiHandlers]];
     }
     
     [self doLoadWebView:webView];

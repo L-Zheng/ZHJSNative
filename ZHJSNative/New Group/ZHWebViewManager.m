@@ -60,11 +60,20 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
 
 #pragma mark - webview
 
-- (ZHWebView *)createWebView:(CGRect)frame apiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers{
-    return [[ZHWebView alloc] initWithFrame:frame apiHandlers:apiHandlers];
+- (ZHWebView *)createWebView:(CGRect)frame
+                 processPool:(WKProcessPool *)processPool
+                 apiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers{
+    return [[ZHWebView alloc] initWithFrame:frame processPool:processPool apiHandlers:apiHandlers];
 }
 
-- (void)preReadyWebView:(NSString *)key frame:(CGRect)frame loadFileName:(NSString *)loadFileName presetFolder:(NSString *)presetFolder allowingReadAccessToURL:(NSURL *)readAccessURL apiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers finish:(void (^) (BOOL success))finish{
+- (void)preReadyWebView:(NSString *)key
+                  frame:(CGRect)frame
+           loadFileName:(NSString *)loadFileName
+           presetFolder:(NSString *)presetFolder
+            processPool:(WKProcessPool *)processPool
+allowingReadAccessToURL:(NSURL *)readAccessURL
+            apiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers
+                 finish:(void (^) (BOOL success))finish{
     if (![ZHWebView checkString:key]) {
         if (finish) finish(NO);
         return;
@@ -79,7 +88,7 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
         return;
     }
     
-    ZHWebView *newWebView = [self createWebView:frame apiHandlers:apiHandlers];
+    ZHWebView *newWebView = [self createWebView:frame processPool:processPool apiHandlers:apiHandlers];
     
     [self opMap:self.loadingWebsMap key:key webView:newWebView add:YES];
     
@@ -329,29 +338,47 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
 - (void)cleanWebViewLoadCache{
     [self.lock lock];
     NSMapTable *mapTable = self.openedWebViewMapTable;
-    if (!mapTable) {
-        [self.lock unlock];
-        return;
-    }
+
+    NSMutableArray *usedKeys = [@[] mutableCopy];
     NSMutableArray *cleanKeys = [@[] mutableCopy];
     //遍历key
     NSEnumerator *enumerator = [mapTable keyEnumerator];
-    id key;
-    while (key = [enumerator nextObject]) {
-        NSPointerArray *arr = [mapTable objectForKey:key];
-        if (!arr) {
-            [cleanKeys addObject:key];
-            continue;
-        }
-        //清除空对象
-        [arr addPointer:NULL];
-        [arr compact];
-        if (arr.count == 0 || arr.allObjects.count == 0) {
-            [cleanKeys addObject:key];
-            continue;
+    if (enumerator) {
+        id key;
+        while (key = [enumerator nextObject]) {
+            NSPointerArray *arr = [mapTable objectForKey:key];
+            if (!arr) {
+                [cleanKeys addObject:key];
+                continue;
+            }
+            //清除空对象
+            [arr addPointer:NULL];
+            [arr compact];
+            if (arr.count == 0 || arr.allObjects.count == 0) {
+                [cleanKeys addObject:key];
+                continue;
+            }
+            [usedKeys addObject:key];
         }
     }
     
+    //遍历子目录
+    NSArray *subFolders = [self.fm subpathsAtPath:ZHWebViewFolder()];
+    NSEnumerator *childFile = [subFolders objectEnumerator];
+    NSString *subPath;
+    while ((subPath = [childFile nextObject]) != nil) {
+        if (subPath.length == 0) continue;
+        NSArray *pathComs = subPath.pathComponents;
+        //只获取一级目录
+        if (pathComs.count != 1) continue;
+        NSString *firstCom = pathComs.firstObject;
+        
+        NSURL *newSubURLPath = [NSURL fileURLWithPath:[ZHWebViewFolder() stringByAppendingPathComponent:firstCom]];
+        if ([self.fm fileExistsAtPath:newSubURLPath.path] &&
+            ![usedKeys containsObject:newSubURLPath.path]) {
+            [cleanKeys addObject:newSubURLPath.path];
+        }
+    }
     //清理
     for (NSString *cleanKey in cleanKeys) {
         [mapTable removeObjectForKey:cleanKey];
@@ -359,7 +386,23 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
         if (![self.fm fileExistsAtPath:cleanKey]) continue;
         [self.fm removeItemAtPath:cleanKey error:nil];
     }
+    
     [self.lock unlock];
+}
+
+- (void)cleanWebViewAllLoadCache{
+    __weak __typeof__(self) __self = self;
+    void (^block) (NSString *) = ^(NSString *folder){
+        if (![__self.fm fileExistsAtPath:folder]) {
+            return;
+        }
+        [__self.lock lock];
+        [__self.fm removeItemAtPath:folder error:nil];
+        [__self.lock unlock];
+    };
+    
+    block(ZHWebViewFolder());
+    block(ZHWebViewTmpFolder());
 }
 
 - (void)addWebView:(ZHWebView *)webView{
@@ -394,21 +437,6 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
     self.openedWebViewMapTable = mapTable;
     
     [self.lock unlock];
-}
-
-- (void)cleanWebViewAllLoadCache{
-    __weak __typeof__(self) __self = self;
-    void (^block) (NSString *) = ^(NSString *folder){
-        if (![__self.fm fileExistsAtPath:folder]) {
-            return;
-        }
-        [__self.lock lock];
-        [__self.fm removeItemAtPath:folder error:nil];
-        [__self.lock unlock];
-    };
-    
-    block(ZHWebViewFolder());
-    block(ZHWebViewTmpFolder());
 }
 
 #pragma mark - dealloc
