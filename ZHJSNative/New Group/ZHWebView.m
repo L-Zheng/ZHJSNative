@@ -8,7 +8,7 @@
 
 #import "ZHWebView.h"
 #import "ZHJSHandler.h"
-#import "ZHFloatView.h"
+#import <ZHFloatWindow/ZHFloatView.h>
 
 NSString * const ZHWebViewSocketDebugUrlKey = @"ZHWebViewSocketDebugUrlKey";
 NSString * const ZHWebViewLocalDebugUrlKey = @"ZHWebViewLocalDebugUrlKey";

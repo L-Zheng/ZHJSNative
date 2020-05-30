@@ -1,8 +1,0 @@
-{
-    "tip": "当运行模拟器时是否使用release环境",
-    "isUseReleaseWhenSimulator": 0,
-
-
-    "isSocket": 0,
-    "socketDebugUrl": "http://192.168.2.21:8080"
-}
