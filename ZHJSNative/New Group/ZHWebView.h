@@ -101,6 +101,12 @@ typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
         baseURL:(NSURL *)baseURL
 allowingReadAccessToURL:(NSURL *)readAccessURL
          finish:(void (^) (BOOL success))finish;
+- (void)loadUrl:(NSURL *)url
+    cachePolicy:(NSNumber *)cachePolicy
+timeoutInterval:(NSNumber *)timeoutInterval
+        baseURL:(NSURL *)baseURL
+allowingReadAccessToURL:(NSURL *)readAccessURL
+         finish:(void (^) (BOOL success))finish;
 
 /// 渲染js页面
 /// @param jsSourceBaseURL 渲染该js文件所需的资源【jsSourceBaseURL的目录下包含有jsSourceURL文件】

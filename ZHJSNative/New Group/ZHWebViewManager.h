@@ -77,6 +77,8 @@ allowingReadAccessToURL:(NSURL *)readAccessURL
 - (void)loadOnlineDebugWebView:(ZHWebView *)webView
                            key:(NSString *)key
                            url:(NSURL *)url
+                   cachePolicy:(NSNumber *)cachePolicy
+               timeoutInterval:(NSNumber *)timeoutInterval
                         finish:(void (^) (BOOL success))finish;
 #endif
 

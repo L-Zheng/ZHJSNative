@@ -348,24 +348,30 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
  结果：ios9以上 加载的 index.html位于沙盒内【Documents】设置readAccessURL = Documents目录
  ios9以下 加载的 index.html拷贝到【Temp】文件夹下  需要的资源也要拷贝
  */
-- (void)loadUrl:(NSURL *)url baseURL:(NSURL *)baseURL allowingReadAccessToURL:(NSURL *)readAccessURL finish:(void (^) (BOOL success))finish{
+
+
+- (void)loadUrl:(NSURL *)url
+        baseURL:(NSURL *)baseURL
+allowingReadAccessToURL:(NSURL *)readAccessURL
+         finish:(void (^) (BOOL success))finish{
+    [self loadUrl:url
+      cachePolicy:nil
+  timeoutInterval:nil
+          baseURL:baseURL
+allowingReadAccessToURL:readAccessURL
+           finish:finish];
+}
+- (void)loadUrl:(NSURL *)url
+    cachePolicy:(NSNumber *)cachePolicy
+timeoutInterval:(NSNumber *)timeoutInterval
+        baseURL:(NSURL *)baseURL
+allowingReadAccessToURL:(NSURL *)readAccessURL
+         finish:(void (^) (BOOL success))finish{
     [self updateFloatViewTitle:@"刷新中..."];
     __weak __typeof__(self) __self = self;
-    //回调
     void (^callBack)(BOOL) = ^(BOOL success){
         if (finish) finish(success);
         [__self updateFloatViewTitle:@"刷新"];
-    };
-    //webView加载完成回调
-    void (^setWebViewFinish)(void) = ^(){
-        __self.loadFinish = ^(BOOL success) {
-            __self.loadSuccess = success;
-            __self.loadFail = !success;
-            if (success) {
-                __self.loadFinish = nil;
-            }
-            callBack(success);
-        };
     };
     
     if (!url) {
@@ -377,8 +383,11 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
     
     //远程Url
     if (!url.isFileURL) {
-        setWebViewFinish();
+        [self configWebViewFinish:callBack];
         NSURLRequest *request = [NSURLRequest requestWithURL:url];
+        if (cachePolicy && timeoutInterval) {
+            request = [NSURLRequest requestWithURL:url cachePolicy:cachePolicy.unsignedIntegerValue timeoutInterval:timeoutInterval.doubleValue];
+        }
         [self loadRequest:request];
         return;
     }
@@ -389,30 +398,14 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
         callBack(NO);
         return;
     }
-    //获取运行沙盒目录
-    NSURL * (^fetchRunBoxFolderBlock) (void) = ^NSURL *(void){
-        if (baseURL) return baseURL;
-        
-        //没有传沙盒路径 默认url的上一级目录为沙盒目录
-        NSString *superFolder = [__self.class fetchSuperiorFolder:url.path];
-        if (!superFolder) {
-            return nil;
-        }
-        NSURL *superURL = [NSURL fileURLWithPath:superFolder];
-        if (![fm fileExistsAtPath:superURL.path]) {
-            return nil;
-        }
-        return superURL;
-    };
-    
     if ([self.class isAvailableIOS9]) {
         NSURL *fileURL = [ZHWebView fileURLWithPath:path isDirectory:NO];
         if (!fileURL) {
             callBack(NO);
             return;
         }
-        setWebViewFinish();
-        self.runSandBoxURL = fetchRunBoxFolderBlock();
+        [self configWebViewFinish:callBack];
+        self.runSandBoxURL = [self parseRealRunBoxFolder:baseURL fileURL:url];
         [self loadFileURL:fileURL allowingReadAccessToURL:readAccessURL?:self.runSandBoxURL];
         return;
     }
@@ -428,15 +421,18 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
             callBack(NO);
             return;
         }
-        setWebViewFinish();
+        [self configWebViewFinish:callBack];
         NSURLRequest *request = [NSURLRequest requestWithURL:fileURL];
-        self.runSandBoxURL = fetchRunBoxFolderBlock();
+        if (cachePolicy && timeoutInterval) {
+            request = [NSURLRequest requestWithURL:fileURL cachePolicy:cachePolicy.unsignedIntegerValue timeoutInterval:timeoutInterval.doubleValue];
+        }
+        self.runSandBoxURL = [self parseRealRunBoxFolder:baseURL fileURL:url];
         [self loadRequest:request];
         return;
     }
     
     //拷贝到tmp目录下
-    NSURL *newBaseURL = fetchRunBoxFolderBlock();
+    NSURL *newBaseURL = [self parseRealRunBoxFolder:baseURL fileURL:url];
     if (!newBaseURL) {
         callBack(NO);
         return;
@@ -490,10 +486,44 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
         callBack(NO);
         return;
     }
-    setWebViewFinish();
+    [self configWebViewFinish:callBack];
     NSURLRequest *request = [NSURLRequest requestWithURL:fileURL];
+    if (cachePolicy && timeoutInterval) {
+        request = [NSURLRequest requestWithURL:fileURL cachePolicy:cachePolicy.unsignedIntegerValue timeoutInterval:timeoutInterval.doubleValue];
+    }
     self.runSandBoxURL = [NSURL fileURLWithPath:iOS8TargetFolder];
     [self loadRequest:request];
+}
+//配置webview渲染完成
+- (void)configWebViewFinish:(void (^) (BOOL success))finish{
+    __weak __typeof__(self) __self = self;
+    self.loadFinish = ^(BOOL success) {
+        __self.loadSuccess = success;
+        __self.loadFail = !success;
+        if (success) {
+            __self.loadFinish = nil;
+        }
+        if (finish) finish(success);
+    };
+}
+//解析运行沙盒目录
+- (NSURL *)parseRealRunBoxFolder:(NSURL *)baseURL fileURL:(NSURL *)fileURL{
+    if (baseURL) return baseURL;
+    
+    if (!fileURL || !fileURL.isFileURL) {
+        return nil;
+    }
+    
+    //没有传沙盒路径 默认url的上一级目录为沙盒目录
+    NSString *superFolder = [self.class fetchSuperiorFolder:fileURL.path];
+    if (!superFolder) {
+        return nil;
+    }
+    NSURL *superURL = [NSURL fileURLWithPath:superFolder];
+    if (![self.fm fileExistsAtPath:superURL.path]) {
+        return nil;
+    }
+    return superURL;
 }
 
 //渲染js页面

@@ -334,7 +334,7 @@
         [self readyLoadWebView];
     }else if (debugModel == ZHWebViewDebugModelOnline){
         NSString *socketUrlStr = [info valueForKey:ZHWebViewSocketDebugUrlKey];
-        [mg loadOnlineDebugWebView:webView key:[self currentTemplateKey] url:[NSURL URLWithString:socketUrlStr] finish:^(BOOL success) {
+        [mg loadOnlineDebugWebView:webView key:[self currentTemplateKey] url:[NSURL URLWithString:socketUrlStr] cachePolicy:@(NSURLRequestReloadIgnoringLocalAndRemoteCacheData) timeoutInterval:@(30) finish:^(BOOL success) {
             block(success);
         }];
     }else if (debugModel == ZHWebViewDebugModelLocal){

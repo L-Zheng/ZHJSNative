@@ -115,11 +115,16 @@ allowingReadAccessToURL:(NSURL *)readAccessURL
 #pragma mark - load
 
 #ifdef DEBUG
-- (void)loadOnlineDebugWebView:(ZHWebView *)webView key:(NSString *)key url:(NSURL *)url finish:(void (^) (BOOL success))finish{
+- (void)loadOnlineDebugWebView:(ZHWebView *)webView
+                           key:(NSString *)key
+                           url:(NSURL *)url
+                   cachePolicy:(NSNumber *)cachePolicy
+               timeoutInterval:(NSNumber *)timeoutInterval
+                        finish:(void (^) (BOOL success))finish{
     if (!webView || !url) {
         if (finish) finish(NO);return;
     }
-    [webView loadUrl:url baseURL:nil allowingReadAccessToURL:[NSURL fileURLWithPath:[ZHWebView getDocumentFolder]] finish:finish];
+    [webView loadUrl:url cachePolicy:cachePolicy timeoutInterval:timeoutInterval baseURL:nil allowingReadAccessToURL:[NSURL fileURLWithPath:[ZHWebView getDocumentFolder]] finish:finish];
 }
 
 - (void)loadLocalDebugWebView:(ZHWebView *)webView key:(NSString *)key loadFolder:(NSString *)loadFolder loadFileName:(NSString *)loadFileName allowingReadAccessToURL:(NSURL *)readAccessURL finish:(void (^) (BOOL success))finish{
@@ -342,7 +347,7 @@ allowingReadAccessToURL:(NSURL *)readAccessURL
     NSMutableArray *usedKeys = [@[] mutableCopy];
     NSMutableArray *cleanKeys = [@[] mutableCopy];
     //遍历key
-    NSEnumerator *enumerator = [mapTable keyEnumerator];
+    NSEnumerator *enumerator = mapTable ? [mapTable keyEnumerator] : nil;
     if (enumerator) {
         id key;
         while (key = [enumerator nextObject]) {
