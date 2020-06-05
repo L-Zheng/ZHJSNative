@@ -126,6 +126,8 @@
         if (operate == ZHWebViewExceptionOperateNothing) {
             [self configWebView:webView];
             [self renderWebView:webView];
+            //预加载新的webview
+//            [self preLoad];
             return;
         }else if (operate == ZHWebViewExceptionOperateReload){
         }else if (operate == ZHWebViewExceptionOperateNewInit){
@@ -137,6 +139,8 @@
     
     [self doLoadWebView:webView];
     if (!webView.superview) [self.view addSubview:webView];
+    //预加载新的webview
+//    [self preLoad];
 }
 
 - (void)doLoadWebView:(ZHWebView *)webView{
