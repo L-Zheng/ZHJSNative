@@ -1073,8 +1073,8 @@ allowingReadAccessToURL:(NSURL *)readAccessURL
 
 - (void)showFlowView{
 #ifdef DEBUG
-    [self.floatView showInView:self location:ZHFloatLocationRight];
-    [self.debugModelFloatView showInView:self location:ZHFloatLocationLeft];
+    [self.floatView showInView:self location:ZHFloatLocationRight locationScale:0.4];
+    [self.debugModelFloatView showInView:self location:ZHFloatLocationRight locationScale:0.6];
 #endif
 }
 - (void)updateFloatViewTitle:(NSString *)title{
