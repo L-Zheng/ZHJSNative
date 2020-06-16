@@ -52,12 +52,6 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
 
 @implementation ZHWebView
 
-- (instancetype)initWithApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers{
-    return [self initWithFrame:CGRectZero processPool:nil apiHandlers:apiHandlers];
-}
-- (instancetype)initWithFrame:(CGRect)frame apiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers{
-    return [self initWithFrame:frame processPool:nil apiHandlers:apiHandlers];
-}
 - (instancetype)initWithFrame:(CGRect)frame processPool:(WKProcessPool *)processPool apiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers{
     
     ZHJSHandler *handler = [[ZHJSHandler alloc] initWithApiHandlers:apiHandlers?:@[]];
@@ -349,18 +343,6 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
  ios9以下 加载的 index.html拷贝到【Temp】文件夹下  需要的资源也要拷贝
  */
 
-
-- (void)loadUrl:(NSURL *)url
-        baseURL:(NSURL *)baseURL
-allowingReadAccessToURL:(NSURL *)readAccessURL
-         finish:(void (^) (BOOL success))finish{
-    [self loadUrl:url
-      cachePolicy:nil
-  timeoutInterval:nil
-          baseURL:baseURL
-allowingReadAccessToURL:readAccessURL
-           finish:finish];
-}
 - (void)loadUrl:(NSURL *)url
     cachePolicy:(NSNumber *)cachePolicy
 timeoutInterval:(NSNumber *)timeoutInterval
@@ -1113,7 +1095,7 @@ allowingReadAccessToURL:(NSURL *)readAccessURL
 #ifdef DEBUG
 - (ZHFloatView *)floatView{
     if (!_floatView) {
-        _floatView = [ZHFloatView floatView];
+        _floatView = [ZHFloatView floatViewWithItems:nil];
         __weak __typeof__(self) __self = self;
         _floatView.tapClickBlock = ^{
             [__self webViewCallRefresh:nil];
@@ -1123,7 +1105,7 @@ allowingReadAccessToURL:(NSURL *)readAccessURL
 }
 - (ZHFloatView *)debugModelFloatView{
     if (!_debugModelFloatView) {
-        _debugModelFloatView = [ZHFloatView floatView];
+        _debugModelFloatView = [ZHFloatView floatViewWithItems:nil];
         [_debugModelFloatView updateTitle:@"release调试模式"];
         __weak __typeof__(self) __self = self;
         _debugModelFloatView.tapClickBlock = ^{

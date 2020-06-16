@@ -62,10 +62,6 @@ typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
 @property (nonatomic,weak) id <ZHScrollViewDelegate> zh_scrollViewDelegate;
 
 #pragma mark - init
-
-- (instancetype)initWithApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers;
-- (instancetype)initWithFrame:(CGRect)frame
-                  apiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers;
 /// 创建
 /// @param frame frame
 /// @param processPool 内容进程池【传nil：会自动创建一个新的processPool，不同的WebView的processPool不同，内容数据不能共享。如要共享内容数据（如： localstorage数据）可自行创建processPool单例，不同的WebView共用此单例】
@@ -94,13 +90,11 @@ typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
 
 /// 加载h5
 /// @param url 加载的url路径
+/// @param cachePolicy 缓存策略@(NSURLRequestCachePolicy)  默认nil
+/// @param timeoutInterval 超时时间  默认nil
 /// @param baseURL 【WebView运行所需的资源根目录，如果为nil，默认为url的上级目录】
 /// @param readAccessURL 允许WebView读取的目录
 /// @param finish 回调
-- (void)loadUrl:(NSURL *)url
-        baseURL:(NSURL *)baseURL
-allowingReadAccessToURL:(NSURL *)readAccessURL
-         finish:(void (^) (BOOL success))finish;
 - (void)loadUrl:(NSURL *)url
     cachePolicy:(NSNumber *)cachePolicy
 timeoutInterval:(NSNumber *)timeoutInterval

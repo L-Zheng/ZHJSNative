@@ -131,10 +131,10 @@
             return;
         }else if (operate == ZHWebViewExceptionOperateReload){
         }else if (operate == ZHWebViewExceptionOperateNewInit){
-            webView = [mg createWebView:self.view.bounds processPool:nil apiHandlers:[self apiHandlers]];
+            webView = [[ZHWebView alloc] initWithFrame:self.view.bounds processPool:nil apiHandlers:[self apiHandlers]];
         }
     }else{
-        webView = [mg createWebView:self.view.bounds processPool:nil apiHandlers:[self apiHandlers]];
+        webView = [[ZHWebView alloc] initWithFrame:self.view.bounds processPool:nil apiHandlers:[self apiHandlers]];
     }
     
     [self doLoadWebView:webView];

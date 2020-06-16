@@ -21,14 +21,6 @@
 
 #pragma mark - webview
 
-/// 创建
-/// @param frame frame
-/// @param processPool 内容进程池【传nil：会自动创建一个新的processPool，不同的WebView的processPool不同，内容数据不能共享。如要共享内容数据（如： localstorage数据）可自行创建processPool单例，不同的WebView共用此单例】
-/// @param apiHandlers 注入的api 【如： fund api】
-- (ZHWebView *)createWebView:(CGRect)frame
-                 processPool:(WKProcessPool *)processPool
-                 apiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers;
-
 /// 预加载webview
 /// @param key 模板的appId【如：品种页模板的appid】
 /// @param frame frame

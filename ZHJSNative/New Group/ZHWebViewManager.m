@@ -60,12 +60,6 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
 
 #pragma mark - webview
 
-- (ZHWebView *)createWebView:(CGRect)frame
-                 processPool:(WKProcessPool *)processPool
-                 apiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers{
-    return [[ZHWebView alloc] initWithFrame:frame processPool:processPool apiHandlers:apiHandlers];
-}
-
 - (void)preReadyWebView:(NSString *)key
                   frame:(CGRect)frame
            loadFileName:(NSString *)loadFileName
@@ -88,7 +82,7 @@ allowingReadAccessToURL:(NSURL *)readAccessURL
         return;
     }
     
-    ZHWebView *newWebView = [self createWebView:frame processPool:processPool apiHandlers:apiHandlers];
+    ZHWebView *newWebView = [[ZHWebView alloc] initWithFrame:frame processPool:processPool apiHandlers:apiHandlers];
     
     [self opMap:self.loadingWebsMap key:key webView:newWebView add:YES];
     
@@ -189,7 +183,7 @@ allowingReadAccessToURL:(NSURL *)readAccessURL
     NSURL *url = [NSURL fileURLWithPath:htmlPath];
     
     __weak __typeof__(self) __self = self;
-    [webView loadUrl:url baseURL:[NSURL fileURLWithPath:superFolder isDirectory:YES] allowingReadAccessToURL:accessURL finish:^(BOOL success) {
+    [webView loadUrl:url cachePolicy:nil timeoutInterval:nil baseURL:[NSURL fileURLWithPath:superFolder isDirectory:YES] allowingReadAccessToURL:accessURL finish:^(BOOL success) {
         if (finish) finish(success);
         //保留
         [__self addWebView:webView];
