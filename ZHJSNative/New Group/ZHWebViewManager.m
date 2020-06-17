@@ -386,6 +386,13 @@ allowingReadAccessToURL:accessURL
 
 //清理WebView加载缓存
 - (void)cleanWebViewLoadCache{
+    if ([ZHWebView isAvailableIOS9]) {
+        [self cleanWebViewLoadCache:ZHWebViewFolder()];
+        return;
+    }
+    [self cleanWebViewLoadCache:ZHWebViewTmpFolder()];
+}
+- (void)cleanWebViewLoadCache:(NSString *)webviewFolder{
     [self.lock lock];
     NSMapTable *mapTable = self.openedWebViewMapTable;
 
@@ -413,7 +420,7 @@ allowingReadAccessToURL:accessURL
     }
     
     //遍历子目录
-    NSArray *subFolders = [self.fm subpathsAtPath:ZHWebViewFolder()];
+    NSArray *subFolders = [self.fm subpathsAtPath:webviewFolder];
     NSEnumerator *childFile = [subFolders objectEnumerator];
     NSString *subPath;
     while ((subPath = [childFile nextObject]) != nil) {
@@ -423,7 +430,7 @@ allowingReadAccessToURL:accessURL
         if (pathComs.count != 1) continue;
         NSString *firstCom = pathComs.firstObject;
         
-        NSURL *newSubURLPath = [NSURL fileURLWithPath:[ZHWebViewFolder() stringByAppendingPathComponent:firstCom]];
+        NSURL *newSubURLPath = [NSURL fileURLWithPath:[webviewFolder stringByAppendingPathComponent:firstCom]];
         if ([self.fm fileExistsAtPath:newSubURLPath.path] &&
             ![usedKeys containsObject:newSubURLPath.path]) {
             [cleanKeys addObject:newSubURLPath.path];

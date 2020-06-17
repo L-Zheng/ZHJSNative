@@ -1146,7 +1146,25 @@ allowingReadAccessToURL:(NSURL *)readAccessURL
 - (void)clearWebViewSystemCache{
     if ([self.class isAvailableIOS9]) {
         WKWebsiteDataStore *dataSource = [WKWebsiteDataStore defaultDataStore];
-        [dataSource removeDataOfTypes:[WKWebsiteDataStore allWebsiteDataTypes] modifiedSince:[NSDate dateWithTimeIntervalSince1970:0] completionHandler:^{
+//        NSMutableSet *set = [WKWebsiteDataStore allWebsiteDataTypes];
+        NSMutableSet *set = [NSMutableSet set];
+        [set addObjectsFromArray:@[
+            WKWebsiteDataTypeDiskCache,//硬盘缓存
+            WKWebsiteDataTypeMemoryCache,//内存缓存
+            WKWebsiteDataTypeOfflineWebApplicationCache//离线应用缓存
+//            WKWebsiteDataTypeCookies,//cookie
+//            WKWebsiteDataTypeSessionStorage,//session
+//            WKWebsiteDataTypeLocalStorage,//localStorage,cookie的一个兄弟
+//            WKWebsiteDataTypeWebSQLDatabases,//数据库
+//            WKWebsiteDataTypeIndexedDBDatabases//索引数据库
+        ]];
+        if (@available(iOS 11.3, *)) {
+            [set addObjectsFromArray:@[
+                WKWebsiteDataTypeFetchCache,//硬盘fetch缓存
+                WKWebsiteDataTypeServiceWorkerRegistrations
+            ]];
+        }
+        [dataSource removeDataOfTypes:set modifiedSince:[NSDate dateWithTimeIntervalSince1970:0] completionHandler:^{
         }];
         return;
     }
