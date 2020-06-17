@@ -22,6 +22,8 @@
 @interface ZHController ()<ZHWebViewSocketDebugDelegate>
 @property (nonatomic, strong) ZHWebView *webView;
 @property (nonatomic, strong) ZHJSContext *context;
+
+@property (nonatomic,strong) WKProcessPool *processPool;
 @end
 
 @implementation ZHController
@@ -42,13 +44,20 @@
     return [[[NSBundle mainBundle] pathForResource:@"TestBundle" ofType:@"bundle"] stringByAppendingPathComponent:@"release"];
 }
 
+- (WKProcessPool *)processPool{
+    if (!_processPool) {
+        _processPool = [[WKProcessPool alloc] init];
+    }
+    return _processPool;
+}
+
 - (void)preLoad{
     //预加载
     [[ZHWebViewManager shareManager] preReadyWebView:[self currentTemplateKey]
                                                frame:[UIScreen mainScreen].bounds
                                         loadFileName:[self currentTemplateLoadName]
                                         presetFolder:[self currentTemplatePresetFolder]
-                                         processPool:nil
+                                         processPool:self.processPool
                              allowingReadAccessToURL:[NSURL fileURLWithPath:[ZHWebView getDocumentFolder]]
                                          apiHandlers:[self apiHandlers]
                                               finish:^(BOOL success) {
@@ -131,10 +140,10 @@
             return;
         }else if (operate == ZHWebViewExceptionOperateReload){
         }else if (operate == ZHWebViewExceptionOperateNewInit){
-            webView = [[ZHWebView alloc] initWithFrame:self.view.bounds processPool:nil apiHandlers:[self apiHandlers]];
+            webView = [[ZHWebView alloc] initWithFrame:self.view.bounds processPool:self.processPool apiHandlers:[self apiHandlers]];
         }
     }else{
-        webView = [[ZHWebView alloc] initWithFrame:self.view.bounds processPool:nil apiHandlers:[self apiHandlers]];
+        webView = [[ZHWebView alloc] initWithFrame:self.view.bounds processPool:self.processPool apiHandlers:[self apiHandlers]];
     }
     
     [self doLoadWebView:webView];
@@ -147,7 +156,12 @@
     ZHWebViewManager *mg = [ZHWebViewManager shareManager];
     
     __weak __typeof__(self) __self = self;
-    [mg loadWebView:webView key:[self currentTemplateKey] loadFileName:[self currentTemplateLoadName] presetFolder:[self currentTemplatePresetFolder] allowingReadAccessToURL:[NSURL fileURLWithPath:[ZHWebView getDocumentFolder]] finish:^(BOOL success) {
+    [mg loadWebView:webView
+                key:[self currentTemplateKey]
+       loadFileName:[self currentTemplateLoadName]
+       presetFolder:[self currentTemplatePresetFolder]
+allowingReadAccessToURL:[NSURL fileURLWithPath:[ZHWebView getDocumentFolder]]
+             finish:^(BOOL success) {
         if (!success) return;
         [__self configWebView:webView];
         [__self renderWebView:webView];

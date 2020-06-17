@@ -1,7 +1,7 @@
 <template>
   <div class="main-wrap">
     <PullRefresh @refresh="onRefresh">
-      <div style="width:100px;height:100px;background-color:orange;"></div>
+      <div @click="clickTest" style="width:100px;height:100px;background-color:orange;">点我</div>
       <div style="word-break:break-all;">
         <a href>@Hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhspfdlk</a>
         加油吧少年
@@ -62,6 +62,14 @@ var vm = {
   computed: {},
   mounted() {},
   methods: {
+    clickTest() {
+      window.localStorage.setItem('ffffff', 'xxsdfgd')
+      console.log(window.localStorage.getItem('ffffff'))
+
+      // HtmlStorage.setLocalStorage('ffffff', 'xx')
+      // console.log('getLocalStoragegetLocalStorage')
+      // console.log(HtmlStorage.getLocalStorage('ffffff'))
+    },
     configVue() {
       Vue.config.errorHandler = (oriFunc => {
         return function(err, vm, info) {

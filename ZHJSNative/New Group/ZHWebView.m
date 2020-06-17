@@ -807,8 +807,6 @@ allowingReadAccessToURL:(NSURL *)readAccessURL
     self.zh_navigationDelegate = nil;
     self.zh_UIDelegate = nil;
     self.zh_socketDebugDelegate = nil;
-    //清除缓存【否则ios11以上不会实时刷新最新的改动】
-    [self clearWebViewSystemCache];
     //回调
     if (ZHCheckDelegate(socketDebugDelegate, @selector(webViewRefresh:debugModel:info:))) {
         
@@ -817,6 +815,8 @@ allowingReadAccessToURL:(NSURL *)readAccessURL
         }else if (debugModel == ZHWebViewDebugModelLocal){
             info = info ?: @{ZHWebViewLocalDebugUrlKey: self.localDebugUrlStr};
         }else if (debugModel == ZHWebViewDebugModelOnline){
+            //清除缓存【否则ios11以上不会实时刷新最新的改动】
+            [self clearWebViewSystemCache];
             info = info ?: @{ZHWebViewSocketDebugUrlKey: self.socketDebugUrlStr};
         }
         [socketDebugDelegate webViewRefresh:self debugModel:self.debugModel info:info];
