@@ -90,8 +90,8 @@ typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
 
 /// 加载h5
 /// @param url 加载的url路径
-/// @param cachePolicy 缓存策略@(NSURLRequestCachePolicy)  默认nil
-/// @param timeoutInterval 超时时间  默认nil
+/// @param cachePolicy 【iOS8下 or  加载http地址使用】 缓存策略@(NSURLRequestCachePolicy)  默认nil
+/// @param timeoutInterval 【iOS8下 or  加载http地址使用】 超时时间  默认nil
 /// @param baseURL 【WebView运行所需的资源根目录，如果为nil，默认为url的上级目录】
 /// @param readAccessURL 允许WebView读取的目录
 /// @param finish 回调

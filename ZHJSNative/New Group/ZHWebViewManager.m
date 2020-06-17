@@ -66,6 +66,8 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
            presetFolder:(NSString *)presetFolder
             processPool:(WKProcessPool *)processPool
 allowingReadAccessToURL:(NSURL *)readAccessURL
+            cachePolicy:(NSNumber *)cachePolicy
+        timeoutInterval:(NSNumber *)timeoutInterval
             apiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers
                  finish:(void (^) (BOOL success))finish{
     if (![ZHWebView checkString:key]) {
@@ -87,7 +89,14 @@ allowingReadAccessToURL:(NSURL *)readAccessURL
     [self opMap:self.loadingWebsMap key:key webView:newWebView add:YES];
     
     __weak __typeof__(self) weakSelf = self;
-    [self loadWebView:newWebView key:key loadFileName:loadFileName presetFolder:presetFolder allowingReadAccessToURL:readAccessURL finish:^(BOOL success) {
+    [self loadWebView:newWebView
+                  key:key
+         loadFileName:loadFileName
+         presetFolder:presetFolder
+allowingReadAccessToURL:readAccessURL
+          cachePolicy:cachePolicy
+      timeoutInterval:timeoutInterval
+               finish:^(BOOL success) {
         [weakSelf opMap:weakSelf.loadingWebsMap key:key webView:newWebView add:NO];
         if (success) {
             [weakSelf opMap:weakSelf.websMap key:key webView:newWebView add:YES];
@@ -118,11 +127,21 @@ allowingReadAccessToURL:(NSURL *)readAccessURL
     if (!webView || !url) {
         if (finish) finish(NO);return;
     }
-    [webView loadUrl:url cachePolicy:cachePolicy timeoutInterval:timeoutInterval baseURL:nil allowingReadAccessToURL:[NSURL fileURLWithPath:[ZHWebView getDocumentFolder]] finish:finish];
+    [webView loadUrl:url
+         cachePolicy:cachePolicy
+     timeoutInterval:timeoutInterval
+             baseURL:nil
+allowingReadAccessToURL:[NSURL fileURLWithPath:[ZHWebView getDocumentFolder]]
+              finish:finish];
 }
-
-- (void)loadLocalDebugWebView:(ZHWebView *)webView key:(NSString *)key loadFolder:(NSString *)loadFolder loadFileName:(NSString *)loadFileName allowingReadAccessToURL:(NSURL *)readAccessURL finish:(void (^) (BOOL success))finish{
-    
+- (void)loadLocalDebugWebView:(ZHWebView *)webView
+                          key:(NSString *)key
+                   loadFolder:(NSString *)loadFolder
+                 loadFileName:(NSString *)loadFileName
+      allowingReadAccessToURL:(NSURL *)readAccessURL
+                  cachePolicy:(NSNumber *)cachePolicy
+              timeoutInterval:(NSNumber *)timeoutInterval
+                       finish:(void (^) (BOOL success))finish{
     __weak __typeof__(self) __self = self;
     //加载模板 拷贝到沙盒
     [self copyTemplateFolderToSandBox:webView templateFolder:loadFolder error:nil callBack:^(NSString *newLoadFolder, NSError *error) {
@@ -131,13 +150,26 @@ allowingReadAccessToURL:(NSURL *)readAccessURL
             if (finish) finish(NO);
             return;
         }
-        [__self loadWebView:webView key:key loadFolder:newLoadFolder loadFileName:loadFileName allowingReadAccessToURL:readAccessURL finish:finish];
+        [__self loadWebView:webView
+                        key:key
+                 loadFolder:newLoadFolder
+               loadFileName:loadFileName
+    allowingReadAccessToURL:readAccessURL
+                cachePolicy:cachePolicy
+            timeoutInterval:timeoutInterval
+                     finish:finish];
     }];
 }
 #endif
 
-- (void)loadWebView:(ZHWebView *)webView key:(NSString *)key loadFileName:(NSString *)loadFileName presetFolder:(NSString *)presetFolder allowingReadAccessToURL:(NSURL *)readAccessURL finish:(void (^) (BOOL success))finish{
-    
+- (void)loadWebView:(ZHWebView *)webView
+                key:(NSString *)key
+       loadFileName:(NSString *)loadFileName
+       presetFolder:(NSString *)presetFolder
+allowingReadAccessToURL:(NSURL *)readAccessURL
+        cachePolicy:(NSNumber *)cachePolicy
+    timeoutInterval:(NSNumber *)timeoutInterval
+             finish:(void (^) (BOOL success))finish{
     if (!webView || ![webView isKindOfClass:[ZHWebView class]] ||
         ![ZHWebView checkString:loadFileName]) {
         if (finish) finish(NO);
@@ -153,12 +185,26 @@ allowingReadAccessToURL:(NSURL *)readAccessURL
                 if (finish) finish(NO);
                 return;
             }
-            [__self loadWebView:webView key:key loadFolder:loadFolder loadFileName:loadFileName allowingReadAccessToURL:readAccessURL finish:finish];
+            [__self loadWebView:webView
+                            key:key
+                     loadFolder:loadFolder
+                   loadFileName:loadFileName
+        allowingReadAccessToURL:readAccessURL
+                    cachePolicy:cachePolicy
+                timeoutInterval:timeoutInterval
+                         finish:finish];
         }];
     }];
 }
 
-- (void)loadWebView:(ZHWebView *)webView key:(NSString *)key loadFolder:(NSString *)loadFolder loadFileName:(NSString *)loadFileName allowingReadAccessToURL:(NSURL *)readAccessURL finish:(void (^) (BOOL success))finish{
+- (void)loadWebView:(ZHWebView *)webView
+                key:(NSString *)key
+         loadFolder:(NSString *)loadFolder
+       loadFileName:(NSString *)loadFileName
+allowingReadAccessToURL:(NSURL *)readAccessURL
+        cachePolicy:(NSNumber *)cachePolicy
+    timeoutInterval:(NSNumber *)timeoutInterval
+             finish:(void (^) (BOOL success))finish{
     //检查
     if (![ZHWebView checkString:loadFolder] ||
         ![ZHWebView checkString:loadFileName]) {
@@ -183,7 +229,12 @@ allowingReadAccessToURL:(NSURL *)readAccessURL
     NSURL *url = [NSURL fileURLWithPath:htmlPath];
     
     __weak __typeof__(self) __self = self;
-    [webView loadUrl:url cachePolicy:nil timeoutInterval:nil baseURL:[NSURL fileURLWithPath:superFolder isDirectory:YES] allowingReadAccessToURL:accessURL finish:^(BOOL success) {
+    [webView loadUrl:url
+         cachePolicy:cachePolicy
+     timeoutInterval:timeoutInterval
+             baseURL:[NSURL fileURLWithPath:superFolder isDirectory:YES]
+allowingReadAccessToURL:accessURL
+              finish:^(BOOL success) {
         if (finish) finish(success);
         //保留
         [__self addWebView:webView];

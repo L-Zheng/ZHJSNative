@@ -59,6 +59,8 @@
                                         presetFolder:[self currentTemplatePresetFolder]
                                          processPool:self.processPool
                              allowingReadAccessToURL:[NSURL fileURLWithPath:[ZHWebView getDocumentFolder]]
+                                         cachePolicy:nil
+                                     timeoutInterval:nil
                                          apiHandlers:[self apiHandlers]
                                               finish:^(BOOL success) {
         NSLog(@"--------------------");
@@ -161,6 +163,8 @@
        loadFileName:[self currentTemplateLoadName]
        presetFolder:[self currentTemplatePresetFolder]
 allowingReadAccessToURL:[NSURL fileURLWithPath:[ZHWebView getDocumentFolder]]
+        cachePolicy:nil
+    timeoutInterval:nil
              finish:^(BOOL success) {
         if (!success) return;
         [__self configWebView:webView];
@@ -352,12 +356,25 @@ allowingReadAccessToURL:[NSURL fileURLWithPath:[ZHWebView getDocumentFolder]]
         [self readyLoadWebView];
     }else if (debugModel == ZHWebViewDebugModelOnline){
         NSString *socketUrlStr = [info valueForKey:ZHWebViewSocketDebugUrlKey];
-        [mg loadOnlineDebugWebView:webView key:[self currentTemplateKey] url:[NSURL URLWithString:socketUrlStr] cachePolicy:@(NSURLRequestReloadIgnoringLocalAndRemoteCacheData) timeoutInterval:@(30) finish:^(BOOL success) {
+        [mg loadOnlineDebugWebView:webView
+                               key:[self currentTemplateKey]
+                               url:[NSURL URLWithString:socketUrlStr]
+                       cachePolicy:@(NSURLRequestReloadIgnoringLocalAndRemoteCacheData)
+                   timeoutInterval:@(30)
+                            finish:^(BOOL success) {
             block(success);
         }];
     }else if (debugModel == ZHWebViewDebugModelLocal){
         NSString *loadFolder = [info valueForKey:ZHWebViewLocalDebugUrlKey];
-        [mg loadLocalDebugWebView:webView key:[self currentTemplateKey] loadFolder:[loadFolder stringByAppendingPathComponent:@"release"] loadFileName:[self currentTemplateLoadName] allowingReadAccessToURL:[NSURL fileURLWithPath:[ZHWebView getDocumentFolder]] finish:^(BOOL success) {
+        [mg loadLocalDebugWebView:webView
+                              key:[self currentTemplateKey]
+                       loadFolder:[loadFolder
+                                   stringByAppendingPathComponent:@"release"]
+                     loadFileName:[self currentTemplateLoadName]
+          allowingReadAccessToURL:[NSURL fileURLWithPath:[ZHWebView getDocumentFolder]]
+                      cachePolicy:nil
+                  timeoutInterval:nil
+                           finish:^(BOOL success) {
             block(success);
         }];
     }
