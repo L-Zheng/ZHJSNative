@@ -61,12 +61,6 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
     //注入api
     NSMutableArray *apis = [NSMutableArray array];
 #ifdef DEBUG
-    //webview log控制台
-//    [apis addObject:@{
-//        @"code": @"let ZhengVconsoleLog = document.createElement('script');ZhengVconsoleLog.src = 'http://wechatfe.github.io/vconsole/lib/vconsole.min.js?v=3.3.0';ZhengVconsoleLog.onload = function() {window.vConsole = new window.VConsole();};document.body.append(ZhengVconsoleLog);",
-//        @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentEnd),
-//        @"mainFrameOnly": @(YES)
-//    }];
     //log
     [apis addObject:@{
         @"code": [handler fetchWebViewLogApi]?:@"",
@@ -83,6 +77,12 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
     [apis addObject:@{
         @"code": [handler fetchWebViewSocketApi]?:@"",
         @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentStart),
+        @"mainFrameOnly": @(YES)
+    }];
+    //webview log控制台
+    [apis addObject:@{
+        @"code": @"let ZhengVconsoleLog = document.createElement('script');ZhengVconsoleLog.src = 'http://wechatfe.github.io/vconsole/lib/vconsole.min.js?v=3.3.0';ZhengVconsoleLog.onload = function() {var vConsole = new VConsole();};document.body.append(ZhengVconsoleLog);",
+        @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentEnd),
         @"mainFrameOnly": @(YES)
     }];
     //禁用webview长按弹出菜单
@@ -141,8 +141,16 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
     config.userContentController = userContent;
     
     //设置跨域
+    
+    // 禁用 file 协议；
+//    setAllowFileAccess(false);
+//    setAllowFileAccessFromFileURLs(false);
+//    setAllowUniversalAccessFromFileURLs(false);
+    
+    // 设置是否允许通过 file url 加载的 Js代码读取其他的本地文件
     [config.preferences setValue:@YES forKey:@"allowFileAccessFromFileURLs"];
     if ([self.class isAvailableIOS10]) {
+        // 设置是否允许通过 file url 加载的 Javascript 可以访问其他的源(包括http、https等源)
         [config setValue:@YES forKey:@"allowUniversalAccessFromFileURLs"];
     }
     
