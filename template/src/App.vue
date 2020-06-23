@@ -1,7 +1,14 @@
 <template>
   <div class="main-wrap">
     <PullRefresh @refresh="onRefresh">
-      <div @click="clickTest" style="width:100px;height:100px;background-color:orange;">点我</div>
+      <div @click="clickTest" 
+      style="width:100px;height:100px;background-color:orange;">
+      点我
+      </div>
+      <div
+      style="width:100px;height:100px;background-color:orange;">
+      点我
+      </div>
       <div style="word-break:break-all;">
         <a href>@Hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhspfdlk</a>
         加油吧少年

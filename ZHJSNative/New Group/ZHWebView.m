@@ -81,7 +81,7 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
     }];
     //webview log控制台
     [apis addObject:@{
-        @"code": @"let ZhengVconsoleLog = document.createElement('script');ZhengVconsoleLog.src = 'http://wechatfe.github.io/vconsole/lib/vconsole.min.js?v=3.3.0';ZhengVconsoleLog.onload = function() {var vConsole = new VConsole();};document.body.append(ZhengVconsoleLog);",
+        @"code": @"var ZhengVconsoleLog = document.createElement('script'); ZhengVconsoleLog.type = 'text/javascript'; ZhengVconsoleLog.src = 'http://wechatfe.github.io/vconsole/lib/vconsole.min.js?v=3.3.0'; ZhengVconsoleLog.charset = 'UTF-8'; ZhengVconsoleLog.onload = function(){var vConsole = new VConsole();}; ZhengVconsoleLog.onerror = function(error){}; window.document.body.appendChild(ZhengVconsoleLog);",
         @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentEnd),
         @"mainFrameOnly": @(YES)
     }];
@@ -148,7 +148,9 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
 //    setAllowUniversalAccessFromFileURLs(false);
     
     // 设置是否允许通过 file url 加载的 Js代码读取其他的本地文件
-    [config.preferences setValue:@YES forKey:@"allowFileAccessFromFileURLs"];
+    if ([self.class isAvailableIOS9]) {
+        [config.preferences setValue:@YES forKey:@"allowFileAccessFromFileURLs"];
+    }
     if ([self.class isAvailableIOS10]) {
         // 设置是否允许通过 file url 加载的 Javascript 可以访问其他的源(包括http、https等源)
         [config setValue:@YES forKey:@"allowUniversalAccessFromFileURLs"];
