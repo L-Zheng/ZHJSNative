@@ -25,7 +25,7 @@ window.onerror = (function (oriFunc) {
         if (argCount == 0) return;
 
         var fetchVaule = function (idx) {
-            return argCount > idx ? params[idx] : 'no this params';
+            return argCount > idx ? params[idx] : 'libaozheng no this params';
         };
         var firstParma = fetchVaule(0);
         var isErrorParam = (Object.prototype.toString.call(firstParma) == '[object Error]');
