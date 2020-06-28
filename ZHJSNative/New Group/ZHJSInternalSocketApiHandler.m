@@ -7,11 +7,10 @@
 //
 
 #import "ZHJSInternalSocketApiHandler.h"
-#import "ZHWebView.h"
+#import "ZHWebViewDebugConfiguration.h"
 
 @implementation ZHJSInternalSocketApiHandler
 
-#ifdef DEBUG
 //socket链接调试
 /** socket调试代理  声明方法 */
 - (void)js_socketDidOpen:(NSDictionary *)params{
@@ -36,13 +35,12 @@
     funcStr = [funcStr substringWithRange:NSMakeRange(range.location + range.length, funcStr.length - range.location - range.length - 1)];
     
     SEL sel = NSSelectorFromString(funcStr);
-    if (![self.webView respondsToSelector:sel]) return;
+    if (![self.webView.debugConfig respondsToSelector:sel]) return;
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
-    [self.webView performSelector:sel withObject:params];
+    [self.webView.debugConfig performSelector:sel withObject:params];
 #pragma clang diagnostic pop
 }
-#endif
 
 //js api方法名前缀  如：fund
 - (NSString *)zh_jsApiPrefixName{
@@ -54,6 +52,6 @@
 }
 
 - (void)dealloc{
-    NSLog(@"-------%s---------", __func__);
+    NSLog(@"%s", __func__);
 }
 @end

@@ -8,45 +8,28 @@
 
 #import "ZHWebView.h"
 #import "ZHJSHandler.h"
-#import <ZHFloatWindow/ZHFloatView.h>
+#import "ZHWebViewDebugConfiguration.h"
 
 NSString * const ZHWebViewSocketDebugUrlKey = @"ZHWebViewSocketDebugUrlKey";
 NSString * const ZHWebViewLocalDebugUrlKey = @"ZHWebViewLocalDebugUrlKey";
 
-//创建 error
-__attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
-    if (!delegate || !sel) return NO;
-    return [delegate respondsToSelector:sel];
-}
-
 @interface ZHWebView ()<WKNavigationDelegate, WKUIDelegate, UIScrollViewDelegate, UIGestureRecognizerDelegate>
+
+// 调试配置
+@property (nonatomic, strong) ZHWebViewDebugConfiguration *debugConfig;
 
 //webView运行的沙盒目录
 @property (nonatomic, copy) NSURL *runSandBoxURL;
 
-@property (nonatomic,copy) void (^loadFinish) (BOOL success);
+@property (nonatomic, copy) void (^loadFinish) (BOOL success);
 @property (nonatomic, assign) BOOL loadSuccess;
 @property (nonatomic, assign) BOOL loadFail;
 
 @property (nonatomic, assign) BOOL didTerminate;//WebContentProcess进程被终结
-@property (nonatomic,strong) UIGestureRecognizer *pressGes;
+@property (nonatomic, strong) UIGestureRecognizer *pressGes;
 @property (nonatomic, strong) ZHJSHandler *handler;
-//外部handler
-//@property (nonatomic,strong) NSMutableArray <id <ZHJSApiProtocol>> *apiHandlers;
-
-#ifdef DEBUG
-@property (nonatomic,strong) ZHFloatView *floatView;
-@property (nonatomic,strong) ZHFloatView *debugModelFloatView;
-
-@property (nonatomic,copy) NSString *socketDebugUrlStr;
-@property (nonatomic,copy) NSString *localDebugUrlStr;
-#endif
 
 @property (nonatomic, strong) NSLock *lock;
-
-#pragma mark - debug
-
-@property (nonatomic, assign) ZHWebViewDebugModel debugModel;
 
 @end
 
@@ -54,44 +37,55 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
 
 - (instancetype)initWithFrame:(CGRect)frame processPool:(WKProcessPool *)processPool apiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers{
     
-    ZHJSHandler *handler = [[ZHJSHandler alloc] initWithApiHandlers:apiHandlers?:@[]];
-    
+    WKWebViewConfiguration *config = [[WKWebViewConfiguration alloc] init];
     WKUserContentController *userContent = [[WKUserContentController alloc] init];
+    ZHWebViewDebugConfiguration *debugConfig = [ZHWebViewDebugConfiguration configuration];
+    self.debugConfig = debugConfig;
+    ZHJSHandler *handler = [[ZHJSHandler alloc] initWithDebugConfig:debugConfig apiHandlers:apiHandlers?:@[]];
+    self.handler = handler;
     
     //注入api
     NSMutableArray *apis = [NSMutableArray array];
-#ifdef DEBUG
     //log
-    [apis addObject:@{
-        @"code": [handler fetchWebViewLogApi]?:@"",
-        @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentStart),
-        @"mainFrameOnly": @(YES)
-    }];
+    if (debugConfig.logOutputXcodeEnable) {
+        [apis addObject:@{
+            @"code": [handler fetchWebViewLogApi]?:@"",
+            @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentStart),
+            @"mainFrameOnly": @(YES)
+        }];
+    }
     //error
-    [apis addObject:@{
-        @"code": [handler fetchWebViewErrorApi]?:@"",
-        @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentStart),
-        @"mainFrameOnly": @(YES)
-    }];
+    if (debugConfig.alertWebViewErrorEnable) {
+        [apis addObject:@{
+            @"code": [handler fetchWebViewErrorApi]?:@"",
+            @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentStart),
+            @"mainFrameOnly": @(YES)
+        }];
+    }
     //websocket js用于监听socket链接
-    [apis addObject:@{
-        @"code": [handler fetchWebViewSocketApi]?:@"",
-        @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentStart),
-        @"mainFrameOnly": @(YES)
-    }];
+    if (debugConfig.debugModelEnable) {
+        [apis addObject:@{
+            @"code": [handler fetchWebViewSocketApi]?:@"",
+            @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentStart),
+            @"mainFrameOnly": @(YES)
+        }];
+    }
     //webview log控制台
-    [apis addObject:@{
-        @"code": @"var ZhengVconsoleLog = document.createElement('script'); ZhengVconsoleLog.type = 'text/javascript'; ZhengVconsoleLog.src = 'http://wechatfe.github.io/vconsole/lib/vconsole.min.js?v=3.3.0'; ZhengVconsoleLog.charset = 'UTF-8'; ZhengVconsoleLog.onload = function(){var vConsole = new VConsole();}; ZhengVconsoleLog.onerror = function(error){}; window.document.body.appendChild(ZhengVconsoleLog);",
-        @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentEnd),
-        @"mainFrameOnly": @(YES)
-    }];
+    if (debugConfig.logOutputWebviewEnable) {
+        [apis addObject:@{
+            @"code": @"var ZhengVconsoleLog = document.createElement('script'); ZhengVconsoleLog.type = 'text/javascript'; ZhengVconsoleLog.src = 'http://wechatfe.github.io/vconsole/lib/vconsole.min.js?v=3.3.0'; ZhengVconsoleLog.charset = 'UTF-8'; ZhengVconsoleLog.onload = function(){var vConsole = new VConsole();}; ZhengVconsoleLog.onerror = function(error){}; window.document.body.appendChild(ZhengVconsoleLog);",
+            @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentEnd),
+            @"mainFrameOnly": @(YES)
+        }];
+    }
     //禁用webview长按弹出菜单
-    [apis addObject:@{
-        @"code": [handler fetchWebViewTouchCalloutApi]?:@"",
-        @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentEnd),
-        @"mainFrameOnly": @(YES)
-    }];
-#endif
+    if (debugConfig.touchCalloutEnable) {
+        [apis addObject:@{
+            @"code": [handler fetchWebViewTouchCalloutApi]?:@"",
+            @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentEnd),
+            @"mainFrameOnly": @(YES)
+        }];
+    }
     //api support js
     [apis addObject:@{
         @"code": [handler fetchWebViewSupportApi]?:@"",
@@ -119,13 +113,12 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
         [userContent addUserScript:script];
     }
     
-    //监听js
+    //监听ScriptMessageHandler
     NSArray *handlerNames = [self.class fetchHandlerNames];
     for (NSString *key in handlerNames) {
         [userContent addScriptMessageHandler:handler name:key];
     }
     
-    WKWebViewConfiguration *config = [[WKWebViewConfiguration alloc] init];
     //配置内容进程池
     if (processPool) {
         config.processPool = processPool;
@@ -148,16 +141,21 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
 //    setAllowUniversalAccessFromFileURLs(false);
     
     // 设置是否允许通过 file url 加载的 Js代码读取其他的本地文件
-    if ([self.class isAvailableIOS9]) {
+    if ([ZHWebViewDebugConfiguration availableIOS9]) {
         [config.preferences setValue:@YES forKey:@"allowFileAccessFromFileURLs"];
     }
-    if ([self.class isAvailableIOS10]) {
+    if ([ZHWebViewDebugConfiguration availableIOS10]) {
         // 设置是否允许通过 file url 加载的 Javascript 可以访问其他的源(包括http、https等源)
         [config setValue:@YES forKey:@"allowUniversalAccessFromFileURLs"];
     }
     
     self = [self initWithFrame:frame configuration:config];
     if (self) {
+        
+        debugConfig.webView = self;
+        handler.webView = self;
+        
+        // UI配置
         self.backgroundColor = [UIColor colorWithRed:245.0/255.0 green:245.0/255.0 blue:245.0/255.0 alpha:1.0];
         //    self.scrollView.bounces = NO;
         //    self.scrollView.alwaysBounceVertical = NO;
@@ -168,12 +166,9 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
         //禁用链接预览
         //    [webView setAllowsLinkPreview:NO];
         
-        if ([self.class isAvailableIOS11]) {
+        if ([ZHWebViewDebugConfiguration availableIOS11]) {
             self.scrollView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
         }
-        
-        self.handler = handler;
-        handler.webView = self;
         
         //设置代理
         self.UIDelegate = self;
@@ -184,16 +179,12 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
          否则crash
          */
         //        self.scrollView.delegate = self;
-        
-        //设置外部handler
-//        self.apiHandlers = [apiHandlers mutableCopy];
     }
     return self;
 }
 - (instancetype)initWithFrame:(CGRect)frame configuration:(WKWebViewConfiguration *)configuration{
     self = [super initWithFrame:frame configuration:configuration];
     if (self) {
-        [self showFlowView];
         [self configGesture];
     }
     return self;
@@ -251,7 +242,7 @@ __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
 - (void)layoutSubviews{
     [super layoutSubviews];
     
-    [self updateFloatViewLocation];
+    [self.debugConfig updateFloatViewLocation];
 }
 
 #pragma mark - config gesture
@@ -359,11 +350,11 @@ timeoutInterval:(NSNumber *)timeoutInterval
         baseURL:(NSURL *)baseURL
 allowingReadAccessToURL:(NSURL *)readAccessURL
          finish:(void (^) (BOOL success))finish{
-    [self updateFloatViewTitle:@"刷新中..."];
+    [self.debugConfig updateFloatViewTitle:@"刷新中..."];
     __weak __typeof__(self) __self = self;
     void (^callBack)(BOOL) = ^(BOOL success){
         if (finish) finish(success);
-        [__self updateFloatViewTitle:@"刷新"];
+        [__self.debugConfig updateFloatViewTitle:@"刷新"];
     };
     
     if (!url) {
@@ -390,7 +381,7 @@ allowingReadAccessToURL:(NSURL *)readAccessURL
         callBack(NO);
         return;
     }
-    if ([self.class isAvailableIOS9]) {
+    if ([ZHWebViewDebugConfiguration availableIOS9]) {
         NSURL *fileURL = [ZHWebView fileURLWithPath:path isDirectory:NO];
         if (!fileURL) {
             callBack(NO);
@@ -700,7 +691,7 @@ allowingReadAccessToURL:(NSURL *)readAccessURL
 
 //当WKWebView总体内存占用过大，页面即将白屏的时候，系统会调用上面的回调函数，我们在该函数里执行[webView reload]（这个时候webView.URL取值尚不为零）解决白屏问题。在一些高内存消耗的页面可能会频繁刷新当前页面
 - (void)webViewWebContentProcessDidTerminate:(WKWebView *)webView{
-    if ([self.class isAvailableIOS9]) {
+    if ([ZHWebViewDebugConfiguration availableIOS9]) {
         id <ZHWKNavigationDelegate> de = self.zh_navigationDelegate;
         if (ZHCheckDelegate(de, @selector(webViewWebContentProcessDidTerminate:))) {
             [de webViewWebContentProcessDidTerminate:webView];
@@ -762,175 +753,6 @@ allowingReadAccessToURL:(NSURL *)readAccessURL
 
 #pragma mark - UIScrollViewDelegate
 
-#pragma mark - socket debug
-#ifdef DEBUG
-- (void)socketDidOpen:(NSDictionary *)params{
-    
-}
-- (void)socketDidReceiveMessage:(NSDictionary *)params{
-    dispatch_async(dispatch_get_main_queue(), ^{
-        if (![params isKindOfClass:[NSDictionary class]]) return;
-        NSString *type = [params valueForKey:@"type"];
-        if (![type isKindOfClass:[NSString class]]) return;
-        if ([type isEqualToString:@"invalid"]) {
-            [self performSelector:@selector(webViewCallReadyRefresh) withObject:nil];
-            [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(webViewCallRefresh:) object:nil];
-            return;
-        }
-        if ([type isEqualToString:@"hash"]) {
-            [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(webViewCallRefresh:) object:nil];
-            return;
-        }
-        if ([type isEqualToString:@"ok"] || [type isEqualToString:@"warnings"]) {
-            [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(webViewCallRefresh:) object:nil];
-            [self performSelector:@selector(webViewCallRefresh:) withObject:nil afterDelay:0.3];
-            return;
-        }
-    });
-}
-- (void)socketDidError:(NSDictionary *)params{
-    
-}
-- (void)socketDidClose:(NSDictionary *)params{
-    
-}
-
-#pragma mark - Call ZHWebViewSocketDebugDelegate
-
-- (void)webViewCallReadyRefresh{
-    [self updateFloatViewTitle:@"准备中..."];
-    if (ZHCheckDelegate(self.zh_socketDebugDelegate, @selector(webViewReadyRefresh:))) {
-        [self.zh_socketDebugDelegate webViewReadyRefresh:self];
-    }
-}
-- (void)webViewCallRefresh:(NSDictionary *)info{
-    [self updateFloatViewTitle:@"刷新中..."];
-        
-        /** presented 与dismiss同时进行 会crash */
-    //    if ([self.presentedViewController isKindOfClass:[UIAlertController class]]) {
-    //        [self dismissViewControllerAnimated:YES completion:nil];
-    //    }
-    
-    //获取代理
-    id <ZHWebViewSocketDebugDelegate> socketDebugDelegate = self.zh_socketDebugDelegate;
-    //清除代理
-    self.zh_navigationDelegate = nil;
-    self.zh_UIDelegate = nil;
-    self.zh_socketDebugDelegate = nil;
-    //清除缓存【否则ios11以上不会实时刷新最新的改动】
-    [self clearWebViewSystemCache];
-    //回调
-    if (ZHCheckDelegate(socketDebugDelegate, @selector(webViewRefresh:debugModel:info:))) {
-        ZHWebViewDebugModel debugModel = self.debugModel;
-        if (debugModel == ZHWebViewDebugModelNo) {
-        }else if (debugModel == ZHWebViewDebugModelLocal){
-            info = info ?: @{ZHWebViewLocalDebugUrlKey: self.localDebugUrlStr};
-        }else if (debugModel == ZHWebViewDebugModelOnline){
-            info = info ?: @{ZHWebViewSocketDebugUrlKey: self.socketDebugUrlStr};
-        }
-        [socketDebugDelegate webViewRefresh:self debugModel:self.debugModel info:info];
-    }
-}
-
-#pragma mark - alert
-
-//切换模式
-- (void)doSwitchDebugModel:(UIAlertAction *)action debugModel:(ZHWebViewDebugModel)debugModel info:(NSDictionary *)info{
-    self.debugModel = debugModel;
-    [self.debugModelFloatView updateTitle:action.title];
-    [self webViewCallReadyRefresh];
-    [self webViewCallRefresh:info];
-}
-//socket debug调试弹窗
-- (void)alertDebugModelOnline:(UIAlertAction *)action debugModel:(ZHWebViewDebugModel)debugModel{
-    NSString *socketDebugUrlCacheKey = @"ZHWebViewSocketDebugUrlCacheKey";
-    
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:action.title message:@"该模式将会监听代码改动，同步刷新页面UI。\n在WebView项目目录下运行 yarn serve，将http地址填在此处【如：http://192.168.2.21:8080，会自动填充上一次的地址】。" preferredStyle:UIAlertControllerStyleAlert];
-    __weak __typeof__(self) __self = self;
-    UIAlertAction *ac1 = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actionT){
-    }];
-    UIAlertAction *ac2 = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actionT) {
-        NSString *urlStr = [alert.textFields.firstObject text];
-        if (urlStr.length == 0) return;
-            
-        __self.socketDebugUrlStr = urlStr;
-        [[NSUserDefaults standardUserDefaults] setValue:urlStr forKey:socketDebugUrlCacheKey];
-        [[NSUserDefaults standardUserDefaults] synchronize];
-        [__self doSwitchDebugModel:action debugModel:debugModel info:@{ZHWebViewSocketDebugUrlKey: urlStr}];
-    }];
-    [alert addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {
-        textField.placeholder = @"输入socket调试地址";
-        NSString *cacheUrl = [[NSUserDefaults standardUserDefaults] valueForKey:socketDebugUrlCacheKey];
-        if (cacheUrl && cacheUrl.length > 0) {
-            textField.text = cacheUrl;
-        }
-    }];
-    [alert addAction:ac1];
-    [alert addAction:ac2];
-    [[self fetchActivityCtrl] presentViewController:alert animated:YES completion:nil];
-}
-//local debug调试弹窗
-- (void)alertDebugModelLocal:(UIAlertAction *)action debugModel:(ZHWebViewDebugModel)debugModel{
-    NSString *localDebugUrlCacheKey = @"ZHWebViewLocalDebugUrlCacheKey";
-    
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:action.title message:@"该模式将会运行本机WebView项目目录release文件下内容。\n将 本机WebView项目目录 填在此处【如：/Users/em/Desktop/EMCode/fund-projects/fund-details，会自动填充上一次的地址】\n在你改动代码后，运行yarn build，点击浮窗刷新。" preferredStyle:UIAlertControllerStyleAlert];
-    __weak __typeof__(self) __self = self;
-    UIAlertAction *ac1 = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actionT){
-    }];
-    UIAlertAction *ac2 = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actionT) {
-        NSString *urlStr = [alert.textFields.firstObject text];
-        if (urlStr.length == 0) return;
-        
-        __self.localDebugUrlStr = urlStr;
-        [[NSUserDefaults standardUserDefaults] setValue:urlStr forKey:localDebugUrlCacheKey];
-        [[NSUserDefaults standardUserDefaults] synchronize];
-        [__self doSwitchDebugModel:action debugModel:debugModel info:@{ZHWebViewLocalDebugUrlKey: urlStr}];
-    }];
-    [alert addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {
-        textField.placeholder = @"输入本机WebView项目目录地址";
-        NSString *cacheUrl = [[NSUserDefaults standardUserDefaults] valueForKey:localDebugUrlCacheKey];
-        if (cacheUrl && cacheUrl.length > 0) {
-            textField.text = cacheUrl;
-        }
-    }];
-    [alert addAction:ac1];
-    [alert addAction:ac2];
-    [[self fetchActivityCtrl] presentViewController:alert animated:YES completion:nil];
-}
-//sheet 弹窗选择
-- (void)alertSheetSelected:(UIAlertAction *)action debugModel:(ZHWebViewDebugModel)debugModel{
-    if (debugModel == ZHWebViewDebugModelNo) {
-        if (self.debugModel == debugModel) return;
-        [self doSwitchDebugModel:action debugModel:debugModel info:nil];
-    }else if (debugModel == ZHWebViewDebugModelLocal){
-        [self alertDebugModelLocal:action debugModel:debugModel];
-    }else if (debugModel == ZHWebViewDebugModelOnline){
-        [self alertDebugModelOnline:action debugModel:debugModel];
-    }
-}
-//sheet 弹窗
-- (void)alertDebugModelSheet{
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"切换调试模式" message:nil preferredStyle:UIAlertControllerStyleActionSheet];
-    __weak __typeof__(self) __self = self;
-    UIAlertAction *action = [UIAlertAction actionWithTitle:@"release调试模式" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-        [__self alertSheetSelected:action debugModel:ZHWebViewDebugModelNo];
-    }];
-    UIAlertAction *action1 = [UIAlertAction actionWithTitle:@"socket调试模式" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-        [__self alertSheetSelected:action debugModel:ZHWebViewDebugModelOnline];
-    }];
-    UIAlertAction *action2 = [UIAlertAction actionWithTitle:@"本机js调试模式" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-        [__self alertSheetSelected:action debugModel:ZHWebViewDebugModelLocal];
-    }];
-    UIAlertAction *action3 = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
-    }];
-    [alert addAction:action];
-    [alert addAction:action1];
-    if (TARGET_OS_SIMULATOR) [alert addAction:action2];
-    [alert addAction:action3];
-    [[self fetchActivityCtrl] presentViewController:alert animated:YES completion:nil];
-}
-#endif
-
 #pragma mark - parse URL
 
 /// 本地路径转NSURL，支持带参数（系统的fileURLWithPath会导致参数被编码，webview加载失败）
@@ -958,49 +780,6 @@ allowingReadAccessToURL:(NSURL *)readAccessURL
         [urlComponents setQueryItems:queryItems];
     }
     return urlComponents.URL;
-}
-
-#pragma mark - debug
-
-- (void)setDebugModel:(ZHWebViewDebugModel)debugModel{
-    if (_debugModel == debugModel) return;
-    _debugModel = debugModel;
-    
-}
-
-+ (BOOL)isAvailableIOS11{
-#ifdef DEBUG
-    if (@available(iOS 11.0, *)) {
-        return YES;
-    }
-    return NO;
-#endif
-    if (@available(iOS 11.0, *)) {
-        return YES;
-    }
-    return NO;
-}
-
-+ (BOOL)isAvailableIOS10{
-    if (@available(iOS 10.0, *)) {
-        return YES;
-    }
-    return NO;
-}
-
-+ (BOOL)isAvailableIOS9{
-#ifdef DEBUG
-    //❌
-//    return NO;
-    if (@available(iOS 9.0, *)) {
-        return YES;
-    }
-    return NO;
-#endif
-    if (@available(iOS 9.0, *)) {
-        return YES;
-    }
-    return NO;
 }
 
 #pragma mark - file
@@ -1037,7 +816,7 @@ allowingReadAccessToURL:(NSURL *)readAccessURL
 //获取webView准备运行沙盒
 - (NSString *)fetchReadyRunSandBox{
     NSString *boxFolder = [NSString stringWithFormat:@"%p", self];
-    if ([self.class isAvailableIOS9]) {
+    if ([ZHWebViewDebugConfiguration availableIOS9]) {
         return [ZHWebViewFolder() stringByAppendingPathComponent:boxFolder];
     }
     return [ZHWebViewTmpFolder() stringByAppendingPathComponent:boxFolder];
@@ -1059,39 +838,6 @@ allowingReadAccessToURL:(NSURL *)readAccessURL
     return [pathComs componentsJoinedByString:@"/"];
 }
 
-
-#pragma mark - float view
-
-- (void)showFlowView{
-#ifdef DEBUG
-    [self.floatView showInView:self location:ZHFloatLocationRight locationScale:0.4];
-    [self.debugModelFloatView showInView:self location:ZHFloatLocationRight locationScale:0.6];
-#endif
-}
-- (void)updateFloatViewTitle:(NSString *)title{
-#ifdef DEBUG
-    [self.floatView updateTitle:title];
-#endif
-}
-- (void)updateFloatViewLocation{
-#ifdef DEBUG
-    [self.floatView updateWhenSuperViewLayout];
-    [self.debugModelFloatView updateWhenSuperViewLayout];
-#endif
-}
-
-#pragma mark - activityCtrl
-
-- (UIViewController *)fetchActivityCtrl:(UIViewController *)ctrl{
-    UIViewController *topCtrl = ctrl.presentedViewController;
-    if (!topCtrl) return ctrl;
-    return [self fetchActivityCtrl:topCtrl];
-}
-- (UIViewController *)fetchActivityCtrl{
-    UIViewController *ctrl = [UIApplication sharedApplication].keyWindow.rootViewController;
-    return [self fetchActivityCtrl:ctrl];
-}
-
 #pragma mark - getter
 
 - (NSLock *)lock{
@@ -1100,30 +846,6 @@ allowingReadAccessToURL:(NSURL *)readAccessURL
     }
     return _lock;
 }
-
-#ifdef DEBUG
-- (ZHFloatView *)floatView{
-    if (!_floatView) {
-        _floatView = [ZHFloatView floatViewWithItems:nil];
-        __weak __typeof__(self) __self = self;
-        _floatView.tapClickBlock = ^{
-            [__self webViewCallRefresh:nil];
-        };
-    }
-    return _floatView;
-}
-- (ZHFloatView *)debugModelFloatView{
-    if (!_debugModelFloatView) {
-        _debugModelFloatView = [ZHFloatView floatViewWithItems:nil];
-        [_debugModelFloatView updateTitle:@"release调试模式"];
-        __weak __typeof__(self) __self = self;
-        _debugModelFloatView.tapClickBlock = ^{
-            [__self alertDebugModelSheet];
-        };
-    }
-    return _debugModelFloatView;
-}
-#endif
 
 #pragma mark - encode
 
@@ -1153,7 +875,7 @@ allowingReadAccessToURL:(NSURL *)readAccessURL
 #pragma mark - clear
 
 - (void)clearWebViewSystemCache{
-    if ([self.class isAvailableIOS9]) {
+    if ([ZHWebViewDebugConfiguration availableIOS9]) {
         WKWebsiteDataStore *dataSource = [WKWebsiteDataStore defaultDataStore];
 //        NSMutableSet *set = [WKWebsiteDataStore allWebsiteDataTypes];
         NSMutableSet *set = [NSMutableSet set];
@@ -1222,7 +944,7 @@ allowingReadAccessToURL:(NSURL *)readAccessURL
 //        [fm removeItemAtPath:folder2 error:nil];
 //    }
     
-    NSLog(@"-------%s---------", __func__);
+    NSLog(@"%s", __func__);
 }
 
 @end

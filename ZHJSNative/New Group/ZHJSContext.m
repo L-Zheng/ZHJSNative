@@ -23,7 +23,7 @@
     self = [self initWithVirtualMachine:vm];
     if (self) {
         //事件
-        self.handler = [[ZHJSHandler alloc] initWithApiHandlers:apiHandlers];
+        self.handler = [[ZHJSHandler alloc] initWithDebugConfig:nil apiHandlers:apiHandlers];
         self.handler.jsContext = self;
         
 //        self.apiHandlers = apiHandlers;
@@ -134,7 +134,7 @@
 }
 
 - (void)dealloc{
-    NSLog(@"-------%s---------", __func__);
+    NSLog(@"%s", __func__);
 }
 
 @end

@@ -7,7 +7,7 @@
 //
 
 #import "ZHWebViewManager.h"
-#import "ZHWebView.h"
+#import "ZHWebViewDebugConfiguration.h"
 
 NSInteger const ZHWebViewPreLoadMaxCount = 3;
 NSInteger const ZHWebViewPreLoadingMaxCount = 1;
@@ -117,7 +117,6 @@ allowingReadAccessToURL:readAccessURL
 
 #pragma mark - load
 
-#ifdef DEBUG
 - (void)loadOnlineDebugWebView:(ZHWebView *)webView
                            key:(NSString *)key
                            url:(NSURL *)url
@@ -160,7 +159,6 @@ allowingReadAccessToURL:[NSURL fileURLWithPath:[ZHWebView getDocumentFolder]]
                      finish:finish];
     }];
 }
-#endif
 
 - (void)loadWebView:(ZHWebView *)webView
                 key:(NSString *)key
@@ -386,7 +384,7 @@ allowingReadAccessToURL:accessURL
 
 //清理WebView加载缓存
 - (void)cleanWebViewLoadCache{
-    if ([ZHWebView isAvailableIOS9]) {
+    if ([ZHWebViewDebugConfiguration availableIOS9]) {
         [self cleanWebViewLoadCache:ZHWebViewFolder()];
         return;
     }
@@ -500,6 +498,7 @@ allowingReadAccessToURL:accessURL
 
 - (void)dealloc{
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    NSLog(@"%s", __func__);
 }
 
 #pragma mark - share

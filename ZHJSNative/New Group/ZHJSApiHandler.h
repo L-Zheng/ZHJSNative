@@ -10,19 +10,22 @@
 #import "ZHJSApiProtocol.h"
 @class ZHJSHandler;
 @class ZHJSApiMethodItem;
+@class ZHWebViewDebugConfiguration;
 
 //NS_ASSUME_NONNULL_BEGIN
 
 @interface ZHJSApiHandler : NSObject
 
-- (instancetype)initWithApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers;
+- (instancetype)initWithHandler:(ZHJSHandler *)handler
+                    debugConfig:(ZHWebViewDebugConfiguration *)debugConfig
+                    apiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers;
+
+@property (nonatomic,weak,readonly) ZHJSHandler *handler;
 @property (nonatomic,strong,readonly) NSArray <id <ZHJSApiProtocol>> *apiHandlers;
 
 //添加移除api
 - (void)addApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers completion:(void (^) (NSArray <id <ZHJSApiProtocol>> *successApiHandlers, NSArray <id <ZHJSApiProtocol>> *failApiHandlers, NSError *error))completion;
 - (void)removeApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers completion:(void (^) (NSArray <id <ZHJSApiProtocol>> *successApiHandlers, NSArray <id <ZHJSApiProtocol>> *failApiHandlers, NSError *error))completion;
-
-@property (nonatomic,weak) ZHJSHandler *handler;
 
 //api映射表
 - (void)enumRegsiterApiMap:(void (^)(NSString *apiPrefix, NSDictionary <NSString *, ZHJSApiMethodItem *> *apiMap))block;

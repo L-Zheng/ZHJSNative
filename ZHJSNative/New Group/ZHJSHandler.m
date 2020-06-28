@@ -8,7 +8,7 @@
 
 #import "ZHJSHandler.h"
 #import "ZHJSContext.h"
-#import "ZHWebView.h"
+#import "ZHWebViewDebugConfiguration.h"
 #import "ZHJSApiHandler.h"
 #import <objc/runtime.h>
 #import "ZHJSInternalSocketApiHandler.h"
@@ -33,11 +33,11 @@ case cType:{\
 
 #pragma mark - init
 
-- (instancetype)initWithApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers{
+- (instancetype)initWithDebugConfig:(ZHWebViewDebugConfiguration *)debugConfig
+                        apiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers{
     self = [super init];
     if (self) {
-        self.apiHandler = [[ZHJSApiHandler alloc] initWithApiHandlers:apiHandlers];
-        self.apiHandler.handler = self;
+        self.apiHandler = [[ZHJSApiHandler alloc] initWithHandler:self debugConfig:debugConfig apiHandlers:apiHandlers];
     }
     return self;
 }
@@ -282,13 +282,16 @@ case cType:{\
 
 //异常弹窗
 - (void)showWebViewException:(NSDictionary *)exception{
-    [self showException:@"WebView JS异常" exception:exception];
+    if (self.webView.debugConfig.alertWebViewErrorEnable) {
+        [self showException:@"WebView JS异常" exception:exception];
+    }
 }
 - (void)showJSContextException:(NSDictionary *)exception{
-    [self showException:@"JSCore异常" exception:exception];
+    if (self.webView.debugConfig.alertJsContextErrorEnable) {
+        [self showException:@"JSCore异常" exception:exception];
+    }
 }
 - (void)showException:(NSString *)title exception:(NSDictionary *)exception{
-#ifdef DEBUG
     if (!exception || ![exception isKindOfClass:[NSDictionary class]] || exception.allKeys.count == 0) return;
     
     NSMutableDictionary *info = [exception mutableCopy];
@@ -329,7 +332,6 @@ case cType:{\
     [alert addAction:action];
     [alert addAction:action1];
     [[self fetchActivityCtrl] presentViewController:alert animated:YES completion:nil];
-#endif
 }
 
 #pragma mark - activityCtrl
@@ -569,7 +571,7 @@ case cType:{\
 }
 
 - (void)dealloc{
-    NSLog(@"-------%s---------", __func__);
+    NSLog(@"%s", __func__);
 }
 
 

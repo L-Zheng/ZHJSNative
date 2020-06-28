@@ -10,6 +10,10 @@
 #import <WebKit/WebKit.h>
 #import "ZHJSApiProtocol.h"
 @class ZHWebView;
+@class ZHWebViewDebugConfiguration;
+
+FOUNDATION_EXPORT NSString * const ZHWebViewSocketDebugUrlKey;
+FOUNDATION_EXPORT NSString * const ZHWebViewLocalDebugUrlKey;
 
 //调试模式
 typedef NS_ENUM(NSInteger, ZHWebViewDebugModel) {
@@ -17,10 +21,6 @@ typedef NS_ENUM(NSInteger, ZHWebViewDebugModel) {
     ZHWebViewDebugModelLocal      = 1, //本地拷贝js调试
     ZHWebViewDebugModelOnline      = 2, //链接线上地址调试
 };
-
-FOUNDATION_EXPORT NSString * const ZHWebViewSocketDebugUrlKey;
-FOUNDATION_EXPORT NSString * const ZHWebViewLocalDebugUrlKey;
-
 
 typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
     ZHWebViewExceptionOperateNothing     = 0,//不做任何操作
@@ -47,6 +47,9 @@ typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
 
 
 @interface ZHWebView : WKWebView
+
+// 调试配置
+@property (nonatomic,strong,readonly) ZHWebViewDebugConfiguration *debugConfig;
 
 #pragma mark - load call
 
@@ -128,14 +131,6 @@ completionHandler:(void (^)(id res, NSError *error))completionHandler;
 
 - (void)clearWebViewSystemCache;
 
-#pragma mark - debug
-
-@property (nonatomic, assign, readonly) ZHWebViewDebugModel debugModel;
-
-+ (BOOL)isAvailableIOS11;
-
-+ (BOOL)isAvailableIOS9;
-
 #pragma mark - path
 
 + (NSString *)getDocumentFolder;
@@ -166,6 +161,10 @@ __attribute__((unused)) static NSString * ZHWebViewFolder() {
 }
 __attribute__((unused)) static NSString * ZHWebViewTmpFolder() {
     return ZHWebViewTargetFolder([ZHWebView getTemporaryFolder], @"ZHWebView");
+}
+__attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
+    if (!delegate || !sel) return NO;
+    return [delegate respondsToSelector:sel];
 }
 __attribute__((unused)) static NSString * ZHWebViewDateString() {
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];

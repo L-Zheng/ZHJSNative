@@ -316,7 +316,7 @@ allowingReadAccessToURL:[NSURL fileURLWithPath:[ZHWebView getDocumentFolder]]
 
 - (void)dealloc{
     [self clear];
-    NSLog(@"-------%s---------", __func__);
+    NSLog(@"%s", __func__);
 }
 
 - (void)clear{
@@ -336,7 +336,6 @@ allowingReadAccessToURL:[NSURL fileURLWithPath:[ZHWebView getDocumentFolder]]
 
 #pragma mark - ZHWebViewSocketDebugDelegate
 
-#ifdef DEBUG
 - (void)webViewReadyRefresh:(ZHWebView *)webView{
 }
 - (void)webViewRefresh:(ZHWebView *)webView debugModel:(ZHWebViewDebugModel)debugModel info:(NSDictionary *)info{
@@ -379,5 +378,4 @@ allowingReadAccessToURL:[NSURL fileURLWithPath:[ZHWebView getDocumentFolder]]
         }];
     }
 }
-#endif
 @end

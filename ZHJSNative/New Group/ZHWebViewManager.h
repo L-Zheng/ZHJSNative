@@ -65,7 +65,6 @@ allowingReadAccessToURL:(NSURL *)readAccessURL
              finish:(void (^) (BOOL success))finish;
 //- (void)loadWebView:(ZHWebView *)webView key:(NSString *)key loadFolder:(NSString *)loadFolder loadFileName:(NSString *)loadFileName allowingReadAccessToURL:(NSURL *)readAccessURL finish:(void (^) (BOOL success))finish;
 
-#ifdef DEBUG
 //调试下使用
 - (void)loadOnlineDebugWebView:(ZHWebView *)webView
                            key:(NSString *)key
@@ -82,7 +81,6 @@ allowingReadAccessToURL:(NSURL *)readAccessURL
                   cachePolicy:(NSNumber *)cachePolicy
               timeoutInterval:(NSNumber *)timeoutInterval
                        finish:(void (^) (BOOL success))finish;
-#endif
 
 #pragma mark - cache
 

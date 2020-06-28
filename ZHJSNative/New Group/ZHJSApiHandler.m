@@ -8,7 +8,7 @@
 
 #import "ZHJSApiHandler.h"
 #import "ZHJSHandler.h"
-#import "ZHWebView.h"
+#import "ZHWebViewDebugConfiguration.h"
 #import "ZHJSInternalSocketApiHandler.h"
 #import "ZHJSInternalCustomApiHandler.h"
 #import <objc/runtime.h>
@@ -37,6 +37,8 @@
 
 @property (nonatomic,strong) NSArray <ZHJSInternalApiHandler <ZHJSApiProtocol> *> *internalApiHandlers;
 @property (nonatomic,strong) NSMutableArray <id <ZHJSApiProtocol>> *outsideApiHandlers;
+
+@property (nonatomic,weak) ZHJSHandler *handler;
 @end
 
 @implementation ZHJSApiHandler
@@ -50,14 +52,21 @@
     return _apiMap;
 }
 
-- (instancetype)initWithApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers{
+- (instancetype)initWithHandler:(ZHJSHandler *)handler
+                    debugConfig:(ZHWebViewDebugConfiguration *)debugConfig
+                    apiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers{
     self = [super init];
     if (self) {
+        self.handler = handler;
+        
         //默认内部api
-        NSArray *internalApiHandlers = @[
-            [[ZHJSInternalSocketApiHandler alloc] init],
-            [[ZHJSInternalCustomApiHandler alloc] init],
-        ];
+        NSMutableArray *internalApiHandlers = [@[] mutableCopy];
+        
+        if (debugConfig && debugConfig.debugModelEnable) {
+            [internalApiHandlers addObject:[[ZHJSInternalSocketApiHandler alloc] init]];
+        }
+        [internalApiHandlers addObject:[[ZHJSInternalCustomApiHandler alloc] init]];
+        
         for (ZHJSInternalApiHandler *handler in internalApiHandlers) {
             handler.apiHandler = self;
         }
@@ -344,7 +353,7 @@
     callBack(targetRes, selRes);
 }
 - (void)dealloc{
-    NSLog(@"-------%s---------", __func__);
+    NSLog(@"%s", __func__);
 }
 
 @end

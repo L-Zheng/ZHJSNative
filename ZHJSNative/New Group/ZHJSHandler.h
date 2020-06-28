@@ -13,6 +13,7 @@
 @class ZHJSContext;
 @class ZHWebView;
 @class ZHJSApiHandler;
+@class ZHWebViewDebugConfiguration;
 
 //NS_ASSUME_NONNULL_BEGIN
 
@@ -22,14 +23,16 @@ static NSString * const ZHJSHandlerErrorName = @"ZHJSErrorEventHandler";
 
 @interface ZHJSHandler : NSObject<WKScriptMessageHandler>
 
-- (instancetype)initWithApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers;
+- (instancetype)initWithDebugConfig:(ZHWebViewDebugConfiguration *)debugConfig
+                        apiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers;
 @property (nonatomic,strong,readonly) NSArray <id <ZHJSApiProtocol>> *apiHandlers;
-//添加移除api
-- (void)addApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers completion:(void (^) (NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, NSString *jsCode, NSError *error))completion;
-- (void)removeApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers completion:(void (^) (NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, NSString *jsCode, NSError *error))completion;
 
 @property (nonatomic,weak) ZHWebView *webView;
 @property (nonatomic,weak) ZHJSContext *jsContext;
+
+//添加移除api
+- (void)addApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers completion:(void (^) (NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, NSString *jsCode, NSError *error))completion;
+- (void)removeApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers completion:(void (^) (NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, NSString *jsCode, NSError *error))completion;
 
 //JSContext注入的api
 - (void)fetchJSContextApi:(void (^) (NSString *apiPrefix, NSDictionary *apiBlockMap))callBack;
