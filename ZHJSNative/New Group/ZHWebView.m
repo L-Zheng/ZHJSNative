@@ -830,12 +830,8 @@ allowingReadAccessToURL:(NSURL *)readAccessURL
     if (pathComs.count <= 1) {
         return nil;
     }
-    if ([pathComs.firstObject isKindOfClass:[NSString class]] &&
-        [(NSString *)pathComs.firstObject isEqualToString:@"/"]) {
-        [pathComs replaceObjectAtIndex:0 withObject:@""];
-    }
     [pathComs removeLastObject];
-    return [pathComs componentsJoinedByString:@"/"];
+    return [NSString pathWithComponents:pathComs];
 }
 
 #pragma mark - getter
