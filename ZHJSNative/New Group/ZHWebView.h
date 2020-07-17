@@ -11,6 +11,10 @@
 #import "ZHJSApiProtocol.h"
 @class ZHWebView;
 @class ZHWebViewDebugConfiguration;
+@class ZHWebViewConfiguration;
+@class ZHWebViewAppletConfiguration;
+@class ZHWebViewCreateConfiguration;
+@class ZHWebViewLoadConfiguration;
 
 FOUNDATION_EXPORT NSString * const ZHWebViewSocketDebugUrlKey;
 FOUNDATION_EXPORT NSString * const ZHWebViewLocalDebugUrlKey;
@@ -48,9 +52,6 @@ typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
 
 @interface ZHWebView : WKWebView
 
-// 调试配置
-@property (nonatomic,strong,readonly) ZHWebViewDebugConfiguration *debugConfig;
-
 #pragma mark - load call
 
 @property (nonatomic,copy, readonly) void (^loadFinish) (BOOL success);
@@ -64,14 +65,19 @@ typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
 @property (nonatomic,weak) id <ZHWKUIDelegate> zh_UIDelegate;
 @property (nonatomic,weak) id <ZHScrollViewDelegate> zh_scrollViewDelegate;
 
+#pragma mark - config
+
+@property (nonatomic,strong,readonly) ZHWebViewConfiguration *globalConfig;
+@property (nonatomic,strong,readonly) ZHWebViewCreateConfiguration *createConfig;
+@property (nonatomic,strong,readonly) ZHWebViewLoadConfiguration *loadConfig;
+// 调试配置
+@property (nonatomic,strong,readonly) ZHWebViewDebugConfiguration *debugConfig;
+
 #pragma mark - init
-/// 创建
-/// @param frame frame
-/// @param processPool 内容进程池【传nil：会自动创建一个新的processPool，不同的WebView的processPool不同，内容数据不能共享。如要共享内容数据（如： localstorage数据）可自行创建processPool单例，不同的WebView共用此单例】
-/// @param apiHandlers 注入的api 【如： fund api】
-- (instancetype)initWithFrame:(CGRect)frame
-                  processPool:(WKProcessPool *)processPool
-                  apiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers;
+
+// 创建
+- (instancetype)initWithGlobalConfig:(ZHWebViewConfiguration *)globalConfig;
+- (instancetype)initWithCreateConfig:(ZHWebViewCreateConfiguration *)createConfig;
 
 //添加移除api
 - (void)addJsCode:(NSString *)jsCode completion:(void (^) (id res, NSError *error))completion;
@@ -93,17 +99,14 @@ typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
 
 /// 加载h5
 /// @param url 加载的url路径
-/// @param cachePolicy 【iOS8下 or  加载http地址使用】 缓存策略@(NSURLRequestCachePolicy)  默认nil
-/// @param timeoutInterval 【iOS8下 or  加载http地址使用】 超时时间  默认nil
 /// @param baseURL 【WebView运行所需的资源根目录，如果为nil，默认为url的上级目录】
-/// @param readAccessURL 允许WebView读取的目录
-/// @param finish 回调
-- (void)loadUrl:(NSURL *)url
-    cachePolicy:(NSNumber *)cachePolicy
-timeoutInterval:(NSNumber *)timeoutInterval
-        baseURL:(NSURL *)baseURL
-allowingReadAccessToURL:(NSURL *)readAccessURL
-         finish:(void (^) (BOOL success))finish;
+/// @param loadConfig loadConfig
+/// @param finish  回调
+- (void)loadWithUrl:(NSURL *)url
+            baseURL:(NSURL *)baseURL
+         loadConfig:(ZHWebViewLoadConfiguration *)loadConfig
+     startLoadBlock:(void (^) (NSURL *runSandBoxURL))startLoadBlock
+             finish:(void (^) (BOOL success))finish;
 
 /// 渲染js页面
 /// @param jsSourceBaseURL 渲染该js文件所需的资源【jsSourceBaseURL的目录下包含有jsSourceURL文件】
@@ -137,6 +140,8 @@ completionHandler:(void (^)(id res, NSError *error))completionHandler;
 + (NSString *)getCacheFolder;
 + (NSString *)getTemporaryFolder;
 
+//获取webView的内置zip资源临时解压目录
+- (NSString *)fetchPresetUnzipTmpFolder;
 //获取webView准备运行沙盒
 - (NSString *)fetchReadyRunSandBox;
 
@@ -161,6 +166,9 @@ __attribute__((unused)) static NSString * ZHWebViewFolder() {
 }
 __attribute__((unused)) static NSString * ZHWebViewTmpFolder() {
     return ZHWebViewTargetFolder([ZHWebView getTemporaryFolder], @"ZHWebView");
+}
+__attribute__((unused)) static NSString * ZHWebViewPresetUnzipTmpFolder() {
+    return ZHWebViewTargetFolder([ZHWebView getTemporaryFolder], @"ZHWebViewPresetUnzip");
 }
 __attribute__((unused)) static BOOL ZHCheckDelegate(id delegate, SEL sel) {
     if (!delegate || !sel) return NO;

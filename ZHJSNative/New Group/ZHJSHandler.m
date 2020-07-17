@@ -441,6 +441,7 @@ case cType:{\
             for (int idx = 0; idx < count; idx++) {
                 id arg = arguments[idx];
                 //获取该方法的参数类型
+                // 各种类型：https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtTypeEncodings.html#//apple_ref/doc/uid/TP40008048-%20CH100
                 int argIdx = idx + 2;
                 const char *paramType = [sig getArgumentTypeAtIndex:argIdx];
                 switch(paramType[0]){
@@ -490,6 +491,15 @@ case cType:{\
                  */
             }
         }
+        /**运行函数：
+         https://developer.apple.com/documentation/foundation/nsinvocation/1437838-retainarguments?language=objc
+         invoke调用后不会立即执行方法，与performSelector一样，等待运行循环触发
+         而为了提高效率，NSInvocation不会保留 调用所需的参数
+         因此，在调用之前参数可能会被释放，App crash
+         */
+        if (!invo.argumentsRetained) {
+            [invo retainArguments];
+        }
         //运行
         [invo invoke];
         
@@ -500,6 +510,12 @@ case cType:{\
         //    id value = res;
         //    return value;
         //
+        /**返回值是什么类型 就要用什么类型接口  否则crash
+         const char *returnType = [signature methodReturnType];   strcmp(returnType, @encode(float))==0
+         id ：接受NSObject类型
+         BOOL：接受BOOL类型
+         ...
+         */
         id __unsafe_unretained res = nil;
         if ([sig methodReturnLength]) [invo getReturnValue:&res];
         value = res;

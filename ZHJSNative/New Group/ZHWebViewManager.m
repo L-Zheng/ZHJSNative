@@ -8,6 +8,7 @@
 
 #import "ZHWebViewManager.h"
 #import "ZHWebViewDebugConfiguration.h"
+#import "ZHWebViewConfiguration.h"
 
 NSInteger const ZHWebViewPreLoadMaxCount = 3;
 NSInteger const ZHWebViewPreLoadingMaxCount = 1;
@@ -19,6 +20,8 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
 @property (nonatomic,strong) NSLock *lock;
 /** 打开的webview页面 */
 @property (nonatomic, retain) NSMapTable *openedWebViewMapTable;
+// 正在加载的webview
+@property (nonatomic, retain) NSMapTable *loadingWebViewMapTable;
 @end
 
 @implementation ZHWebViewManager
@@ -60,21 +63,17 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
 
 #pragma mark - webview
 
-- (void)preReadyWebView:(NSString *)key
-                  frame:(CGRect)frame
-           loadFileName:(NSString *)loadFileName
-           presetFolder:(NSString *)presetFolder
-            processPool:(WKProcessPool *)processPool
-allowingReadAccessToURL:(NSURL *)readAccessURL
-            cachePolicy:(NSNumber *)cachePolicy
-        timeoutInterval:(NSNumber *)timeoutInterval
-            apiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers
+- (void)preReadyWebView:(ZHWebViewConfiguration *)config
                  finish:(void (^) (BOOL success))finish{
+    
+    ZHWebViewAppletConfiguration *appletConfig = config.appletConfig;
+    NSString *key = appletConfig.appId;
+    
     if (![ZHWebView checkString:key]) {
         if (finish) finish(NO);
         return;
     }
-        
+    
     NSMutableArray *webs = [self fetchMap:self.websMap key:key];
     NSMutableArray *loadingWebs = [self fetchMap:self.loadingWebsMap key:key];
     
@@ -84,19 +83,12 @@ allowingReadAccessToURL:(NSURL *)readAccessURL
         return;
     }
     
-    ZHWebView *newWebView = [[ZHWebView alloc] initWithFrame:frame processPool:processPool apiHandlers:apiHandlers];
+    ZHWebView *newWebView = [[ZHWebView alloc] initWithGlobalConfig:config];
     
     [self opMap:self.loadingWebsMap key:key webView:newWebView add:YES];
     
     __weak __typeof__(self) weakSelf = self;
-    [self loadWebView:newWebView
-                  key:key
-         loadFileName:loadFileName
-         presetFolder:presetFolder
-allowingReadAccessToURL:readAccessURL
-          cachePolicy:cachePolicy
-      timeoutInterval:timeoutInterval
-               finish:^(BOOL success) {
+    [self loadWebView:newWebView config:config finish:^(BOOL success) {
         [weakSelf opMap:weakSelf.loadingWebsMap key:key webView:newWebView add:NO];
         if (success) {
             [weakSelf opMap:weakSelf.websMap key:key webView:newWebView add:YES];
@@ -118,91 +110,65 @@ allowingReadAccessToURL:readAccessURL
 #pragma mark - load
 
 - (void)loadOnlineDebugWebView:(ZHWebView *)webView
-                           key:(NSString *)key
                            url:(NSURL *)url
-                   cachePolicy:(NSNumber *)cachePolicy
-               timeoutInterval:(NSNumber *)timeoutInterval
+                        config:(ZHWebViewConfiguration *)config
                         finish:(void (^) (BOOL success))finish{
-    if (!webView || !url) {
+    if (!webView || !url || url.isFileURL) {
         if (finish) finish(NO);return;
     }
-    [webView loadUrl:url
-         cachePolicy:cachePolicy
-     timeoutInterval:timeoutInterval
-             baseURL:nil
-allowingReadAccessToURL:[NSURL fileURLWithPath:[ZHWebView getDocumentFolder]]
-              finish:finish];
+    [webView loadWithUrl:url baseURL:nil loadConfig:config.loadConfig startLoadBlock:^(NSURL *runSandBoxURL) {
+        
+    } finish:finish];
 }
 - (void)loadLocalDebugWebView:(ZHWebView *)webView
-                          key:(NSString *)key
-                   loadFolder:(NSString *)loadFolder
-                 loadFileName:(NSString *)loadFileName
-      allowingReadAccessToURL:(NSURL *)readAccessURL
-                  cachePolicy:(NSNumber *)cachePolicy
-              timeoutInterval:(NSNumber *)timeoutInterval
+                   templateFolder:(NSString *)templateFolder
+                       config:(ZHWebViewConfiguration *)config
                        finish:(void (^) (BOOL success))finish{
     __weak __typeof__(self) __self = self;
     //加载模板 拷贝到沙盒
-    [self copyTemplateFolderToSandBox:webView templateFolder:loadFolder error:nil callBack:^(NSString *newLoadFolder, NSError *error) {
+    [self copyTemplateFolderToSandBox:webView templateFolder:templateFolder error:nil callBack:^(NSString *loadFolder, NSError *error) {
         //检查
-        if (![ZHWebView checkString:newLoadFolder] || error) {
+        if (error) {
             if (finish) finish(NO);
             return;
         }
-        [__self loadWebView:webView
-                        key:key
-                 loadFolder:newLoadFolder
-               loadFileName:loadFileName
-    allowingReadAccessToURL:readAccessURL
-                cachePolicy:cachePolicy
-            timeoutInterval:timeoutInterval
-                     finish:finish];
+        [__self realLoadWebView:webView loadFolder:loadFolder config:config finish:finish];
     }];
 }
 
 - (void)loadWebView:(ZHWebView *)webView
-                key:(NSString *)key
-       loadFileName:(NSString *)loadFileName
-       presetFolder:(NSString *)presetFolder
-allowingReadAccessToURL:(NSURL *)readAccessURL
-        cachePolicy:(NSNumber *)cachePolicy
-    timeoutInterval:(NSNumber *)timeoutInterval
+             config:(ZHWebViewConfiguration *)config
              finish:(void (^) (BOOL success))finish{
-    if (!webView || ![webView isKindOfClass:[ZHWebView class]] ||
-        ![ZHWebView checkString:loadFileName]) {
+    if (!webView ||
+        ![webView isKindOfClass:[ZHWebView class]]) {
         if (finish) finish(NO);
         return;
     }
-    
+        
     __weak __typeof__(self) __self = self;
     //加载模板 不存在会下载
-    [self.class localReleaseTemplateFolder:key presetFolder:presetFolder callBack:^(NSString *templateFolder, NSError *error) {
+    [self.class localReleaseTemplateFolder:config.appletConfig
+                                   webView:webView
+                                  callBack:^(NSString *templateFolder, NSError *error) {
         [__self copyTemplateFolderToSandBox:webView templateFolder:templateFolder error:error callBack:^(NSString *loadFolder, NSError *error) {
             //检查
-            if (![ZHWebView checkString:loadFolder] || error) {
+            if (error) {
                 if (finish) finish(NO);
                 return;
             }
-            [__self loadWebView:webView
-                            key:key
-                     loadFolder:loadFolder
-                   loadFileName:loadFileName
-        allowingReadAccessToURL:readAccessURL
-                    cachePolicy:cachePolicy
-                timeoutInterval:timeoutInterval
-                         finish:finish];
+            [__self realLoadWebView:webView loadFolder:loadFolder config:config finish:finish];
         }];
     }];
 }
 
-- (void)loadWebView:(ZHWebView *)webView
-                key:(NSString *)key
-         loadFolder:(NSString *)loadFolder
-       loadFileName:(NSString *)loadFileName
-allowingReadAccessToURL:(NSURL *)readAccessURL
-        cachePolicy:(NSNumber *)cachePolicy
-    timeoutInterval:(NSNumber *)timeoutInterval
-             finish:(void (^) (BOOL success))finish{
+- (void)realLoadWebView:(ZHWebView *)webView
+             loadFolder:(NSString *)loadFolder
+                 config:(ZHWebViewConfiguration *)config
+                 finish:(void (^) (BOOL success))finish{
+    ZHWebViewAppletConfiguration *appletConfig = config.appletConfig;
+    ZHWebViewLoadConfiguration *loadConfig = config.loadConfig;
+    NSString *loadFileName = appletConfig.loadFileName;
+    
     //检查
     if (![ZHWebView checkString:loadFolder] ||
         ![ZHWebView checkString:loadFileName]) {
@@ -214,7 +180,6 @@ allowingReadAccessToURL:(NSURL *)readAccessURL
         if (finish) finish(NO);
         return;
     }
-    
     //获取上级目录
     NSString *superFolder = [ZHWebView fetchSuperiorFolder:htmlPath];
     if (!superFolder) {
@@ -223,19 +188,24 @@ allowingReadAccessToURL:(NSURL *)readAccessURL
     }
     
     //加载
-    NSURL *accessURL = readAccessURL?:[NSURL fileURLWithPath:loadFolder];
+    loadConfig.readAccessURL = loadConfig.readAccessURL?:[NSURL fileURLWithPath:loadFolder];
     NSURL *url = [NSURL fileURLWithPath:htmlPath];
+    NSURL *baseURL = [NSURL fileURLWithPath:superFolder isDirectory:YES];
     
     __weak __typeof__(self) __self = self;
-    [webView loadUrl:url
-         cachePolicy:cachePolicy
-     timeoutInterval:timeoutInterval
-             baseURL:[NSURL fileURLWithPath:superFolder isDirectory:YES]
-allowingReadAccessToURL:accessURL
-              finish:^(BOOL success) {
+    [webView loadWithUrl:url
+                 baseURL:baseURL
+              loadConfig:loadConfig
+          startLoadBlock:^(NSURL *runSandBoxURL) {
+        // 加入loading表
+        [__self opLoadingWebView:webView isAdd:YES];
+    }
+                  finish:^(BOOL success) {
+        // 移除loading表
+        [__self opLoadingWebView:webView isAdd:NO];
+        // 加入finish表
+        [__self opLoadFinishWebView:webView isAdd:YES];
         if (finish) finish(success);
-        //保留
-        [__self addWebView:webView];
     }];
 }
 
@@ -316,8 +286,12 @@ allowingReadAccessToURL:accessURL
 #pragma mark - debug
 
 //加载线上资源
-+ (void)localReleaseTemplateFolder:(NSString *)key presetFolder:(NSString *)presetFolder callBack:(void (^) (NSString *templateFolder, NSError *error))callBack{
-
++ (void)localReleaseTemplateFolder:(ZHWebViewAppletConfiguration *)appletConfig
+                           webView:(ZHWebView *)webView
+                          callBack:(void (^) (NSString *templateFolder, NSError *error))callBack{
+    NSString *key = appletConfig.appId;
+    NSString *presetFolder = appletConfig.presetFolderPath;
+    
     //检查本地缓存
     NSString *latestFolder = nil;
     if ([ZHWebView checkString:latestFolder] &&
@@ -392,16 +366,15 @@ allowingReadAccessToURL:accessURL
 }
 - (void)cleanWebViewLoadCache:(NSString *)webviewFolder{
     [self.lock lock];
-    NSMapTable *mapTable = self.openedWebViewMapTable;
 
     NSMutableArray *usedKeys = [@[] mutableCopy];
     NSMutableArray *cleanKeys = [@[] mutableCopy];
     //遍历key
-    NSEnumerator *enumerator = mapTable ? [mapTable keyEnumerator] : nil;
+    NSEnumerator *enumerator = self.openedWebViewMapTable ? [self.openedWebViewMapTable keyEnumerator] : nil;
     if (enumerator) {
         id key;
         while (key = [enumerator nextObject]) {
-            NSPointerArray *arr = [mapTable objectForKey:key];
+            NSPointerArray *arr = [self.openedWebViewMapTable objectForKey:key];
             if (!arr) {
                 [cleanKeys addObject:key];
                 continue;
@@ -413,6 +386,13 @@ allowingReadAccessToURL:accessURL
                 [cleanKeys addObject:key];
                 continue;
             }
+            [usedKeys addObject:key];
+        }
+    }
+    enumerator = self.loadingWebViewMapTable ? [self.loadingWebViewMapTable keyEnumerator] : nil;
+    if (enumerator) {
+        id key;
+        while (key = [enumerator nextObject]) {
             [usedKeys addObject:key];
         }
     }
@@ -436,7 +416,7 @@ allowingReadAccessToURL:accessURL
     }
     //清理
     for (NSString *cleanKey in cleanKeys) {
-        [mapTable removeObjectForKey:cleanKey];
+        [self.openedWebViewMapTable removeObjectForKey:cleanKey];
         
         if (![self.fm fileExistsAtPath:cleanKey]) continue;
         [self.fm removeItemAtPath:cleanKey error:nil];
@@ -444,7 +424,6 @@ allowingReadAccessToURL:accessURL
     
     [self.lock unlock];
 }
-
 - (void)cleanWebViewAllLoadCache{
     __weak __typeof__(self) __self = self;
     void (^block) (NSString *) = ^(NSString *folder){
@@ -460,12 +439,19 @@ allowingReadAccessToURL:accessURL
     block(ZHWebViewTmpFolder());
 }
 
-- (void)addWebView:(ZHWebView *)webView{
-    if (!webView || ![webView isKindOfClass:[ZHWebView class]]) return;
-    
+- (void)opLoadingWebView:(ZHWebView *)webView isAdd:(BOOL)isAdd{
+    self.loadingWebViewMapTable = [self opWebViewMapTable:self.loadingWebViewMapTable webView:webView isAdd:isAdd];
+}
+- (void)opLoadFinishWebView:(ZHWebView *)webView isAdd:(BOOL)isAdd{
+    self.openedWebViewMapTable = [self opWebViewMapTable:self.openedWebViewMapTable webView:webView isAdd:isAdd];
+}
+- (NSMapTable *)opWebViewMapTable:(NSMapTable *)mapTable webView:(ZHWebView *)webView isAdd:(BOOL)isAdd{
+    if (!webView || ![webView isKindOfClass:[ZHWebView class]]) {
+        return mapTable;
+    }
+        
     [self.lock lock];
     //创建表
-    NSMapTable *mapTable = self.openedWebViewMapTable;
     if (!mapTable) {
         mapTable = [NSMapTable mapTableWithKeyOptions:NSPointerFunctionsCopyIn valueOptions:NSPointerFunctionsStrongMemory];
     }
@@ -473,25 +459,49 @@ allowingReadAccessToURL:accessURL
     NSString *key = webView.runSandBoxURL.path;
     if (![ZHWebView checkString:key]) {
         [self.lock unlock];
-        return;
+        return mapTable;
     }
     //创建PointerArray
     NSPointerArray *arr = [mapTable objectForKey:key];
     if (!arr) {
         arr = [NSPointerArray weakObjectsPointerArray];
     }
-    //已经存在
-    if ([arr.allObjects containsObject:webView]) {
-        [self.lock unlock];
-        return;
-    }
-    //添加
-    [arr addPointer:(__bridge void * _Nullable)(webView)];
     
-    [mapTable setObject:arr forKey:key];
-    self.openedWebViewMapTable = mapTable;
+    // 清除空对象
+    [arr addPointer:NULL];
+    [arr compact];
+    
+    if (isAdd) {
+        //添加
+        if (![arr.allObjects containsObject:webView]) {
+            [arr addPointer:(__bridge void * _Nullable)(webView)];
+            [mapTable setObject:arr forKey:key];
+        }
+        [self.lock unlock];
+        return mapTable;
+    }
+    if ([arr.allObjects containsObject:webView]) {
+        __block NSUInteger removeIndex = NSNotFound;
+        NSArray *allObjects = arr.allObjects;
+        [allObjects enumerateObjectsUsingBlock:^(ZHWebView *obj, NSUInteger idx, BOOL *stop) {
+            if ([webView isEqual:obj]) {
+                removeIndex = idx;
+                *stop = YES;
+            }
+        }];
+        //移除
+        if (removeIndex != NSNotFound) {
+            [arr removePointerAtIndex:removeIndex];
+        }
+        if (arr.count == 0) {
+            [mapTable removeObjectForKey:key];
+        }else{
+            [mapTable setObject:arr forKey:key];
+        }
+    }
     
     [self.lock unlock];
+    return mapTable;
 }
 
 #pragma mark - dealloc
@@ -508,6 +518,8 @@ allowingReadAccessToURL:accessURL
         static dispatch_once_t onceToken;
         dispatch_once(&onceToken, ^{
             [self addNotification];
+            // 初始化 清理缓存 仅执行一次
+            [self cleanWebViewAllLoadCache];
         });
     }
     return self;

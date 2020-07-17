@@ -9,12 +9,16 @@
 #import "ZHWebView.h"
 #import "ZHJSHandler.h"
 #import "ZHWebViewDebugConfiguration.h"
+#import "ZHWebViewConfiguration.h"
 
 NSString * const ZHWebViewSocketDebugUrlKey = @"ZHWebViewSocketDebugUrlKey";
 NSString * const ZHWebViewLocalDebugUrlKey = @"ZHWebViewLocalDebugUrlKey";
 
 @interface ZHWebView ()<WKNavigationDelegate, WKUIDelegate, UIScrollViewDelegate, UIGestureRecognizerDelegate>
 
+@property (nonatomic,strong) ZHWebViewConfiguration *globalConfig;
+@property (nonatomic,strong) ZHWebViewCreateConfiguration *createConfig;
+@property (nonatomic,strong) ZHWebViewLoadConfiguration *loadConfig;
 // 调试配置
 @property (nonatomic, strong) ZHWebViewDebugConfiguration *debugConfig;
 
@@ -35,12 +39,28 @@ NSString * const ZHWebViewLocalDebugUrlKey = @"ZHWebViewLocalDebugUrlKey";
 
 @implementation ZHWebView
 
-- (instancetype)initWithFrame:(CGRect)frame processPool:(WKProcessPool *)processPool apiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers{
+- (instancetype)initWithGlobalConfig:(ZHWebViewConfiguration *)globalConfig{
+    self.globalConfig = globalConfig;
+    globalConfig.webView = self;
+    return [self initWithCreateConfig:globalConfig.createConfig];
+}
+- (instancetype)initWithCreateConfig:(ZHWebViewCreateConfiguration *)createConfig{
     
-    WKWebViewConfiguration *config = [[WKWebViewConfiguration alloc] init];
+    // 初始化配置
+    self.createConfig = createConfig;
+    NSArray <id <ZHJSApiProtocol>> *apiHandlers = createConfig.apiHandlers;
+    WKProcessPool *processPool = createConfig.processPool;
+    CGRect frame = createConfig.frameValue.CGRectValue;
+    
+    // webView配置
+    WKWebViewConfiguration *wkConfig = [[WKWebViewConfiguration alloc] init];
     WKUserContentController *userContent = [[WKUserContentController alloc] init];
+    
+    // debug配置
     ZHWebViewDebugConfiguration *debugConfig = [ZHWebViewDebugConfiguration configuration];
     self.debugConfig = debugConfig;
+    
+    // api处理配置
     ZHJSHandler *handler = [[ZHJSHandler alloc] initWithDebugConfig:debugConfig apiHandlers:apiHandlers?:@[]];
     self.handler = handler;
     
@@ -121,17 +141,17 @@ NSString * const ZHWebViewLocalDebugUrlKey = @"ZHWebViewLocalDebugUrlKey";
     
     //配置内容进程池
     if (processPool) {
-        config.processPool = processPool;
+        wkConfig.processPool = processPool;
     }
     // 设置偏好设置
-    config.preferences = [[WKPreferences alloc] init];
+    wkConfig.preferences = [[WKPreferences alloc] init];
     // 默认为0
-    config.preferences.minimumFontSize = 10;
+    wkConfig.preferences.minimumFontSize = 10;
     // 默认认为YES
-    config.preferences.javaScriptEnabled = YES;
+    wkConfig.preferences.javaScriptEnabled = YES;
     //允许视频
-    config.allowsInlineMediaPlayback = YES;
-    config.userContentController = userContent;
+    wkConfig.allowsInlineMediaPlayback = YES;
+    wkConfig.userContentController = userContent;
     
     //设置跨域
     
@@ -142,16 +162,17 @@ NSString * const ZHWebViewLocalDebugUrlKey = @"ZHWebViewLocalDebugUrlKey";
     
     // 设置是否允许通过 file url 加载的 Js代码读取其他的本地文件
     if ([ZHWebViewDebugConfiguration availableIOS9]) {
-        [config.preferences setValue:@YES forKey:@"allowFileAccessFromFileURLs"];
+        [wkConfig.preferences setValue:@YES forKey:@"allowFileAccessFromFileURLs"];
     }
     if ([ZHWebViewDebugConfiguration availableIOS10]) {
         // 设置是否允许通过 file url 加载的 Javascript 可以访问其他的源(包括http、https等源)
-        [config setValue:@YES forKey:@"allowUniversalAccessFromFileURLs"];
+        [wkConfig setValue:@YES forKey:@"allowUniversalAccessFromFileURLs"];
     }
     
-    self = [self initWithFrame:frame configuration:config];
+    self = [self initWithFrame:frame configuration:wkConfig];
     if (self) {
-        
+        // 一定要放到initWithFrame 后面  因为debugConfig.webView里面有操作addSubView
+        createConfig.webView = self;
         debugConfig.webView = self;
         handler.webView = self;
         
@@ -343,13 +364,17 @@ NSString * const ZHWebViewLocalDebugUrlKey = @"ZHWebViewLocalDebugUrlKey";
  结果：ios9以上 加载的 index.html位于沙盒内【Documents】设置readAccessURL = Documents目录
  ios9以下 加载的 index.html拷贝到【Temp】文件夹下  需要的资源也要拷贝
  */
-
-- (void)loadUrl:(NSURL *)url
-    cachePolicy:(NSNumber *)cachePolicy
-timeoutInterval:(NSNumber *)timeoutInterval
-        baseURL:(NSURL *)baseURL
-allowingReadAccessToURL:(NSURL *)readAccessURL
-         finish:(void (^) (BOOL success))finish{
+- (void)loadWithUrl:(NSURL *)url
+            baseURL:(NSURL *)baseURL
+         loadConfig:(ZHWebViewLoadConfiguration *)loadConfig
+     startLoadBlock:(void (^) (NSURL *runSandBoxURL))startLoadBlock
+             finish:(void (^) (BOOL success))finish{
+    self.loadConfig = loadConfig;
+    loadConfig.webView = self;
+    NSNumber *cachePolicy = loadConfig.cachePolicy;
+    NSNumber *timeoutInterval = loadConfig.timeoutInterval;
+    NSURL *readAccessURL = loadConfig.readAccessURL;
+    
     [self.debugConfig updateFloatViewTitle:@"刷新中..."];
     __weak __typeof__(self) __self = self;
     void (^callBack)(BOOL) = ^(BOOL success){
@@ -366,11 +391,12 @@ allowingReadAccessToURL:(NSURL *)readAccessURL
     
     //远程Url
     if (!url.isFileURL) {
-        [self configWebViewFinish:callBack];
         NSURLRequest *request = [NSURLRequest requestWithURL:url];
         if (cachePolicy && timeoutInterval) {
             request = [NSURLRequest requestWithURL:url cachePolicy:cachePolicy.unsignedIntegerValue timeoutInterval:timeoutInterval.doubleValue];
         }
+        [self callWebViewStartLoad:nil block:startLoadBlock];
+        [self configWebViewFinishCallBack:callBack];
         [self loadRequest:request];
         return;
     }
@@ -387,8 +413,9 @@ allowingReadAccessToURL:(NSURL *)readAccessURL
             callBack(NO);
             return;
         }
-        [self configWebViewFinish:callBack];
         self.runSandBoxURL = [self parseRealRunBoxFolder:baseURL fileURL:url];
+        [self callWebViewStartLoad:self.runSandBoxURL block:startLoadBlock];
+        [self configWebViewFinishCallBack:callBack];
         [self loadFileURL:fileURL allowingReadAccessToURL:readAccessURL?:self.runSandBoxURL];
         return;
     }
@@ -404,12 +431,13 @@ allowingReadAccessToURL:(NSURL *)readAccessURL
             callBack(NO);
             return;
         }
-        [self configWebViewFinish:callBack];
         NSURLRequest *request = [NSURLRequest requestWithURL:fileURL];
         if (cachePolicy && timeoutInterval) {
             request = [NSURLRequest requestWithURL:fileURL cachePolicy:cachePolicy.unsignedIntegerValue timeoutInterval:timeoutInterval.doubleValue];
         }
         self.runSandBoxURL = [self parseRealRunBoxFolder:baseURL fileURL:url];
+        [self callWebViewStartLoad:self.runSandBoxURL block:startLoadBlock];
+        [self configWebViewFinishCallBack:callBack];
         [self loadRequest:request];
         return;
     }
@@ -469,16 +497,21 @@ allowingReadAccessToURL:(NSURL *)readAccessURL
         callBack(NO);
         return;
     }
-    [self configWebViewFinish:callBack];
     NSURLRequest *request = [NSURLRequest requestWithURL:fileURL];
     if (cachePolicy && timeoutInterval) {
         request = [NSURLRequest requestWithURL:fileURL cachePolicy:cachePolicy.unsignedIntegerValue timeoutInterval:timeoutInterval.doubleValue];
     }
     self.runSandBoxURL = [NSURL fileURLWithPath:iOS8TargetFolder];
+    [self callWebViewStartLoad:self.runSandBoxURL block:startLoadBlock];
+    [self configWebViewFinishCallBack:callBack];
     [self loadRequest:request];
 }
-//配置webview渲染完成
-- (void)configWebViewFinish:(void (^) (BOOL success))finish{
+//配置webview渲染回调
+- (void)callWebViewStartLoad:(NSURL *)runSandBoxURL block:(void (^) (NSURL *runSandBoxURL))block{
+    if (!block) return;
+    block(runSandBoxURL);
+}
+- (void)configWebViewFinishCallBack:(void (^) (BOOL success))finish{
     __weak __typeof__(self) __self = self;
     self.loadFinish = ^(BOOL success) {
         __self.loadSuccess = success;
@@ -813,6 +846,11 @@ allowingReadAccessToURL:(NSURL *)readAccessURL
     return NSTemporaryDirectory();
 }
 
+//获取webView的内置zip资源临时解压目录
+- (NSString *)fetchPresetUnzipTmpFolder{
+    NSString *boxFolder = [NSString stringWithFormat:@"%p", self];
+    return [ZHWebViewPresetUnzipTmpFolder() stringByAppendingPathComponent:boxFolder];
+}
 //获取webView准备运行沙盒
 - (NSString *)fetchReadyRunSandBox{
     NSString *boxFolder = [NSString stringWithFormat:@"%p", self];
@@ -855,9 +893,16 @@ allowingReadAccessToURL:(NSURL *)readAccessURL
     }else if ([data isKindOfClass:[NSDictionary class]] ||
               [data isKindOfClass:[NSArray class]]){
         NSError *jsonError;
-        NSData *jsonData = [NSJSONSerialization dataWithJSONObject:data options:0 error:&jsonError];
+        NSData *jsonData = nil;
+        @try {
+            // 当原生传来的json中包含有NSObject对象，数据解析异常导致crash
+            jsonData = [NSJSONSerialization dataWithJSONObject:data options:0 error:&jsonError];
+        } @catch (NSException *exception) {
+            jsonData = [NSJSONSerialization dataWithJSONObject:@{} options:0 error:&jsonError];
+        } @finally {
+        }
         res = jsonError ? jsonError.userInfo[NSLocalizedDescriptionKey] : [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-        if (jsonError) return nil;
+        if (jsonError || !jsonData) return nil;
         res = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
     }else if ([data isKindOfClass:[NSObject class]]){
         res = [data description];

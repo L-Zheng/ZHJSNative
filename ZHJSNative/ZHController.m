@@ -8,6 +8,7 @@
 
 #import "ZHController.h"
 #import "ZHWebView.h"
+#import "ZHWebViewConfiguration.h"
 #import "ZHJSApiProtocol.h"
 #import "ZHJSContext.h"
 #import "ZHWebViewManager.h"
@@ -51,24 +52,40 @@
     return _processPool;
 }
 
+- (ZHWebViewConfiguration *)createConfig{
+    ZHWebViewAppletConfiguration *appletConfig = [ZHWebViewAppletConfiguration new];
+    appletConfig.appId = [self currentTemplateKey];
+    appletConfig.loadFileName = [self currentTemplateLoadName];
+    appletConfig.presetFolderPath = [self currentTemplatePresetFolder];
+    
+    ZHWebViewCreateConfiguration *createConfig = [ZHWebViewCreateConfiguration new];
+    createConfig.frameValue = [NSValue valueWithCGRect:[UIScreen mainScreen].bounds];
+    createConfig.processPool = [self processPool];
+    createConfig.apiHandlers = [self apiHandlers];
+    
+    ZHWebViewLoadConfiguration *loadConfig = [ZHWebViewLoadConfiguration new];
+    loadConfig.cachePolicy = nil;
+    loadConfig.timeoutInterval = nil;
+    loadConfig.readAccessURL = [NSURL fileURLWithPath:[ZHWebView getDocumentFolder]];
+    
+    
+    ZHWebViewConfiguration *config = [ZHWebViewConfiguration new];
+    config.appletConfig = appletConfig;
+    config.createConfig = createConfig;
+    config.loadConfig = loadConfig;
+    
+    return config;
+}
+
 - (void)preLoad{
     //预加载
-    [[ZHWebViewManager shareManager] preReadyWebView:[self currentTemplateKey]
-                                               frame:[UIScreen mainScreen].bounds
-                                        loadFileName:[self currentTemplateLoadName]
-                                        presetFolder:[self currentTemplatePresetFolder]
-                                         processPool:self.processPool
-                             allowingReadAccessToURL:[NSURL fileURLWithPath:[ZHWebView getDocumentFolder]]
-                                         cachePolicy:nil
-                                     timeoutInterval:nil
-                                         apiHandlers:[self apiHandlers]
-                                              finish:^(BOOL success) {
+    [[ZHWebViewManager shareManager] preReadyWebView:[self createConfig] finish:^(BOOL success) {
         NSLog(@"--------------------");
-
+        
         //预加载完成不能立即使用： webView loadSuccess只是加载成功  里面的内容还没有配置完成
-//        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-//            [self readyLoadWebView];
-//        });
+        //        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        //            [self readyLoadWebView];
+        //        });
     }];
 }
 
@@ -142,10 +159,10 @@
             return;
         }else if (operate == ZHWebViewExceptionOperateReload){
         }else if (operate == ZHWebViewExceptionOperateNewInit){
-            webView = [[ZHWebView alloc] initWithFrame:self.view.bounds processPool:self.processPool apiHandlers:[self apiHandlers]];
+            webView = [[ZHWebView alloc] initWithGlobalConfig:[self createConfig]];
         }
     }else{
-        webView = [[ZHWebView alloc] initWithFrame:self.view.bounds processPool:self.processPool apiHandlers:[self apiHandlers]];
+        webView = [[ZHWebView alloc] initWithGlobalConfig:[self createConfig]];
     }
     
     [self doLoadWebView:webView];
@@ -156,16 +173,8 @@
 
 - (void)doLoadWebView:(ZHWebView *)webView{
     ZHWebViewManager *mg = [ZHWebViewManager shareManager];
-    
     __weak __typeof__(self) __self = self;
-    [mg loadWebView:webView
-                key:[self currentTemplateKey]
-       loadFileName:[self currentTemplateLoadName]
-       presetFolder:[self currentTemplatePresetFolder]
-allowingReadAccessToURL:[NSURL fileURLWithPath:[ZHWebView getDocumentFolder]]
-        cachePolicy:nil
-    timeoutInterval:nil
-             finish:^(BOOL success) {
+    [mg loadWebView:webView config:webView.globalConfig finish:^(BOOL success) {
         if (!success) return;
         [__self configWebView:webView];
         [__self renderWebView:webView];
@@ -354,26 +363,18 @@ allowingReadAccessToURL:[NSURL fileURLWithPath:[ZHWebView getDocumentFolder]]
         [self clear];
         [self readyLoadWebView];
     }else if (debugModel == ZHWebViewDebugModelOnline){
-        NSString *socketUrlStr = [info valueForKey:ZHWebViewSocketDebugUrlKey];
+        NSURL *url = [NSURL URLWithString:[info valueForKey:ZHWebViewSocketDebugUrlKey]];
         [mg loadOnlineDebugWebView:webView
-                               key:[self currentTemplateKey]
-                               url:[NSURL URLWithString:socketUrlStr]
-                       cachePolicy:@(NSURLRequestReloadIgnoringLocalAndRemoteCacheData)
-                   timeoutInterval:@(30)
+                               url:url
+                            config:[self createConfig]
                             finish:^(BOOL success) {
             block(success);
         }];
     }else if (debugModel == ZHWebViewDebugModelLocal){
-        NSString *loadFolder = [info valueForKey:ZHWebViewLocalDebugUrlKey];
+        NSString *loadFolder = [[info valueForKey:ZHWebViewLocalDebugUrlKey] stringByAppendingPathComponent:@"release"];
         [mg loadLocalDebugWebView:webView
-                              key:[self currentTemplateKey]
-                       loadFolder:[loadFolder
-                                   stringByAppendingPathComponent:@"release"]
-                     loadFileName:[self currentTemplateLoadName]
-          allowingReadAccessToURL:[NSURL fileURLWithPath:[ZHWebView getDocumentFolder]]
-                      cachePolicy:nil
-                  timeoutInterval:nil
-                           finish:^(BOOL success) {
+                   templateFolder:loadFolder
+                           config:[self createConfig] finish:^(BOOL success) {
             block(success);
         }];
     }
