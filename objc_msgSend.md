@@ -95,7 +95,7 @@ objc_msgSendSuper(&tSuper, @selector(testInstance));
 --> 如果类没有初始化，先初始化类，此过程会调用initialize方法  
 --> 开始循环遍历查找、二分查找比较 `method_t->name`。<font color=#ff0000 size=4 face="微软雅黑">存在：流程终止 goto call;</font>  
 --> 没有找到方法，尝试resolver进行动态决议。`resolveInstanceMethod` `resolveClassMethod`  
---> 决议后，再次进行查找`goto lookUpImpOrForward`。<font color=#ff0000 size=4 face="微软雅黑">存在：流程终止 goto call;</font>
+--> 决议后，再次进行查找`goto lookUpImpOrForward`。<font color=#ff0000 size=4 face="微软雅黑">存在：流程终止 goto call;</font>  
 >> 消息快速转发：
 `- (id)forwardingTargetForSelector:(SEL)aSelector`。
 >>> 1、`return obj;` 交由obj对象处理。<font color=#ff0000 size=4 face="微软雅黑">流程终止。</font>
