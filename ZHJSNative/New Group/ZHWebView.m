@@ -22,6 +22,9 @@ NSString * const ZHWebViewLocalDebugUrlKey = @"ZHWebViewLocalDebugUrlKey";
 // 调试配置
 @property (nonatomic, strong) ZHWebViewDebugConfiguration *debugConfig;
 
+// webview异常信息
+@property (nonatomic,strong) NSDictionary *exceptionInfo;
+
 //webView运行的沙盒目录
 @property (nonatomic, copy) NSURL *runSandBoxURL;
 
@@ -325,10 +328,10 @@ NSString * const ZHWebViewLocalDebugUrlKey = @"ZHWebViewLocalDebugUrlKey";
  WKCompositingView控件会被销毁
  */
 - (ZHWebViewExceptionOperate)checkException{
-    if (self.didTerminate) return ZHWebViewExceptionOperateNewInit;
+    if (self.didTerminate) return ZHWebViewExceptionOperateReload;
     
     BOOL isBlank = [self isBlankView:self];
-    if (isBlank) return ZHWebViewExceptionOperateNewInit;
+    if (isBlank) return ZHWebViewExceptionOperateReload;
     
     BOOL isTitle = (self.title.length > 0);
     BOOL isURL = (self.URL != nil);
@@ -725,11 +728,21 @@ NSString * const ZHWebViewLocalDebugUrlKey = @"ZHWebViewLocalDebugUrlKey";
 //当WKWebView总体内存占用过大，页面即将白屏的时候，系统会调用上面的回调函数，我们在该函数里执行[webView reload]（这个时候webView.URL取值尚不为零）解决白屏问题。在一些高内存消耗的页面可能会频繁刷新当前页面
 - (void)webViewWebContentProcessDidTerminate:(WKWebView *)webView{
     if ([ZHWebViewDebugConfiguration availableIOS9]) {
+        // webview content进程被系统终结，抛出异常
+        NSDictionary *exceptionInfo = @{
+            @"reason": @"The web view whose underlying web content process was terminated.",
+            @"address": [NSString stringWithFormat:@"%p", self],
+            @"stack": [NSString stringWithFormat:@"%s", __func__],
+        };
+        self.exceptionInfo = exceptionInfo;
+        self.didTerminate = YES;
+
         id <ZHWKNavigationDelegate> de = self.zh_navigationDelegate;
         if (ZHCheckDelegate(de, @selector(webViewWebContentProcessDidTerminate:))) {
             [de webViewWebContentProcessDidTerminate:webView];
+        }else{
+            [self.handler showWebViewException:exceptionInfo];
         }
-        self.didTerminate = YES;
     }
 }
 

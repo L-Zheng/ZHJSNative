@@ -90,6 +90,7 @@ typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
 
 /** 检查WebView异常 ：白屏*/
 - (ZHWebViewExceptionOperate)checkException;
+@property (nonatomic,strong,readonly) NSDictionary *exceptionInfo;
 
 #pragma mark - encode
 
