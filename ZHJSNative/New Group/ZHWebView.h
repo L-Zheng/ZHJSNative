@@ -9,22 +9,8 @@
 #import <UIKit/UIKit.h>
 #import <WebKit/WebKit.h>
 #import "ZHJSApiProtocol.h"
+#import "ZHWebViewConfiguration.h"
 @class ZHWebView;
-@class ZHWebViewDebugConfiguration;
-@class ZHWebViewConfiguration;
-@class ZHWebViewAppletConfiguration;
-@class ZHWebViewCreateConfiguration;
-@class ZHWebViewLoadConfiguration;
-
-FOUNDATION_EXPORT NSString * const ZHWebViewSocketDebugUrlKey;
-FOUNDATION_EXPORT NSString * const ZHWebViewLocalDebugUrlKey;
-
-//调试模式
-typedef NS_ENUM(NSInteger, ZHWebViewDebugModel) {
-    ZHWebViewDebugModelNo     = 0, //release模式
-    ZHWebViewDebugModelLocal      = 1, //本地拷贝js调试
-    ZHWebViewDebugModelOnline      = 2, //链接线上地址调试
-};
 
 typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
     ZHWebViewExceptionOperateNothing     = 0,//不做任何操作
@@ -91,6 +77,7 @@ typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
 /** 检查WebView异常 ：白屏*/
 - (ZHWebViewExceptionOperate)checkException;
 @property (nonatomic,strong,readonly) NSDictionary *exceptionInfo;
+@property (nonatomic,assign,readonly) BOOL didTerminate;
 
 #pragma mark - encode
 

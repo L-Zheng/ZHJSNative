@@ -7,8 +7,7 @@
 //
 
 #import "ZHWebViewManager.h"
-#import "ZHWebViewDebugConfiguration.h"
-#import "ZHWebViewConfiguration.h"
+#import "ZHWebView.h"
 
 NSInteger const ZHWebViewPreLoadMaxCount = 3;
 NSInteger const ZHWebViewPreLoadingMaxCount = 1;

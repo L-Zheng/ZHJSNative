@@ -37,7 +37,6 @@
 		85A4A3122440003C002AE903 /* ZHEmotion.m in Sources */ = {isa = PBXBuildFile; fileRef = 85A4A3112440003C002AE903 /* ZHEmotion.m */; };
 		85B4FC9924349EA300CD910B /* EFEmoji.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 85B4FC9824349EA300CD910B /* EFEmoji.bundle */; };
 		85B4FC9C2435702900CD910B /* ZhengFile.m in Sources */ = {isa = PBXBuildFile; fileRef = 85B4FC9A2435702900CD910B /* ZhengFile.m */; };
-		85F8594A24A2FB1F00484F22 /* ZHWebViewDebugConfiguration.m in Sources */ = {isa = PBXBuildFile; fileRef = 85F8594924A2FB1F00484F22 /* ZHWebViewDebugConfiguration.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -115,8 +114,6 @@
 		85B4FC9824349EA300CD910B /* EFEmoji.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = EFEmoji.bundle; sourceTree = "<group>"; };
 		85B4FC9A2435702900CD910B /* ZhengFile.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZhengFile.m; sourceTree = "<group>"; };
 		85B4FC9B2435702900CD910B /* ZhengFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZhengFile.h; sourceTree = "<group>"; };
-		85F8594824A2FB1F00484F22 /* ZHWebViewDebugConfiguration.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHWebViewDebugConfiguration.h; sourceTree = "<group>"; };
-		85F8594924A2FB1F00484F22 /* ZHWebViewDebugConfiguration.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHWebViewDebugConfiguration.m; sourceTree = "<group>"; };
 		E56B9B5085C846D362800AF3 /* Pods-ZHJSNative.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ZHJSNative.release.xcconfig"; path = "Target Support Files/Pods-ZHJSNative/Pods-ZHJSNative.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -244,8 +241,6 @@
 				85A4A30E243FF80A002AE903 /* ZHWebViewManager.m */,
 				0F07989A2401060A004AAFBC /* ZHWebView.h */,
 				0F07989B2401060A004AAFBC /* ZHWebView.m */,
-				85F8594824A2FB1F00484F22 /* ZHWebViewDebugConfiguration.h */,
-				85F8594924A2FB1F00484F22 /* ZHWebViewDebugConfiguration.m */,
 				0F0798A024010647004AAFBC /* ZHJSHandler.h */,
 				0F0798A124010647004AAFBC /* ZHJSHandler.m */,
 				856980832429E13F0042755A /* ZHJSApiProtocol.h */,
@@ -461,7 +456,6 @@
 				8556697C24B854CF005CF37C /* ZHWebViewConfiguration.m in Sources */,
 				856980822429E0F50042755A /* ZHCustomApiHandler.m in Sources */,
 				85A4A3122440003C002AE903 /* ZHEmotion.m in Sources */,
-				85F8594A24A2FB1F00484F22 /* ZHWebViewDebugConfiguration.m in Sources */,
 				0F079862240104FA004AAFBC /* SceneDelegate.m in Sources */,
 				0F6807DD24016A0500E6B4C6 /* ZHJSApiHandler.m in Sources */,
 				0F5E33D9242F084E00623068 /* ZHCustom1ApiHandler.m in Sources */,

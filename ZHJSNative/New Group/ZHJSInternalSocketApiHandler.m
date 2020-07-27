@@ -7,7 +7,7 @@
 //
 
 #import "ZHJSInternalSocketApiHandler.h"
-#import "ZHWebViewDebugConfiguration.h"
+#import "ZHWebView.h"
 
 @implementation ZHJSInternalSocketApiHandler
 

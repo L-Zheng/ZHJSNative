@@ -8,11 +8,6 @@
 
 #import "ZHWebView.h"
 #import "ZHJSHandler.h"
-#import "ZHWebViewDebugConfiguration.h"
-#import "ZHWebViewConfiguration.h"
-
-NSString * const ZHWebViewSocketDebugUrlKey = @"ZHWebViewSocketDebugUrlKey";
-NSString * const ZHWebViewLocalDebugUrlKey = @"ZHWebViewLocalDebugUrlKey";
 
 @interface ZHWebView ()<WKNavigationDelegate, WKUIDelegate, UIScrollViewDelegate, UIGestureRecognizerDelegate>
 
@@ -48,9 +43,9 @@ NSString * const ZHWebViewLocalDebugUrlKey = @"ZHWebViewLocalDebugUrlKey";
     return [self initWithCreateConfig:globalConfig.createConfig];
 }
 - (instancetype)initWithCreateConfig:(ZHWebViewCreateConfiguration *)createConfig{
-    
     // 初始化配置
     self.createConfig = createConfig;
+    createConfig.webView = self;
     NSArray <id <ZHJSApiProtocol>> *apiHandlers = createConfig.apiHandlers;
     WKProcessPool *processPool = createConfig.processPool;
     CGRect frame = createConfig.frameValue.CGRectValue;
@@ -62,10 +57,12 @@ NSString * const ZHWebViewLocalDebugUrlKey = @"ZHWebViewLocalDebugUrlKey";
     // debug配置
     ZHWebViewDebugConfiguration *debugConfig = [ZHWebViewDebugConfiguration configuration];
     self.debugConfig = debugConfig;
+    debugConfig.webView = self;
     
     // api处理配置
     ZHJSHandler *handler = [[ZHJSHandler alloc] initWithDebugConfig:debugConfig apiHandlers:apiHandlers?:@[]];
     self.handler = handler;
+    handler.webView = self;
     
     //注入api
     NSMutableArray *apis = [NSMutableArray array];
@@ -174,35 +171,6 @@ NSString * const ZHWebViewLocalDebugUrlKey = @"ZHWebViewLocalDebugUrlKey";
     
     self = [self initWithFrame:frame configuration:wkConfig];
     if (self) {
-        // 一定要放到initWithFrame 后面  因为debugConfig.webView里面有操作addSubView
-        createConfig.webView = self;
-        debugConfig.webView = self;
-        handler.webView = self;
-        
-        // UI配置
-        self.backgroundColor = [UIColor colorWithRed:245.0/255.0 green:245.0/255.0 blue:245.0/255.0 alpha:1.0];
-        //    self.scrollView.bounces = NO;
-        //    self.scrollView.alwaysBounceVertical = NO;
-        //    self.scrollView.alwaysBounceHorizontal = NO;
-        self.scrollView.showsVerticalScrollIndicator = YES;
-        //设置流畅滑动【否则 滑动效果没有减速过快】
-        self.scrollView.decelerationRate = UIScrollViewDecelerationRateNormal;
-        //禁用链接预览
-        //    [webView setAllowsLinkPreview:NO];
-        
-        if ([ZHWebViewDebugConfiguration availableIOS11]) {
-            self.scrollView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
-        }
-        
-        //设置代理
-        self.UIDelegate = self;
-        self.navigationDelegate = self;
-        /**
-         iOS9设备  设置了WKWebView的scrollView.delegate  要在使用WKWebView的地方
-         dealloc时 清空代理scrollView.delegate = nil;   不能在WKWebView的dealloc方法里面清空代理
-         否则crash
-         */
-        //        self.scrollView.delegate = self;
     }
     return self;
 }
@@ -210,6 +178,7 @@ NSString * const ZHWebViewLocalDebugUrlKey = @"ZHWebViewLocalDebugUrlKey";
     self = [super initWithFrame:frame configuration:configuration];
     if (self) {
         [self configGesture];
+        [self configUI];
     }
     return self;
 }
@@ -265,7 +234,41 @@ NSString * const ZHWebViewLocalDebugUrlKey = @"ZHWebViewLocalDebugUrlKey";
 
 - (void)layoutSubviews{
     [super layoutSubviews];
+    [self updateUI];
+}
+
+#pragma mark - UI
+
+- (void)configUI{
+    // UI配置
+    self.backgroundColor = [UIColor colorWithRed:245.0/255.0 green:245.0/255.0 blue:245.0/255.0 alpha:1.0];
+    //    self.scrollView.bounces = NO;
+    //    self.scrollView.alwaysBounceVertical = NO;
+    //    self.scrollView.alwaysBounceHorizontal = NO;
+    self.scrollView.showsVerticalScrollIndicator = YES;
+    //设置流畅滑动【否则 滑动效果没有减速过快】
+    self.scrollView.decelerationRate = UIScrollViewDecelerationRateNormal;
+    //禁用链接预览
+    //    [webView setAllowsLinkPreview:NO];
     
+    if ([ZHWebViewDebugConfiguration availableIOS11]) {
+        self.scrollView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
+    }
+    
+    //设置代理
+    self.UIDelegate = self;
+    self.navigationDelegate = self;
+    /**
+     iOS9设备  设置了WKWebView的scrollView.delegate  要在使用WKWebView的地方
+     dealloc时 清空代理scrollView.delegate = nil;   不能在WKWebView的dealloc方法里面清空代理
+     否则crash
+     */
+    //        self.scrollView.delegate = self;
+    
+    [self.debugConfig showFlowView];
+}
+
+- (void)updateUI{
     [self.debugConfig updateFloatViewLocation];
 }
 

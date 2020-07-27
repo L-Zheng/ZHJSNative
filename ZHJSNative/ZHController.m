@@ -359,9 +359,12 @@
     };
         
     if (debugModel == ZHWebViewDebugModelNo) {
-        //清理原来的webview
-        [self clear];
-        [self readyLoadWebView];
+//        //清理原来的webview
+//        [self clear];
+//        [self readyLoadWebView];
+        [mg loadWebView:webView config:webView.globalConfig finish:^(BOOL success) {
+            block(success);
+        }];
     }else if (debugModel == ZHWebViewDebugModelOnline){
         NSURL *url = [NSURL URLWithString:[info valueForKey:ZHWebViewSocketDebugUrlKey]];
         [mg loadOnlineDebugWebView:webView

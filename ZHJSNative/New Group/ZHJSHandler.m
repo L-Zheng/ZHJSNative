@@ -8,7 +8,7 @@
 
 #import "ZHJSHandler.h"
 #import "ZHJSContext.h"
-#import "ZHWebViewDebugConfiguration.h"
+#import "ZHWebView.h"
 #import "ZHJSApiHandler.h"
 #import <objc/runtime.h>
 #import "ZHJSInternalSocketApiHandler.h"
