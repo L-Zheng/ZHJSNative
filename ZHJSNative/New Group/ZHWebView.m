@@ -514,6 +514,7 @@
 }
 //配置webview渲染回调
 - (void)callWebViewStartLoad:(NSURL *)runSandBoxURL block:(void (^) (NSURL *runSandBoxURL))block{
+    self.didTerminate = NO;
     if (!block) return;
     block(runSandBoxURL);
 }

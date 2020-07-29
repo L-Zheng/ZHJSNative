@@ -125,6 +125,16 @@
     [super viewWillAppear:animated];
     [self configNavigaitonBar:animated];
     NSLog(@"----✅viewWillAppear----");
+    
+    if (self.webView.didTerminate) {
+        ZHWebViewManager *mg = [ZHWebViewManager shareManager];
+        __weak __typeof__(self) weakSelf = self;
+        [mg loadWebView:self.webView config:weakSelf.webView.globalConfig finish:^(BOOL success) {
+            if (!success) return;
+            [weakSelf configWebView:weakSelf.webView];
+            [weakSelf renderWebView:weakSelf.webView];
+        }];
+    }
 }
 
 - (void)viewDidAppear:(BOOL)animated{
