@@ -927,7 +927,29 @@
         //默认obj作为BOOL值处理
         res = [NSString stringWithFormat:@"%d",data];
     }
-    return [res stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
+    
+    NSString *(^block)(NSString *) = ^NSString *(NSString *str){
+        return [str stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
+    };
+    if (@available(iOS 8.3, *)) {
+        return block(res);
+    }
+    /** iOS8.2以下对于 较长的中文字符串 编码存在内存问题，导致crash
+     https://stackoverflow.com/questions/44309415/stack-overflow-in-nsstringnsurlutilities-stringbyaddingpercentencodingwithal
+     https://github.com/Alamofire/Alamofire/issues/206
+     将字符串分割操作
+     */
+    if (res.length < 400) {
+        return block(res);
+    }
+    NSMutableString *newRes = [NSMutableString string];
+    NSInteger totalCount = res.length;
+    NSInteger batchSize = 100;
+    for (NSUInteger i = 0; i < totalCount; i += batchSize) {
+        NSInteger rangeLength = i + batchSize > totalCount ? totalCount - i : batchSize;
+        [newRes appendString:block([res substringWithRange:NSMakeRange(i, rangeLength)])];
+    }
+    return newRes.copy;
 }
 
 #pragma mark - clear
