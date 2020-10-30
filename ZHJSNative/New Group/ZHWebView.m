@@ -648,17 +648,13 @@
     }else{
         js = [NSString stringWithFormat:@"(%@)()", funcName];
     }
-    __weak __typeof__(self) __self = self;
-    [self evaluateJavaScript:js completionHandler:^(id _Nullable res, NSError * _Nullable error) {
+    [self evaluateJs:js completionHandler:^(id res, NSError *error) {
         if (error) {
             NSLog(@"----❌js:function:%@--error:%@--", funcName, error);
-            [__self.handler showWebViewException:error.userInfo];
         }else{
             NSLog(@"----✅js:function:%@--返回值:%@--", funcName, res?:@"void");
         }
-        if (completionHandler) {
-            completionHandler(res, error);
-        }
+        if (completionHandler) completionHandler(res, error);
     }];
 }
 - (void)evaluateJs:(NSString *)js completionHandler:(void (^)(id res, NSError *error))completionHandler{

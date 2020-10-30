@@ -27,6 +27,12 @@ typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
 - (void)webViewRefresh:(ZHWebView *)webView debugModel:(ZHWebViewDebugModel)debugModel info:(NSDictionary *)info;
 @end
 
+/** webview异常代理 */
+@protocol ZHWebViewExceptionDelegate <NSObject>
+@optional
+- (void)webViewException:(ZHWebView *)webView info:(NSDictionary *)info;
+@end
+
 /** 重写系统代理 */
 @protocol ZHWKNavigationDelegate <WKNavigationDelegate>
 @end
@@ -47,6 +53,7 @@ typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
 #pragma mark - delegate
 
 @property (nonatomic,weak) id <ZHWebViewSocketDebugDelegate> zh_socketDebugDelegate;
+@property (nonatomic,weak) id <ZHWebViewExceptionDelegate> zh_exceptionDelegate;
 @property (nonatomic,weak) id <ZHWKNavigationDelegate> zh_navigationDelegate;
 @property (nonatomic,weak) id <ZHWKUIDelegate> zh_UIDelegate;
 @property (nonatomic,weak) id <ZHScrollViewDelegate> zh_scrollViewDelegate;

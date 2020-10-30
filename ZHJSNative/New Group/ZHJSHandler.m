@@ -282,6 +282,13 @@ case cType:{\
 
 //异常弹窗
 - (void)showWebViewException:(NSDictionary *)exception{
+    // 异常抛出
+    id <ZHWebViewExceptionDelegate> de = self.webView.zh_exceptionDelegate;
+    if (ZHCheckDelegate(de, @selector(webViewException:info:))) {
+        [de webViewException:self.webView info:exception];
+    }
+    // 调试弹窗
+
     if (self.webView.debugConfig.alertWebViewErrorEnable) {
         [self showException:@"WebView JS异常" exception:exception];
     }
