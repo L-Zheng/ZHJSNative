@@ -148,7 +148,44 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
     //加载模板 不存在会下载
     [self.class localReleaseTemplateFolder:config.appletConfig
                                    webView:webView
-                                  callBack:^(NSString *templateFolder, NSError *error) {
+                                  callBack:^(NSString *templateFolder, NSDictionary *resultInfo, NSError *error) {
+        [__self copyTemplateFolderToSandBox:webView templateFolder:templateFolder error:error callBack:^(NSString *loadFolder, NSError *error) {
+            //检查
+            if (error) {
+                if (finish) finish(NO);
+                return;
+            }
+            [__self realLoadWebView:webView loadFolder:loadFolder config:config finish:finish];
+        }];
+    }];
+}
+
+/// 重新下载模板文件加载webView
+- (void)retryLoadWebView:(ZHWebView *)webView
+                  config:(ZHWebViewConfiguration *)config
+           downLoadStart:(void (^) (void))downLoadStart
+          downLoadFinish:(void (^) (NSDictionary *info ,NSError *error))downLoadFinish
+                  finish:(void (^) (BOOL success))finish{
+    if (!webView ||
+        ![webView isKindOfClass:[ZHWebView class]]) {
+        if (finish) finish(NO);
+        return;
+    }
+    
+    NSString *key = config.appletConfig.appId;
+    if (![ZHWebView checkString:key]) {
+        if (finish) finish(NO);
+        return;
+    }
+    
+    __weak __typeof__(self) __self = self;
+    //下载
+    if (downLoadStart) downLoadStart();
+    [self.class waitDownLoadTemplate:key callBack:^(NSString *templateFolder, NSDictionary *resultInfo, NSError *error) {
+        if (downLoadFinish) downLoadFinish(error ? nil : resultInfo, error);
+        if (error) return;
+        
+        // 拷贝到沙盒
         [__self copyTemplateFolderToSandBox:webView templateFolder:templateFolder error:error callBack:^(NSString *loadFolder, NSError *error) {
             //检查
             if (error) {
@@ -287,7 +324,7 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
 //加载线上资源
 + (void)localReleaseTemplateFolder:(ZHWebViewAppletConfiguration *)appletConfig
                            webView:(ZHWebView *)webView
-                          callBack:(void (^) (NSString *templateFolder, NSError *error))callBack{
+                          callBack:(void (^) (NSString *templateFolder, NSDictionary *resultInfo, NSError *error))callBack{
     NSString *key = appletConfig.appId;
     NSString *presetFolder = appletConfig.presetFolderPath;
     
@@ -295,25 +332,29 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
     NSString *latestFolder = nil;
     if ([ZHWebView checkString:latestFolder] &&
         [[NSFileManager defaultManager] fileExistsAtPath:latestFolder]) {
-        if (callBack) callBack(latestFolder, nil);
+        if (callBack) callBack(latestFolder, @{@"description": @"此模板为本地缓存资源"}, nil);
         [[self shareManager] updateTemplate:key];
         return;
     }
     
     //存在预置资源
     if ([ZHWebView checkString:presetFolder] && [[NSFileManager defaultManager] fileExistsAtPath:presetFolder]) {
-        if (callBack) callBack(presetFolder, nil);
+        if (callBack) callBack(presetFolder, @{@"description": @"此模板为App内置资源"}, nil);
         [[self shareManager] updateTemplate:key];
         return;
     }
     
     //等待下载
+    [self waitDownLoadTemplate:key callBack:callBack];
+}
+
++ (void)waitDownLoadTemplate:(NSString *)key callBack:(void (^) (NSString *templateFolder, NSDictionary *resultInfo, NSError *error))callBack{
     [[self shareManager] downLoadTemplate:key callback:^(NSDictionary *resultInfo, NSError *error) {
         NSString *downFolder = nil;
         if (downFolder && !error) {
-            if (callBack) callBack(downFolder, nil);
+            if (callBack) callBack(downFolder, @{@"description": @"此模板为下载资源"}, nil);
         }else{
-            if (callBack) callBack(nil, error ? error : [NSError new]);
+            if (callBack) callBack(nil, @{@"description": @"下载WebView模板文件失败"}, error ? error : [NSError new]);
         }
     } progressBlock:^(NSProgress *progress) {
         

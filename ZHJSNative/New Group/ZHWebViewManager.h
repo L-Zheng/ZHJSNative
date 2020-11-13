@@ -39,6 +39,18 @@
              config:(ZHWebViewConfiguration *)config
              finish:(void (^) (BOOL success))finish;
 
+/// 重新下载模板文件加载webView
+/// @param webView webView
+/// @param config config
+/// @param downLoadStart 下载开始回调
+/// @param downLoadFinish 下载完成回调
+/// @param finish webview加载完成回调
+- (void)retryLoadWebView:(ZHWebView *)webView
+                  config:(ZHWebViewConfiguration *)config
+           downLoadStart:(void (^) (void))downLoadStart
+          downLoadFinish:(void (^) (NSDictionary *info ,NSError *error))downLoadFinish
+                  finish:(void (^) (BOOL success))finish;
+
 //调试下使用
 - (void)loadOnlineDebugWebView:(ZHWebView *)webView
                            url:(NSURL *)url
