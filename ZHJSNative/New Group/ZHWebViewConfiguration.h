@@ -17,6 +17,7 @@
 
 @interface ZHWebViewModuleConfiguration : NSObject
 @property (nonatomic,weak) ZHWebView *webView;
+- (NSDictionary *)formatInfo;
 @end
 
 
@@ -66,6 +67,7 @@
 @property (nonatomic,strong) ZHWebViewCreateConfiguration *createConfig;
 @property (nonatomic,strong) ZHWebViewLoadConfiguration *loadConfig;
 @property (nonatomic,weak) ZHWebView *webView;
+- (NSDictionary *)formatInfo;
 @end
 
 

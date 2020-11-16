@@ -11,6 +11,9 @@
 #import <ZHFloatWindow/ZHFloatView.h>
 
 @implementation ZHWebViewModuleConfiguration
+- (NSDictionary *)formatInfo{
+    return @{};
+}
 - (void)dealloc{
     NSLog(@"%s", __func__);
 }
@@ -18,6 +21,14 @@
 
 
 @implementation ZHWebViewAppletConfiguration
+- (NSDictionary *)formatInfo{
+    return @{
+        @"appId": self.appId?:@"",
+        @"loadFileName": self.loadFileName?:@"",
+        @"presetFilePath": self.presetFilePath?:@"",
+        @"presetFolderPath": self.presetFolderPath?:@""
+    };
+}
 - (void)dealloc{
     NSLog(@"%s", __func__);
 }
@@ -31,6 +42,13 @@
 @end
 
 @implementation ZHWebViewLoadConfiguration
+- (NSDictionary *)formatInfo{
+    return @{
+        @"cachePolicy": self.cachePolicy?:@"",
+        @"timeoutInterval": self.timeoutInterval?:@"",
+        @"readAccessURL": self.readAccessURL.absoluteString ?: @""
+    };
+}
 - (void)dealloc{
     NSLog(@"%s", __func__);
 }
@@ -38,6 +56,13 @@
 
 
 @implementation ZHWebViewConfiguration
+- (NSDictionary *)formatInfo{
+    return @{
+        @"appletConfig": [self.appletConfig formatInfo],
+        @"createConfig": [self.createConfig formatInfo],
+        @"loadConfig": [self.loadConfig formatInfo]
+    };
+}
 - (void)dealloc{
     NSLog(@"%s", __func__);
 }

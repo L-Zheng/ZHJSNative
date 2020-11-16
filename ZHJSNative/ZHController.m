@@ -79,7 +79,7 @@
 
 - (void)preLoad{
     //预加载
-    [[ZHWebViewManager shareManager] preReadyWebView:[self createConfig] finish:^(BOOL success) {
+    [[ZHWebViewManager shareManager] preReadyWebView:[self createConfig] finish:^(NSDictionary *info, NSError *error) {
         NSLog(@"--------------------");
         
         //预加载完成不能立即使用： webView loadSuccess只是加载成功  里面的内容还没有配置完成
@@ -129,8 +129,8 @@
     if (self.webView.didTerminate) {
         ZHWebViewManager *mg = [ZHWebViewManager shareManager];
         __weak __typeof__(self) weakSelf = self;
-        [mg loadWebView:self.webView config:weakSelf.webView.globalConfig finish:^(BOOL success) {
-            if (!success) return;
+        [mg loadWebView:self.webView config:weakSelf.webView.globalConfig finish:^(NSDictionary *info, NSError *error) {
+            if (error) return;
             [weakSelf configWebView:weakSelf.webView];
             [weakSelf renderWebView:weakSelf.webView];
         }];
@@ -184,8 +184,8 @@
 - (void)doLoadWebView:(ZHWebView *)webView{
     ZHWebViewManager *mg = [ZHWebViewManager shareManager];
     __weak __typeof__(self) __self = self;
-    [mg loadWebView:webView config:webView.globalConfig finish:^(BOOL success) {
-        if (!success) return;
+    [mg loadWebView:webView config:webView.globalConfig finish:^(NSDictionary *info, NSError *error) {
+        if (error) return;
         [__self configWebView:webView];
         [__self renderWebView:webView];
     }];
@@ -372,23 +372,23 @@
 //        //清理原来的webview
 //        [self clear];
 //        [self readyLoadWebView];
-        [mg loadWebView:webView config:webView.globalConfig finish:^(BOOL success) {
-            block(success);
+        [mg loadWebView:webView config:webView.globalConfig finish:^(NSDictionary *info, NSError *error) {
+            block(error ? NO : YES);
         }];
     }else if (debugModel == ZHWebViewDebugModelOnline){
         NSURL *url = [NSURL URLWithString:[info valueForKey:ZHWebViewSocketDebugUrlKey]];
         [mg loadOnlineDebugWebView:webView
                                url:url
                             config:[self createConfig]
-                            finish:^(BOOL success) {
-            block(success);
+                            finish:^(NSDictionary *info, NSError *error) {
+            block(error ? NO : YES);
         }];
     }else if (debugModel == ZHWebViewDebugModelLocal){
         NSString *loadFolder = [[info valueForKey:ZHWebViewLocalDebugUrlKey] stringByAppendingPathComponent:@"release"];
         [mg loadLocalDebugWebView:webView
                    templateFolder:loadFolder
-                           config:[self createConfig] finish:^(BOOL success) {
-            block(success);
+                           config:[self createConfig] finish:^(NSDictionary *info, NSError *error) {
+            block(error ? NO : YES);
         }];
     }
 }

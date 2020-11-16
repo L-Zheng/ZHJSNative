@@ -12,6 +12,14 @@
 #import "ZHWebViewConfiguration.h"
 @class ZHWebView;
 
+@interface NSError(ZHWebView)
+@property (nonatomic,copy,readonly) NSString *zh_localizedDescription;
+@end
+
+// 定位代码位置  ZHLocationCodeString
+#define ZHLCString(fmt, ...) [NSString stringWithFormat:(@"\n  function：%s\n  line：%d\n  reason：" fmt @"\n  stack：%@"), __func__, __LINE__, ##__VA_ARGS__, [NSThread callStackSymbols]]
+#define ZHLCInlineString(fmt, ...) [NSString stringWithFormat:(@"  function：%s.\n  line：%d.\n  reason：" fmt), __func__, __LINE__, ##__VA_ARGS__]
+
 typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
     ZHWebViewExceptionOperateNothing     = 0,//不做任何操作
     ZHWebViewExceptionOperateReload      = 1,//WebView重新load
@@ -46,7 +54,6 @@ typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
 
 #pragma mark - load call
 
-@property (nonatomic,copy, readonly) void (^loadFinish) (BOOL success);
 @property (nonatomic, assign, readonly) BOOL loadSuccess;
 @property (nonatomic, assign, readonly) BOOL loadFail;
 
@@ -101,7 +108,7 @@ typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
             baseURL:(NSURL *)baseURL
          loadConfig:(ZHWebViewLoadConfiguration *)loadConfig
      startLoadBlock:(void (^) (NSURL *runSandBoxURL))startLoadBlock
-             finish:(void (^) (BOOL success))finish;
+             finish:(void (^) (NSDictionary *info, NSError *error))finish;
 
 /// 渲染js页面
 /// @param jsSourceBaseURL 渲染该js文件所需的资源【jsSourceBaseURL的目录下包含有jsSourceURL文件】
@@ -176,7 +183,13 @@ __attribute__((unused)) static NSString * ZHWebViewDateString() {
     [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss.SSS"];
     return [dateFormatter stringFromDate:[NSDate date]];
 }
-
+__attribute__((unused)) static NSError * ZHWebViewInlineError(NSInteger code, NSString *desc) {
+    return [NSError errorWithDomain:@"com.zh.webview" code:code userInfo:@{NSLocalizedDescriptionKey:desc}];
+}
+__attribute__((unused)) static NSString * ZHWebViewErrorDesc(NSError *error) {
+    if (!error) return @"";
+    return [NSString stringWithFormat:@"[inline-error >>\n  domain: %@.  \n  code: %ld.  \n%@.]", error.domain, error.code, error.zh_localizedDescription];
+}
 
 
 //NS_ASSUME_NONNULL_END

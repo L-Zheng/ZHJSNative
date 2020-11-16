@@ -9,6 +9,26 @@
 #import "ZHWebView.h"
 #import "ZHJSHandler.h"
 
+@implementation NSError(ZHWebView)
+- (NSString *)zh_localizedDescription{
+    /**
+     [NSError new]，error.domain == null 时，调用error.localizedDescription会崩溃
+     error.domain == @"" 或者  error.userInfo的key不服从NSErrorUserInfoKey协议   时，error.localizedDescription = The operation couldn’t be completed. ( error 22.)
+     */
+    NSErrorDomain domain = self.domain;
+    if (!domain) {
+        return @"this error is illegality created";
+    }
+    if ([domain isKindOfClass:NSString.class]) {
+        if (domain.length == 0 && [domain isEqualToString:@""]) {
+            return [NSString stringWithFormat:@"this error domain length is zero. code is %ld. localizedDescription is %@. userInfo is %@.", self.code, self.localizedDescription, self.userInfo];
+        }
+        return self.localizedDescription?:@"";
+    }
+    return self.localizedDescription?:@"";
+}
+@end
+
 @interface ZHWebView ()<WKNavigationDelegate, WKUIDelegate, UIScrollViewDelegate, UIGestureRecognizerDelegate>
 
 @property (nonatomic,strong) ZHWebViewConfiguration *globalConfig;
@@ -23,7 +43,7 @@
 //webView运行的沙盒目录
 @property (nonatomic, copy) NSURL *runSandBoxURL;
 
-@property (nonatomic, copy) void (^loadFinish) (BOOL success);
+@property (nonatomic, copy) void (^loadFinish) (NSDictionary *info, NSError *error);
 @property (nonatomic, assign) BOOL loadSuccess;
 @property (nonatomic, assign) BOOL loadFail;
 
@@ -374,7 +394,7 @@
             baseURL:(NSURL *)baseURL
          loadConfig:(ZHWebViewLoadConfiguration *)loadConfig
      startLoadBlock:(void (^) (NSURL *runSandBoxURL))startLoadBlock
-             finish:(void (^) (BOOL success))finish{
+             finish:(void (^) (NSDictionary *info, NSError *error))finish{
     self.loadConfig = loadConfig;
     loadConfig.webView = self;
     NSNumber *cachePolicy = loadConfig.cachePolicy;
@@ -383,13 +403,15 @@
     
     [self.debugConfig updateFloatViewTitle:@"刷新中..."];
     __weak __typeof__(self) __self = self;
-    void (^callBack)(BOOL) = ^(BOOL success){
-        if (finish) finish(success);
+    void (^callBack)(NSDictionary *, NSError *) = ^(NSDictionary *info, NSError *error){
+        if (finish) finish(info, error);
         [__self.debugConfig updateFloatViewTitle:@"刷新"];
     };
     
+    NSString *extraErrorDesc = [NSString stringWithFormat:@"file path is %@. url is %@. baseURL is %@. loadConfig is %@.", url.path, url, baseURL, [loadConfig formatInfo]];
+    
     if (!url) {
-        callBack(NO);
+        callBack(nil, ZHWebViewInlineError(404, ZHLCInlineString(@"webview load url is null. %@", extraErrorDesc)));
         return;
     }
     
@@ -408,15 +430,20 @@
     }
     
     //本地Url
+    BOOL isDirectory = YES;
     NSFileManager *fm = [NSFileManager defaultManager];
-    if (![fm fileExistsAtPath:path]) {
-        callBack(NO);
+    if (![fm fileExistsAtPath:path isDirectory:&isDirectory]) {
+        callBack(nil, ZHWebViewInlineError(404, ZHLCInlineString(@"file is not exists. %@", extraErrorDesc)));
+        return;
+    }
+    if (isDirectory) {
+        callBack(nil, ZHWebViewInlineError(404, ZHLCInlineString(@"file path is directory. %@", extraErrorDesc)));
         return;
     }
     if ([ZHWebViewDebugConfiguration availableIOS9]) {
         NSURL *fileURL = [ZHWebView fileURLWithPath:path isDirectory:NO];
         if (!fileURL) {
-            callBack(NO);
+            callBack(nil, ZHWebViewInlineError(404, ZHLCInlineString(@"parse url params is failed. %@", extraErrorDesc)));
             return;
         }
         self.runSandBoxURL = [self parseRealRunBoxFolder:baseURL fileURL:url];
@@ -434,7 +461,7 @@
     if (isInTmpFolder) {
         NSURL *fileURL = [ZHWebView fileURLWithPath:path isDirectory:NO];
         if (!fileURL) {
-            callBack(NO);
+            callBack(nil, ZHWebViewInlineError(404, ZHLCInlineString(@"parse url params is failed. %@", extraErrorDesc)));
             return;
         }
         NSURLRequest *request = [NSURLRequest requestWithURL:fileURL];
@@ -451,7 +478,7 @@
     //拷贝到tmp目录下
     NSURL *newBaseURL = [self parseRealRunBoxFolder:baseURL fileURL:url];
     if (!newBaseURL) {
-        callBack(NO);
+        callBack(nil, ZHWebViewInlineError(404, ZHLCInlineString(@"parse run box is failed. %@", extraErrorDesc)));
         return;
     }
     //获取相对路径
@@ -460,7 +487,7 @@
     [URLComs removeObjectsInArray:newBaseURLComs];
     NSString *relativePath = [URLComs componentsJoinedByString:@"/"];
     if (![self.class checkString:relativePath]) {
-        callBack(NO);
+        callBack(nil, ZHWebViewInlineError(404, ZHLCInlineString(@"fetch relativePath is failed. %@", extraErrorDesc)));
         return;
     }
     
@@ -472,27 +499,27 @@
     if ([fm fileExistsAtPath:iOS8TargetFolder]) {
         result = [fm removeItemAtPath:iOS8TargetFolder error:&error];
         if (!result || error) {
-            callBack(NO);
+            callBack(nil, ZHWebViewInlineError(-999, ZHLCInlineString(@"remove folder(%@) is failed(error: %@). %@", iOS8TargetFolder, error.zh_localizedDescription, extraErrorDesc)));
             return;
         }
     }else{
         //创建上级目录 否则拷贝失败
         NSString *superFolder = [self.class fetchSuperiorFolder:iOS8TargetFolder];
         if (!superFolder) {
-            callBack(NO);
+            callBack(nil, ZHWebViewInlineError(404, ZHLCInlineString(@"fetch superior folder by folder(%@) is failed. %@", iOS8TargetFolder, extraErrorDesc)));
             return;
         }
         if (![self.fm fileExistsAtPath:superFolder]) {
             result = [self.fm createDirectoryAtPath:superFolder withIntermediateDirectories:YES attributes:nil error:&error];
             if (!result || error) {
-                callBack(NO);
+                callBack(nil, ZHWebViewInlineError(-999, ZHLCInlineString(@"create folder(%@) is failed(error: %@). %@", superFolder, error.zh_localizedDescription, extraErrorDesc)));
                 return;
             }
         }
     }
     result = [fm copyItemAtPath:newBaseURL.path toPath:iOS8TargetFolder error:&error];
     if (!result || error) {
-        callBack(NO);
+        callBack(nil, ZHWebViewInlineError(-999, ZHLCInlineString(@"copy sourcePath(%@) to targetPath(%@) is failed(error: %@). %@", newBaseURL.path, iOS8TargetFolder, error.zh_localizedDescription, extraErrorDesc)));
         return;
     }
     
@@ -500,7 +527,7 @@
     
     NSURL *fileURL = [ZHWebView fileURLWithPath:newPath isDirectory:NO];
     if (!fileURL) {
-        callBack(NO);
+        callBack(nil, ZHWebViewInlineError(404, ZHLCInlineString(@"parse url(%@) params is failed. %@", newPath, extraErrorDesc)));
         return;
     }
     NSURLRequest *request = [NSURLRequest requestWithURL:fileURL];
@@ -518,15 +545,16 @@
     if (!block) return;
     block(runSandBoxURL);
 }
-- (void)configWebViewFinishCallBack:(void (^) (BOOL success))finish{
+- (void)configWebViewFinishCallBack:(void (^) (NSDictionary *info, NSError *error))finish{
     __weak __typeof__(self) __self = self;
-    self.loadFinish = ^(BOOL success) {
+    self.loadFinish = ^(NSDictionary *info, NSError *error) {
+        BOOL success = error ? NO : YES;
         __self.loadSuccess = success;
         __self.loadFail = !success;
         if (success) {
             __self.loadFinish = nil;
         }
-        if (finish) finish(success);
+        if (finish) finish(info, error);
     };
 }
 //解析运行沙盒目录
@@ -683,7 +711,7 @@
 #pragma mark - WKNavigationDelegate
 
 - (void)webView:(ZHWebView *)webView didFailNavigation:(WKNavigation *)navigation withError:(NSError *)error{
-    if (webView.loadFinish) webView.loadFinish(NO);
+    if (webView.loadFinish) webView.loadFinish(nil, ZHWebViewInlineError(error.code, ZHLCInlineString(@"%@", error.zh_localizedDescription)));
     
     id <ZHWKNavigationDelegate> de = self.zh_navigationDelegate;
     if (ZHCheckDelegate(de, @selector(webView:didFailNavigation:withError:))) {
@@ -692,7 +720,7 @@
 }
 
 - (void)webView:(ZHWebView *)webView didFinishNavigation:(WKNavigation *)navigation{
-    if (webView.loadFinish) webView.loadFinish(YES);
+    if (webView.loadFinish) webView.loadFinish(nil, nil);
     
     id <ZHWKNavigationDelegate> de = self.zh_navigationDelegate;
     if (ZHCheckDelegate(de, @selector(webView:didFinishNavigation:))) {

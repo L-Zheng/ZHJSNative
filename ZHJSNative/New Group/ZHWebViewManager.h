@@ -26,7 +26,7 @@
 /// @param config 配置
 /// @param finish 加载完成回调
 - (void)preReadyWebView:(ZHWebViewConfiguration *)config
-                 finish:(void (^) (BOOL success))finish;
+                 finish:(void (^) (NSDictionary *info, NSError *error))finish;
 
 //查找预加载的webview
 - (ZHWebView *)fetchWebView:(NSString *)key;
@@ -37,7 +37,7 @@
 /// @param finish 回调
 - (void)loadWebView:(ZHWebView *)webView
              config:(ZHWebViewConfiguration *)config
-             finish:(void (^) (BOOL success))finish;
+             finish:(void (^) (NSDictionary *info, NSError *error))finish;
 
 /// 重新下载模板文件加载webView
 /// @param webView webView
@@ -49,17 +49,17 @@
                   config:(ZHWebViewConfiguration *)config
            downLoadStart:(void (^) (void))downLoadStart
           downLoadFinish:(void (^) (NSDictionary *info ,NSError *error))downLoadFinish
-                  finish:(void (^) (BOOL success))finish;
+                  finish:(void (^) (NSDictionary *info ,NSError *error))finish;
 
 //调试下使用
 - (void)loadOnlineDebugWebView:(ZHWebView *)webView
                            url:(NSURL *)url
                         config:(ZHWebViewConfiguration *)config
-                        finish:(void (^) (BOOL success))finish;
+                        finish:(void (^) (NSDictionary *info, NSError *error))finish;
 - (void)loadLocalDebugWebView:(ZHWebView *)webView
                    templateFolder:(NSString *)templateFolder
                        config:(ZHWebViewConfiguration *)config
-                       finish:(void (^) (BOOL success))finish;
+                       finish:(void (^) (NSDictionary *info, NSError *error))finish;
 
 #pragma mark - cache
 
