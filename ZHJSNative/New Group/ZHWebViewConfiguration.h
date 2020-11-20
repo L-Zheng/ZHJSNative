@@ -72,7 +72,7 @@
 
 
 
-/** 👉webview 调试配置 */
+/** 👉webview 全局调试配置 */
 FOUNDATION_EXPORT NSString * const ZHWebViewSocketDebugUrlKey;
 FOUNDATION_EXPORT NSString * const ZHWebViewLocalDebugUrlKey;
 
@@ -81,16 +81,35 @@ typedef NS_ENUM(NSInteger, ZHWebViewDebugModel) {
     ZHWebViewDebugModelLocal      = 1, //本地拷贝js调试
     ZHWebViewDebugModelOnline      = 2, //链接线上地址调试
 };
+
+@interface ZHWebViewDebugGlobalConfigurationItem : NSObject
+// 调试模式
+@property (nonatomic, assign) ZHWebViewDebugModel debugModel;
+@property (nonatomic, copy) NSString *socketDebugUrlStr;
+@property (nonatomic, copy) NSString *localDebugUrlStr;
+@end
+
+@interface ZHWebViewDebugGlobalConfiguration : NSObject
++ (instancetype)shareConfiguration;
++ (void)setupDebugEnable:(BOOL)enable;
++ (BOOL)fetchDebugEnable;
+- (ZHWebViewDebugGlobalConfigurationItem *)fetchConfigurationItem:(NSString *)key;
+@end
+
+/** 👉webview 调试配置 */
 @interface ZHWebViewDebugConfiguration : NSObject
 #pragma mark - init
 
-+ (instancetype)configuration;
++ (instancetype)configuration:(ZHWebView *)webview;
 @property (nonatomic,weak) ZHWebView *webView;
-+ (void)setupDebugEnable:(BOOL)enable;
-+ (BOOL)fetchDebugEnable;
+
+@property (nonatomic,strong) ZHWebViewDebugGlobalConfiguration *globalConfig;
 
 // 调试模式
-@property (nonatomic, assign, readonly) ZHWebViewDebugModel debugModel;
+@property (nonatomic, assign) ZHWebViewDebugModel debugModel;
+
+@property (nonatomic,copy) NSString *socketDebugUrlStr;
+@property (nonatomic,copy) NSString *localDebugUrlStr;
 
 #pragma mark - float view
 

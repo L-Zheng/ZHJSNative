@@ -75,9 +75,8 @@
     WKUserContentController *userContent = [[WKUserContentController alloc] init];
     
     // debug配置
-    ZHWebViewDebugConfiguration *debugConfig = [ZHWebViewDebugConfiguration configuration];
+    ZHWebViewDebugConfiguration *debugConfig = [ZHWebViewDebugConfiguration configuration:self];
     self.debugConfig = debugConfig;
-    debugConfig.webView = self;
     
     // api处理配置
     ZHJSHandler *handler = [[ZHJSHandler alloc] initWithDebugConfig:debugConfig apiHandlers:apiHandlers?:@[]];

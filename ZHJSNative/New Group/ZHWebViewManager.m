@@ -152,6 +152,23 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
         if (finish) finish(nil, ZHWebViewInlineError(404, ZHLCInlineString(@"webview is invalid")));
         return;
     }
+    
+    ZHWebViewDebugModel debugModel = webView.debugConfig.debugModel;
+    if (debugModel == ZHWebViewDebugModelLocal) {
+        NSString *templateFolder = [webView.debugConfig.localDebugUrlStr stringByAppendingPathComponent:@"release"];
+        [self loadLocalDebugWebView:webView
+                     templateFolder:templateFolder
+                             config:webView.globalConfig
+                             finish:finish];
+        return;
+    }
+    if (debugModel == ZHWebViewDebugModelOnline) {
+        [self loadOnlineDebugWebView:webView
+                                 url:[NSURL URLWithString:webView.debugConfig.socketDebugUrlStr]
+                              config:webView.globalConfig
+                              finish:finish];
+        return;
+    }
         
     __weak __typeof__(self) __self = self;
     //加载模板 不存在会下载

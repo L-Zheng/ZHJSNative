@@ -359,37 +359,6 @@
 }
 - (void)webViewRefresh:(ZHWebView *)webView debugModel:(ZHWebViewDebugModel)debugModel info:(NSDictionary *)info{
     
-    ZHWebViewManager *mg = [ZHWebViewManager shareManager];
-    __weak __typeof__(self) __self = self;
-    
-    void (^block)(BOOL success) = ^(BOOL success){
-        if (!success) return;
-        [__self configWebView:__self.webView];
-        [__self renderWebView:__self.webView];
-    };
-        
-    if (debugModel == ZHWebViewDebugModelNo) {
-//        //清理原来的webview
-//        [self clear];
-//        [self readyLoadWebView];
-        [mg loadWebView:webView config:webView.globalConfig finish:^(NSDictionary *info, NSError *error) {
-            block(error ? NO : YES);
-        }];
-    }else if (debugModel == ZHWebViewDebugModelOnline){
-        NSURL *url = [NSURL URLWithString:[info valueForKey:ZHWebViewSocketDebugUrlKey]];
-        [mg loadOnlineDebugWebView:webView
-                               url:url
-                            config:[self createConfig]
-                            finish:^(NSDictionary *info, NSError *error) {
-            block(error ? NO : YES);
-        }];
-    }else if (debugModel == ZHWebViewDebugModelLocal){
-        NSString *loadFolder = [[info valueForKey:ZHWebViewLocalDebugUrlKey] stringByAppendingPathComponent:@"release"];
-        [mg loadLocalDebugWebView:webView
-                   templateFolder:loadFolder
-                           config:[self createConfig] finish:^(NSDictionary *info, NSError *error) {
-            block(error ? NO : YES);
-        }];
-    }
+    [self doLoadWebView:webView];
 }
 @end
