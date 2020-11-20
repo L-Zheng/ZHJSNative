@@ -458,13 +458,14 @@ static id _instance;
 - (void)alertDebugModelSheet{
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"切换调试模式" message:nil preferredStyle:UIAlertControllerStyleActionSheet];
     __weak __typeof__(self) __self = self;
-    UIAlertAction *action = [UIAlertAction actionWithTitle:@"release调试模式" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+    
+    UIAlertAction *action = [UIAlertAction actionWithTitle:[self.globalConfig fetchModeDesc:ZHWebViewDebugModelNo] style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         [__self alertSheetSelected:action debugModel:ZHWebViewDebugModelNo];
     }];
-    UIAlertAction *action1 = [UIAlertAction actionWithTitle:@"socket调试模式" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+    UIAlertAction *action1 = [UIAlertAction actionWithTitle:[self.globalConfig fetchModeDesc:ZHWebViewDebugModelOnline] style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         [__self alertSheetSelected:action debugModel:ZHWebViewDebugModelOnline];
     }];
-    UIAlertAction *action2 = [UIAlertAction actionWithTitle:@"本机js调试模式" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+    UIAlertAction *action2 = [UIAlertAction actionWithTitle:[self.globalConfig fetchModeDesc:ZHWebViewDebugModelLocal] style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         [__self alertSheetSelected:action debugModel:ZHWebViewDebugModelLocal];
     }];
     UIAlertAction *action3 = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
