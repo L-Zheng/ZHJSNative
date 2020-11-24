@@ -13,14 +13,16 @@ NSInteger const ZHWebViewPreLoadMaxCount = 3;
 NSInteger const ZHWebViewPreLoadingMaxCount = 1;
 
 @interface ZHWebViewManager ()
-//初始化配置资源
+//初始化配置资源：用于预加载
 @property (nonatomic, strong) NSMutableDictionary <NSString *, NSArray <ZHWebView *> *> *websMap;
 @property (nonatomic, strong) NSMutableDictionary <NSString *, NSArray <ZHWebView *> *> *loadingWebsMap;
 @property (nonatomic,strong) NSLock *lock;
-/** 打开的webview页面 */
+/** 打开的webview页面 、 正在加载的webview：用于清理沙盒 */
 @property (nonatomic, retain) NSMapTable *openedWebViewMapTable;
-// 正在加载的webview
 @property (nonatomic, retain) NSMapTable *loadingWebViewMapTable;
+
+// 外部正在使用的webview：用于外部获取
+@property (nonatomic, retain) NSMapTable *outsideUsedWebViewMapTable;
 @end
 
 @implementation ZHWebViewManager
@@ -111,6 +113,32 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
     }
     return nil;
 }
+// 获取所有加载的webview
+- (NSArray <ZHWebView *> *)fetchAllWebViews{
+    [self.lock lock];
+    NSMutableArray <ZHWebView *> *allWebViews = [@[] mutableCopy];
+    //遍历key
+    NSEnumerator *enumerator = self.outsideUsedWebViewMapTable ? [self.outsideUsedWebViewMapTable keyEnumerator] : nil;
+    if (enumerator) {
+        id key;
+        while (key = [enumerator nextObject]) {
+            NSPointerArray *arr = [self.outsideUsedWebViewMapTable objectForKey:key];
+            if (!arr) {
+                continue;
+            }
+            //清除空对象
+            [arr addPointer:NULL];
+            [arr compact];
+            if (arr.count == 0 || arr.allObjects.count == 0) {
+                continue;
+            }
+            [allWebViews addObjectsFromArray:arr.allObjects];
+        }
+    }
+    [self.lock unlock];
+    
+    return allWebViews.copy;
+}
 
 #pragma mark - load
 
@@ -123,9 +151,13 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
         if (finish) finish(nil, error);
         return;
     }
+    __weak __typeof__(self) __self = self;
     [webView loadWithUrl:url baseURL:nil loadConfig:config.loadConfig startLoadBlock:^(NSURL *runSandBoxURL) {
         
     } finish:^(NSDictionary *info, NSError *error) {
+        if (!error) {
+            [__self opOutsideUsedWebView:webView isAdd:YES];
+        }
         if (finish) finish(info, error);
     }];
 }
@@ -284,6 +316,10 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
         [__self opLoadingWebView:webView isAdd:NO];
         // 加入finish表
         [__self opLoadFinishWebView:webView isAdd:YES];
+        // 加入外部使用表
+        if (!error) {
+            [__self opOutsideUsedWebView:webView isAdd:YES];
+        }
         if (finish) finish(error ? nil : info, error ? ZHWebViewInlineError(error.code, ZHLCInlineString(@"%@", ZHWebViewErrorDesc(error))) : nil);
     }];
 }
@@ -529,13 +565,22 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
     block(ZHWebViewTmpFolder());
 }
 
+- (void)opOutsideUsedWebView:(ZHWebView *)webView isAdd:(BOOL)isAdd{
+    self.outsideUsedWebViewMapTable = [self opWebViewMapTable:self.outsideUsedWebViewMapTable webView:webView isAdd:isAdd keyBlock:^NSString *(ZHWebView *web) {
+        return [NSString stringWithFormat:@"%p", web];
+    }];
+}
 - (void)opLoadingWebView:(ZHWebView *)webView isAdd:(BOOL)isAdd{
-    self.loadingWebViewMapTable = [self opWebViewMapTable:self.loadingWebViewMapTable webView:webView isAdd:isAdd];
+    self.loadingWebViewMapTable = [self opWebViewMapTable:self.loadingWebViewMapTable webView:webView isAdd:isAdd keyBlock:^NSString *(ZHWebView *web) {
+        return web.runSandBoxURL.path;
+    }];
 }
 - (void)opLoadFinishWebView:(ZHWebView *)webView isAdd:(BOOL)isAdd{
-    self.openedWebViewMapTable = [self opWebViewMapTable:self.openedWebViewMapTable webView:webView isAdd:isAdd];
+    self.openedWebViewMapTable = [self opWebViewMapTable:self.openedWebViewMapTable webView:webView isAdd:isAdd keyBlock:^NSString *(ZHWebView *web) {
+        return web.runSandBoxURL.path;
+    }];
 }
-- (NSMapTable *)opWebViewMapTable:(NSMapTable *)mapTable webView:(ZHWebView *)webView isAdd:(BOOL)isAdd{
+- (NSMapTable *)opWebViewMapTable:(NSMapTable *)mapTable webView:(ZHWebView *)webView isAdd:(BOOL)isAdd keyBlock:(NSString * (^) (ZHWebView *web))keyBlock{
     if (!webView || ![webView isKindOfClass:[ZHWebView class]]) {
         return mapTable;
     }
@@ -546,7 +591,7 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
         mapTable = [NSMapTable mapTableWithKeyOptions:NSPointerFunctionsCopyIn valueOptions:NSPointerFunctionsStrongMemory];
     }
     //生成key
-    NSString *key = webView.runSandBoxURL.path;
+    NSString *key = keyBlock ? keyBlock(webView) : nil;
     if (![ZHWebView checkString:key]) {
         [self.lock unlock];
         return mapTable;

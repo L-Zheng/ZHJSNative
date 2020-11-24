@@ -46,6 +46,10 @@
 @property (nonatomic,strong) WKProcessPool *processPool;
 // WebView需要注入的api【如：fund API】
 @property (nonatomic,retain) NSArray <id <ZHJSApiProtocol>> *apiHandlers;
+// webview初始化附加脚本：document start时注入
+@property (nonatomic,copy) NSString *extraScriptStart;
+// webview初始化附加脚本：document end时注入
+@property (nonatomic,copy) NSString *extraScriptEnd;
 @end
 
 

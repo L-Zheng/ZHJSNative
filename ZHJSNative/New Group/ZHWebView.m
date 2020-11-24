@@ -143,6 +143,21 @@
         @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentEnd),
         @"mainFrameOnly": @(YES)
     }];
+    //api 注入附加脚本
+    if ([ZHWebView checkString:createConfig.extraScriptStart]) {
+        [apis addObject:@{
+            @"code": createConfig.extraScriptStart?:@"",
+            @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentStart),
+            @"mainFrameOnly": @(YES)
+        }];
+    }
+    if ([ZHWebView checkString:createConfig.extraScriptEnd]) {
+        [apis addObject:@{
+            @"code": createConfig.extraScriptEnd?:@"",
+            @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentEnd),
+            @"mainFrameOnly": @(YES)
+        }];
+    }
     for (NSDictionary *map in apis) {
         NSString *code = [map valueForKey:@"code"];
         if (code.length == 0) continue;
