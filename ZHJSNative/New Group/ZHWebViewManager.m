@@ -104,7 +104,10 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
     if (webs.count) {
         ZHWebView *web = webs.firstObject;
         [self opMap:self.websMap key:key webView:web add:NO];
-        return web;
+
+        ZHWebViewDebugModel cMode = web.debugConfig.debugModel;
+        ZHWebViewDebugModel gMode = [[ZHWebViewDebugGlobalConfiguration shareConfiguration] fetchConfigurationItem:web.globalConfig.appletConfig.appId].debugModel;
+        return (cMode == gMode ? web : nil);
     }
     return nil;
 }

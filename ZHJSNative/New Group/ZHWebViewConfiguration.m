@@ -188,8 +188,8 @@ static id _instance;
 - (void)configProperty{
     self.debugEnable = [ZHWebViewDebugGlobalConfiguration readEnable];
     
-    self.globalConfig = [ZHWebViewDebugGlobalConfiguration shareConfiguration];
-    ZHWebViewDebugGlobalConfigurationItem *item = [self.globalConfig fetchConfigurationItem:self.webView.globalConfig.appletConfig.appId];
+    self.debugGlobalConfig = [ZHWebViewDebugGlobalConfiguration shareConfiguration];
+    ZHWebViewDebugGlobalConfigurationItem *item = [self.debugGlobalConfig fetchConfigurationItem:self.webView.globalConfig.appletConfig.appId];
     
     self.debugModel = item.debugModel;
     self.socketDebugUrlStr = item.socketDebugUrlStr;
@@ -269,7 +269,7 @@ static id _instance;
 - (ZHFloatView *)debugModelFloatView{
     if (!_debugModelFloatView) {
         _debugModelFloatView = [ZHFloatView floatViewWithItems:nil];
-        [_debugModelFloatView updateTitle:[self.globalConfig fetchModeDesc:self.debugModel]];
+        [_debugModelFloatView updateTitle:[self.debugGlobalConfig fetchModeDesc:self.debugModel]];
         __weak __typeof__(self) __self = self;
         _debugModelFloatView.tapClickBlock = ^{
             [__self alertDebugModelSheet];
@@ -306,7 +306,7 @@ static id _instance;
 
 //切换模式
 - (void)doSwitchDebugModel:(ZHWebViewDebugModel)debugModel info:(NSDictionary *)info{
-    [self.debugModelFloatView updateTitle:[self.globalConfig fetchModeDesc:debugModel]];
+    [self.debugModelFloatView updateTitle:[self.debugGlobalConfig fetchModeDesc:debugModel]];
     [self webViewCallReadyRefresh];
     [self webViewCallRefresh:info];
 }
@@ -341,7 +341,7 @@ static id _instance;
         NSString *urlStr = [alert.textFields.firstObject text];
         if (urlStr.length == 0) return;
         
-        ZHWebViewDebugGlobalConfigurationItem *item = [__self.globalConfig fetchConfigurationItem:__self.webView.globalConfig.appletConfig.appId];
+        ZHWebViewDebugGlobalConfigurationItem *item = [__self.debugGlobalConfig fetchConfigurationItem:__self.webView.globalConfig.appletConfig.appId];
         item.socketDebugUrlStr = urlStr;
         item.debugModel = debugModel;
         
@@ -395,7 +395,7 @@ static id _instance;
         NSString *urlStr = [alert.textFields.firstObject text];
         if (urlStr.length == 0) return;
         
-        ZHWebViewDebugGlobalConfigurationItem *item = [__self.globalConfig fetchConfigurationItem:__self.webView.globalConfig.appletConfig.appId];
+        ZHWebViewDebugGlobalConfigurationItem *item = [__self.debugGlobalConfig fetchConfigurationItem:__self.webView.globalConfig.appletConfig.appId];
         item.localDebugUrlStr = urlStr;
         item.debugModel = debugModel;
         
@@ -432,7 +432,7 @@ static id _instance;
     }];
     UIAlertAction *ac3 = [UIAlertAction actionWithTitle:@"App全局设置" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actionT) {
         
-        ZHWebViewDebugGlobalConfigurationItem *item = [__self.globalConfig fetchConfigurationItem:__self.webView.globalConfig.appletConfig.appId];
+        ZHWebViewDebugGlobalConfigurationItem *item = [__self.debugGlobalConfig fetchConfigurationItem:__self.webView.globalConfig.appletConfig.appId];
         item.debugModel = debugModel;
         
         __self.debugModel = debugModel;
@@ -459,13 +459,13 @@ static id _instance;
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"切换调试模式" message:nil preferredStyle:UIAlertControllerStyleActionSheet];
     __weak __typeof__(self) __self = self;
     
-    UIAlertAction *action = [UIAlertAction actionWithTitle:[self.globalConfig fetchModeDesc:ZHWebViewDebugModelNo] style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+    UIAlertAction *action = [UIAlertAction actionWithTitle:[self.debugGlobalConfig fetchModeDesc:ZHWebViewDebugModelNo] style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         [__self alertSheetSelected:action debugModel:ZHWebViewDebugModelNo];
     }];
-    UIAlertAction *action1 = [UIAlertAction actionWithTitle:[self.globalConfig fetchModeDesc:ZHWebViewDebugModelOnline] style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+    UIAlertAction *action1 = [UIAlertAction actionWithTitle:[self.debugGlobalConfig fetchModeDesc:ZHWebViewDebugModelOnline] style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         [__self alertSheetSelected:action debugModel:ZHWebViewDebugModelOnline];
     }];
-    UIAlertAction *action2 = [UIAlertAction actionWithTitle:[self.globalConfig fetchModeDesc:ZHWebViewDebugModelLocal] style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+    UIAlertAction *action2 = [UIAlertAction actionWithTitle:[self.debugGlobalConfig fetchModeDesc:ZHWebViewDebugModelLocal] style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         [__self alertSheetSelected:action debugModel:ZHWebViewDebugModelLocal];
     }];
     UIAlertAction *action3 = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {

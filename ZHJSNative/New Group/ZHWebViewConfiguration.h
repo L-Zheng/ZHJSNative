@@ -103,7 +103,7 @@ typedef NS_ENUM(NSInteger, ZHWebViewDebugModel) {
 + (instancetype)configuration:(ZHWebView *)webview;
 @property (nonatomic,weak) ZHWebView *webView;
 
-@property (nonatomic,strong) ZHWebViewDebugGlobalConfiguration *globalConfig;
+@property (nonatomic,strong) ZHWebViewDebugGlobalConfiguration *debugGlobalConfig;
 
 // 调试模式
 @property (nonatomic, assign) ZHWebViewDebugModel debugModel;
