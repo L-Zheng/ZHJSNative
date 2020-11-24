@@ -113,6 +113,15 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
     }
     return nil;
 }
+// 操作所有加载的webview
+- (void)opAllWebViewUsingBlock:(void (^) (ZHWebView *webView))block{
+    if (!block) return;
+    NSArray <ZHWebView *> *webs = [self fetchAllWebViews];
+    if (!webs || webs.count == 0) return;
+    for (ZHWebView *webView in webs) {
+        block(webView);
+    }
+}
 // 获取所有加载的webview
 - (NSArray <ZHWebView *> *)fetchAllWebViews{
     [self.lock lock];

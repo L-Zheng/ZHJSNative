@@ -30,8 +30,8 @@
 
 //查找预加载的webview
 - (ZHWebView *)fetchWebView:(NSString *)key;
-// 获取所有加载的webview
-- (NSArray <ZHWebView *> *)fetchAllWebViews;
+// 操作所有加载的webview
+- (void)opAllWebViewUsingBlock:(void (^) (ZHWebView *webView))block;
 
 /// 加载webView  包含有模板小程序更新逻辑 沙盒拷贝逻辑
 /// @param webView webView
