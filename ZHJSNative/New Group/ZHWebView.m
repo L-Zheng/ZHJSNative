@@ -956,7 +956,6 @@
             jsonData = [NSJSONSerialization dataWithJSONObject:@{} options:0 error:&jsonError];
         } @finally {
         }
-        res = jsonError ? jsonError.userInfo[NSLocalizedDescriptionKey] : [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
         if (jsonError || !jsonData) return nil;
         res = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
     }else if ([data isKindOfClass:[NSObject class]]){
