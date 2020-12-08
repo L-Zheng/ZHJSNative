@@ -684,25 +684,24 @@
 /** 发送js消息 */
 - (void)postMessageToJs:(NSString *)funcName params:(NSDictionary *)params completionHandler:(void (^)(id res, NSError *error))completionHandler{
     NSString *paramsStr = [ZHWebView encodeObj:params];
-    NSString *js;
-    if (paramsStr.length) {
-        // typeof fund === 'function'
-        js = [NSString stringWithFormat:@"\
-              (function () {\
-                  try {\
-                          if (Object.prototype.toString.call(window.%@) === '[object Function]') {\
-                            (%@)(\"%@\");\
-                          } else {\
-                            return '%@ is ' + Object.prototype.toString.call(window.%@);\
-                          }\
+    
+    NSString *funcJs = paramsStr.length ? [NSString stringWithFormat:@"(%@)(\"%@\");", funcName, paramsStr] : [NSString stringWithFormat:@"(%@)();", funcName];
+    
+    // typeof fund === 'function'
+    NSString *js = [NSString stringWithFormat:@"\
+          (function () {\
+              try {\
+                      if (Object.prototype.toString.call(window.%@) === '[object Function]') {\
+                        %@\
+                      } else {\
+                        return '%@ is ' + Object.prototype.toString.call(window.%@);\
                       }\
-                  catch (error) {\
-                      return error.toString();\
                   }\
-              })();", funcName, funcName, paramsStr, funcName, funcName];
-    }else{
-        js = [NSString stringWithFormat:@"(%@)()", funcName];
-    }
+              catch (error) {\
+                  return error.toString();\
+              }\
+          })();", funcName, funcJs, funcName, funcName];
+    
     [self evaluateJs:js completionHandler:^(id res, NSError *error) {
         if (error) {
             NSLog(@"----❌js:function:%@--error:%@--", funcName, error);
