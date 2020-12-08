@@ -686,7 +686,20 @@
     NSString *paramsStr = [ZHWebView encodeObj:params];
     NSString *js;
     if (paramsStr.length) {
-        js = [NSString stringWithFormat:@"(%@)(\"%@\")", funcName, paramsStr];
+        // typeof fund === 'function'
+        js = [NSString stringWithFormat:@"\
+              (function () {\
+                  try {\
+                          if (Object.prototype.toString.call(window.%@) === '[object Function]') {\
+                            (%@)(\"%@\");\
+                          } else {\
+                            return '%@ is ' + Object.prototype.toString.call(window.%@);\
+                          }\
+                      }\
+                  catch (error) {\
+                      return error.toString();\
+                  }\
+              })();", funcName, funcName, paramsStr, funcName, funcName];
     }else{
         js = [NSString stringWithFormat:@"(%@)()", funcName];
     }
