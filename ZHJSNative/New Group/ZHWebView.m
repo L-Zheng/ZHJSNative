@@ -437,7 +437,7 @@
         if (cachePolicy && timeoutInterval) {
             request = [NSURLRequest requestWithURL:url cachePolicy:cachePolicy.unsignedIntegerValue timeoutInterval:timeoutInterval.doubleValue];
         }
-        [self callWebViewStartLoad:nil block:startLoadBlock];
+        [self callWebViewStartLoad:nil renderURL:url block:startLoadBlock];
         [self configWebViewFinishCallBack:callBack];
         [self loadRequest:request];
         return;
@@ -461,7 +461,7 @@
             return;
         }
         self.runSandBoxURL = [self parseRealRunBoxFolder:baseURL fileURL:url];
-        [self callWebViewStartLoad:self.runSandBoxURL block:startLoadBlock];
+        [self callWebViewStartLoad:self.runSandBoxURL renderURL:fileURL block:startLoadBlock];
         [self configWebViewFinishCallBack:callBack];
         [self loadFileURL:fileURL allowingReadAccessToURL:readAccessURL?:self.runSandBoxURL];
         return;
@@ -483,7 +483,7 @@
             request = [NSURLRequest requestWithURL:fileURL cachePolicy:cachePolicy.unsignedIntegerValue timeoutInterval:timeoutInterval.doubleValue];
         }
         self.runSandBoxURL = [self parseRealRunBoxFolder:baseURL fileURL:url];
-        [self callWebViewStartLoad:self.runSandBoxURL block:startLoadBlock];
+        [self callWebViewStartLoad:self.runSandBoxURL renderURL:fileURL block:startLoadBlock];
         [self configWebViewFinishCallBack:callBack];
         [self loadRequest:request];
         return;
@@ -549,13 +549,14 @@
         request = [NSURLRequest requestWithURL:fileURL cachePolicy:cachePolicy.unsignedIntegerValue timeoutInterval:timeoutInterval.doubleValue];
     }
     self.runSandBoxURL = [NSURL fileURLWithPath:iOS8TargetFolder];
-    [self callWebViewStartLoad:self.runSandBoxURL block:startLoadBlock];
+    [self callWebViewStartLoad:self.runSandBoxURL renderURL:fileURL block:startLoadBlock];
     [self configWebViewFinishCallBack:callBack];
     [self loadRequest:request];
 }
 //配置webview渲染回调
-- (void)callWebViewStartLoad:(NSURL *)runSandBoxURL block:(void (^) (NSURL *runSandBoxURL))block{
+- (void)callWebViewStartLoad:(NSURL *)runSandBoxURL renderURL:(NSURL *)renderURL block:(void (^) (NSURL *runSandBoxURL))block{
     self.didTerminate = NO;
+    self.renderURL = renderURL;
     if (!block) return;
     block(runSandBoxURL);
 }

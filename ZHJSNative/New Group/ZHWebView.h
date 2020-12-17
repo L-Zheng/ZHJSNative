@@ -52,6 +52,8 @@ typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
 
 @interface ZHWebView : WKWebView
 
+@property (nonatomic, strong) NSURL *renderURL;
+
 #pragma mark - load call
 
 @property (nonatomic, assign, readonly) BOOL loadSuccess;
