@@ -1,15 +1,14 @@
 //
-//  ZHJSInternalCustomApiHandler.m
+//  ZHJSInWebFundApi.m
 //  ZHJSNative
 //
-//  Created by Zheng on 2020/3/28.
+//  Created by EM on 2020/12/20.
 //  Copyright © 2020 Zheng. All rights reserved.
 //
 
-#import "ZHJSInternalCustomApiHandler.h"
+#import "ZHJSInWebFundApi.h"
 
-@implementation ZHJSInternalCustomApiHandler
-
+@implementation ZHJSInWebFundApi
 
 #pragma mark - api
 /** ⚠️⚠️⚠️添加API步骤：
@@ -174,10 +173,11 @@
      NSLog(@"%@",params);
  }
 
+#pragma mark - ZHJSApiProtocol
 
 //js api方法名前缀  如：fund
 - (NSString *)zh_jsApiPrefixName{
-    return @"ZhengInternal";
+    return @"fund";
 }
 //ios api方法名前缀 如：js_
 - (NSString *)zh_iosApiPrefixName{

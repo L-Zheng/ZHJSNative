@@ -1,20 +1,23 @@
 //
-//  ZHJSInternalApiHandler.m
+//  ZHJSInApi.m
 //  ZHJSNative
 //
-//  Created by EM on 2020/3/24.
+//  Created by EM on 2020/12/20.
 //  Copyright © 2020 Zheng. All rights reserved.
 //
 
-#import "ZHJSInternalApiHandler.h"
+#import "ZHJSInApi.h"
 #import "ZHJSApiHandler.h"
 #import "ZHJSHandler.h"
 
-@implementation ZHJSInternalApiHandler
-
+@implementation ZHJSInApi
 
 - (ZHWebView *)webView{
     return self.apiHandler.handler.webView;
+}
+
+- (ZHJSContext *)jsContext{
+    return self.apiHandler.handler.jsContext;
 }
 
 //js api方法名前缀  如：fund

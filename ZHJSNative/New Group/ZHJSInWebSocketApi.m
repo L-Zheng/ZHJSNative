@@ -1,15 +1,15 @@
 //
-//  ZHJSInternalSocketApiHandler.m
+//  ZHJSInWebSocketApi.m
 //  ZHJSNative
 //
-//  Created by Zheng on 2020/3/28.
+//  Created by EM on 2020/12/20.
 //  Copyright © 2020 Zheng. All rights reserved.
 //
 
-#import "ZHJSInternalSocketApiHandler.h"
+#import "ZHJSInWebSocketApi.h"
 #import "ZHWebView.h"
 
-@implementation ZHJSInternalSocketApiHandler
+@implementation ZHJSInWebSocketApi
 
 //socket链接调试
 /** socket调试代理  声明方法 */
@@ -54,4 +54,5 @@
 - (void)dealloc{
     NSLog(@"%s", __func__);
 }
+
 @end

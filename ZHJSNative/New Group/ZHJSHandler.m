@@ -9,9 +9,8 @@
 #import "ZHJSHandler.h"
 #import "ZHJSContext.h"
 #import "ZHWebView.h"
-#import "ZHJSApiHandler.h"
 #import <objc/runtime.h>
-#import "ZHJSInternalSocketApiHandler.h"
+#import "ZHJSInWebSocketApi.h"
 
 //设置NSInvocation参数
 #define ZH_Invo_Set_Arg(invo, arg, idx, cType, type, op)\
@@ -26,21 +25,11 @@ case cType:{\
 }
 
 @interface ZHJSHandler ()
-@property (nonatomic,strong) ZHJSApiHandler *apiHandler;
 @end
 
 @implementation ZHJSHandler
 
 #pragma mark - init
-
-- (instancetype)initWithDebugConfig:(ZHWebViewDebugConfiguration *)debugConfig
-                        apiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers{
-    self = [super init];
-    if (self) {
-        self.apiHandler = [[ZHJSApiHandler alloc] initWithHandler:self debugConfig:debugConfig apiHandlers:apiHandlers];
-    }
-    return self;
-}
 
 - (NSArray<id<ZHJSApiProtocol>> *)apiHandlers{
     return [self.apiHandler apiHandlers];
@@ -175,13 +164,13 @@ case cType:{\
         JSValue *failFunc = [jsValue valueForProperty:fail];
         JSValue *completeFunc = [jsValue valueForProperty:complete];
         ZHJSApiAliveBlock block = ^(id result, NSError *error, BOOL alive) {
-            if (!error && result) {
+            if (!error) {
                 //运行参数里的success方法
                 //                [paramsValue invokeMethod:success withArguments:@[result]];
-                if (successFunc) [successFunc callWithArguments:@[result]];
+                if (successFunc) [successFunc callWithArguments:result ? @[result] : @[]];
             }else{
                 NSString *errorDesc = error.userInfo[NSLocalizedDescriptionKey];
-                id desc = error ? (errorDesc.length ? errorDesc : @"发生错误") : @"没有数据";
+                id desc = (errorDesc ?: @"发生错误");
                 //运行参数里的fail方法
                 //                [paramsValue invokeMethod:fail withArguments:@[result]];
                 if (failFunc) [failFunc callWithArguments:@[desc]];
@@ -214,11 +203,11 @@ case cType:{\
     return jsCode;
 }
 - (NSString *)fetchWebViewSocketApi{
-    ZHJSInternalSocketApiHandler *socketHandler = [[ZHJSInternalSocketApiHandler alloc] init];
-    if (![socketHandler conformsToProtocol:@protocol(ZHJSApiProtocol)] ||
-        ![socketHandler respondsToSelector:@selector(zh_jsApiPrefixName)]) return nil;
+    ZHJSInWebSocketApi *socketApi = [[ZHJSInWebSocketApi alloc] init];
+    if (![socketApi conformsToProtocol:@protocol(ZHJSApiProtocol)] ||
+        ![socketApi respondsToSelector:@selector(zh_jsApiPrefixName)]) return nil;
     
-    NSString *jsPrefix = [socketHandler zh_jsApiPrefixName];
+    NSString *jsPrefix = [socketApi zh_jsApiPrefixName];
     
     if (jsPrefix.length == 0) return nil;
     //以下代码由socketEvent.js压缩而成
@@ -288,13 +277,12 @@ case cType:{\
         [de webViewException:self.webView info:exception];
     }
     // 调试弹窗
-
     if (self.webView.debugConfig.alertWebViewErrorEnable) {
         [self showException:@"WebView JS异常" exception:exception];
     }
 }
 - (void)showJSContextException:(NSDictionary *)exception{
-    if (self.webView.debugConfig.alertJsContextErrorEnable) {
+    if (self.jsContext.debugConfig.alertJsContextErrorEnable) {
         [self showException:@"JSCore异常" exception:exception];
     }
 }
@@ -417,11 +405,11 @@ case cType:{\
     //需要回调
     __weak __typeof__(self) __self = self;
     ZHJSApiAliveBlock block = ^(id result, NSError *error, BOOL alive) {
-        if (!error && result) {
-            if (successId.length) [__self callBackJsFunc:successId data:result alive:alive callBack:nil];
+        if (!error) {
+            if (successId.length) [__self callBackJsFunc:successId data:result?:[NSNull null] alive:alive callBack:nil];
         }else{
             NSString *errorDesc = error.userInfo[NSLocalizedDescriptionKey];
-            id desc = error ? (errorDesc.length ? errorDesc : @"发生错误") : @"没有数据";
+            id desc = (errorDesc ?: @"发生错误");
             if (failId.length) [__self callBackJsFunc:failId data:desc alive:alive callBack:nil];
         }
         if (completeId.length) [__self callBackJsFunc:completeId data:[NSNull null] alive:alive callBack:nil];

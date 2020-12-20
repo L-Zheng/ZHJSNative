@@ -9,9 +9,6 @@
 #import <Foundation/Foundation.h>
 #import <WebKit/WebKit.h>
 #import "ZHJSApiProtocol.h"
-@class ZHWebViewAppletConfiguration;
-@class ZHWebViewCreateConfiguration;
-@class ZHWebViewLoadConfiguration;
 @class ZHWebView;
 
 
@@ -66,12 +63,10 @@
 
 
 /** 👉webview 配置 */
-@interface ZHWebViewConfiguration : NSObject
+@interface ZHWebViewConfiguration : ZHWebViewModuleConfiguration
 @property (nonatomic,strong) ZHWebViewAppletConfiguration *appletConfig;
 @property (nonatomic,strong) ZHWebViewCreateConfiguration *createConfig;
 @property (nonatomic,strong) ZHWebViewLoadConfiguration *loadConfig;
-@property (nonatomic,weak) ZHWebView *webView;
-- (NSDictionary *)formatInfo;
 @end
 
 
@@ -133,8 +128,6 @@ typedef NS_ENUM(NSInteger, ZHWebViewDebugModel) {
 @property (nonatomic,assign,readonly) BOOL logOutputXcodeEnable;
 // 弹窗显示 webview异常  window.onerror
 @property (nonatomic,assign,readonly) BOOL alertWebViewErrorEnable;
-// 弹窗显示 JSContext异常
-@property (nonatomic,assign,readonly) BOOL alertJsContextErrorEnable;
 // 禁用webview长按弹出菜单
 @property (nonatomic,assign,readonly) BOOL touchCalloutEnable;
 // 版本 运行iOS8模式

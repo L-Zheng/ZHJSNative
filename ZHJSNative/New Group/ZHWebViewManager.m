@@ -8,6 +8,8 @@
 
 #import "ZHWebViewManager.h"
 #import "ZHWebView.h"
+#import "NSError+ZH.h"
+#import "ZHUtil.h"
 
 NSInteger const ZHWebViewPreLoadMaxCount = 3;
 NSInteger const ZHWebViewPreLoadingMaxCount = 1;
@@ -71,7 +73,7 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
     NSString *key = appletConfig.appId;
     
     if (![ZHWebView checkString:key]) {
-        if (finish) finish(nil, ZHWebViewInlineError(404, ZHLCInlineString(@"key(%@) is invalid", key)));
+        if (finish) finish(nil, ZHInlineError(404, ZHLCInlineString(@"key(%@) is invalid", key)));
         return;
     }
     
@@ -79,11 +81,11 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
     NSMutableArray *loadingWebs = [self fetchMap:self.loadingWebsMap key:key];
     
     if (webs.count >= ZHWebViewPreLoadMaxCount) {
-        if (finish) finish(nil, ZHWebViewInlineError(-999, ZHLCInlineString(@"load finish webview count is beyond max(%ld)", ZHWebViewPreLoadMaxCount)));
+        if (finish) finish(nil, ZHInlineError(-999, ZHLCInlineString(@"load finish webview count is beyond max(%ld)", ZHWebViewPreLoadMaxCount)));
         return;
     }
     if (loadingWebs.count >= ZHWebViewPreLoadingMaxCount) {
-        if (finish) finish(nil, ZHWebViewInlineError(-999, ZHLCInlineString(@"loading webview count is beyond max(%ld)", ZHWebViewPreLoadingMaxCount)));
+        if (finish) finish(nil, ZHInlineError(-999, ZHLCInlineString(@"loading webview count is beyond max(%ld)", ZHWebViewPreLoadingMaxCount)));
         return;
     }
     
@@ -97,7 +99,7 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
         if (!error) {
             [weakSelf opMap:weakSelf.websMap key:key webView:newWebView add:YES];
         }
-        if (finish) finish(error ? nil : info, error ? ZHWebViewInlineError(error.code, ZHLCInlineString(@"%@", ZHWebViewErrorDesc(error))) : nil);
+        if (finish) finish(error ? nil : info, error ? ZHInlineError(error.code, ZHLCInlineString(@"%@", ZHErrorDesc(error))) : nil);
     }];
 }
 
@@ -156,7 +158,7 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
                         config:(ZHWebViewConfiguration *)config
                         finish:(void (^) (NSDictionary *info, NSError *error))finish{
     if (!webView || !url || url.isFileURL) {
-        NSError *error = ZHWebViewInlineError(404, ZHLCInlineString(@"webView is null / url is null / url is not filr URL.  URL is %@.", url));
+        NSError *error = ZHInlineError(404, ZHLCInlineString(@"webView is null / url is null / url is not filr URL.  URL is %@.", url));
         if (finish) finish(nil, error);
         return;
     }
@@ -179,11 +181,11 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
     [self copyTemplateFolderToSandBox:webView templateFolder:templateFolder callBack:^(NSString *loadFolder, NSError *error) {
         //检查
         if (error) {
-            if (finish) finish(nil, ZHWebViewInlineError(error.code, ZHLCInlineString(@"%@", ZHWebViewErrorDesc(error))));
+            if (finish) finish(nil, ZHInlineError(error.code, ZHLCInlineString(@"%@", ZHErrorDesc(error))));
             return;
         }
         [__self realLoadWebView:webView loadFolder:loadFolder config:config finish:^(NSDictionary *info, NSError *error) {
-            if (finish) finish(error ? nil : info, error ? ZHWebViewInlineError(error.code, ZHLCInlineString(@"%@", ZHWebViewErrorDesc(error))) : nil);
+            if (finish) finish(error ? nil : info, error ? ZHInlineError(error.code, ZHLCInlineString(@"%@", ZHErrorDesc(error))) : nil);
         }];
     }];
 }
@@ -193,7 +195,7 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
              finish:(void (^) (NSDictionary *info, NSError *error))finish{
     if (!webView ||
         ![webView isKindOfClass:[ZHWebView class]]) {
-        if (finish) finish(nil, ZHWebViewInlineError(404, ZHLCInlineString(@"webview is invalid")));
+        if (finish) finish(nil, ZHInlineError(404, ZHLCInlineString(@"webview is invalid")));
         return;
     }
     
@@ -220,17 +222,18 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
                                    webView:webView
                                   callBack:^(NSString *templateFolder, NSDictionary *resultInfo, NSError *error) {
         if (error) {
-            if (finish) finish(nil, ZHWebViewInlineError(error.code, ZHLCInlineString(@"%@", ZHWebViewErrorDesc(error))));
+            if (finish) finish(nil, ZHInlineError(error.code, ZHLCInlineString(@"%@", ZHErrorDesc(error))));
             return;
         }
         [__self copyTemplateFolderToSandBox:webView templateFolder:templateFolder callBack:^(NSString *loadFolder, NSError *error) {
             //检查
             if (error) {
-                if (finish) finish(nil, ZHWebViewInlineError(error.code, ZHLCInlineString(@"%@", ZHWebViewErrorDesc(error))));
+                if (finish) finish(nil, ZHInlineError(error.code, ZHLCInlineString(@"%@", ZHErrorDesc(error))));
                 return;
             }
+            webView.downLoadInfo = [resultInfo copy];
             [__self realLoadWebView:webView loadFolder:loadFolder config:config finish:^(NSDictionary *info, NSError *error) {
-                if (finish) finish(error ? nil : info, error ? ZHWebViewInlineError(error.code, ZHLCInlineString(@"%@", ZHWebViewErrorDesc(error))) : nil);
+                if (finish) finish(error ? nil : info, error ? ZHInlineError(error.code, ZHLCInlineString(@"%@", ZHErrorDesc(error))) : nil);
             }];
         }];
     }];
@@ -244,13 +247,13 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
                   finish:(void (^) (NSDictionary *info ,NSError *error))finish{
     if (!webView ||
         ![webView isKindOfClass:[ZHWebView class]]) {
-        if (finish) finish(nil, ZHWebViewInlineError(404, ZHLCInlineString(@"webview is invalid")));
+        if (finish) finish(nil, ZHInlineError(404, ZHLCInlineString(@"webview is invalid")));
         return;
     }
     
     NSString *key = config.appletConfig.appId;
     if (![ZHWebView checkString:key]) {
-        if (finish) finish(nil, ZHWebViewInlineError(404, ZHLCInlineString(@"key(%@) is invalid", key)));
+        if (finish) finish(nil, ZHInlineError(404, ZHLCInlineString(@"key(%@) is invalid", key)));
         return;
     }
     
@@ -260,7 +263,7 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
     [self.class waitDownLoadTemplate:key callBack:^(NSString *templateFolder, NSDictionary *resultInfo, NSError *error) {
         if (downLoadFinish) downLoadFinish(error ? nil : resultInfo, error);
         if (error) {
-            if (finish) finish(nil, ZHWebViewInlineError(error.code, ZHLCInlineString(@"%@", ZHWebViewErrorDesc(error))));
+            if (finish) finish(nil, ZHInlineError(error.code, ZHLCInlineString(@"%@", ZHErrorDesc(error))));
             return;
         }
         
@@ -268,9 +271,10 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
         [__self copyTemplateFolderToSandBox:webView templateFolder:templateFolder callBack:^(NSString *loadFolder, NSError *error) {
             //检查
             if (error) {
-                if (finish) finish(nil, ZHWebViewInlineError(error.code, ZHLCInlineString(@"%@", ZHWebViewErrorDesc(error))));
+                if (finish) finish(nil, ZHInlineError(error.code, ZHLCInlineString(@"%@", ZHErrorDesc(error))));
                 return;
             }
+            webView.downLoadInfo = [resultInfo copy];
             [__self realLoadWebView:webView loadFolder:loadFolder config:config finish:finish];
         }];
     }];
@@ -288,22 +292,22 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
     
     //检查
     if (![ZHWebView checkString:loadFolder]) {
-        if (finish) finish(nil, ZHWebViewInlineError(404, ZHLCInlineString(@"loadFolder is null. %@", extraErrorDesc)));
+        if (finish) finish(nil, ZHInlineError(404, ZHLCInlineString(@"loadFolder is null. %@", extraErrorDesc)));
         return;
     }
     if (![ZHWebView checkString:loadFileName]) {
-        if (finish) finish(nil, ZHWebViewInlineError(404, ZHLCInlineString(@"loadFileName is invaild: %@. %@", loadFileName, extraErrorDesc)));
+        if (finish) finish(nil, ZHInlineError(404, ZHLCInlineString(@"loadFileName is invaild: %@. %@", loadFileName, extraErrorDesc)));
         return;
     }
     NSString *htmlPath = [loadFolder stringByAppendingPathComponent:loadFileName];
     if (![self.fm fileExistsAtPath:htmlPath]) {
-        if (finish) finish(nil, ZHWebViewInlineError(404, ZHLCInlineString(@"htmlPath(%@) is not exists. %@", htmlPath, extraErrorDesc)));
+        if (finish) finish(nil, ZHInlineError(404, ZHLCInlineString(@"htmlPath(%@) is not exists. %@", htmlPath, extraErrorDesc)));
         return;
     }
     //获取上级目录
-    NSString *superFolder = [ZHWebView fetchSuperiorFolder:htmlPath];
+    NSString *superFolder = [ZHUtil fetchSuperiorFolder:htmlPath];
     if (!superFolder) {
-        if (finish) finish(nil, ZHWebViewInlineError(404, ZHLCInlineString(@"fetch superFolder is failed. htmlPath is (%@). %@", htmlPath, extraErrorDesc)));
+        if (finish) finish(nil, ZHInlineError(404, ZHLCInlineString(@"fetch superFolder is failed. htmlPath is (%@). %@", htmlPath, extraErrorDesc)));
         return;
     }
     
@@ -329,7 +333,7 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
         if (!error) {
             [__self opOutsideUsedWebView:webView isAdd:YES];
         }
-        if (finish) finish(error ? nil : info, error ? ZHWebViewInlineError(error.code, ZHLCInlineString(@"%@", ZHWebViewErrorDesc(error))) : nil);
+        if (finish) finish(error ? nil : info, error ? ZHInlineError(error.code, ZHLCInlineString(@"%@", ZHErrorDesc(error))) : nil);
     }];
 }
 
@@ -344,14 +348,14 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
 //拷贝模板资源到沙盒
 - (void)copyTemplateFolderToSandBox:(ZHWebView *)webView templateFolder:(NSString *)templateFolder callBack:(void (^) (NSString *loadFolder, NSError *error))callBack{
     if (!templateFolder) {
-        if (callBack) callBack(nil, ZHWebViewInlineError(404, ZHLCInlineString(@"templateFolder is null")));
+        if (callBack) callBack(nil, ZHInlineError(404, ZHLCInlineString(@"templateFolder is null")));
         return;
     }
     
     //目标路径
     NSString *resFolder = [webView fetchReadyRunSandBox];
     if (!resFolder) {
-        if (callBack) callBack(nil, ZHWebViewInlineError(404, ZHLCInlineString(@"fetch Ready Run SandBox is failed")));
+        if (callBack) callBack(nil, ZHInlineError(404, ZHLCInlineString(@"fetch Ready Run SandBox is failed")));
         return;
     }
     
@@ -366,22 +370,22 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
         
         if (!result || fileError) {
             [self.lock unlock];
-            if (callBack) callBack(nil, ZHWebViewInlineError(-999, ZHLCInlineString(@"remove file(%@) failed. fileError :%@ .", resFolder, ZHWebViewErrorDesc(fileError))));
+            if (callBack) callBack(nil, ZHInlineError(-999, ZHLCInlineString(@"remove file(%@) failed. fileError :%@ .", resFolder, ZHErrorDesc(fileError))));
             return;
         }
     }else{
         //创建上级目录 否则拷贝失败
-        NSString *superFolder = [ZHWebView fetchSuperiorFolder:resFolder];
+        NSString *superFolder = [ZHUtil fetchSuperiorFolder:resFolder];
         if (!superFolder) {
             [self.lock unlock];
-            if (callBack) callBack(nil, ZHWebViewInlineError(404, ZHLCInlineString(@"fetch superFolder is failed by folder(%@).", resFolder)));
+            if (callBack) callBack(nil, ZHInlineError(404, ZHLCInlineString(@"fetch superFolder is failed by folder(%@).", resFolder)));
             return;
         }
         if (![self.fm fileExistsAtPath:superFolder]) {
             result = [self.fm createDirectoryAtPath:superFolder withIntermediateDirectories:YES attributes:nil error:&fileError];
             if (!result || fileError) {
                 [self.lock unlock];
-                if (callBack) callBack(nil, ZHWebViewInlineError(-999, ZHLCInlineString(@"create folder(%@) failed. fileError :%@ .", superFolder, ZHWebViewErrorDesc(fileError))));
+                if (callBack) callBack(nil, ZHInlineError(-999, ZHLCInlineString(@"create folder(%@) failed. fileError :%@ .", superFolder, ZHErrorDesc(fileError))));
                 return;
             }
         }
@@ -391,7 +395,7 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
     result = [self.fm copyItemAtPath:templateFolder toPath:resFolder error:&fileError];
     if (!result || fileError) {
         [self.lock unlock];
-        if (callBack) callBack(nil, ZHWebViewInlineError(-999, ZHLCInlineString(@"copy sourceFolder(%@) targetFolder(%@) failed. fileError :%@ .", templateFolder, resFolder, ZHWebViewErrorDesc(fileError))));
+        if (callBack) callBack(nil, ZHInlineError(-999, ZHLCInlineString(@"copy sourceFolder(%@) targetFolder(%@) failed. fileError :%@ .", templateFolder, resFolder, ZHErrorDesc(fileError))));
         return;
     }
     

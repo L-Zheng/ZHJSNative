@@ -8,29 +8,48 @@
 
 #import "ZHJSContext.h"
 #import "ZHJSHandler.h"
+#import "NSError+ZH.h"
+#import "ZHUtil.h"
 
 @interface ZHJSContext ()
 @property (nonatomic,strong) ZHJSHandler *handler;
-//外部handler
-//@property (nonatomic,strong) NSArray <id <ZHJSApiProtocol>> *apiHandlers;
+
+//运行的沙盒目录
+@property (nonatomic, copy) NSURL *runSandBoxURL;
 @end
 
 @implementation ZHJSContext
 
-- (instancetype)initWithApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers{
+- (instancetype)initWithGlobalConfig:(ZHJSContextConfiguration *)globalConfig{
+    self.globalConfig = globalConfig;
+    globalConfig.jsContext = self;
+    return [self initWithCreateConfig:globalConfig.createConfig];
+}
+- (instancetype)initWithCreateConfig:(ZHJSContextCreateConfiguration *)createConfig{
+    // 初始化配置
+    self.createConfig = createConfig;
+    createConfig.jsContext = self;
+    NSArray <id <ZHJSApiProtocol>> *apiHandlers = createConfig.apiHandlers;
+    
     //创建虚拟机
     JSVirtualMachine *vm = [[JSVirtualMachine alloc] init];
     self = [self initWithVirtualMachine:vm];
     if (self) {
-        //事件
-        self.handler = [[ZHJSHandler alloc] initWithDebugConfig:nil apiHandlers:apiHandlers];
-        self.handler.jsContext = self;
+        // debug配置
+        ZHJSContextDebugConfiguration *debugConfig = [ZHJSContextDebugConfiguration configuration:self];
+        self.debugConfig = debugConfig;
         
-//        self.apiHandlers = apiHandlers;
+        // api处理配置
+        ZHJSHandler *handler = [[ZHJSHandler alloc] init];
+        handler.apiHandler = [[ZHJSApiHandler alloc] initWithJSContextHandler:handler debugConfig:debugConfig apiHandlers:apiHandlers?:@[]];
+        handler.jsContext = self;
+        self.handler = handler;
         
         //注入api
         [self registerException];
-        [self registerLogAPI];
+        if (debugConfig.logOutputXcodeEnable) {
+            [self registerLogAPI];
+        }
         [self registerAPI];
         
         //运算js
@@ -117,7 +136,86 @@
     }];
 }
 
-#pragma mark - public
+#pragma mark - render
+
+/// 加载js
+/// @param url 加载的url路径
+/// @param baseURL 【JSContext运行所需的资源根目录，如果为nil，默认为url的上级目录】
+/// @param loadConfig loadConfig
+/// @param loadStartBlock  回调
+/// @param loadFinishBlock  回调
+- (void)renderWithUrl:(NSURL *)url
+              baseURL:(NSURL *)baseURL
+           loadConfig:(ZHJSContextLoadConfiguration *)loadConfig
+       loadStartBlock:(void (^) (NSURL *runSandBoxURL))loadStartBlock
+      loadFinishBlock:(void (^) (NSDictionary *info, NSError *error))loadFinishBlock{
+    
+    self.loadConfig = loadConfig;
+    loadConfig.jsContext = self;
+    
+    void (^callBack)(NSDictionary *, NSError *) = ^(NSDictionary *info, NSError *error){
+        if (loadFinishBlock) loadFinishBlock(info, error);
+    };
+    
+    NSString *extraErrorDesc = [NSString stringWithFormat:@"file path is %@. url is %@. baseURL is %@. loadConfig is %@.", url.path, url, baseURL, [loadConfig formatInfo]];
+    
+    if (!url) {
+        callBack(nil, ZHInlineError(404, ZHLCInlineString(@"jscontext load url is null. %@", extraErrorDesc)));
+        return;
+    }
+    
+    //远程Url
+    if (!url.isFileURL) {
+        [self callStartLoad:nil renderURL:url block:loadStartBlock];
+        
+        __weak __typeof__(self) __self = self;
+        NSURLSession *session = [NSURLSession sharedSession];
+        NSURLSessionDataTask *dataTask = [session dataTaskWithURL:url completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if (error) {
+                    callBack(nil, ZHInlineError(error.code, ZHLCInlineString(@"%@", error.zh_localizedDescription)));
+                    return;
+                }
+                if (!data || data.length == 0) {
+                    callBack(nil, ZHInlineError(error.code, ZHLCInlineString(@"url(%@) response data is null.", url)));
+                    return;
+                }
+                NSString *loadStr = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+                if (!loadStr || loadStr.length == 0) {
+                    callBack(nil, ZHInlineError(error.code, ZHLCInlineString(@"url(%@) response string(%@) data is null.", url, loadStr)));
+                    return;
+                }
+                
+                JSValue *res = [__self evaluateScript:loadStr];
+                callBack([res toObject], nil);
+            });
+        }];
+        [dataTask resume];
+        return;
+    }
+    
+    self.runSandBoxURL = [ZHUtil parseRealRunBoxFolder:baseURL fileURL:url];
+    [self callStartLoad:self.runSandBoxURL renderURL:url block:loadStartBlock];
+    NSError *readErr = nil;
+    NSString *loadStr = [NSString stringWithContentsOfURL:url encoding:NSUTF8StringEncoding error:&readErr];
+    if (readErr) {
+        callBack(nil, ZHInlineError(readErr.code, ZHLCInlineString(@"%@", readErr.zh_localizedDescription)));
+        return;
+    }
+    if (!loadStr || loadStr.length == 0) {
+        callBack(nil, ZHInlineError(404, ZHLCInlineString(@"url(%@) read string(%@) data is null.", url, loadStr)));
+        return;
+    }
+    JSValue *res = [self evaluateScript:loadStr];
+    callBack([res toObject], nil);
+}
+
+//配置渲染回调
+- (void)callStartLoad:(NSURL *)runSandBoxURL renderURL:(NSURL *)renderURL block:(void (^) (NSURL *runSandBoxURL))block{
+    self.renderURL = renderURL;
+    if (!block) return;
+    block(runSandBoxURL);
+}
 
 - (JSValue *)runJsFunc:(NSString *)funcName arguments:(NSArray *)arguments{
     if (funcName.length == 0) {

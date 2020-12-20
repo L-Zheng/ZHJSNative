@@ -12,14 +12,6 @@
 #import "ZHWebViewConfiguration.h"
 @class ZHWebView;
 
-@interface NSError(ZHWebView)
-@property (nonatomic,copy,readonly) NSString *zh_localizedDescription;
-@end
-
-// 定位代码位置  ZHLocationCodeString
-#define ZHLCString(fmt, ...) [NSString stringWithFormat:(@"\n  function：%s\n  line：%d\n  reason：" fmt @"\n  stack：%@"), __func__, __LINE__, ##__VA_ARGS__, [NSThread callStackSymbols]]
-#define ZHLCInlineString(fmt, ...) [NSString stringWithFormat:(@"  function：%s.\n  line：%d.\n  reason：" fmt), __func__, __LINE__, ##__VA_ARGS__]
-
 typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
     ZHWebViewExceptionOperateNothing     = 0,//不做任何操作
     ZHWebViewExceptionOperateReload      = 1,//WebView重新load
@@ -52,7 +44,10 @@ typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
 
 @interface ZHWebView : WKWebView
 
-@property (nonatomic, strong) NSURL *renderURL;
+#pragma mark - mp
+
+//小程序版本信息
+@property (nonatomic, strong) NSDictionary *downLoadInfo;
 
 #pragma mark - load call
 
@@ -69,11 +64,11 @@ typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
 
 #pragma mark - config
 
-@property (nonatomic,strong,readonly) ZHWebViewConfiguration *globalConfig;
-@property (nonatomic,strong,readonly) ZHWebViewCreateConfiguration *createConfig;
-@property (nonatomic,strong,readonly) ZHWebViewLoadConfiguration *loadConfig;
+@property (nonatomic,strong) ZHWebViewConfiguration *globalConfig;
+@property (nonatomic,strong) ZHWebViewCreateConfiguration *createConfig;
+@property (nonatomic,strong) ZHWebViewLoadConfiguration *loadConfig;
 // 调试配置
-@property (nonatomic,strong,readonly) ZHWebViewDebugConfiguration *debugConfig;
+@property (nonatomic,strong) ZHWebViewDebugConfiguration *debugConfig;
 
 #pragma mark - init
 
@@ -124,6 +119,10 @@ jsSourceBaseURL:(NSURL *)jsSourceBaseURL
    jsSourceURL:(NSURL *)jsSourceURL
 completionHandler:(void (^)(id res, NSError *error))completionHandler;
 
+
+#pragma mark - render url
+
+@property (nonatomic, strong) NSURL *renderURL;
 //webView运行的沙盒目录
 @property (nonatomic, copy, readonly) NSURL *runSandBoxURL;
 
@@ -148,9 +147,6 @@ completionHandler:(void (^)(id res, NSError *error))completionHandler;
 - (NSString *)fetchPresetUnzipTmpFolder;
 //获取webView准备运行沙盒
 - (NSString *)fetchReadyRunSandBox;
-
-//获取路径的上级目录
-+ (NSString *)fetchSuperiorFolder:(NSString *)path;
 
 #pragma mark - check
 
@@ -184,13 +180,6 @@ __attribute__((unused)) static NSString * ZHWebViewDateString() {
     [dateFormatter setTimeStyle:NSDateFormatterShortStyle];
     [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss.SSS"];
     return [dateFormatter stringFromDate:[NSDate date]];
-}
-__attribute__((unused)) static NSError * ZHWebViewInlineError(NSInteger code, NSString *desc) {
-    return [NSError errorWithDomain:@"com.zh.webview" code:code userInfo:@{NSLocalizedDescriptionKey:desc}];
-}
-__attribute__((unused)) static NSString * ZHWebViewErrorDesc(NSError *error) {
-    if (!error) return @"";
-    return [NSString stringWithFormat:@"[inline-error >>\n  domain: %@.  \n  code: %ld.  \n%@.]", error.domain, error.code, error.zh_localizedDescription];
 }
 
 

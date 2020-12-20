@@ -10,10 +10,9 @@
 #import <WebKit/WebKit.h>
 #import <JavaScriptCore/JavaScriptCore.h>
 #import "ZHJSApiProtocol.h"
+#import "ZHJSApiHandler.h"
 @class ZHJSContext;
 @class ZHWebView;
-@class ZHJSApiHandler;
-@class ZHWebViewDebugConfiguration;
 
 //NS_ASSUME_NONNULL_BEGIN
 
@@ -23,8 +22,7 @@ static NSString * const ZHJSHandlerErrorName = @"ZHJSErrorEventHandler";
 
 @interface ZHJSHandler : NSObject<WKScriptMessageHandler>
 
-- (instancetype)initWithDebugConfig:(ZHWebViewDebugConfiguration *)debugConfig
-                        apiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers;
+@property (nonatomic,strong) ZHJSApiHandler *apiHandler;
 @property (nonatomic,strong,readonly) NSArray <id <ZHJSApiProtocol>> *apiHandlers;
 
 @property (nonatomic,weak) ZHWebView *webView;

@@ -9,8 +9,9 @@
 #import "ZHJSApiHandler.h"
 #import "ZHJSHandler.h"
 #import "ZHWebViewConfiguration.h"
-#import "ZHJSInternalSocketApiHandler.h"
-#import "ZHJSInternalCustomApiHandler.h"
+#import "ZHJSInWebSocketApi.h"
+#import "ZHJSInWebFundApi.h"
+#import "ZHJSInContextFundApi.h"
 #import <objc/runtime.h>
 
 @interface ZHJSApiHandler ()
@@ -35,7 +36,7 @@
  */
 @property (nonatomic,strong) NSMutableDictionary <NSString *, NSArray *> *apiMap;
 
-@property (nonatomic,strong) NSArray <ZHJSInternalApiHandler <ZHJSApiProtocol> *> *internalApiHandlers;
+@property (nonatomic,strong) NSArray <ZHJSInApi <ZHJSApiProtocol> *> *internalApiHandlers;
 @property (nonatomic,strong) NSMutableArray <id <ZHJSApiProtocol>> *outsideApiHandlers;
 
 @property (nonatomic,weak) ZHJSHandler *handler;
@@ -52,33 +53,52 @@
     return _apiMap;
 }
 
-- (instancetype)initWithHandler:(ZHJSHandler *)handler
-                    debugConfig:(ZHWebViewDebugConfiguration *)debugConfig
-                    apiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers{
+- (instancetype)initWithWebViewHandler:(ZHJSHandler *)handler
+                           debugConfig:(ZHWebViewDebugConfiguration *)debugConfig
+                           apiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers{
     self = [super init];
     if (self) {
         self.handler = handler;
         
         //默认内部api
         NSMutableArray *internalApiHandlers = [@[] mutableCopy];
-        
         if (debugConfig && debugConfig.debugModelEnable) {
-            [internalApiHandlers addObject:[[ZHJSInternalSocketApiHandler alloc] init]];
+            [internalApiHandlers addObject:[[ZHJSInWebSocketApi alloc] init]];
         }
-        [internalApiHandlers addObject:[[ZHJSInternalCustomApiHandler alloc] init]];
-        
-        for (ZHJSInternalApiHandler *handler in internalApiHandlers) {
+        [internalApiHandlers addObject:[[ZHJSInWebFundApi alloc] init]];
+        for (ZHJSInApi *handler in internalApiHandlers) {
             handler.apiHandler = self;
         }
-        self.internalApiHandlers = [internalApiHandlers copy];
-        //外部api
-        self.outsideApiHandlers = [apiHandlers?:@[] mutableCopy];
         
-        //查找api
-        NSArray *mergeHandlers = [self.internalApiHandlers arrayByAddingObjectsFromArray:self.outsideApiHandlers];
-        [self addApiMap:self.apiMap handlers:mergeHandlers];
+        [self config:internalApiHandlers outsideApiHandlers:[apiHandlers?:@[] mutableCopy]];
     }
     return self;
+}
+- (instancetype)initWithJSContextHandler:(ZHJSHandler *)handler
+                             debugConfig:(ZHJSContextDebugConfiguration *)debugConfig
+                             apiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers{
+    self = [super init];
+    if (self) {
+        self.handler = handler;
+        
+        //默认内部api
+        NSMutableArray *internalApiHandlers = [@[] mutableCopy];
+        [internalApiHandlers addObject:[[ZHJSInContextFundApi alloc] init]];
+        for (ZHJSInApi *handler in internalApiHandlers) {
+            handler.apiHandler = self;
+        }
+        
+        [self config:internalApiHandlers outsideApiHandlers:[apiHandlers?:@[] mutableCopy]];
+    }
+    return self;
+}
+
+- (void)config:(NSArray <ZHJSInApi <ZHJSApiProtocol> *> *)internalApiHandlers outsideApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)outsideApiHandlers{
+    self.internalApiHandlers = [internalApiHandlers copy];
+    self.outsideApiHandlers = [outsideApiHandlers?:@[] mutableCopy];
+    //查找api
+    NSArray *mergeHandlers = [self.internalApiHandlers arrayByAddingObjectsFromArray:self.outsideApiHandlers];
+    [self addApiMap:self.apiMap handlers:mergeHandlers];
 }
 
 - (NSArray<id<ZHJSApiProtocol>> *)apiHandlers{

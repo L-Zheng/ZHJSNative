@@ -211,9 +211,6 @@ static id _instance;
 - (BOOL)alertWebViewErrorEnable{
     return self.debugEnable;
 }
-- (BOOL)alertJsContextErrorEnable{
-    return self.debugEnable;
-}
 - (BOOL)touchCalloutEnable{
     return self.debugEnable;
 }

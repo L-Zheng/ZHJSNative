@@ -11,14 +11,19 @@
 @class ZHJSHandler;
 @class ZHJSApiMethodItem;
 @class ZHWebViewDebugConfiguration;
+@class ZHJSContextDebugConfiguration;
 
 //NS_ASSUME_NONNULL_BEGIN
 
 @interface ZHJSApiHandler : NSObject
 
-- (instancetype)initWithHandler:(ZHJSHandler *)handler
-                    debugConfig:(ZHWebViewDebugConfiguration *)debugConfig
-                    apiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers;
+- (instancetype)initWithWebViewHandler:(ZHJSHandler *)handler
+                           debugConfig:(ZHWebViewDebugConfiguration *)debugConfig
+                           apiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers;
+
+- (instancetype)initWithJSContextHandler:(ZHJSHandler *)handler
+                             debugConfig:(ZHJSContextDebugConfiguration *)debugConfig
+                             apiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers;
 
 @property (nonatomic,weak,readonly) ZHJSHandler *handler;
 @property (nonatomic,strong,readonly) NSArray <id <ZHJSApiProtocol>> *apiHandlers;
