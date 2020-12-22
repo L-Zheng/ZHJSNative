@@ -7,6 +7,7 @@
 //
 
 #import "ZHJSContextConfiguration.h"
+#import "ZHJSNativeItem.h" // WebView/JSContext页面信息数据
 
 @implementation ZHJSContextModuleConfiguration
 - (NSDictionary *)formatInfo{
@@ -24,8 +25,7 @@
     return @{
         @"appId": self.appId?:@"",
         @"loadFileName": self.loadFileName?:@"",
-        @"presetFilePath": self.presetFilePath?:@"",
-        @"presetFolderPath": self.presetFolderPath?:@""
+        @"presetFilePath": self.presetFilePath?:@""
     };
 }
 - (void)dealloc{

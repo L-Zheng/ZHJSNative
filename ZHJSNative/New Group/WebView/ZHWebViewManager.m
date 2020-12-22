@@ -10,6 +10,7 @@
 #import "ZHWebView.h"
 #import "NSError+ZH.h"
 #import "ZHUtil.h"
+#import "ZHJSNativeItem.h" // WebView/JSContext页面信息数据
 
 NSInteger const ZHWebViewPreLoadMaxCount = 3;
 NSInteger const ZHWebViewPreLoadingMaxCount = 1;
@@ -231,7 +232,7 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
                 if (finish) finish(nil, ZHInlineError(error.code, ZHLCInlineString(@"%@", ZHErrorDesc(error))));
                 return;
             }
-            webView.downLoadInfo = [resultInfo copy];
+            webView.webItem.downLoadInfo = [resultInfo copy];
             [__self realLoadWebView:webView loadFolder:loadFolder config:config finish:^(NSDictionary *info, NSError *error) {
                 if (finish) finish(error ? nil : info, error ? ZHInlineError(error.code, ZHLCInlineString(@"%@", ZHErrorDesc(error))) : nil);
             }];
@@ -274,7 +275,7 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
                 if (finish) finish(nil, ZHInlineError(error.code, ZHLCInlineString(@"%@", ZHErrorDesc(error))));
                 return;
             }
-            webView.downLoadInfo = [resultInfo copy];
+            webView.webItem.downLoadInfo = [resultInfo copy];
             [__self realLoadWebView:webView loadFolder:loadFolder config:config finish:finish];
         }];
     }];
@@ -418,7 +419,8 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
                            webView:(ZHWebView *)webView
                           callBack:(void (^) (NSString *templateFolder, NSDictionary *resultInfo, NSError *error))callBack{
     NSString *key = appletConfig.appId;
-    NSString *presetFolder = appletConfig.presetFolderPath;
+    NSString *presetFolder = appletConfig.presetFilePath;
+    NSDictionary *presetFileInfo = appletConfig.presetFileInfo;
     NSString *loadFileName = appletConfig.loadFileName;
     
     //检查本地缓存
@@ -438,7 +440,7 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
     
     //存在预置资源
     if ([ZHWebView checkString:presetFolder] && [[NSFileManager defaultManager] fileExistsAtPath:presetFolder]) {
-        if (callBack) callBack(presetFolder, @{@"description": @"此模板为App内置资源"}, nil);
+        if (callBack) callBack(presetFolder, presetFileInfo, nil);
         [[self shareManager] updateTemplate:key];
         return;
     }
@@ -451,9 +453,9 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
     [[self shareManager] downLoadTemplate:key callback:^(NSDictionary *resultInfo, NSError *error) {
         NSString *downFolder = nil;
         if (downFolder && !error) {
-            if (callBack) callBack(downFolder, @{@"description": @"此模板为下载资源"}, nil);
+            if (callBack) callBack(downFolder, resultInfo, nil);
         }else{
-            if (callBack) callBack(nil, @{@"description": @"下载WebView模板文件失败"}, error ? error : [NSError new]);
+            if (callBack) callBack(nil, nil, error ? error : [NSError new]);
         }
     } progressBlock:^(NSProgress *progress) {
         

@@ -41,6 +41,7 @@
 		85A69A64258DEEA4009728F4 /* ZHJSContextConfiguration.m in Sources */ = {isa = PBXBuildFile; fileRef = 85A69A63258DEEA4009728F4 /* ZHJSContextConfiguration.m */; };
 		85B4FC9924349EA300CD910B /* EFEmoji.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 85B4FC9824349EA300CD910B /* EFEmoji.bundle */; };
 		85B4FC9C2435702900CD910B /* ZhengFile.m in Sources */ = {isa = PBXBuildFile; fileRef = 85B4FC9A2435702900CD910B /* ZhengFile.m */; };
+		85FE9D932591D379008A76AE /* ZHJSNativeItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 85FE9D922591D379008A76AE /* ZHJSNativeItem.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -126,6 +127,8 @@
 		85B4FC9824349EA300CD910B /* EFEmoji.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = EFEmoji.bundle; sourceTree = "<group>"; };
 		85B4FC9A2435702900CD910B /* ZhengFile.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZhengFile.m; sourceTree = "<group>"; };
 		85B4FC9B2435702900CD910B /* ZhengFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZhengFile.h; sourceTree = "<group>"; };
+		85FE9D912591D379008A76AE /* ZHJSNativeItem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHJSNativeItem.h; sourceTree = "<group>"; };
+		85FE9D922591D379008A76AE /* ZHJSNativeItem.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHJSNativeItem.m; sourceTree = "<group>"; };
 		E56B9B5085C846D362800AF3 /* Pods-ZHJSNative.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ZHJSNative.release.xcconfig"; path = "Target Support Files/Pods-ZHJSNative/Pods-ZHJSNative.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -254,6 +257,8 @@
 				856980832429E13F0042755A /* ZHJSApiProtocol.h */,
 				0F6807DB24016A0500E6B4C6 /* ZHJSApiHandler.h */,
 				0F6807DC24016A0500E6B4C6 /* ZHJSApiHandler.m */,
+				85FE9D912591D379008A76AE /* ZHJSNativeItem.h */,
+				85FE9D922591D379008A76AE /* ZHJSNativeItem.m */,
 			);
 			path = Base;
 			sourceTree = "<group>";
@@ -513,6 +518,7 @@
 				8505EC1524752EDB00628FD8 /* ZHCustomExtra1ApiHandler.m in Sources */,
 				0F07985F240104FA004AAFBC /* AppDelegate.m in Sources */,
 				8581BAB3258F370B004E25DC /* ZHJSInWebSocketApi.m in Sources */,
+				85FE9D932591D379008A76AE /* ZHJSNativeItem.m in Sources */,
 				85A4A30F243FF80A002AE903 /* ZHWebViewManager.m in Sources */,
 				85B4FC9C2435702900CD910B /* ZhengFile.m in Sources */,
 				0F079899240105E3004AAFBC /* ZHJSContext.m in Sources */,

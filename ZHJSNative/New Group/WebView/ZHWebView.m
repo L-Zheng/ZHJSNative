@@ -10,6 +10,7 @@
 #import "ZHJSHandler.h"
 #import "NSError+ZH.h"
 #import "ZHUtil.h"
+#import "ZHJSNativeItem.h" // WebView/JSContext页面信息数据
 
 @interface ZHWebView ()<WKNavigationDelegate, WKUIDelegate, UIScrollViewDelegate, UIGestureRecognizerDelegate>
 
@@ -36,6 +37,18 @@
 - (instancetype)initWithGlobalConfig:(ZHWebViewConfiguration *)globalConfig{
     self.globalConfig = globalConfig;
     globalConfig.webView = self;
+    
+    ZHWebViewAppletConfiguration *appletConfig = globalConfig.appletConfig;
+    appletConfig.webView = self;
+    self.appletConfig = appletConfig;
+    
+    self.webItem = [ZHWebViewItem createByInfo:@{
+        @"appId": appletConfig.appId?:@"",
+        @"envVersion": appletConfig.envVersion?:@"",
+        @"url": appletConfig.loadFileName?:@"",
+        @"params": @{}
+    }];
+    
     return [self initWithCreateConfig:globalConfig.createConfig];
 }
 - (instancetype)initWithCreateConfig:(ZHWebViewCreateConfiguration *)createConfig{

@@ -56,12 +56,13 @@
     ZHWebViewAppletConfiguration *appletConfig = [ZHWebViewAppletConfiguration new];
     appletConfig.appId = [self currentTemplateKey];
     appletConfig.loadFileName = [self currentTemplateLoadName];
-    appletConfig.presetFolderPath = [self currentTemplatePresetFolder];
+    appletConfig.presetFilePath = [self currentTemplatePresetFolder];
     
     ZHWebViewCreateConfiguration *createConfig = [ZHWebViewCreateConfiguration new];
     createConfig.frameValue = [NSValue valueWithCGRect:[UIScreen mainScreen].bounds];
     createConfig.processPool = [self processPool];
     createConfig.apiHandlers = [self apiHandlers];
+    createConfig.extraScriptStart = @"var testGlobalFunc = function (params) {var res = JSON.parse(decodeURIComponent(params));console.log(res);return true;}";
     
     ZHWebViewLoadConfiguration *loadConfig = [ZHWebViewLoadConfiguration new];
     loadConfig.cachePolicy = nil;

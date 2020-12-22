@@ -11,6 +11,7 @@
 #import "ZHJSApiProtocol.h"
 #import "ZHWebViewConfiguration.h"
 @class ZHWebView;
+@class ZHWebViewItem;//WebView信息数据
 
 typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
     ZHWebViewExceptionOperateNothing     = 0,//不做任何操作
@@ -46,8 +47,7 @@ typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
 
 #pragma mark - mp
 
-//小程序版本信息
-@property (nonatomic, strong) NSDictionary *downLoadInfo;
+@property (nonatomic,strong) ZHWebViewItem *webItem;
 
 #pragma mark - load call
 
@@ -65,6 +65,7 @@ typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
 #pragma mark - config
 
 @property (nonatomic,strong) ZHWebViewConfiguration *globalConfig;
+@property (nonatomic,strong) ZHWebViewAppletConfiguration *appletConfig;
 @property (nonatomic,strong) ZHWebViewCreateConfiguration *createConfig;
 @property (nonatomic,strong) ZHWebViewLoadConfiguration *loadConfig;
 // 调试配置

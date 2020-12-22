@@ -10,6 +10,7 @@
 #import "ZHJSHandler.h"
 #import "NSError+ZH.h"
 #import "ZHUtil.h"
+#import "ZHJSNativeItem.h" // WebView/JSContext页面信息数据
 
 @interface ZHJSContext ()
 @property (nonatomic,strong) ZHJSHandler *handler;
@@ -23,6 +24,18 @@
 - (instancetype)initWithGlobalConfig:(ZHJSContextConfiguration *)globalConfig{
     self.globalConfig = globalConfig;
     globalConfig.jsContext = self;
+    
+    ZHJSContextAppletConfiguration *appletConfig = globalConfig.appletConfig;
+    appletConfig.jsContext = self;
+    self.appletConfig = appletConfig;
+    
+    self.contextItem = [ZHJSContextItem createByInfo:@{
+        @"appId": appletConfig.appId?:@"",
+        @"envVersion": appletConfig.envVersion?:@"",
+        @"url": appletConfig.loadFileName?:@"",
+        @"params": @{}
+    }];
+    
     return [self initWithCreateConfig:globalConfig.createConfig];
 }
 - (instancetype)initWithCreateConfig:(ZHJSContextCreateConfiguration *)createConfig{

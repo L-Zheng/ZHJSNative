@@ -10,6 +10,7 @@
 #import <JavaScriptCore/JavaScriptCore.h>
 #import "ZHJSApiProtocol.h"
 #import "ZHJSContextConfiguration.h"
+@class ZHJSContextItem;//JSContext信息数据
 
 //NS_ASSUME_NONNULL_BEGIN
 
@@ -18,12 +19,13 @@
 #pragma mark - init
 
 - (instancetype)initWithGlobalConfig:(ZHJSContextConfiguration *)globalConfig;
-- (instancetype)initWithCreateConfig:(ZHJSContextCreateConfiguration *)createConfig;
+//- (instancetype)initWithCreateConfig:(ZHJSContextCreateConfiguration *)createConfig;
 @property (nonatomic,strong,readonly) NSArray <id <ZHJSApiProtocol>> *apiHandlers;
 
 #pragma mark - config
 
 @property (nonatomic,strong) ZHJSContextConfiguration *globalConfig;
+@property (nonatomic,strong) ZHJSContextAppletConfiguration *appletConfig;
 @property (nonatomic,strong) ZHJSContextCreateConfiguration *createConfig;
 @property (nonatomic,strong) ZHJSContextLoadConfiguration *loadConfig;
 // 调试配置
@@ -59,8 +61,8 @@
 
 #pragma mark - mp
 
-//小程序版本信息
-@property (nonatomic, strong) NSDictionary *downLoadInfo;
+@property (nonatomic,strong) ZHJSContextItem *contextItem;
+
 
 @end
 
