@@ -24,6 +24,17 @@ case cType:{\
     break;\
 }
 
+@interface ZHJSInvocation : NSInvocation
+// 强引用target 防止invoke执行时释放
+@property (nonatomic,strong) id zhjs_target;
+@end
+@implementation ZHJSInvocation
+- (void)dealloc{
+    NSLog(@"%s",__func__);
+}
+@end
+
+
 @interface ZHJSHandler ()
 @end
 
@@ -423,7 +434,8 @@ case cType:{\
         if (!target || !sel) return;
         
         NSMethodSignature *sig = [target methodSignatureForSelector:sel];
-        NSInvocation *invo = [NSInvocation invocationWithMethodSignature:sig];
+        ZHJSInvocation *invo = [ZHJSInvocation invocationWithMethodSignature:sig];
+        invo.zhjs_target = target;
         [invo setTarget:target];
         [invo setSelector:sel];
         /**
@@ -514,6 +526,8 @@ case cType:{\
         id __unsafe_unretained res = nil;
         if ([sig methodReturnLength]) [invo getReturnValue:&res];
         value = res;
+        
+        invo = nil;
         
         //    void *res = NULL;
         //    if ([signature methodReturnLength]) [invocation getReturnValue:&res];

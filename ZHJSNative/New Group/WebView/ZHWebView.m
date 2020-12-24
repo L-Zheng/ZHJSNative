@@ -684,10 +684,33 @@
     }];
 }
 - (void)evaluateJs:(NSString *)js completionHandler:(void (^)(id res, NSError *error))completionHandler{
-    __weak __typeof__(self) __self = self;
+    if (@available(iOS 9.0, *)) {
+        __weak __typeof__(self) __self = self;
+        [self evaluateJavaScript:js completionHandler:^(id res, NSError *error) {
+            if (error) {
+                [__self.handler showWebViewException:error.userInfo];
+            }
+            if (completionHandler) completionHandler(res, error);
+        }];
+        return;
+    }
+    /** iOS8 crash问题
+         调用evaluateJavaScript函数，如果此时WKWebView退出dealloc，会导致completionHandler block释放，
+         此时JS代码还在执行，等待JavaScriptCore执行完毕，准备回调completionHandler，发生野指针错误。
+     iOS9，苹果已修复此问题
+        https://zhuanlan.zhihu.com/p/24990222
+        https://trac.webkit.org/changeset/179160/webkit
+        不再提前获取completionHandler，准备回调时再获取completionHandler
+     修复：
+        completionHandler强引用WKWebView，推迟WKWebView及completionHandler的释放，待completionHandler执行完成后，
+        completionHandler会自动销毁，WKWebView释放。
+     */
+    __strong __typeof__(self) strongSelf = self;
     [self evaluateJavaScript:js completionHandler:^(id res, NSError *error) {
+        //强引用WebView
+        strongSelf;
         if (error) {
-            [__self.handler showWebViewException:error.userInfo];
+            [strongSelf.handler showWebViewException:error.userInfo];
         }
         if (completionHandler) completionHandler(res, error);
     }];
