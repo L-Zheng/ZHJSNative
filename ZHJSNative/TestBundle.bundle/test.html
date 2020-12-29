@@ -42,37 +42,65 @@
         console.log(json)
     }
 
-// const fff = function(t){
-//     console.log(gg)
-//     var gg = t
-//     console.log(gg)
-// } 
-// fff('sfdg')
-// fff('dcvbv')
+    var aa = function (arg1, arg2, arg3, arg4,) {
+        /**获取参数*/
+        var params = arguments;
+        var argType = Object.prototype.toString.call(params);
+        var argCount = params.length;
 
-// const fff = function(){
-//     var res = {}
-//     var map = {
-//         qq: 'sdf',
-//         ww: 'sdf'
-//     }
-//     for (var key in map) {
-//         var gg = 'sfdfsd'
-//         var func = (function (params) {
-//             console.log(key)
-//         })
-//         res[key] = func
-//     }
-//     return res
-// }
-// const res1 = fff()
-// res1.qq()
+        console.log('1111111111')
+        console.log(params)
+        console.log(arg1)
+        console.log(Object.prototype.toString.call(arg1))
+        console.log(arg2)
+        console.log(Object.prototype.toString.call(arg2))
+        console.log(arg3)
+        console.log(Object.prototype.toString.call(arg3))
+        console.log(arg4)
+        console.log(Object.prototype.toString.call(arg4))
+        console.log('22222222')
+    }
 
-// window.addEventListener('ZhengJSBridgeReady', function () {
-//     console.log('addEventListeneraddEventListener')
-// })
-        // const aaa = []
-        // aaa.forEach(el, index => { });
+    // foo.call(this, arg1, arg2, arg3) == 
+    // foo.apply(this, arguments) == 
+    // this.foo(arg1, arg2, arg3);
+    // call函数：
+    // arg1：this对象
+
+    // aa.call(null, [null, undefined, true, function () { console.log('jjjj') }], 'sdfgb')
+    // aa(null, undefined, true, function(){console.log('jjjj')});
+
+    // const fff = function(t){
+    //     console.log(gg)
+    //     var gg = t
+    //     console.log(gg)
+    // } 
+    // fff('sfdg')
+    // fff('dcvbv')
+
+    // const fff = function(){
+    //     var res = {}
+    //     var map = {
+    //         qq: 'sdf',
+    //         ww: 'sdf'
+    //     }
+    //     for (var key in map) {
+    //         var gg = 'sfdfsd'
+    //         var func = (function (params) {
+    //             console.log(key)
+    //         })
+    //         res[key] = func
+    //     }
+    //     return res
+    // }
+    // const res1 = fff()
+    // res1.qq()
+
+    // window.addEventListener('ZhengJSBridgeReady', function () {
+    //     console.log('addEventListeneraddEventListener')
+    // })
+    // const aaa = []
+    // aaa.forEach(el, index => { });
 
     // try {
     //    var msg = "Hi, " + Name
