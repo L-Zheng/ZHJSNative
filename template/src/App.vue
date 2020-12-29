@@ -2,7 +2,7 @@
   <div class="main-wrap">
     <PullRefresh @refresh="onRefresh">
       <div @click="clickTest" 
-      style="width:100px;height:100px;background-color:orange;">
+      style="width:150px;height:100px;background-color:green;">
       点我测试
       </div>
       <div
@@ -70,6 +70,30 @@ var vm = {
   mounted() {},
   methods: {
     clickTest() {
+      // fund.commonLinkTo();
+      // return
+      fund.commonLinkTo({
+        ff: 'qqq',
+        success: (res) => {
+          console.log('success', 243, 'gdf')
+          console.log(res)
+        },
+        fail: (res) => {
+          console.log('fail')
+          console.log(res)
+        },
+        complete: (res) => {
+          console.log('complete')
+          console.log(res)
+        }
+      }, 'a string', ['gf', 555], 234, null, undefined, false, true, function(){console.log('jjjj')});
+      return;
+      // const res = fund.getJsonSync();
+      // console.log(res)
+      // return;
+      console.log('sdfdg')
+      console.log(sdfg)
+      return;
       fund.request({
             url: 'https://dataapineice.1234567.com.cn/community/show/article?serverversion=6.2.5&userid=43fe14e102644bd5b0edcd8fc3306e80&product=EFund&passportid=1010285265217684&deviceid=F0DD802F-6164-439E-9ACB-85763AAE813F&plat=Iphone&ids=20191128154557877210040_300&ctoken=afqqc6c6afacj-q6f1qk-8kjrnej-d1-&utoken=ndecnj-fjne1krck8816q68fkcnfkcnu&version=6.3.0&gtoken=85D646FD659449F7A3E646530A51F372',
             method: 'GET',
