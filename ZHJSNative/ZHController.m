@@ -78,6 +78,27 @@
     return config;
 }
 
+- (ZHJSContextConfiguration *)createContextConfig{
+    ZHJSContextAppletConfiguration *appletConfig = [ZHJSContextAppletConfiguration new];
+    appletConfig.appId = nil;
+    appletConfig.envVersion = nil;
+    appletConfig.loadFileName = nil;
+    appletConfig.presetFilePath = nil;
+    appletConfig.presetFileInfo = nil;
+    
+    ZHJSContextCreateConfiguration *createConfig = [ZHJSContextCreateConfiguration new];
+    createConfig.apiHandlers = [self apiHandlers];
+    
+    ZHJSContextLoadConfiguration *loadConfig = [ZHJSContextLoadConfiguration new];
+    
+    ZHJSContextConfiguration *config = [ZHJSContextConfiguration new];
+    config.appletConfig = appletConfig;
+    config.createConfig = createConfig;
+    config.loadConfig = loadConfig;
+    
+    return config;
+}
+
 - (void)preLoad{
     //预加载
     [[ZHWebViewManager shareManager] preReadyWebView:[self createConfig] finish:^(NSDictionary *info, NSError *error) {
@@ -90,18 +111,40 @@
     }];
 }
 
+- (void)btnClick{
+    NSLog(@"--------------------");
+}
+
+- (void)testJSContext{
+    
+    //运算js
+    ZHJSContextConfiguration *contextConfig = [self createContextConfig];
+    self.context = [[ZHJSContext alloc] initWithGlobalConfig:contextConfig];
+    NSURL *url = [NSURL fileURLWithPath:[[[NSBundle mainBundle] pathForResource:@"TestBundle" ofType:@"bundle"] stringByAppendingPathComponent:@"test.js"]];
+    [self.context renderWithUrl:url baseURL:nil loadConfig:contextConfig.loadConfig loadStartBlock:^(NSURL *runSandBoxURL) {
+        
+    } loadFinishBlock:^(NSDictionary *info, NSError *error) {
+        NSLog(@"--------------------");
+    }];
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
+    
+    UIView *bgView = [[UIView alloc] initWithFrame:CGRectMake(100, 50, 100, 100)];
+    bgView.backgroundColor = [UIColor redColor];
+    [self.view addSubview:bgView];
+    
+    UIButton *bgBtn = [[UIButton alloc] initWithFrame:CGRectMake(100, 180, 100, 100)];
+    bgBtn.backgroundColor = [UIColor greenColor];
+    [self.view addSubview:bgBtn];
+    [bgBtn addTarget:self action:@selector(btnClick) forControlEvents:UIControlEventTouchUpInside];
     
 //    [self preLoad];
     
     [self configView];
     [self readyLoadWebView];
-    
-    //运算js
-//    self.context = [[ZHJSContext alloc] initWithApiHandlers:@[[[ZHCustomApiHandler alloc] init], [[ZHCustom1ApiHandler alloc] init]]];
-//    NSURL *url = [NSURL fileURLWithPath:@"/Users/em/Desktop/My/ZHCode/GitHubCode/ZHJSNative/ZHJSNative/TestBundle.bundle/test.js"];
-//    [self.context evaluateScript:[NSString stringWithContentsOfURL:url encoding:NSUTF8StringEncoding error:nil]];
 //
 ////    ZHCustomExtra1ApiHandler *extr1 = [ZHCustomExtra1ApiHandler new];
 ////    [self.context addApiHandlers:@[extr1] completion:^(NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, id res, NSError *error) {

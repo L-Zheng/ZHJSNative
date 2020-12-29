@@ -136,13 +136,14 @@ case cType:{\
     //处理js的事件
     id (^apiBlock)(void) = ^(){
         //获取参数
-        NSArray *arguments = [ZHJSContext currentArguments];
-        JSValue *jsValue = (arguments.count == 0) ? nil : arguments[0];
+        NSArray *args = [ZHJSContext currentArguments];
         //js没传参数
-        if (!jsValue) {
+        if (args.count == 0) {
             return [__self runNativeFunc:key apiPrefix:apiPrefix arguments:@[]];
         }
-        /**
+        /**JSContext中：js类型-->JSValue类型 对应关系
+         Date：[JSValue toDate]=[NSDate class]
+         function：[JSValue toObject]=[NSDictionary class]    [jsValue isObject]=YES
          null：[JSValue toObject]=[NSNull null]
          undefined：[JSValue toObject]=nil
          boolean：[JSValue toObject]=@(YES) or @(NO)  [NSNumber class]
@@ -151,29 +152,52 @@ case cType:{\
          array：[JSValue toObject]= [NSArray class]    [jsValue isObject]=YES
          json：[JSValue toObject]= [NSDictionary class]    [jsValue isObject]=YES
          */
-        if ([jsValue isNull] || [jsValue isUndefined]) {
-            return [__self runNativeFunc:key apiPrefix:apiPrefix arguments:@[]];
+        NSMutableArray *resArgs = [NSMutableArray array];
+        for (JSValue *jsValue in args) {
+            if (@available(iOS 9.0, *)) {
+                if (jsValue.isDate) {
+                    [resArgs addObject:[jsValue toDate]]; continue;
+                }
+                if (jsValue.isArray) {
+                    [resArgs addObject:[jsValue toArray]]; continue;
+                }
+            }
+            if (@available(iOS 13.0, *)) {
+                if (jsValue.isSymbol) {
+                    [resArgs addObject:[NSNull null]]; continue;
+                }
+            }
+            if (jsValue.isNull || jsValue.isUndefined) {
+                [resArgs addObject:[NSNull null]]; continue;
+            }
+            if (jsValue.isString || jsValue.isNumber || jsValue.isBoolean){
+                [resArgs addObject:[jsValue toObject]]; continue;
+            }
+            if (jsValue.isObject){
+                [resArgs addObject:[jsValue toObject]?:@{}]; continue;
+            }
         }
-        NSDictionary *params = [jsValue toObject];
-        if (![params isKindOfClass:[NSDictionary class]]) {
-            return [__self runNativeFunc:key apiPrefix:apiPrefix arguments:@[params]];
+        JSValue *firstJSValue = args.firstObject;
+        NSDictionary *firstParams = [firstJSValue toObject];
+        if (![firstParams isKindOfClass:[NSDictionary class]]) {
+            return [__self runNativeFunc:key apiPrefix:apiPrefix arguments:resArgs.copy];
         }
         
         //是否需要回调
         NSString *success = __self.fetchJSContextCallSuccessFuncKey;
         NSString *fail = __self.fetchJSContextCallFailFuncKey;
         NSString *complete = __self.fetchJSContextCallCompleteFuncKey;
-        BOOL hasCallFunction = ([jsValue hasProperty:success] ||
-                                [jsValue hasProperty:fail] ||
-                                [jsValue hasProperty:complete]);
+        BOOL hasCallFunction = ([firstJSValue hasProperty:success] ||
+                                [firstJSValue hasProperty:fail] ||
+                                [firstJSValue hasProperty:complete]);
         if (!hasCallFunction) {
-            return [__self runNativeFunc:key apiPrefix:apiPrefix arguments:@[params]];
+            return [__self runNativeFunc:key apiPrefix:apiPrefix arguments:resArgs.copy];
         }
         
         //获取回调方法
-        JSValue *successFunc = [jsValue valueForProperty:success];
-        JSValue *failFunc = [jsValue valueForProperty:fail];
-        JSValue *completeFunc = [jsValue valueForProperty:complete];
+        JSValue *successFunc = [firstJSValue valueForProperty:success];
+        JSValue *failFunc = [firstJSValue valueForProperty:fail];
+        JSValue *completeFunc = [firstJSValue valueForProperty:complete];
         ZHJSApiAliveBlock block = ^(id result, NSError *error, BOOL alive) {
             if (!error) {
                 //运行参数里的success方法
@@ -193,7 +217,7 @@ case cType:{\
              */
             if (completeFunc) [completeFunc callWithArguments:@[]];
         };
-        return [__self runNativeFunc:key apiPrefix:apiPrefix arguments:@[params, block]];
+        return [__self runNativeFunc:key apiPrefix:apiPrefix arguments:[resArgs arrayByAddingObject:block]];
     };
     return apiBlock;
 }
@@ -386,32 +410,38 @@ case cType:{\
     if (!jsInfo || ![jsInfo isKindOfClass:[NSDictionary class]]) return nil;
     NSString *jsMethodName = [jsInfo valueForKey:@"methodName"];
     NSString *apiPrefix = [jsInfo valueForKey:@"apiPrefix"];
-
-    /** 参数类型
-     null、undefined：js端处理掉   jsInfo没有params字段
-     boolean：params=@(YES) or @(NO)  [NSNumber class]
-     number：params= [NSNumber class]
-     string：params= [NSString class]
-     array：params= [NSArray class]
-     json：params= [NSDictionary class]
-     */
-    NSDictionary *params = [jsInfo objectForKey:@"params"];
-    
-    if (!params) {
+    NSArray *args = [jsInfo valueForKey:@"args"];
+    if (!args || ![args isKindOfClass:NSArray.class] || args.count == 0) {
         return [self runNativeFunc:jsMethodName apiPrefix:apiPrefix arguments:@[]];
     }
-    if (![params isKindOfClass:[NSDictionary class]]) {
-        return [self runNativeFunc:jsMethodName apiPrefix:apiPrefix arguments:@[params]];
+    /**  WebView中：js类型-->原生类型 对应关系
+     Date：         params=[NSString class]，Date经JSON.stringify转换为string，@"2020-12-29T05:06:55.383Z"
+     function：    params=[NSNull null]，function经JSON.stringify转换为null，原生接受为NSNull
+     null：           params=[NSNull null]，null经JSON.stringify转换为null，原生接受为NSNull
+     undefined： params=[NSNull null]，undefined经JSON.stringify转换为null，原生接受为NSNull
+     boolean：    params=@(YES) or @(NO)  [NSNumber class]
+     number：    params= [NSNumber class]
+     string：        params= [NSString class]
+     array：         params= [NSArray class]
+     json：          params= [NSDictionary class]
+     */
+    NSDictionary *firstParams = args.firstObject;
+    
+    if (!firstParams) {
+        return [self runNativeFunc:jsMethodName apiPrefix:apiPrefix arguments:@[]];
+    }
+    if (![firstParams isKindOfClass:[NSDictionary class]]) {
+        return [self runNativeFunc:jsMethodName apiPrefix:apiPrefix arguments:args];
     }
     
     //回调方法
-    NSString *successId = [params valueForKey:[self fetchWebViewCallSuccessFuncKey]];
-    NSString *failId = [params valueForKey:[self fetchWebViewCallFailFuncKey]];
-    NSString *completeId = [params valueForKey:[self fetchWebViewCallCompleteFuncKey]];
+    NSString *successId = [firstParams valueForKey:[self fetchWebViewCallSuccessFuncKey]];
+    NSString *failId = [firstParams valueForKey:[self fetchWebViewCallFailFuncKey]];
+    NSString *completeId = [firstParams valueForKey:[self fetchWebViewCallCompleteFuncKey]];
     BOOL hasCallFunction = (successId.length || failId.length || completeId.length);
     //不需要回调方法
     if (!hasCallFunction) {
-        return [self runNativeFunc:jsMethodName apiPrefix:apiPrefix arguments:@[params]];
+        return [self runNativeFunc:jsMethodName apiPrefix:apiPrefix arguments:args];
     }
     //需要回调
     __weak __typeof__(self) __self = self;
@@ -425,7 +455,7 @@ case cType:{\
         }
         if (completeId.length) [__self callBackJsFunc:completeId data:[NSNull null] alive:alive callBack:nil];
     };
-    return [self runNativeFunc:jsMethodName apiPrefix:apiPrefix arguments:@[params, block]];
+    return [self runNativeFunc:jsMethodName apiPrefix:apiPrefix arguments:[args arrayByAddingObject:block]];
 }
 //运行原生方法
 - (id)runNativeFunc:(NSString *)jsMethodName apiPrefix:(NSString *)apiPrefix arguments:(NSArray *)arguments{

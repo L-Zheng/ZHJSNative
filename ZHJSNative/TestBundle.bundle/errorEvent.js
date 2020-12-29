@@ -20,7 +20,7 @@ window.onerror = (function (oriFunc) {
     return function () {
         try {
             /**发送至webview控制台*/
-            if (oriFunc) oriFunc.call(window, arguments);
+            if (oriFunc) oriFunc.apply(window, arguments);
             /**获取参数*/
             var lbz_params = arguments;
             /**发送至iOS原生*/

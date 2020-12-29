@@ -13,6 +13,13 @@
  * 不识别模板字符串语法  `--${}`
  * 不识别语法  endsWith
  */
+/**  函数参数 ...args  代表将参数arguments分割成args数组  等价于[arg1, arg2, arg3]
+    foo.apply(this, arguments) == 
+    foo.apply(this, [arg1, arg2, arg3]) == 
+    foo.apply(this, args) == 
+    foo.call(this, arg1, arg2, arg3) == 
+    this.foo(arg1, arg2, arg3);
+*/
 /**
  * 最小化该js文件： 
  * uglify-es库地址 ：https://github.com/mishoo/UglifyJS2
@@ -152,19 +159,19 @@ var ZhengHandleCallBackParams = function(methodName, params) {
 var ZhengSendParams = function(apiPrefix, methodName, params, sync) {
     /** js发送消息 以此为key包裹消息体 */
     var newParams = params;
-    var res = {};
-    if (!sync) {
-        newParams = ZhengHandleCallBackParams(methodName, params);
+    /** 处理参数 */
+    var resArgs = [];
+    if (Object.prototype.toString.call(newParams) === '[object Arguments]') {
+        var argCount = newParams.length;
+        for (var argIdx = 0; argIdx < argCount; argIdx++) {
+            if (!sync && argIdx == 0) {
+                resArgs.push(ZhengHandleCallBackParams(methodName, newParams[argIdx]));
+            }else{
+                resArgs.push(newParams[argIdx]);
+            }
+        }
     }
-    var haveParms = !(ZhengJSType.isNull(newParams) || ZhengJSType.isUndefined(newParams));
-    res = haveParms ? {
-        methodName,
-        apiPrefix,
-        params: newParams
-    } : {
-        methodName,
-        apiPrefix
-    };
+    var res = {methodName, apiPrefix, args: resArgs};
     /** 必须这样【JSON.parse(JSON.stringify())】 否则js运行window.webkit.messageHandlers  会报错cannot be cloned */
     return sync ? res : JSON.parse(JSON.stringify(res));
 };
@@ -196,10 +203,10 @@ var ZhengReplaceGeneratorAPI = function(apiPrefix, apiMap) {
             var config = apiMap[name];
             var isSync = config.hasOwnProperty('sync') ? config.sync : false;
             /** 生成function */
-            res[name] = isSync ? (function (params) {
-                return ZhengSendNativeSync(ZhengSendParams(apiPrefix, name, params, true));
-            }) : (function (params) {
-                ZhengSendNative(ZhengSendParams(apiPrefix, name, params, false));
+            res[name] = isSync ? (function () {
+                return ZhengSendNativeSync(ZhengSendParams(apiPrefix, name, arguments, true));
+            }) : (function () {
+                ZhengSendNative(ZhengSendParams(apiPrefix, name, arguments, false));
             });
         })(mapKeys[i]);
     }

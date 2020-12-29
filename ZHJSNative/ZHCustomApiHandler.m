@@ -152,8 +152,11 @@
     return [arguments componentsJoinedByString:@"&"];
 }
 
-- (NSDictionary *)js_getJsonSync:(NSDictionary *)params{
+- (NSDictionary *)js_getJsonSync:(NSDictionary *)params p1:(id)p1 p2:(id)p2 p3:(id)p3 p4:(id)p4 p5:(id)p5 p6:(id)p6 p7:(id)p7 p8:(id)p8 callBack:(ZHJSApiBlock)callBack{
     NSLog(@"-------%s---------", __func__);
+    if (callBack) {
+        callBack(@"qewret", nil);
+    }
     return @{@"sdfd": @"22222", @"sf": @(YES)};
 }
 - (NSNumber *)js_getNumberSync:(NSDictionary *)params{
@@ -168,9 +171,13 @@
     NSLog(@"-------%s---------", __func__);
     return @"dfgewrefdwd";
 }
-- (void)js_commonLinkTo:(NSDictionary *)params{
+- (void)js_commonLinkTo:(NSDictionary *)params p1:(id)p1 p2:(id)p2 p3:(id)p3 p4:(id)p4 p5:(id)p5 p6:(id)p6 p7:(id)p7 p8:(id)p8 callBack:(ZHJSApiBlock)callBack{
     NSLog(@"-------%s---------", __func__);
     NSLog(@"%@",params);
+    sleep(4);
+    if (callBack) {
+        callBack(@"qewret", nil);
+    }
 }
 
 

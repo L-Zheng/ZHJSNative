@@ -29,43 +29,51 @@ typedef void(^ZHJSApiAliveBlock)(id result, NSError *error, BOOL alive);
 /**
  ⚠️⚠️⚠️添加API步骤：
  在服从协议ZHJSApiProtocol的类中实现方法即可：
- id参数：类型可能为
-        NSDictionary
-        NSString
-        NSNumber：(js中的number 或者 boolean类型传到原生都为NSNumber类型)
-        NSArray
-        nil
+ id参数：js类型-->原生类型 对应关系
+        function：    params=[NSNull null]，function经JSON.stringify转换为null，原生接受为NSNull
+        null：           params=[NSNull null]，null经JSON.stringify转换为null，原生接受为NSNull
+        undefined： params=[NSNull null]，undefined经JSON.stringify转换为null，原生接受为NSNull
+        boolean：    params=@(YES) or @(NO)  [NSNumber class]
+        number：    params= [NSNumber class]
+        string：        params= [NSString class]
+        array：         params= [NSArray class]
+        json：          params= [NSDictionary class]
  callBack参数：
         ZHJSApiBlock：只能调用一次，再次调用无效
         ZHJSApiAliveBlock：
             alive：YES 可调用多次
             alive：NO 只能调用一次，再次调用无效
  异步方法
-   - (void)js_<#functionName#><##>{}
-   - (void)js_<#functionName#><##>:(id)params{}
-   - (void)js_<#functionName#><##>:(id)params callBack:(ZHJSApiBlock)callBack{}
-   - (void)js_<#functionName#><##>:(id)params callBack:(ZHJSApiAliveBlock)callBack{}
+   - (void)js_<#functionName#>{}
+   - (void)js_<#functionName#>:(id)params{}
+   - (void)js_<#functionName#>:(id)params callBack:(ZHJSApiBlock)callBack{}
+   - (void)js_<#functionName#>:(id)params callBack:(ZHJSApiAliveBlock)callBack{}
 
  同步方法
    //返回JS类型Object
-   - (NSDictionary *)js_<#functionName#><##>Sync{}
-   - (NSDictionary *)js_<#functionName#><##>Sync:(id)params{}
+   - (NSDictionary *)js_<#functionName#>Sync{}
+   - (NSDictionary *)js_<#functionName#>Sync:(id)params{} callBack:(ZHJSApiBlock)callBack{}
+   - (NSDictionary *)js_<#functionName#>Sync:(id)params{} callBack:(ZHJSApiAliveBlock)callBack{}
 
    //返回JS类型Array
-   - (NSArray *)js_<#functionName#><##>Sync{}
-   - (NSArray *)js_<#functionName#><##>Sync:(id)params{}
+   - (NSArray *)js_<#functionName#>Sync{}
+   - (NSArray *)js_<#functionName#>Sync:(id)params{} callBack:(ZHJSApiBlock)callBack{}
+   - (NSArray *)js_<#functionName#>Sync:(id)params{} callBack:(ZHJSApiAliveBlock)callBack{}
 
    //返回JS类型String
-   - (NSString *)js_<#functionName#><##>Sync{}
-   - (NSString *)js_<#functionName#><##>Sync:(id)params{}
+   - (NSString *)js_<#functionName#>Sync{}
+   - (NSString *)js_<#functionName#>Sync:(id)params{} callBack:(ZHJSApiBlock)callBack{}
+   - (NSString *)js_<#functionName#>Sync:(id)params{} callBack:(ZHJSApiAliveBlock)callBack{}
 
    //返回JS类型Number
-   - (NSNumber *)js_<#functionName#><##>Sync{}
-   - (NSNumber *)js_<#functionName#><##>Sync:(id)params{}
+   - (NSNumber *)js_<#functionName#>Sync{}
+   - (NSNumber *)js_<#functionName#>Sync:(id)params{} callBack:(ZHJSApiBlock)callBack{}
+   - (NSNumber *)js_<#functionName#>Sync:(id)params{} callBack:(ZHJSApiAliveBlock)callBack{}
    
    //返回JS类型Boolean：@(YES)、@(NO)
-   - (NSNumber *)js_<#functionName#><##>Sync{}
-   - (NSNumber *)js_<#functionName#><##>Sync:(id)params{}
+   - (NSNumber *)js_<#functionName#>Sync{}
+   - (NSNumber *)js_<#functionName#>Sync:(id)params{} callBack:(ZHJSApiBlock)callBack{}
+   - (NSNumber *)js_<#functionName#>Sync:(id)params{} callBack:(ZHJSApiAliveBlock)callBack{}
  */
 @end
 

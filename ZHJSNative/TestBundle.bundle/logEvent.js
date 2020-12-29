@@ -4,7 +4,7 @@ var ZhengJSToNativeLogHandlerName = 'ZhengReplaceJSIosLogEventHandler';
 console.log = (function (oriLogFunc) {
   return function () {
     /**发送至webview控制台*/
-    oriLogFunc.call(console, arguments);
+    oriLogFunc.apply(console, arguments);
     try {
       /**保留error信息*/
       var errorRes = [];
@@ -45,14 +45,13 @@ console.log = (function (oriLogFunc) {
       };
       /**获取参数*/
       var params = arguments;
-      var type = Object.prototype.toString.call(params);
-      var argCount = params.length;
       /**发送至iOS原生*/
-      if (type != '[object Arguments]') return;
+      if (Object.prototype.toString.call(params) != '[object Arguments]') return;
+      var argCount = params.length;
       /**保留发送error*/
       var iosRes = [];
-      var fetchVaule = function (idx) {
-        return argCount > idx ? params[idx] : '无此参数';
+      var fetchVaule = function (aIdx) {
+        return argCount > aIdx ? params[aIdx] : '无此参数';
       };
       if (argCount == 0) return;
       if (argCount == 1) {
