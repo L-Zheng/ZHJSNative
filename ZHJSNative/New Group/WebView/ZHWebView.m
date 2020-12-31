@@ -664,7 +664,7 @@
           (function () {\
               try {\
                       if (Object.prototype.toString.call(window.%@) === '[object Function]') {\
-                        %@\
+                        return %@\
                       } else {\
                         return '%@ is ' + Object.prototype.toString.call(window.%@);\
                       }\
@@ -678,7 +678,7 @@
         if (error) {
             NSLog(@"----❌js:function:%@--error:%@--", funcName, error);
         }else{
-            NSLog(@"----✅js:function:%@--返回值:%@--", funcName, res?:@"void");
+//            NSLog(@"----✅js:function:%@--返回值:%@--", funcName, res?:@"void");
         }
         if (completionHandler) completionHandler(res, error);
     }];

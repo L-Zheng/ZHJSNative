@@ -48,12 +48,13 @@ var ZhengJSType = (function() {
 })();
 var ZhengCallBackMap = {};
 var ZhengReplaceIosCallBack = function(params) {
+    var funcRes = null;
     if (!ZhengJSType.isString(params) || !params) {
-        return;
+        return funcRes;
     }
     var newParams = JSON.parse(decodeURIComponent(params));
     if (!ZhengJSType.isObject(newParams)) {
-        return;
+        return funcRes;
     }
     var funcId = newParams.funcId;
     var res = newParams.data;
@@ -74,27 +75,29 @@ var ZhengReplaceIosCallBack = function(params) {
         return true;
     };
     var matchRes = (matchKey(ZhengCallBackSuccessKey) || matchKey(ZhengCallBackFailKey) || matchKey(ZhengCallBackCompleteKey));
-    if (!matchRes) return;
+    if (!matchRes) return funcRes;
 
     var funcMap = ZhengCallBackMap[randomKey];
-    if (!ZhengJSType.isObject(funcMap)) return;
+    if (!ZhengJSType.isObject(funcMap)) return funcRes;
     var func = funcMap[funcNameKey];
-    if (!ZhengJSType.isFunction(func)) return;
+    if (!ZhengJSType.isFunction(func)) return funcRes;
     try {
         /** 
          * 原函数没有参数 complete: () => {}  调用func(res) 不会报错
          * 原函数有参数 complete: (res) => {}  调用func() 会报错 走catch
          */
-        func(res);
+        funcRes = func(res);
     } catch (error) {
-        console.log('CallBack-error');
-        console.log(error);
+        // console.log('CallBack-error');
+        // console.log(error);
+        funcRes = null;
     }
-    if (alive) return;
+    if (alive) return funcRes;
     /** 回调complete后删除 */
     if (funcNameKey == ZhengCallBackCompleteKey) {
         ZhengRemoveCallBack(randomKey);
     }
+    return funcRes;
 }
 /**
 {
@@ -121,12 +124,12 @@ var ZhengRemoveCallBack = function(randomKey) {
     if (!ZhengCallBackMap.hasOwnProperty(randomKey)) return;
     delete ZhengCallBackMap[randomKey];
 };
-var ZhengHandleCallBackParams = function(methodName, params) {
+var ZhengHandleCallBackParams = function(methodName, params, index) {
     if (!ZhengJSType.isObject(params)) {
         return params;
     }
-    /** 0-10000的随机整数 */
-    var randomKey = '-' + methodName + '-' + new Date().getTime().toString() + '-' + Math.floor(Math.random() * 10000).toString() + '-';
+    /** 0-10000的随机整数 -request-1582972065568-0-79- */
+    var randomKey = '-' + methodName + '-' + new Date().getTime().toString() + '-' + index + '-' + Math.floor(Math.random() * 10000).toString() + '-';
     /** 参数 */
     var newParams = params;
     var funcId = '';
@@ -156,28 +159,23 @@ var ZhengHandleCallBackParams = function(methodName, params) {
 };
 
 /** 构造发送参数 */
-var ZhengSendParams = function(apiPrefix, methodName, params, sync) {
-    /** js发送消息 以此为key包裹消息体 */
+var ZhengSendParams = function(apiPrefix, methodName, params) {
+    /** arguments */
     var newParams = params;
     /** 处理参数 */
     var resArgs = [];
     if (Object.prototype.toString.call(newParams) === '[object Arguments]') {
         var argCount = newParams.length;
         for (var argIdx = 0; argIdx < argCount; argIdx++) {
-            if (!sync && argIdx == 0) {
-                resArgs.push(ZhengHandleCallBackParams(methodName, newParams[argIdx]));
-            }else{
-                resArgs.push(newParams[argIdx]);
-            }
+            resArgs.push(ZhengHandleCallBackParams(methodName, newParams[argIdx], argIdx));
         }
     }
-    var res = {methodName, apiPrefix, args: resArgs};
-    /** 必须这样【JSON.parse(JSON.stringify())】 否则js运行window.webkit.messageHandlers  会报错cannot be cloned */
-    return sync ? res : JSON.parse(JSON.stringify(res));
+    return {methodName, apiPrefix, args: resArgs};
 };
 var ZhengSendNative = function(params) {
-    var handler = window.webkit.messageHandlers[ZhengJSToNativeHandlerName]
-    handler.postMessage(params);
+    var handler = window.webkit.messageHandlers[ZhengJSToNativeHandlerName];
+    /** 必须这样【JSON.parse(JSON.stringify())】 否则js运行window.webkit.messageHandlers  会报错cannot be cloned */
+    handler.postMessage(JSON.parse(JSON.stringify(params)));
 };
 var ZhengSendNativeSync = function(params) {
     var res = prompt(JSON.stringify(params));
@@ -204,9 +202,9 @@ var ZhengReplaceGeneratorAPI = function(apiPrefix, apiMap) {
             var isSync = config.hasOwnProperty('sync') ? config.sync : false;
             /** 生成function */
             res[name] = isSync ? (function () {
-                return ZhengSendNativeSync(ZhengSendParams(apiPrefix, name, arguments, true));
+                return ZhengSendNativeSync(ZhengSendParams(apiPrefix, name, arguments));
             }) : (function () {
-                ZhengSendNative(ZhengSendParams(apiPrefix, name, arguments, false));
+                ZhengSendNative(ZhengSendParams(apiPrefix, name, arguments));
             });
         })(mapKeys[i]);
     }

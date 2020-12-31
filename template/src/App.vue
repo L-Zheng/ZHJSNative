@@ -72,25 +72,89 @@ var vm = {
     clickTest() {
       // fund.commonLinkTo();
       // return
-      fund.commonLinkTo({
+      // fund.commonLinkTo({
+      //   ff: 'qqq',
+      //   success: (res) => {
+      //     console.log('success', 243, 'gdf')
+      //     console.log(res)
+      //   return '11111q'
+      //   },
+      //   fail: (res) => {
+      //     console.log('fail')
+      //     console.log(res)
+      //   return '22222q'
+      //   },
+      //   complete: (res) => {
+      //     console.log('complete')
+      //     console.log(res)
+      //   return '333333q'
+      //   }
+      // }, {
+      //   ff: 'ttt',
+      //   success: (res) => {
+      //     console.log('success-ttt', 243, 'gdf')
+      //     console.log(res)
+      //   },
+      //   fail: (res) => {
+      //     console.log('fail-ttt')
+      //     console.log(res)
+      //   },
+      //   complete: (res) => {
+      //     console.log('complete-ttt')
+      //     console.log(res)
+      //   }
+      // }, 
+      // 'a string', 
+      // ['gf', 555], 
+      // 234, 
+      // null, 
+      // undefined, 
+      // false, 
+      // true, 
+      // function(){console.log('jjjj')});
+      // return;
+      const res = fund.getJsonSync({
         ff: 'qqq',
         success: (res) => {
-          console.log('success', 243, 'gdf')
+          console.log('success-qqq', 243, 'gdf')
+          console.log(res)
+        return '11111q'
+        },
+        fail: (res) => {
+          console.log('fail-qqq')
+          console.log(res)
+        return '22222q'
+        },
+        complete: (res) => {
+          console.log('complete-qqq')
+          console.log(res)
+        return '33333q'
+        }
+      }, {
+        ff: 'ttt',
+        success: (res) => {
+          console.log('success-ttt', 243, 'gdf')
           console.log(res)
         },
         fail: (res) => {
-          console.log('fail')
+          console.log('fail-ttt')
           console.log(res)
         },
         complete: (res) => {
-          console.log('complete')
+          console.log('complete-ttt')
           console.log(res)
         }
-      }, 'a string', ['gf', 555], 234, null, undefined, false, true, function(){console.log('jjjj')});
+      }, 
+      'a string', 
+      ['gf', 555], 
+      234, 
+      null, 
+      undefined, 
+      false, 
+      true, 
+      function(){console.log('jjjj')});
+      console.log(res)
       return;
-      // const res = fund.getJsonSync();
-      // console.log(res)
-      // return;
       console.log('sdfdg')
       console.log(sdfg)
       return;

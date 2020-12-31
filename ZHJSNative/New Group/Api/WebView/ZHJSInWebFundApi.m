@@ -11,29 +11,8 @@
 @implementation ZHJSInWebFundApi
 
 #pragma mark - api
-/** ⚠️⚠️⚠️添加API步骤：
- 在下面实现方法即可：
-     异步方法
-       - (void)js_<#functionName#><##>:(NSDictionary *)params{}
-       - (void)js_<#functionName#><##>:(NSDictionary *)params callBack:(ZHJSApiBlock)callBack{}
- 
-     同步方法
-       //返回JS类型Object
-       - (NSDictionary *)js_<#functionName#><##>Sync:(NSDictionary *)params{}
- 
-       //返回JS类型Array
-       - (NSArray *)js_<#functionName#><##>Sync:(NSDictionary *)params{}
- 
-       //返回JS类型String
-       - (NSString *)js_<#functionName#><##>Sync:(NSDictionary *)params{}
- 
-       //返回JS类型Number
-       - (NSNumber *)js_<#functionName#><##>Sync:(NSDictionary *)params{}
-       
-       //返回JS类型Boolean：@(YES)、@(NO)
-       - (NSNumber *)js_<#functionName#><##>Sync:(NSDictionary *)params{}
- */
- - (void)js_request:(NSDictionary *)info callBack:(ZHJSApiBlock)callBack{
+
+ - (void)js_request:(NSDictionary *)info callBack:(ZHJSApiArgsBlock)callBack{
      NSLog(@"-------%s---------", __func__);
      NSString *url = [info objectForKey:@"url"];
      NSString *method = [[info objectForKey:@"method"] uppercaseString];
@@ -105,15 +84,15 @@
              });
              
              if (error) {
-                 callBack(nil, error);
+                 callBack(nil, error, nil);
                  return;
              }
              if (!data) {
-                 callBack(nil, createError(@"没有数据"));
+                 callBack(nil, createError(@"没有数据"), nil);
                  return;
              }
              if (!response || ![response isKindOfClass:[NSHTTPURLResponse class]]) {
-                 callBack(nil, createError((response ? @"不是NSHTTPURLResponse响应" : @"response为空")));
+                 callBack(nil, createError((response ? @"不是NSHTTPURLResponse响应" : @"response为空")), nil);
                  return;
              }
              
@@ -122,14 +101,14 @@
  //            [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
              result = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:&jsonError];
              if (jsonError || !result) {
-                 callBack(nil, createError(@"解析json失败"));
+                 callBack(nil, createError(@"解析json失败"), nil);
                  return;
              }
              NSLog(@"👉-ios-request--api回调数据");
              NSLog(@"%@",result);
              callBack(@{@"data": result?:@{},
                         @"statusCode": @([(NSHTTPURLResponse *)response statusCode])
-             }, nil);
+             }, nil, nil);
          });
      }];
      [dataTask resume];
@@ -152,8 +131,33 @@
      return [arguments componentsJoinedByString:@"&"];
  }
 
- - (NSDictionary *)js_getJsonSync:(NSDictionary *)params{
-     NSLog(@"-------%s---------", __func__);
+ - (NSDictionary *)js_getJsonSync:(NSDictionary *)params p1:(NSDictionary *)p1 p2:(id)p2 p3:(id)p3 p4:(id)p4 p5:(id)p5 p6:(id)p6 p7:(id)p7 p8:(id)p8 p9:(id)p9 callBack:(ZHJSApiArgsBlock)callBack{
+     
+     ZHJSApiArgsBlock block1 = params[ZHJSApiParamsBlockKey];
+     ZHJSApiArgsBlock block2 = p1[ZHJSApiParamsBlockKey];
+     
+     if (block1) {
+         NSDictionary *runResMap = @{
+             ZHJSApiRunResSuccessBlockKey: ^ZHJSApiRunResBlockHeader{
+                 NSLog(@"%@",result);
+                 NSLog(@"%@",error);
+                 return result;
+             },
+             ZHJSApiRunResFailBlockKey: ^ZHJSApiRunResBlockHeader{
+                 NSLog(@"%@",result);
+                 NSLog(@"%@",error);
+                 return result;
+             },
+             ZHJSApiRunResCompleteBlockKey: ^ZHJSApiRunResBlockHeader{
+                 NSLog(@"%@",result);
+                 NSLog(@"%@",error);
+                 return result;
+             }
+         };
+         block1(@"lkjhg", nil, @(YES), runResMap, nil);
+     }
+     if (block2) block2(@"2222", nil, nil);
+     if (callBack) callBack(@"3333", nil, nil);
      return @{@"sdfd": @"22222", @"sf": @(YES)};
  }
  - (NSNumber *)js_getNumberSync:(NSDictionary *)params{
@@ -168,9 +172,16 @@
      NSLog(@"-------%s---------", __func__);
      return @"dfgewrefdwd";
  }
- - (void)js_commonLinkTo:(NSDictionary *)params{
+ - (void)js_commonLinkTo:(NSDictionary *)params p1:(id)p1 p2:(id)p2 p3:(id)p3 p4:(id)p4 p5:(id)p5 p6:(id)p6 p7:(id)p7 p8:(id)p8 p9:(id)p9 callBack:(ZHJSApiArgsBlock)callBack{
+     
+     ZHJSApiArgsBlock block1 = params[ZHJSApiParamsBlockKey];
+     ZHJSApiArgsBlock block2 = p1[ZHJSApiParamsBlockKey];
+     
+     if (block1) block1(@"1111", nil, @(YES), nil);
+     if (block2) block2(@"2222", nil, nil);
+     
+     if (callBack) callBack(@"3333", nil, nil);
      NSLog(@"-------%s---------", __func__);
-     NSLog(@"%@",params);
  }
 
 #pragma mark - ZHJSApiProtocol

@@ -1,38 +1,69 @@
 
 // fund.commonLinkTo();
 // return
-fund.commonLinkTo({
-ff: 'qqq',
-success: function(res) {
-    console.log('success')
-    console.log(res)
-},
-fail: function(res) {
-    console.log('fail')
-    console.log(res)
-},
-complete: function(res) {
-    console.log('complete')
-    console.log(res)
-}
-}, 'a string', ['gf', 555], 234, null, undefined, false, true, function(){console.log('jjjj')});
-// return;
-// const resa = fund.getJsonSync({
+// fund.commonLinkTo({
 //     ff: 'qqq',
-//     success: function(res) {
-//         console.log('success')
+//     success: function (res) {
+//         console.log('success-qqq')
 //         console.log(res)
 //     },
-//     fail: function(res) {
-//         console.log('fail')
+//     fail: function (res) {
+//         console.log('fail-qqq')
 //         console.log(res)
 //     },
-//     complete: function(res) {
-//         console.log('complete')
+//     complete: function (res) {
+//         console.log('complete-qqq')
 //         console.log(res)
 //     }
-//     }, 'a string', ['gf', 555], 234, null, undefined, false, true, function(){console.log('jjjj')});
-// console.log(resa);
+// }, {
+//     ff: 'ttt',
+//     success: (res) => {
+//       console.log('success-ttt')
+//       console.log(res)
+//     },
+//     fail: (res) => {
+//       console.log('fail-ttt')
+//       console.log(res)
+//     },
+//     complete: (res) => {
+//       console.log('complete-ttt')
+//       console.log(res)
+//     }
+//   }, 'a string', ['gf', 555], 234, null, undefined, false, true, function () { console.log('jjjj') });
+// return;
+const resa = fund.getJsonSync({
+    ff: 'qqq',
+    success: function (res) {
+        console.log('success-qqq')
+        console.log(res)
+        return '11111q'
+    },
+    fail: function (res) {
+        console.log('fail-qqq')
+        console.log(res)
+        return '22222q'
+    },
+    complete: function (res) {
+        console.log('complete-qqq')
+        console.log(res)
+        return '333333q'
+    }
+}, {
+    ff: 'ttt',
+    success: (res) => {
+      console.log('success-ttt')
+      console.log(res)
+    },
+    fail: (res) => {
+      console.log('fail-ttt')
+      console.log(res)
+    },
+    complete: (res) => {
+      console.log('complete-ttt')
+      console.log(res)
+    }
+  }, 'a string', ['gf', 555], 234, null, undefined, false, true, function () { console.log('jjjj') });
+console.log(resa);
 // return;
 
 // const sss = []
