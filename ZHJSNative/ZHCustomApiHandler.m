@@ -13,35 +13,6 @@
 
 #pragma mark - api
 
-- (NSDictionary *)js_getJsonSync:(NSDictionary *)params p1:(NSDictionary *)p1 p2:(id)p2 p3:(id)p3 p4:(id)p4 p5:(id)p5 p6:(id)p6 p7:(id)p7 p8:(id)p8 p9:(id)p9 callBack:(ZHJSApiArgsBlock)callBack{
-    
-    ZHJSApiArgsBlock block1 = params[ZHJSApiParamsBlockKey];
-    ZHJSApiArgsBlock block2 = p1[ZHJSApiParamsBlockKey];
-    
-    if (block1) {
-        NSDictionary *callMap = @{
-            ZHJSApiRunResSuccessBlockKey: ^ZHJSApiRunResBlockHeader{
-                NSLog(@"%@",result);
-                NSLog(@"%@",error);
-                return result;
-            },
-            ZHJSApiRunResFailBlockKey: ^ZHJSApiRunResBlockHeader{
-                NSLog(@"%@",result);
-                NSLog(@"%@",error);
-                return result;
-            },
-            ZHJSApiRunResCompleteBlockKey: ^ZHJSApiRunResBlockHeader{
-                NSLog(@"%@",result);
-                NSLog(@"%@",error);
-                return result;
-            }
-        };
-        block1(@"lkjhg", nil, @(YES), callMap, nil);
-    }
-    if (block2) block2(@"2222", nil, nil);
-    if (callBack) callBack(@"3333", nil, nil);
-    return @{@"sdfd": @"22222", @"sf": @(YES)};
-}
 - (NSNumber *)js_getNumberSync:(NSDictionary *)params{
     NSLog(@"-------%s---------", __func__);
     return @(22);
@@ -54,18 +25,6 @@
     NSLog(@"-------%s---------", __func__);
     return @"dfgewrefdwd";
 }
-- (void)js_commonLinkTo:(NSDictionary *)params p1:(id)p1 p2:(id)p2 p3:(id)p3 p4:(id)p4 p5:(id)p5 p6:(id)p6 p7:(id)p7 p8:(id)p8 p9:(id)p9 callBack:(ZHJSApiArgsBlock)callBack{
-    
-    ZHJSApiArgsBlock block1 = params[ZHJSApiParamsBlockKey];
-    ZHJSApiArgsBlock block2 = p1[ZHJSApiParamsBlockKey];
-    
-    if (block1) block1(@"1111", nil, @(YES), nil);
-    if (block2) block2(@"2222", nil, nil);
-    
-    if (callBack) callBack(@"3333", nil, nil);
-    NSLog(@"-------%s---------", __func__);
-}
-
 
 - (NSDictionary *)js_getEmotionResourceSync:(NSDictionary *)params{
     return [ZHEmotion shareManager].emotionMap;

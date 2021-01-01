@@ -133,22 +133,30 @@
 
  - (NSDictionary *)js_getJsonSync:(NSDictionary *)params p1:(NSDictionary *)p1 p2:(id)p2 p3:(id)p3 p4:(id)p4 p5:(id)p5 p6:(id)p6 p7:(id)p7 p8:(id)p8 p9:(id)p9 callBack:(ZHJSApiArgsBlock)callBack{
      
-     ZHJSApiArgsBlock block1 = params[ZHJSApiParamsBlockKey];
-     ZHJSApiArgsBlock block2 = p1[ZHJSApiParamsBlockKey];
+     ZHJSApiArgsBlock block1 = params[ZHJSApiBlockKey];
+     ZHJSApiArgsBlock block2 = p1[ZHJSApiBlockKey];
      
      if (block1) {
          NSDictionary *runResMap = @{
-             ZHJSApiRunResSuccessBlockKey: ^ZHJSApiRunResBlockHeader{
+             ZHJSResSuccessBlockKey: ^ZHJSResBlockHeader{
+                 // 参数result、error
+                 NSLog(@"%@--%@",result, error);
+                 // 获取所有block参数
+                 NSMutableArray *bArgs = [NSMutableArray array];
+                 va_list bList; id bArg;
+                 va_start(bList, error);
+                 while ((bArg = va_arg(bList, id))) {
+                     [bArgs addObject:bArg];
+                 }
+                 va_end(bList);
+                 return nil;
+             },
+             ZHJSResFailBlockKey: ^ZHJSResBlockHeader{
                  NSLog(@"%@",result);
                  NSLog(@"%@",error);
                  return result;
              },
-             ZHJSApiRunResFailBlockKey: ^ZHJSApiRunResBlockHeader{
-                 NSLog(@"%@",result);
-                 NSLog(@"%@",error);
-                 return result;
-             },
-             ZHJSApiRunResCompleteBlockKey: ^ZHJSApiRunResBlockHeader{
+             ZHJSResCompleteBlockKey: ^ZHJSResBlockHeader{
                  NSLog(@"%@",result);
                  NSLog(@"%@",error);
                  return result;
@@ -174,8 +182,8 @@
  }
  - (void)js_commonLinkTo:(NSDictionary *)params p1:(id)p1 p2:(id)p2 p3:(id)p3 p4:(id)p4 p5:(id)p5 p6:(id)p6 p7:(id)p7 p8:(id)p8 p9:(id)p9 callBack:(ZHJSApiArgsBlock)callBack{
      
-     ZHJSApiArgsBlock block1 = params[ZHJSApiParamsBlockKey];
-     ZHJSApiArgsBlock block2 = p1[ZHJSApiParamsBlockKey];
+     ZHJSApiArgsBlock block1 = params[ZHJSApiBlockKey];
+     ZHJSApiArgsBlock block2 = p1[ZHJSApiBlockKey];
      
      if (block1) block1(@"1111", nil, @(YES), nil);
      if (block2) block2(@"2222", nil, nil);

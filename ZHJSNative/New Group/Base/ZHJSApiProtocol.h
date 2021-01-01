@@ -8,37 +8,42 @@
 
 #import <Foundation/Foundation.h>
 
-//NS_ASSUME_NONNULL_BEGIN
-
-/**js传递给原生的参数：（json格式 && 有success、fail、complete函数），
- 就会带有此key值ZHJSApiParamsBlockKey，其value是个block（ZHJSApiArgsBlock类型）,可用于回调给js
- */
-static NSString * const ZHJSApiParamsBlockKey = @"ZHJSApiParamsBlockKey";
 // 调用js函数（success、fail、complete）的返回值
-typedef NSString * ZHJSApiRunResBlockKey;
-static ZHJSApiRunResBlockKey const ZHJSApiRunResSuccessBlockKey = @"ZHJSApiRunResSuccessBlockKey";
-static ZHJSApiRunResBlockKey const ZHJSApiRunResFailBlockKey = @"ZHJSApiRunResFailBlockKey";
-static ZHJSApiRunResBlockKey const ZHJSApiRunResCompleteBlockKey = @"ZHJSApiRunResCompleteBlockKey";
-#define ZHJSApiRunResBlockHeader id(id result, NSError *error)
-typedef id(^ZHJSApiRunResBlockType)(id result, NSError *error);
-/** iOS原生函数接收
- 调用参数（最少三个参数，一律以nil结尾）：call(xx, xx, ..., nil)
+static NSString * const ZHJSResSuccessBlockKey = @"ZHJSResSuccessBlockKey";
+static NSString * const ZHJSResFailBlockKey = @"ZHJSResFailBlockKey";
+static NSString * const ZHJSResCompleteBlockKey = @"ZHJSResCompleteBlockKey";
+#define ZHJSResBlockHeader id(id result, NSError *error, ...)
+typedef id(^ZHJSResBlock)(id result, NSError *error, ...);
+/**js传递给原生的参数：（json格式 && 有success、fail、complete函数），
+ 就会带有此key值ZHJSApiBlockKey，其value是个block（ZHJSApiArgsBlock类型）,可用于回调给js
+ */
+static NSString * const ZHJSApiBlockKey = @"ZHJSApiBlockKey";
+/** Block
+ 调用说明（⚠️最少三个参数，一律以nil结尾）：call(xx, xx, ..., nil)
  参数说明...
     回调数据：                                      id result
     调用js函数（success、fail）：       NSError *error
     允许多次调用js函数：                     NSNumber *alive    @(YES)、@(NO)
-    调用js函数（success、fail、complete）的返回值：
-                            NSDictionary <ZHJSApiRunResBlockKey, ZHJSApiRunResBlockType> *runResBlockMap
+    调用js函数（success、fail、complete）的返回值： NSDictionary *runResBlockMap
                              @{
-                                 ZHJSApiRunResSuccessBlockKey: ^ZHJSApiRunResBlockHeader{
+                                 ZHJSResSuccessBlockKey: ^ZHJSResBlockHeader{
+                                     // 参数result、error
+                                     NSLog(@"%@--%@",result, error);
+                                     // 获取所有block参数
+                                     NSMutableArray *bArgs = [NSMutableArray array];
+                                     va_list bList; id bArg;
+                                     va_start(bList, error);
+                                     while ((bArg = va_arg(bList, id))) {
+                                         [bArgs addObject:bArg];
+                                     }
+                                     va_end(bList);
+                                     return nil;
+                                 },
+                                 ZHJSResFailBlockKey: ^ZHJSResBlockHeader{
                                      NSLog(@"%@--%@",result, error);
                                      return nil;
                                  },
-                                 ZHJSApiRunResFailBlockKey: ^ZHJSApiRunResBlockHeader{
-                                     NSLog(@"%@--%@",result, error);
-                                     return nil;
-                                 },
-                                 ZHJSApiRunResCompleteBlockKey: ^ZHJSApiRunResBlockHeader{
+                                 ZHJSResCompleteBlockKey: ^ZHJSResBlockHeader{
                                      NSLog(@"%@--%@",result, error);
                                      return nil;
                                  }
@@ -98,5 +103,3 @@ typedef id(^ZHJSApiArgsBlock)(id result, NSError *error, ...);
    - (NSNumber *)js_<#functionName#>Sync:(id)params params1:(id)params1 <#xxx:(id)xxx#> callBack:(ZHJSApiArgsBlock)callBack{}
  */
 @end
-
-//NS_ASSUME_NONNULL_END
