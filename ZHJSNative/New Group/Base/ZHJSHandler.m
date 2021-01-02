@@ -29,9 +29,11 @@ case cType:{\
 @property (nonatomic,strong) id zhjs_target;
 @end
 @implementation ZHJSInvocation
+#ifdef DEBUG
 - (void)dealloc{
     NSLog(@"%s",__func__);
 }
+#endif
 @end
 
 
@@ -141,7 +143,7 @@ case cType:{\
             return [__self runNativeFunc:key apiPrefix:apiPrefix arguments:@[]];
         }
          // 第一个参数的success fail complete回调
-         ZHJSApiArgsBlock firstBlock = nil;
+        ZHJSApiCallItem *firstCallItem = nil;
         
         //处理参数
         NSMutableArray *resArgs = [NSMutableArray array];
@@ -169,37 +171,21 @@ case cType:{\
             JSValue *successFunc = [jsArg valueForProperty:success];
             JSValue *failFunc = [jsArg valueForProperty:fail];
             JSValue *completeFunc = [jsArg valueForProperty:complete];
-            ZHJSApiArgsBlock block = ^id(id result, NSError *error, ...) {
-                // 获取所有block参数
-                NSMutableArray *bArgs = [NSMutableArray array];
-                va_list bList; id bArg;
-                va_start(bList, error);
-                //依次获取参数值，直到遇见nil【参数format必须以nil结尾 否则崩溃】
-                while ((bArg = va_arg(bList, id))) {
-                    [bArgs addObject:bArg];
-                }
-                va_end(bList);
-                
-                BOOL alive = ((bArgs.count > 0 && [bArgs[0] isKindOfClass:[NSNumber class]]) ? [(NSNumber *)bArgs[0] boolValue] : NO);
-                NSDictionary *runResMap = ((bArgs.count > 1 && [bArgs[1] isKindOfClass:[NSDictionary class]]) ? (NSDictionary *)bArgs[1] : @{});
+            ZHJSApiInCallBlock block = ^ZHJSApi_InCallBlock_Header{
+                id result = argItem.result;
+                NSError *error = argItem.error;
                 
                 if (!error && successFunc) {
                     // 运行参数里的success方法
                     // [paramsValue invokeMethod:success withArguments:@[result]];
                     JSValue *resValue = [successFunc callWithArguments:result ? @[result] : @[]];
-                    ZHJSResBlock callBlock = runResMap[ZHJSResSuccessBlockKey];
-                    if (callBlock) {
-                        callBlock([__self jsValueToNative:resValue], nil, nil);
-                    }
+                    argItem.callSuccess([ZHJSApiRunJsReturnItem item:[__self jsValueToNative:resValue] error:nil]);
                 }
                 if (error && failFunc) {
                     NSString *errorDesc = error.userInfo[NSLocalizedDescriptionKey];
                     id desc = (errorDesc ?: @"发生错误");
                     JSValue *resValue = [failFunc callWithArguments:@[desc]];
-                    ZHJSResBlock callBlock = runResMap[ZHJSResFailBlockKey];
-                    if (callBlock) {
-                        callBlock([__self jsValueToNative:resValue], nil, nil);
-                    }
+                    argItem.callFail([ZHJSApiRunJsReturnItem item:[__self jsValueToNative:resValue] error:nil]);
                 }
                 /**
                  js方法 complete: () => {}，complete: (res) => {}
@@ -208,21 +194,19 @@ case cType:{\
                  */
                 if (completeFunc) {
                     JSValue *resValue = [completeFunc callWithArguments:@[]];
-                    ZHJSResBlock callBlock = runResMap[ZHJSResCompleteBlockKey];
-                    if (callBlock) {
-                        callBlock([__self jsValueToNative:resValue], nil, nil);
-                    }
+                    argItem.callComplete([ZHJSApiRunJsReturnItem item:[__self jsValueToNative:resValue] error:nil]);
                 }
-                return nil;
+                return [ZHJSApiCallReturnItem item];
             };
             
-            [newParams setObject:block forKey:ZHJSApiBlockKey];
+            ZHJSApiCallItem *callItem = [ZHJSApiCallItem itemWithBlock:block];
+            [newParams setObject:callItem forKey:ZHJSApiCallItemKey];
             [resArgs addObject:newParams.copy];
             
-            if (idx == 0) firstBlock = block;
+            if (idx == 0) firstCallItem = callItem;
         }
         
-        if (firstBlock) [resArgs addObject:firstBlock];
+        if (firstCallItem) [resArgs addObject:firstCallItem];
         return [__self runNativeFunc:key apiPrefix:apiPrefix arguments:resArgs.copy];
     };
     return apiBlock;
@@ -470,7 +454,7 @@ case cType:{\
      */
      __weak __typeof__(self) __self = self;
     // 第一个参数的success fail complete回调
-    ZHJSApiArgsBlock firstBlock = nil;
+    ZHJSApiCallItem *firstCallItem = nil;
     //处理参数
     NSMutableArray *resArgs = [NSMutableArray array];
     for (NSUInteger idx = 0; idx < jsArgs.count; idx++) {
@@ -491,48 +475,37 @@ case cType:{\
             continue;
         }
         //需要回调
-        ZHJSApiArgsBlock block = ^id(id result, NSError *error, ...) {
-            // 获取所有block参数
-            NSMutableArray *bArgs = [NSMutableArray array];
-            va_list bList; id bArg;
-            va_start(bList, error);
-            //依次获取参数值，直到遇见nil【参数format必须以nil结尾 否则崩溃】
-            while ((bArg = va_arg(bList, id))) {
-                [bArgs addObject:bArg];
-            }
-            va_end(bList);
-            
-            BOOL alive = ((bArgs.count > 0 && [bArgs[0] isKindOfClass:[NSNumber class]]) ? [(NSNumber *)bArgs[0] boolValue] : NO);
-            NSDictionary *runResMap = ((bArgs.count > 1 && [bArgs[1] isKindOfClass:[NSDictionary class]]) ? (NSDictionary *)bArgs[1] : @{});
+        ZHJSApiInCallBlock block = ^ZHJSApi_InCallBlock_Header{
+            id result = argItem.result;
+            NSError *error = argItem.error;
+            BOOL alive = argItem.alive;
             
             if (!error && successId.length) {
                 [__self callBackJsFunc:successId data:result?:[NSNull null] alive:alive callBack:^(id jsRes, NSError *jsError) {
-                    ZHJSResBlock callBlock = runResMap[ZHJSResSuccessBlockKey];
-                    if (callBlock) callBlock(jsRes, jsError, nil);
+                    argItem.callSuccess([ZHJSApiRunJsReturnItem item:jsRes error:jsError]);
                 }];
             }
             if (error && failId.length) {
                 NSString *errorDesc = error.userInfo[NSLocalizedDescriptionKey];
                 id desc = (errorDesc ?: @"发生错误");
                 [__self callBackJsFunc:failId data:desc alive:alive callBack:^(id jsRes, NSError *jsError) {
-                    ZHJSResBlock callBlock = runResMap[ZHJSResFailBlockKey];
-                    if (callBlock) callBlock(jsRes, jsError, nil);
+                    argItem.callFail([ZHJSApiRunJsReturnItem item:jsRes error:jsError]);
                 }];
             }
             if (completeId.length) {
                 [__self callBackJsFunc:completeId data:[NSNull null] alive:alive callBack:^(id jsRes, NSError *jsError) {
-                    ZHJSResBlock callBlock = runResMap[ZHJSResCompleteBlockKey];
-                    if (callBlock) callBlock(jsRes, jsError, nil);
+                    argItem.callComplete([ZHJSApiRunJsReturnItem item:jsRes error:jsError]);
                 }];
             }
-            return nil;
+            return [ZHJSApiCallReturnItem item];
         };
-        [newParams setObject:block forKey:ZHJSApiBlockKey];
+        ZHJSApiCallItem *callItem = [ZHJSApiCallItem itemWithBlock:block];
+        [newParams setObject:callItem forKey:ZHJSApiCallItemKey];
         [resArgs addObject:newParams.copy];
         
-        if (idx == 0) firstBlock = block;
+        if (idx == 0) firstCallItem = callItem;
     }
-    if (firstBlock) [resArgs addObject:firstBlock];
+    if (firstCallItem) [resArgs addObject:firstCallItem];
     
     return [self runNativeFunc:jsMethodName apiPrefix:apiPrefix arguments:resArgs.copy];
 }

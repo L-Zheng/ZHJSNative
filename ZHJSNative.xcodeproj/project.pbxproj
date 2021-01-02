@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0F064E0525A0299100244915 /* ZHJSApiCallItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F064E0425A0299100244915 /* ZHJSApiCallItem.m */; };
 		0F07985F240104FA004AAFBC /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F07985E240104FA004AAFBC /* AppDelegate.m */; };
 		0F079862240104FA004AAFBC /* SceneDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F079861240104FA004AAFBC /* SceneDelegate.m */; };
 		0F079865240104FA004AAFBC /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F079864240104FA004AAFBC /* ViewController.m */; };
@@ -62,6 +63,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0F064E0325A0299100244915 /* ZHJSApiCallItem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHJSApiCallItem.h; sourceTree = "<group>"; };
+		0F064E0425A0299100244915 /* ZHJSApiCallItem.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHJSApiCallItem.m; sourceTree = "<group>"; };
 		0F07985A240104FA004AAFBC /* ZHJSNative.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ZHJSNative.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0F07985D240104FA004AAFBC /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		0F07985E240104FA004AAFBC /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -255,6 +258,8 @@
 				0F0798A024010647004AAFBC /* ZHJSHandler.h */,
 				0F0798A124010647004AAFBC /* ZHJSHandler.m */,
 				856980832429E13F0042755A /* ZHJSApiProtocol.h */,
+				0F064E0325A0299100244915 /* ZHJSApiCallItem.h */,
+				0F064E0425A0299100244915 /* ZHJSApiCallItem.m */,
 				0F6807DB24016A0500E6B4C6 /* ZHJSApiHandler.h */,
 				0F6807DC24016A0500E6B4C6 /* ZHJSApiHandler.m */,
 				85FE9D912591D379008A76AE /* ZHJSNativeItem.h */,
@@ -522,6 +527,7 @@
 				85A4A30F243FF80A002AE903 /* ZHWebViewManager.m in Sources */,
 				85B4FC9C2435702900CD910B /* ZhengFile.m in Sources */,
 				0F079899240105E3004AAFBC /* ZHJSContext.m in Sources */,
+				0F064E0525A0299100244915 /* ZHJSApiCallItem.m in Sources */,
 				0F07989F24010627004AAFBC /* ZHController.m in Sources */,
 				0F079870240104FB004AAFBC /* main.m in Sources */,
 				0F0798A224010647004AAFBC /* ZHJSHandler.m in Sources */,
