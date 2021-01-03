@@ -30,23 +30,6 @@
 + (instancetype)item{
     return [[ZHJSApiCallArgItem alloc] init];
 }
-- (ZHJSApiRunJsReturnBlock)callSuccess{
-    return [self callJsRunRes:ZHJSApi_RunJsReturnBlockKey_Success];
-}
-- (ZHJSApiRunJsReturnBlock)callFail{
-    return [self callJsRunRes:ZHJSApi_RunJsReturnBlockKey_Fail];
-}
-- (ZHJSApiRunJsReturnBlock)callComplete{
-    return [self callJsRunRes:ZHJSApi_RunJsReturnBlockKey_Complete];
-}
-- (ZHJSApiRunJsReturnBlock)callJsRunRes:(NSString *)key{
-    ZHJSApiRunJsReturnBlock block = self.jsRunResMap[key];
-    if (block) return block;
-    block = ^ZHJSApi_RunJsReturnBlock_Header{
-        return [ZHJSApiRuniOSReturnItem item];
-    };
-    return block;
-}
 @end
 
 @implementation ZHJSApiCallReturnItem
@@ -67,39 +50,28 @@
 }
 - (ZHJSApiCallReturnItem * (^) (id result, NSError *error))call{
     __weak __typeof__(self) __self = self;
-    ZHJSApiCallReturnItem * (^block) (id, NSError *) = ^ZHJSApiCallReturnItem *(id result, NSError *error){
-        return __self.callAJ(result, error, NO, nil);
+    return ^ZHJSApiCallReturnItem *(id result, NSError *error){
+        return __self.callA(result, error, NO);
     };
-    return block;
 }
 - (ZHJSApiCallReturnItem * (^) (id result, NSError *error, BOOL alive))callA{
     __weak __typeof__(self) __self = self;
-    ZHJSApiCallReturnItem * (^block) (id, NSError *, BOOL) = ^ZHJSApiCallReturnItem *(id result, NSError *error, BOOL alive){
-        return __self.callAJ(result, error, alive, nil);
-    };
-    return block;
-}
-- (ZHJSApiCallReturnItem * (^) (id result, NSError *error, BOOL alive, NSDictionary *jsRunResMap))callAJ{
-    __weak __typeof__(self) __self = self;
-    ZHJSApiCallReturnItem * (^block) (id, NSError *, BOOL, NSDictionary*) = ^ZHJSApiCallReturnItem *(id result, NSError *error, BOOL alive, NSDictionary *jsRunResMap){
+    return ^ZHJSApiCallReturnItem *(id result, NSError *error, BOOL alive){
         ZHJSApiCallArgItem *caItem = [ZHJSApiCallArgItem item];
         caItem.result = result;
         caItem.error = error;
         caItem.alive = alive;
-        caItem.jsRunResMap = jsRunResMap;
-        return __self.callArgs(caItem);
+        return __self.callArg(caItem);
     };
-    return block;
 }
-- (ZHJSApiCallReturnItem * (^) (ZHJSApiCallArgItem *argItem))callArgs{
+- (ZHJSApiCallReturnItem * (^) (ZHJSApiCallArgItem *argItem))callArg{
     __weak __typeof__(self) __self = self;
-    ZHJSApiCallReturnItem * (^block) (ZHJSApiCallArgItem *) = ^ZHJSApiCallReturnItem *(ZHJSApiCallArgItem *argItem){
+    return ^ZHJSApiCallReturnItem *(ZHJSApiCallArgItem *argItem){
         if (__self.callInBlock) {
             return __self.callInBlock(argItem);
         }
         return [ZHJSApiCallReturnItem item];
     };
-    return block;
     
     
 //    ZHJSApiCallBlock block = ^ZHJSApiCallBlockHeader{

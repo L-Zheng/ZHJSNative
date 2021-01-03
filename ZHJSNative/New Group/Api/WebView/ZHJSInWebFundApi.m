@@ -133,26 +133,29 @@
 
  - (NSDictionary *)js_getJsonSync:(NSDictionary *)params p1:(NSDictionary *)p1 p2:(id)p2 p3:(id)p3 p4:(id)p4 p5:(id)p5 p6:(id)p6 p7:(id)p7 p8:(id)p8 p9:(id)p9 callItem:(ZHJSApiCallItem *)callItem{
      
+     ZHJSApiCallArgItem *callArgItem = [ZHJSApiCallArgItem item];
+     callArgItem.result = @"lkjhg";
+     callArgItem.error = nil;
+     callArgItem.alive = YES;
+     callArgItem.jsReturnSuccessBlock = ^ZHJSApi_RunJsReturnBlock_Header {
+         NSLog(@"success res: %@--%@",jsReturnItem.result, jsReturnItem.error);
+         return [ZHJSApiRuniOSReturnItem item];
+     };
+     callArgItem.jsReturnFailBlock = ^ZHJSApi_RunJsReturnBlock_Header {
+         NSLog(@"fail res: %@--%@",jsReturnItem.result, jsReturnItem.error);
+         return [ZHJSApiRuniOSReturnItem item];
+     };
+     callArgItem.jsReturnCompleteBlock = ^ZHJSApi_RunJsReturnBlock_Header {
+         NSLog(@"complete res: %@--%@",jsReturnItem.result, jsReturnItem.error);
+         return [ZHJSApiRuniOSReturnItem item];
+     };
+     
      ZHJSApiCallItem *item1 = params[ZHJSApiCallItemKey];
      ZHJSApiCallItem *item2 = p1[ZHJSApiCallItemKey];
      
-     NSDictionary *runResMap = @{
-         ZHJSApi_RunJsReturnBlockKey_Success: ^ZHJSApi_RunJsReturnBlock_Header{
-             // 参数result、error
-             NSLog(@"success res: %@--%@",jsReturnItem.result, jsReturnItem.error);
-             return [ZHJSApiRuniOSReturnItem item];
-         },
-         ZHJSApi_RunJsReturnBlockKey_Fail: ^ZHJSApi_RunJsReturnBlock_Header{
-             NSLog(@"fail res: %@--%@",jsReturnItem.result, jsReturnItem.error);
-             return [ZHJSApiRuniOSReturnItem item];
-         },
-         ZHJSApi_RunJsReturnBlockKey_Complete: ^ZHJSApi_RunJsReturnBlock_Header{
-             NSLog(@"complete res: %@--%@",jsReturnItem.result, jsReturnItem.error);
-             return [ZHJSApiRuniOSReturnItem item];
-         }
-     };
-     item1.callAJ(@"lkjhg", nil, YES, runResMap);
-     item2.call(@"2222", nil);
+     if (item1) item1.callArg(callArgItem);
+     if (item2) item2.call(@"2222", nil);
+     
      callItem.call(@"3333", nil);
      return @{@"sdfd": @"22222", @"sf": @(YES)};
  }

@@ -24,9 +24,6 @@
 @end
 
 // 调用js函数（success、fail、complete）的返回值
-static NSString * const ZHJSApi_RunJsReturnBlockKey_Success = @"ZHJSApi_RunJsReturnBlockKey_Success";
-static NSString * const ZHJSApi_RunJsReturnBlockKey_Fail = @"ZHJSApi_RunJsReturnBlockKey_Fail";
-static NSString * const ZHJSApi_RunJsReturnBlockKey_Complete = @"ZHJSApi_RunJsReturnBlockKey_Complete";
 #define ZHJSApi_RunJsReturnBlock_Args ZHJSApiRunJsReturnItem *jsReturnItem
 #define ZHJSApi_RunJsReturnBlock_Header ZHJSApiRuniOSReturnItem *(ZHJSApi_RunJsReturnBlock_Args)
 typedef ZHJSApiRuniOSReturnItem *(^ZHJSApiRunJsReturnBlock)(ZHJSApi_RunJsReturnBlock_Args);
@@ -42,34 +39,14 @@ typedef ZHJSApiRuniOSReturnItem *(^ZHJSApiRunJsReturnBlock)(ZHJSApi_RunJsReturnB
 // 允许多次调用js函数
 @property (nonatomic,assign) BOOL alive;
 /** 调用js函数（success、fail、complete）的返回值
- @{
-     ZHJSApi_RunJsReturnBlockKey_Success: ^ZHJSApi_RunJsReturnBlock_Header{
-         // 参数result、error
-         NSLog(@"%@--%@",result, error);
-         // 获取所有block参数
-         NSMutableArray *bArgs = [NSMutableArray array];
-         va_list bList; id bArg;
-         va_start(bList, error);
-         while ((bArg = va_arg(bList, id))) {
-             [bArgs addObject:bArg];
-         }
-         va_end(bList);
-         return nil;
-     },
-     ZHJSApi_RunJsReturnBlockKey_Fail: ^ZHJSApi_RunJsReturnBlock_Header{
-         NSLog(@"%@--%@",result, error);
-         return nil;
-     },
-     ZHJSApi_RunJsReturnBlockKey_Complete: ^ZHJSApi_RunJsReturnBlock_Header{
-         NSLog(@"%@--%@",result, error);
-         return nil;
-     }
- }
+ ^ZHJSApi_RunJsReturnBlock_Header{
+     NSLog(@"res: %@--%@",jsReturnItem.result, jsReturnItem.error);
+     return [ZHJSApiRuniOSReturnItem item];
+ },
  */
-@property (nonatomic,strong) NSDictionary *jsRunResMap;
-- (ZHJSApiRunJsReturnBlock)callSuccess;
-- (ZHJSApiRunJsReturnBlock)callFail;
-- (ZHJSApiRunJsReturnBlock)callComplete;
+@property (nonatomic,copy) ZHJSApiRunJsReturnBlock jsReturnSuccessBlock;
+@property (nonatomic,copy) ZHJSApiRunJsReturnBlock jsReturnFailBlock;
+@property (nonatomic,copy) ZHJSApiRunJsReturnBlock jsReturnCompleteBlock;
 @end
 
 #pragma mark - 回调js function后的原生处理结果
@@ -93,8 +70,7 @@ static NSString * const ZHJSApiCallItemKey = @"ZHJSApiCallItemKey";
 + (instancetype)itemWithBlock:(ZHJSApiInCallBlock)callInBlock;
 - (ZHJSApiCallReturnItem * (^) (id result, NSError *error))call;
 - (ZHJSApiCallReturnItem * (^) (id result, NSError *error, BOOL alive))callA;
-- (ZHJSApiCallReturnItem * (^) (id result, NSError *error, BOOL alive, NSDictionary *jsRunResMap))callAJ;
-- (ZHJSApiCallReturnItem * (^) (ZHJSApiCallArgItem *argItem))callArgs;
+- (ZHJSApiCallReturnItem * (^) (ZHJSApiCallArgItem *argItem))callArg;
 @end
 
 ////if (block2) block2(x(@"2222", nil, @(YES), @{}));

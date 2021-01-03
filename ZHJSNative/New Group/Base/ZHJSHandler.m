@@ -179,13 +179,17 @@ case cType:{\
                     // 运行参数里的success方法
                     // [paramsValue invokeMethod:success withArguments:@[result]];
                     JSValue *resValue = [successFunc callWithArguments:result ? @[result] : @[]];
-                    argItem.callSuccess([ZHJSApiRunJsReturnItem item:[__self jsValueToNative:resValue] error:nil]);
+                    if (argItem.jsReturnSuccessBlock) {
+                        argItem.jsReturnSuccessBlock([ZHJSApiRunJsReturnItem item:[__self jsValueToNative:resValue] error:nil]);
+                    }
                 }
                 if (error && failFunc) {
                     NSString *errorDesc = error.userInfo[NSLocalizedDescriptionKey];
                     id desc = (errorDesc ?: @"发生错误");
                     JSValue *resValue = [failFunc callWithArguments:@[desc]];
-                    argItem.callFail([ZHJSApiRunJsReturnItem item:[__self jsValueToNative:resValue] error:nil]);
+                    if (argItem.jsReturnFailBlock) {
+                        argItem.jsReturnFailBlock([ZHJSApiRunJsReturnItem item:[__self jsValueToNative:resValue] error:nil]);
+                    }
                 }
                 /**
                  js方法 complete: () => {}，complete: (res) => {}
@@ -194,7 +198,9 @@ case cType:{\
                  */
                 if (completeFunc) {
                     JSValue *resValue = [completeFunc callWithArguments:@[]];
-                    argItem.callComplete([ZHJSApiRunJsReturnItem item:[__self jsValueToNative:resValue] error:nil]);
+                    if (argItem.jsReturnCompleteBlock) {
+                        argItem.jsReturnCompleteBlock([ZHJSApiRunJsReturnItem item:[__self jsValueToNative:resValue] error:nil]);
+                    }
                 }
                 return [ZHJSApiCallReturnItem item];
             };
@@ -482,19 +488,25 @@ case cType:{\
             
             if (!error && successId.length) {
                 [__self callBackJsFunc:successId data:result?:[NSNull null] alive:alive callBack:^(id jsRes, NSError *jsError) {
-                    argItem.callSuccess([ZHJSApiRunJsReturnItem item:jsRes error:jsError]);
+                    if (argItem.jsReturnSuccessBlock) {
+                        argItem.jsReturnSuccessBlock([ZHJSApiRunJsReturnItem item:jsRes error:jsError]);
+                    }
                 }];
             }
             if (error && failId.length) {
                 NSString *errorDesc = error.userInfo[NSLocalizedDescriptionKey];
                 id desc = (errorDesc ?: @"发生错误");
                 [__self callBackJsFunc:failId data:desc alive:alive callBack:^(id jsRes, NSError *jsError) {
-                    argItem.callFail([ZHJSApiRunJsReturnItem item:jsRes error:jsError]);
+                    if (argItem.jsReturnFailBlock) {
+                        argItem.jsReturnFailBlock([ZHJSApiRunJsReturnItem item:jsRes error:jsError]);
+                    }
                 }];
             }
             if (completeId.length) {
                 [__self callBackJsFunc:completeId data:[NSNull null] alive:alive callBack:^(id jsRes, NSError *jsError) {
-                    argItem.callComplete([ZHJSApiRunJsReturnItem item:jsRes error:jsError]);
+                    if (argItem.jsReturnCompleteBlock) {
+                        argItem.jsReturnCompleteBlock([ZHJSApiRunJsReturnItem item:jsRes error:jsError]);
+                    }
                 }];
             }
             return [ZHJSApiCallReturnItem item];
