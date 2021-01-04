@@ -684,6 +684,17 @@
     }];
 }
 - (void)evaluateJs:(NSString *)js completionHandler:(void (^)(id res, NSError *error))completionHandler{
+    if ([[NSThread currentThread] isEqual:[NSThread mainThread]]) {
+        [self evaluateJsThreadSafe:js completionHandler:completionHandler];
+        return;
+    }
+    __weak __typeof__(self) __self = self;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [__self evaluateJsThreadSafe:js completionHandler:completionHandler];
+    });
+}
+- (void)evaluateJsThreadSafe:(NSString *)js completionHandler:(void (^)(id res, NSError *error))completionHandler{
+    // evaluateJavaScript 只允许主线程回调
     if (@available(iOS 9.0, *)) {
         __weak __typeof__(self) __self = self;
         [self evaluateJavaScript:js completionHandler:^(id res, NSError *error) {
