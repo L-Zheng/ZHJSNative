@@ -88,8 +88,9 @@ var ZhengReplaceIosCallBack = function(params) {
          */
         funcRes = func(res);
     } catch (error) {
-        // console.log('CallBack-error');
-        // console.log(error);
+        if (ZhengJSType.isFunction(window.onerror) && Object.prototype.toString.call(error) == '[object Error]') {
+            window.onerror.apply(window, [error]);
+        }
         funcRes = null;
     }
     if (alive) return funcRes;
@@ -183,8 +184,9 @@ var ZhengSendNativeSync = function(params) {
         res = JSON.parse(res);
         return res.data;
     } catch (error) {
-        console.log('❌SendNativeSync--error');
-        console.log(error);
+        if (ZhengJSType.isFunction(window.onerror) && Object.prototype.toString.call(error) == '[object Error]') {
+            window.onerror.apply(window, [error]);
+        }
     }
     return null;
 };

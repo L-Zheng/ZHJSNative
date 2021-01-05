@@ -185,6 +185,9 @@ ZHJS_EXPORT_FUNC(getStringSync, @(YES), @{@"dd": @"vvv"})
      callItem.call(@"3333", nil);
      NSLog(@"-------%s---------", __func__);
  }
+- (void)js_commonLinkTo11:(NSDictionary *)params callItem:(ZHJSApiCallItem *)callItem{
+    callItem.call(@"2222", nil);
+}
 
 #pragma mark - ZHJSApiProtocol
 
