@@ -134,7 +134,7 @@
  - (NSDictionary *)js_getJsonSync:(NSDictionary *)params p1:(NSDictionary *)p1 p2:(id)p2 p3:(id)p3 p4:(id)p4 p5:(id)p5 p6:(id)p6 p7:(id)p7 p8:(id)p8 p9:(id)p9 callItem:(ZHJSApiCallItem *)callItem{
      
      ZHJSApiCallArgItem *callArgItem = [ZHJSApiCallArgItem item];
-     callArgItem.result = @"lkjhg";
+     callArgItem.successData = @"lkjhg";
      callArgItem.error = nil;
      callArgItem.alive = YES;
      callArgItem.jsReturnSuccessBlock = ^ZHJSApi_RunJsReturnBlock_Header {

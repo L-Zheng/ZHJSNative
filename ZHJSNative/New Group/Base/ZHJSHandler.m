@@ -172,21 +172,21 @@ case cType:{\
             JSValue *failFunc = [jsArg valueForProperty:fail];
             JSValue *completeFunc = [jsArg valueForProperty:complete];
             ZHJSApiInCallBlock block = ^ZHJSApi_InCallBlock_Header{
-                id result = argItem.result;
+                id successData = argItem.successData;
+                id failData = argItem.failData;
+                id completeData = argItem.completeData;
                 NSError *error = argItem.error;
                 
                 if (!error && successFunc) {
                     // 运行参数里的success方法
-                    // [paramsValue invokeMethod:success withArguments:@[result]];
-                    JSValue *resValue = [successFunc callWithArguments:result ? @[result] : @[]];
+                    // [paramsValue invokeMethod:success withArguments:@[successData]];
+                    JSValue *resValue = [successFunc callWithArguments:@[successData?:[NSNull null]]];
                     if (argItem.jsReturnSuccessBlock) {
                         argItem.jsReturnSuccessBlock([ZHJSApiRunJsReturnItem item:[__self jsValueToNative:resValue] error:nil]);
                     }
                 }
                 if (error && failFunc) {
-                    NSString *errorDesc = error.userInfo[NSLocalizedDescriptionKey];
-                    id desc = (errorDesc ?: @"发生错误");
-                    JSValue *resValue = [failFunc callWithArguments:@[desc]];
+                    JSValue *resValue = [failFunc callWithArguments:@[failData?:[NSNull null]]];
                     if (argItem.jsReturnFailBlock) {
                         argItem.jsReturnFailBlock([ZHJSApiRunJsReturnItem item:[__self jsValueToNative:resValue] error:nil]);
                     }
@@ -197,7 +197,7 @@ case cType:{\
                  callWithArguments: @[]  原生传参数 上面里两个都运行正常
                  */
                 if (completeFunc) {
-                    JSValue *resValue = [completeFunc callWithArguments:@[]];
+                    JSValue *resValue = [completeFunc callWithArguments:@[completeData?:[NSNull null]]];
                     if (argItem.jsReturnCompleteBlock) {
                         argItem.jsReturnCompleteBlock([ZHJSApiRunJsReturnItem item:[__self jsValueToNative:resValue] error:nil]);
                     }
@@ -482,28 +482,28 @@ case cType:{\
         }
         //需要回调
         ZHJSApiInCallBlock block = ^ZHJSApi_InCallBlock_Header{
-            id result = argItem.result;
+            id successData = argItem.successData;
+            id failData = argItem.failData;
+            id completeData = argItem.completeData;
             NSError *error = argItem.error;
             BOOL alive = argItem.alive;
             
             if (!error && successId.length) {
-                [__self callBackJsFunc:successId data:result?:[NSNull null] alive:alive callBack:^(id jsRes, NSError *jsError) {
+                [__self callBackJsFunc:successId data:successData?:[NSNull null] alive:alive callBack:^(id jsRes, NSError *jsError) {
                     if (argItem.jsReturnSuccessBlock) {
                         argItem.jsReturnSuccessBlock([ZHJSApiRunJsReturnItem item:jsRes error:jsError]);
                     }
                 }];
             }
             if (error && failId.length) {
-                NSString *errorDesc = error.userInfo[NSLocalizedDescriptionKey];
-                id desc = (errorDesc ?: @"发生错误");
-                [__self callBackJsFunc:failId data:desc alive:alive callBack:^(id jsRes, NSError *jsError) {
+                [__self callBackJsFunc:failId data:failData?:[NSNull null] alive:alive callBack:^(id jsRes, NSError *jsError) {
                     if (argItem.jsReturnFailBlock) {
                         argItem.jsReturnFailBlock([ZHJSApiRunJsReturnItem item:jsRes error:jsError]);
                     }
                 }];
             }
             if (completeId.length) {
-                [__self callBackJsFunc:completeId data:[NSNull null] alive:alive callBack:^(id jsRes, NSError *jsError) {
+                [__self callBackJsFunc:completeId data:completeData?:[NSNull null] alive:alive callBack:^(id jsRes, NSError *jsError) {
                     if (argItem.jsReturnCompleteBlock) {
                         argItem.jsReturnCompleteBlock([ZHJSApiRunJsReturnItem item:jsRes error:jsError]);
                     }

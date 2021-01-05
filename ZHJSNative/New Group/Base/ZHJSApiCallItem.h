@@ -32,8 +32,12 @@ typedef ZHJSApiRuniOSReturnItem *(^ZHJSApiRunJsReturnBlock)(ZHJSApi_RunJsReturnB
 
 @interface ZHJSApiCallArgItem : NSObject
 + (instancetype)item;
-// 回调数据
-@property (nonatomic,strong) id result;
+// 回调数据 success
+@property (nonatomic,strong) id successData;
+// 回调数据 fail
+@property (nonatomic,strong) id failData;
+// 回调数据 complete
+@property (nonatomic,strong) id completeData;
 // 调用js函数（success、fail）
 @property (nonatomic,strong) NSError *error;
 // 允许多次调用js函数
@@ -68,8 +72,10 @@ static NSString * const ZHJSApiCallItemKey = @"ZHJSApiCallItemKey";
 
 @interface ZHJSApiCallItem : NSObject
 + (instancetype)itemWithBlock:(ZHJSApiInCallBlock)callInBlock;
-- (ZHJSApiCallReturnItem * (^) (id result, NSError *error))call;
-- (ZHJSApiCallReturnItem * (^) (id result, NSError *error, BOOL alive))callA;
+- (ZHJSApiCallReturnItem * (^) (id successData, NSError *error))call;
+- (ZHJSApiCallReturnItem * (^) (id successData, NSError *error, BOOL alive))callA;
+- (ZHJSApiCallReturnItem * (^) (id successData, id failData, id completeData, NSError *error))callSFC;
+- (ZHJSApiCallReturnItem * (^) (id successData, id failData, id completeData, NSError *error, BOOL alive))callSFCA;
 - (ZHJSApiCallReturnItem * (^) (ZHJSApiCallArgItem *argItem))callArg;
 @end
 

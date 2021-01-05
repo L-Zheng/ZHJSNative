@@ -48,17 +48,31 @@
     item.callInBlock = callInBlock;
     return item;
 }
-- (ZHJSApiCallReturnItem * (^) (id result, NSError *error))call{
+- (ZHJSApiCallReturnItem * (^) (id successData, NSError *error))call{
     __weak __typeof__(self) __self = self;
-    return ^ZHJSApiCallReturnItem *(id result, NSError *error){
-        return __self.callA(result, error, NO);
+    return ^ZHJSApiCallReturnItem *(id successData, NSError *error){
+        return __self.callSFCA(successData, nil, nil, error, NO);
     };
 }
-- (ZHJSApiCallReturnItem * (^) (id result, NSError *error, BOOL alive))callA{
+- (ZHJSApiCallReturnItem * (^) (id successData, NSError *error, BOOL alive))callA{
     __weak __typeof__(self) __self = self;
-    return ^ZHJSApiCallReturnItem *(id result, NSError *error, BOOL alive){
+    return ^ZHJSApiCallReturnItem *(id successData, NSError *error, BOOL alive){
+        return __self.callSFCA(successData, nil, nil, error, alive);
+    };
+}
+- (ZHJSApiCallReturnItem * (^) (id successData, id failData, id completeData, NSError *error))callSFC{
+    __weak __typeof__(self) __self = self;
+    return ^ZHJSApiCallReturnItem *(id successData, id failData, id completeData, NSError *error){
+        return __self.callSFCA(successData, failData, completeData, error, NO);
+    };
+}
+- (ZHJSApiCallReturnItem * (^) (id successData, id failData, id completeData, NSError *error, BOOL alive))callSFCA{
+    __weak __typeof__(self) __self = self;
+    return ^ZHJSApiCallReturnItem *(id successData, id failData, id completeData, NSError *error, BOOL alive){
         ZHJSApiCallArgItem *caItem = [ZHJSApiCallArgItem item];
-        caItem.result = result;
+        caItem.successData = successData;
+        caItem.failData = failData;
+        caItem.completeData = completeData;
         caItem.error = error;
         caItem.alive = alive;
         return __self.callArg(caItem);
