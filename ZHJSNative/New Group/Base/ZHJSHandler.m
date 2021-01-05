@@ -135,7 +135,7 @@ case cType:{\
     __weak __typeof__(self) __self = self;
     
     //处理js的事件
-    id (^apiBlock)(void) = ^(){
+    id (^apiBlock)(void) = ^id(void){
         //获取参数
         NSArray *jsArgs = [ZHJSContext currentArguments];
         //js没传参数
