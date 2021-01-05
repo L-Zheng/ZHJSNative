@@ -14,6 +14,12 @@
 #import "ZHJSInContextFundApi.h"
 #import <objc/runtime.h>
 
+@interface ZHJSApiMethodItem ()
+@property (nonatomic,assign, getter=isSync) BOOL sync;
+@end
+@implementation ZHJSApiMethodItem
+@end
+
 @interface ZHJSApiHandler ()
 /**
 @{
@@ -225,6 +231,19 @@
             item.jsMethodName = jsName;
             item.nativeMethodName = nativeName;
             
+            // 如果有func配置，优先使用
+            SEL syncSel = NSSelectorFromString([NSString stringWithFormat:ZHJS_Export_Func_Config_Prefix_Format, jsName]);
+            if (syncSel && [api respondsToSelector:syncSel]) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
+                NSDictionary *funcConfig = [api performSelector:syncSel];
+                NSNumber *syncNum = funcConfig[@"sync"];
+                item.sync = syncNum ? syncNum.boolValue : NO;
+#pragma clang diagnostic pop
+            }else{
+                item.sync = [jsName hasSuffix:@"Sync"];
+            }
+                        
             NSMutableArray <ZHJSApiMethodItem *> *items = [resMethodMap objectForKey:jsName] ?: [@[] mutableCopy];
             [items addObject:item];
             
@@ -376,10 +395,4 @@
     NSLog(@"%s", __func__);
 }
 
-@end
-
-@implementation ZHJSApiMethodItem
-- (BOOL)isSync{
-    return [self.jsMethodName hasSuffix:@"Sync"];
-}
 @end

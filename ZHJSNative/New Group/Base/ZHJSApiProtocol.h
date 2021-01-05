@@ -9,6 +9,31 @@
 #import <Foundation/Foundation.h>
 #import "ZHJSApiCallItem.h"
 
+#define ZHJS_Export_Func_Config_Prefix_Format @"ZHJS_Export_Func_Config_Prefix_%@"
+#define ZHJS_EXPORT_FUNC_CONFIG_INTERNAL(selArg, ...) \
+- (NSDictionary *)ZHJS_Export_Func_Config_Prefix_ ## selArg { \
+    NSDictionary *(^block)(id selStr, ...) = ^NSDictionary *(id selStr, ...){\
+        NSMutableArray *bArgs = [NSMutableArray array]; \
+        va_list bList; id bArg; \
+        va_start(bList, selStr); \
+        while ((bArg = va_arg(bList, id))) { \
+            [bArgs addObject:bArg]; \
+        } \
+        va_end(bList); \
+        NSUInteger idx = 0;\
+        BOOL sync = ((bArgs.count > idx && [bArgs[idx] isKindOfClass:[NSNumber class]]) ? [(NSNumber *)bArgs[idx] boolValue] : NO);\
+        idx = 1;\
+        NSDictionary *other = ((bArgs.count > idx && [bArgs[idx] isKindOfClass:[NSDictionary class]]) ? (NSDictionary *)bArgs[idx] : @{});\
+        return @{\
+            @"sync": @(sync),\
+            @"other": other\
+        }; \
+    };\
+    return block(@" ## selArg ## ", ## __VA_ARGS__, nil);\
+}
+#define ZHJS_EXPORT_FUNC(sel, ...) ZHJS_EXPORT_FUNC_CONFIG_INTERNAL(sel, ## __VA_ARGS__)
+
+
 @protocol ZHJSApiProtocol <NSObject>
 @required
 /**  方法说明

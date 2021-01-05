@@ -159,14 +159,17 @@
      callItem.call(@"3333", nil);
      return @{@"sdfd": @"22222", @"sf": @(YES)};
  }
+ZHJS_EXPORT_FUNC(getNumberSync, @(YES))
  - (NSNumber *)js_getNumberSync:(NSDictionary *)params{
      NSLog(@"-------%s---------", __func__);
      return @(22);
  }
+ZHJS_EXPORT_FUNC(getBoolSync, @(YES))
  - (NSNumber *)js_getBoolSync:(NSDictionary *)params{
      NSLog(@"-------%s---------", __func__);
      return @(YES);
  }
+ZHJS_EXPORT_FUNC(getStringSync, @(YES), @{@"dd": @"vvv"})
  - (NSString *)js_getStringSync:(NSDictionary *)params{
      NSLog(@"-------%s---------", __func__);
      return @"dfgewrefdwd";

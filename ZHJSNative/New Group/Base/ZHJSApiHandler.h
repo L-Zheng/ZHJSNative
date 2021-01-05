@@ -9,9 +9,14 @@
 #import <Foundation/Foundation.h>
 #import "ZHJSApiProtocol.h"
 @class ZHJSHandler;
-@class ZHJSApiMethodItem;
 @class ZHWebViewDebugConfiguration;
 @class ZHJSContextDebugConfiguration;
+
+@interface ZHJSApiMethodItem : NSObject
+@property (nonatomic,copy) NSString *jsMethodName;
+@property (nonatomic,copy) NSString *nativeMethodName;
+@property (nonatomic,assign, readonly, getter=isSync) BOOL sync;
+@end
 
 //NS_ASSUME_NONNULL_BEGIN
 
@@ -38,11 +43,5 @@
 //获取方法名
 - (void)fetchSelectorByName:(NSString *)jsMethodName apiPrefix:(NSString *)apiPrefix callBack:(void (^) (id target, SEL sel))callBack;
 
-@end
-
-@interface ZHJSApiMethodItem : NSObject
-@property (nonatomic,copy) NSString *jsMethodName;
-@property (nonatomic,copy) NSString *nativeMethodName;
-@property (nonatomic,assign, readonly) BOOL isSync;
 @end
 //NS_ASSUME_NONNULL_END
