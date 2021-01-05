@@ -180,6 +180,7 @@ var ZhengSendNative = function(params) {
 };
 var ZhengSendNativeSync = function(params) {
     var res = prompt(JSON.stringify(params));
+    if (!res) return null;
     try {
         res = JSON.parse(res);
         return res.data;
