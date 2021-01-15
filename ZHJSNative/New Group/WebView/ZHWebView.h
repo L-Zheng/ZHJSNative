@@ -10,8 +10,8 @@
 #import <WebKit/WebKit.h>
 #import "ZHJSApiProtocol.h"
 #import "ZHWebViewConfiguration.h"
+#import "ZHJSPageItem.h" // WebView/JSContext页面信息数据
 @class ZHWebView;
-@class ZHWebViewItem;//WebView信息数据
 
 typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
     ZHWebViewExceptionOperateNothing     = 0,//不做任何操作
@@ -43,11 +43,15 @@ typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
 @end
 
 
-@interface ZHWebView : WKWebView
+@interface ZHWebView : WKWebView <ZHJSPageProtocol>
 
 #pragma mark - mp
 
 @property (nonatomic,strong) ZHWebViewItem *webItem;
+
+#pragma mark - controller
+
+@property (nonatomic,weak) UIViewController *controller;
 
 #pragma mark - load call
 

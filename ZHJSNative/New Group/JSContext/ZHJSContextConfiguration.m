@@ -7,7 +7,7 @@
 //
 
 #import "ZHJSContextConfiguration.h"
-#import "ZHJSNativeItem.h" // WebView/JSContext页面信息数据
+#import "ZHJSPageItem.h" // WebView/JSContext页面信息数据
 
 @implementation ZHJSContextModuleConfiguration
 - (NSDictionary *)formatInfo{

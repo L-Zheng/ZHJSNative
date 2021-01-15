@@ -10,7 +10,7 @@
 #import "ZHWebView.h"
 #import "NSError+ZH.h"
 #import "ZHUtil.h"
-#import "ZHJSNativeItem.h" // WebView/JSContext页面信息数据
+#import "ZHJSPageItem.h" // WebView/JSContext页面信息数据
 
 NSInteger const ZHWebViewPreLoadMaxCount = 3;
 NSInteger const ZHWebViewPreLoadingMaxCount = 1;

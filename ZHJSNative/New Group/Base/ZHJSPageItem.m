@@ -1,14 +1,14 @@
 //
-//  ZHJSNativeItem.m
+//  ZHJSPageItem.m
 //  ZHJSNative
 //
-//  Created by EM on 2020/12/22.
-//  Copyright © 2020 Zheng. All rights reserved.
+//  Created by EM on 2021/1/12.
+//  Copyright © 2021 Zheng. All rights reserved.
 //
 
-#import "ZHJSNativeItem.h"
+#import "ZHJSPageItem.h"
 
-@implementation ZHJSNativeItem
+@implementation ZHJSPageItem
 
 - (void)updateProperty:(NSDictionary *)info{
     if (!info) return;

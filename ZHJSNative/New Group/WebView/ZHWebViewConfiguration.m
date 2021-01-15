@@ -9,7 +9,7 @@
 #import "ZHWebViewConfiguration.h"
 #import "ZHWebView.h"
 #import <ZHFloatWindow/ZHFloatView.h>
-#import "ZHJSNativeItem.h" // WebView/JSContext页面信息数据
+#import "ZHJSPageItem.h" // WebView/JSContext页面信息数据
 
 @implementation ZHWebViewModuleConfiguration
 - (NSDictionary *)formatInfo{

@@ -10,7 +10,6 @@
 #import "ZHJSHandler.h"
 #import "NSError+ZH.h"
 #import "ZHUtil.h"
-#import "ZHJSNativeItem.h" // WebView/JSContext页面信息数据
 
 @interface ZHJSContext ()
 @property (nonatomic,strong) ZHJSHandler *handler;
@@ -242,6 +241,37 @@
         return nil;
     }
     return [func callWithArguments:arguments];
+}
+
+#pragma mark - ZHJSPageProtocol
+
+// renderUrl
+- (NSURL *)zh_renderURL{
+    return self.renderURL;
+}
+- (NSURL *)zh_runSandBoxURL{
+    return self.runSandBoxURL;
+}
+// pageitem
+- (ZHJSPageItem *)zh_pageItem{
+    return self.contextItem;
+}
+// controller
+- (UIViewController *)zh_controller{
+    return self.controller;
+}
+// navigation
+- (UINavigationItem *)zh_navigationItem{
+    return self.controller.navigationItem;
+}
+- (UINavigationBar *)zh_navigationBar{
+    return self.controller.navigationController.navigationBar;
+}
+- (UINavigationController *)zh_navigationController{
+    return self.controller.navigationController;
+}
+- (UINavigationController *)zh_router_navigationController{
+    return self.controller.navigationController;
 }
 
 - (void)dealloc{

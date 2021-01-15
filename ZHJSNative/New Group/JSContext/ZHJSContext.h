@@ -10,11 +10,12 @@
 #import <JavaScriptCore/JavaScriptCore.h>
 #import "ZHJSApiProtocol.h"
 #import "ZHJSContextConfiguration.h"
-@class ZHJSContextItem;//JSContext信息数据
+#import "ZHJSPageItem.h" // WebView/JSContext页面信息数据
+@class ZHJSPageProtocol;//页面协议
 
 //NS_ASSUME_NONNULL_BEGIN
 
-@interface ZHJSContext : JSContext
+@interface ZHJSContext : JSContext <ZHJSPageProtocol>
 
 #pragma mark - init
 
@@ -62,6 +63,10 @@
 #pragma mark - mp
 
 @property (nonatomic,strong) ZHJSContextItem *contextItem;
+
+#pragma mark - controller
+
+@property (nonatomic,weak) UIViewController *controller;
 
 
 @end

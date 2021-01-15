@@ -37,12 +37,12 @@
 		8581BAB3258F370B004E25DC /* ZHJSInWebSocketApi.m in Sources */ = {isa = PBXBuildFile; fileRef = 8581BAB2258F370B004E25DC /* ZHJSInWebSocketApi.m */; };
 		8581BABC258F3755004E25DC /* ZHJSInWebFundApi.m in Sources */ = {isa = PBXBuildFile; fileRef = 8581BABB258F3755004E25DC /* ZHJSInWebFundApi.m */; };
 		8581BAC5258F3795004E25DC /* ZHJSInContextFundApi.m in Sources */ = {isa = PBXBuildFile; fileRef = 8581BAC4258F3795004E25DC /* ZHJSInContextFundApi.m */; };
+		8582282425AD97BF00FECFB9 /* ZHJSPageItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 8582282325AD97BF00FECFB9 /* ZHJSPageItem.m */; };
 		85A4A30F243FF80A002AE903 /* ZHWebViewManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 85A4A30E243FF80A002AE903 /* ZHWebViewManager.m */; };
 		85A4A3122440003C002AE903 /* ZHEmotion.m in Sources */ = {isa = PBXBuildFile; fileRef = 85A4A3112440003C002AE903 /* ZHEmotion.m */; };
 		85A69A64258DEEA4009728F4 /* ZHJSContextConfiguration.m in Sources */ = {isa = PBXBuildFile; fileRef = 85A69A63258DEEA4009728F4 /* ZHJSContextConfiguration.m */; };
 		85B4FC9924349EA300CD910B /* EFEmoji.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 85B4FC9824349EA300CD910B /* EFEmoji.bundle */; };
 		85B4FC9C2435702900CD910B /* ZhengFile.m in Sources */ = {isa = PBXBuildFile; fileRef = 85B4FC9A2435702900CD910B /* ZhengFile.m */; };
-		85FE9D932591D379008A76AE /* ZHJSNativeItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 85FE9D922591D379008A76AE /* ZHJSNativeItem.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -121,6 +121,8 @@
 		8581BABB258F3755004E25DC /* ZHJSInWebFundApi.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHJSInWebFundApi.m; sourceTree = "<group>"; };
 		8581BAC3258F3795004E25DC /* ZHJSInContextFundApi.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHJSInContextFundApi.h; sourceTree = "<group>"; };
 		8581BAC4258F3795004E25DC /* ZHJSInContextFundApi.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHJSInContextFundApi.m; sourceTree = "<group>"; };
+		8582282225AD97BF00FECFB9 /* ZHJSPageItem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHJSPageItem.h; sourceTree = "<group>"; };
+		8582282325AD97BF00FECFB9 /* ZHJSPageItem.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHJSPageItem.m; sourceTree = "<group>"; };
 		85A4A30D243FF80A002AE903 /* ZHWebViewManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHWebViewManager.h; sourceTree = "<group>"; };
 		85A4A30E243FF80A002AE903 /* ZHWebViewManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHWebViewManager.m; sourceTree = "<group>"; };
 		85A4A3102440003C002AE903 /* ZHEmotion.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHEmotion.h; sourceTree = "<group>"; };
@@ -130,8 +132,6 @@
 		85B4FC9824349EA300CD910B /* EFEmoji.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = EFEmoji.bundle; sourceTree = "<group>"; };
 		85B4FC9A2435702900CD910B /* ZhengFile.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZhengFile.m; sourceTree = "<group>"; };
 		85B4FC9B2435702900CD910B /* ZhengFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZhengFile.h; sourceTree = "<group>"; };
-		85FE9D912591D379008A76AE /* ZHJSNativeItem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHJSNativeItem.h; sourceTree = "<group>"; };
-		85FE9D922591D379008A76AE /* ZHJSNativeItem.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHJSNativeItem.m; sourceTree = "<group>"; };
 		E56B9B5085C846D362800AF3 /* Pods-ZHJSNative.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ZHJSNative.release.xcconfig"; path = "Target Support Files/Pods-ZHJSNative/Pods-ZHJSNative.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -282,8 +282,8 @@
 				0F6807DC24016A0500E6B4C6 /* ZHJSApiHandler.m */,
 				0F064E0325A0299100244915 /* ZHJSApiCallItem.h */,
 				0F064E0425A0299100244915 /* ZHJSApiCallItem.m */,
-				85FE9D912591D379008A76AE /* ZHJSNativeItem.h */,
-				85FE9D922591D379008A76AE /* ZHJSNativeItem.m */,
+				8582282225AD97BF00FECFB9 /* ZHJSPageItem.h */,
+				8582282325AD97BF00FECFB9 /* ZHJSPageItem.m */,
 				8581BAA8258F3075004E25DC /* ZHJSInApi.h */,
 				8581BAA9258F3075004E25DC /* ZHJSInApi.m */,
 			);
@@ -515,11 +515,11 @@
 				8505EC1524752EDB00628FD8 /* ZHCustomExtra1ApiHandler.m in Sources */,
 				0F07985F240104FA004AAFBC /* AppDelegate.m in Sources */,
 				8581BAB3258F370B004E25DC /* ZHJSInWebSocketApi.m in Sources */,
-				85FE9D932591D379008A76AE /* ZHJSNativeItem.m in Sources */,
 				85A4A30F243FF80A002AE903 /* ZHWebViewManager.m in Sources */,
 				85B4FC9C2435702900CD910B /* ZhengFile.m in Sources */,
 				0F079899240105E3004AAFBC /* ZHJSContext.m in Sources */,
 				0F064E0525A0299100244915 /* ZHJSApiCallItem.m in Sources */,
+				8582282425AD97BF00FECFB9 /* ZHJSPageItem.m in Sources */,
 				0F07989F24010627004AAFBC /* ZHController.m in Sources */,
 				0F079870240104FB004AAFBC /* main.m in Sources */,
 				0F0798A224010647004AAFBC /* ZHJSHandler.m in Sources */,
