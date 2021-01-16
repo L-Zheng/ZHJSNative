@@ -1,12 +1,20 @@
 //
-//  ZHJSApiCallItem.m
+//  ZHJSApiItem.m
 //  ZHJSNative
 //
-//  Created by Zheng on 2021/1/2.
+//  Created by Zheng on 2021/1/16.
 //  Copyright © 2021 Zheng. All rights reserved.
 //
 
-#import "ZHJSApiCallItem.h"
+#import "ZHJSApiItem.h"
+
+@implementation ZHJSApiItem
+@end
+
+@interface ZHJSApiRegisterItem ()
+@end
+@implementation ZHJSApiRegisterItem
+@end
 
 @implementation ZHJSApiRunJsReturnItem
 + (instancetype)item{

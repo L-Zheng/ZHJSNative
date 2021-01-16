@@ -1,12 +1,24 @@
 //
-//  ZHJSApiCallItem.h
+//  ZHJSApiItem.h
 //  ZHJSNative
 //
-//  Created by Zheng on 2021/1/2.
+//  Created by Zheng on 2021/1/16.
 //  Copyright © 2021 Zheng. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
+
+@interface ZHJSApiItem : NSObject
+
+@end
+
+#pragma mark - 注入的api函数
+
+@interface ZHJSApiRegisterItem : NSObject
+@property (nonatomic,copy) NSString *jsMethodName;
+@property (nonatomic,copy) NSString *nativeMethodName;
+@property (nonatomic,assign,getter=isSync) BOOL sync;
+@end
 
 #pragma mark - 回调js function后的js处理结果
 

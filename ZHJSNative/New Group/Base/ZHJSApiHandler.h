@@ -12,12 +12,6 @@
 @class ZHWebViewDebugConfiguration;
 @class ZHJSContextDebugConfiguration;
 
-@interface ZHJSApiMethodItem : NSObject
-@property (nonatomic,copy) NSString *jsMethodName;
-@property (nonatomic,copy) NSString *nativeMethodName;
-@property (nonatomic,assign, readonly, getter=isSync) BOOL sync;
-@end
-
 //NS_ASSUME_NONNULL_BEGIN
 
 @interface ZHJSApiHandler : NSObject
@@ -38,8 +32,8 @@
 - (void)removeApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers completion:(void (^) (NSArray <id <ZHJSApiProtocol>> *successApiHandlers, NSArray <id <ZHJSApiProtocol>> *failApiHandlers, NSError *error))completion;
 
 //api映射表
-- (void)enumRegsiterApiMap:(void (^)(NSString *apiPrefix, NSDictionary <NSString *, ZHJSApiMethodItem *> *apiMap))block;
-//- (void)fetchRegsiterApiMap:(NSArray <id <ZHJSApiProtocol>> *)handlers block:(void (^)(NSString *apiPrefix, NSDictionary <NSString *, ZHJSApiMethodItem *> *apiMap))block;
+- (void)enumRegsiterApiMap:(void (^)(NSString *apiPrefix, NSDictionary <NSString *, ZHJSApiRegisterItem *> *apiMap))block;
+//- (void)fetchRegsiterApiMap:(NSArray <id <ZHJSApiProtocol>> *)handlers block:(void (^)(NSString *apiPrefix, NSDictionary <NSString *, ZHJSApiRegisterItem *> *apiMap))block;
 //获取方法名
 - (void)fetchSelectorByName:(NSString *)jsMethodName apiPrefix:(NSString *)apiPrefix callBack:(void (^) (id target, SEL sel))callBack;
 

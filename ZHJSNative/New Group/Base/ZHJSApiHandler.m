@@ -14,12 +14,6 @@
 #import "ZHJSInContextFundApi.h"
 #import <objc/runtime.h>
 
-@interface ZHJSApiMethodItem ()
-@property (nonatomic,assign, getter=isSync) BOOL sync;
-@end
-@implementation ZHJSApiMethodItem
-@end
-
 @interface ZHJSApiHandler ()
 /**
 @{
@@ -29,11 +23,11 @@
                     @"map" : @{
                             @"getSystemInfoSync": @[
                                     //本类
-                                    ZHJSApiMethodItem1,
+                                    ZHJSApiRegisterItem1,
                                     //父类
-                                    ZHJSApiMethodItem2,
+                                    ZHJSApiRegisterItem2,
                                     //父类的父类
-                                    ZHJSApiMethodItem3
+                                    ZHJSApiRegisterItem3
                             ]
                     }
                 }
@@ -201,7 +195,7 @@
     NSString *nativeMethodPrefix = [self fetchNativeApiPrefix:api];
     if (!nativeMethodPrefix || nativeMethodPrefix.length == 0) return @{};
     
-    NSMutableDictionary <NSString *, NSArray <ZHJSApiMethodItem *> *> *resMethodMap = [@{} mutableCopy];
+    NSMutableDictionary <NSString *, NSArray <ZHJSApiRegisterItem *> *> *resMethodMap = [@{} mutableCopy];
     
     //运行时 仅能获取本类中的所有方法 父类中的拿不到
     Class opCalss = object_getClass(api);
@@ -227,7 +221,7 @@
                 jsName = subNames[0];
             }
             
-            ZHJSApiMethodItem *item = [[ZHJSApiMethodItem alloc] init];
+            ZHJSApiRegisterItem *item = [[ZHJSApiRegisterItem alloc] init];
             item.jsMethodName = jsName;
             item.nativeMethodName = nativeName;
             
@@ -244,7 +238,7 @@
                 item.sync = [jsName hasSuffix:@"Sync"];
             }
                         
-            NSMutableArray <ZHJSApiMethodItem *> *items = [resMethodMap objectForKey:jsName] ?: [@[] mutableCopy];
+            NSMutableArray <ZHJSApiRegisterItem *> *items = [resMethodMap objectForKey:jsName] ?: [@[] mutableCopy];
             [items addObject:item];
             
             [resMethodMap setObject:items forKey:jsName];
@@ -297,7 +291,7 @@
     
     [apiMap enumerateKeysAndObjectsUsingBlock:^(NSString *apiPrefix, NSArray *handlerMaps, BOOL *stop) {
         
-        NSMutableDictionary <NSString *, ZHJSApiMethodItem *> *functionMap = [@{} mutableCopy];
+        NSMutableDictionary <NSString *, ZHJSApiRegisterItem *> *functionMap = [@{} mutableCopy];
         
         [handlerMaps enumerateObjectsUsingBlock:^(NSDictionary *handlerMap, NSUInteger idx, BOOL *handlerStop) {
             //            id <ZHJSApiProtocol> handler = [handlerMap objectForKey:@"handler"];
@@ -312,7 +306,7 @@
         /**
          @{
              @"fund" : @{
-                     @"getSystemInfoSync" : ZHJSApiMethodItem
+                     @"getSystemInfoSync" : ZHJSApiRegisterItem
              }
          }
          */
@@ -322,7 +316,7 @@
 }
 
 //遍历方法映射表
-- (void)enumRegsiterApiMap:(void (^)(NSString *apiPrefix, NSDictionary <NSString *, ZHJSApiMethodItem *> *apiMap))block{
+- (void)enumRegsiterApiMap:(void (^)(NSString *apiPrefix, NSDictionary <NSString *, ZHJSApiRegisterItem *> *apiMap))block{
     if (!block) return;
     
     //转换成注册api
@@ -331,7 +325,7 @@
         if (block) block(apiPrefix, apiMap);
     }];
 }
-- (void)fetchRegsiterApiMap:(NSArray <id <ZHJSApiProtocol>> *)handlers block:(void (^)(NSString *apiPrefix, NSDictionary <NSString *, ZHJSApiMethodItem *> *apiMap))block{
+- (void)fetchRegsiterApiMap:(NSArray <id <ZHJSApiProtocol>> *)handlers block:(void (^)(NSString *apiPrefix, NSDictionary <NSString *, ZHJSApiRegisterItem *> *apiMap))block{
     if (!handlers || handlers.count == 0) {
         if (block) block(nil, nil);
         return;
@@ -374,11 +368,11 @@
         id <ZHJSApiProtocol> handler = [handlerMap objectForKey:@"handler"];
         NSDictionary *map = [handlerMap objectForKey:@"map"];
         
-        NSArray <ZHJSApiMethodItem *> *items = map[jsMethodName];
+        NSArray <ZHJSApiRegisterItem *> *items = map[jsMethodName];
         
         if (items.count == 0) continue;
         
-        ZHJSApiMethodItem *item = items[0];
+        ZHJSApiRegisterItem *item = items[0];
         if (!item || !item.nativeMethodName) continue;
 
         SEL sel = NSSelectorFromString(item.nativeMethodName);

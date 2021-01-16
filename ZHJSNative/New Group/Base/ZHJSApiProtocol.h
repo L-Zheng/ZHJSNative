@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "ZHJSApiCallItem.h"
+#import "ZHJSApiItem.h"
 
 #define ZHJS_Export_Func_Config_Prefix_Format @"ZHJS_Export_Func_Config_Prefix_%@"
 #define ZHJS_EXPORT_FUNC_CONFIG_INTERNAL(selArg, ...) \
