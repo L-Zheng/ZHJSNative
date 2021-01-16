@@ -12,7 +12,9 @@
 
 #pragma mark - api
 
- - (void)js_request:(NSDictionary *)info callItem:(ZHJSApiCallItem *)callItem{
+ - (void)js_request:(ZHJSApiArgItem *)arg{
+     NSDictionary *info = arg.jsonData;
+     ZHJSApiCallJsItem *callItem = arg.callItem;
      NSLog(@"-------%s---------", __func__);
      NSString *url = [info objectForKey:@"url"];
      NSString *method = [[info objectForKey:@"method"] uppercaseString];
@@ -131,62 +133,65 @@
      return [arguments componentsJoinedByString:@"&"];
  }
 
- - (NSDictionary *)js_getJsonSync:(NSDictionary *)params p1:(NSDictionary *)p1 p2:(id)p2 p3:(id)p3 p4:(id)p4 p5:(id)p5 p6:(id)p6 p7:(id)p7 p8:(id)p8 p9:(id)p9 callItem:(ZHJSApiCallItem *)callItem{
+ - (NSDictionary *)js_getJsonSync:(ZHJSApiArgItem *)arg p1:(ZHJSApiArgItem *)p1 p2:(id)p2 p3:(id)p3 p4:(id)p4 p5:(id)p5 p6:(id)p6 p7:(id)p7 p8:(id)p8 p9:(id)p9{
      
-     ZHJSApiCallArgItem *callArgItem = [ZHJSApiCallArgItem item];
+     ZHJSApiCallJsItem *callItem = arg.callItem;
+     
+     ZHJSApiCallJsArgItem *callArgItem = [ZHJSApiCallJsArgItem item];
      callArgItem.successData = @"lkjhg";
      callArgItem.error = nil;
      callArgItem.alive = YES;
-     callArgItem.jsReturnSuccessBlock = ^ZHJSApi_RunJsReturnBlock_Header {
-         NSLog(@"success res: %@--%@",jsReturnItem.result, jsReturnItem.error);
-         return [ZHJSApiRuniOSReturnItem item];
+     callArgItem.jsResSuccessBlock = ^ZHJSApi_CallJsResNativeBlock_Header {
+         NSLog(@"success res: %@--%@",jsResItem.result, jsResItem.error);
+         return [ZHJSApiCallJsResNativeResItem item];
      };
-     callArgItem.jsReturnFailBlock = ^ZHJSApi_RunJsReturnBlock_Header {
-         NSLog(@"fail res: %@--%@",jsReturnItem.result, jsReturnItem.error);
-         return [ZHJSApiRuniOSReturnItem item];
+     callArgItem.jsResFailBlock = ^ZHJSApi_CallJsResNativeBlock_Header {
+         NSLog(@"fail res: %@--%@",jsResItem.result, jsResItem.error);
+         return [ZHJSApiCallJsResNativeResItem item];
      };
-     callArgItem.jsReturnCompleteBlock = ^ZHJSApi_RunJsReturnBlock_Header {
-         NSLog(@"complete res: %@--%@",jsReturnItem.result, jsReturnItem.error);
-         return [ZHJSApiRuniOSReturnItem item];
+     callArgItem.jsResCompleteBlock = ^ZHJSApi_CallJsResNativeBlock_Header {
+         NSLog(@"complete res: %@--%@",jsResItem.result, jsResItem.error);
+         return [ZHJSApiCallJsResNativeResItem item];
      };
      
-     ZHJSApiCallItem *item1 = params[ZHJSApiCallItemKey];
-     ZHJSApiCallItem *item2 = p1[ZHJSApiCallItemKey];
+     ZHJSApiCallJsItem *item1 = arg.callItem;
+     ZHJSApiCallJsItem *item2 = p1.callItem;
      
-     if (item1) item1.callArg(callArgItem);
-     if (item2) item2.call(@"2222", nil);
+     if (item1.callArg) item1.callArg(callArgItem);
+     if (item2.call) item2.call(@"2222", nil);
      
-     callItem.call(@"3333", nil);
+     if (callItem.call) callItem.call(@"3333", nil);
      return @{@"sdfd": @"22222", @"sf": @(YES)};
  }
 ZHJS_EXPORT_FUNC(getNumberSync, @(YES))
- - (NSNumber *)js_getNumberSync:(NSDictionary *)params{
+ - (NSNumber *)js_getNumberSync:(ZHJSApiArgItem *)arg{
      NSLog(@"-------%s---------", __func__);
      return @(22);
  }
 ZHJS_EXPORT_FUNC(getBoolSync, @(YES))
- - (NSNumber *)js_getBoolSync:(NSDictionary *)params{
+ - (NSNumber *)js_getBoolSync:(ZHJSApiArgItem *)arg{
      NSLog(@"-------%s---------", __func__);
      return @(YES);
  }
 ZHJS_EXPORT_FUNC(getStringSync, @(YES), @{@"dd": @"vvv"})
- - (NSString *)js_getStringSync:(NSDictionary *)params{
+ - (NSString *)js_getStringSync:(ZHJSApiArgItem *)arg{
      NSLog(@"-------%s---------", __func__);
      return @"dfgewrefdwd";
  }
- - (void)js_commonLinkTo:(NSDictionary *)params p1:(id)p1 p2:(id)p2 p3:(id)p3 p4:(id)p4 p5:(id)p5 p6:(id)p6 p7:(id)p7 p8:(id)p8 p9:(id)p9 callItem:(ZHJSApiCallItem *)callItem{
+ - (void)js_commonLinkTo:(ZHJSApiArgItem *)arg p1:(ZHJSApiArgItem *)p1 p2:(id)p2 p3:(id)p3 p4:(id)p4 p5:(id)p5 p6:(id)p6 p7:(id)p7 p8:(id)p8 p9:(id)p9{
      
-     ZHJSApiCallItem *item1 = params[ZHJSApiCallItemKey];
-     ZHJSApiCallItem *item2 = p1[ZHJSApiCallItemKey];
+     ZHJSApiCallJsItem *item1 = arg.callItem;
+     ZHJSApiCallJsItem *item2 = p1.callItem;
      
-     item1.callA(@"1111", nil, YES);
-     item2.call(@"2222", nil);
+     if (item1.callA) item1.callA(@"1111", nil, YES);
+     if (item2.call) item2.call(@"2222", nil);
      
-     callItem.call(@"3333", nil);
+     if (item1.call) item1.call(@"3333", nil);
      NSLog(@"-------%s---------", __func__);
  }
-- (void)js_commonLinkTo11:(NSDictionary *)params callItem:(ZHJSApiCallItem *)callItem{
-    callItem.call(@"2222", nil);
+- (void)js_commonLinkTo11:(ZHJSApiArgItem *)arg{
+    ZHJSApiCallJsItem *item1 = arg.callItem;
+    if (item1.call) item1.call(@"2222", nil);
 }
 
 #pragma mark - ZHJSApiProtocol

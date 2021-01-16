@@ -39,7 +39,7 @@
 /**  方法说明
  如： js中要使用api ---->  fund.request({})      zh_iosApiPrefixName = @'js_"
  则：- (NSString *)zh_jsApiPrefixName{return @"fund"}
- 对应的原生方法实现 - (void)js_request:(NSDictionary *)params params1:(id)params1 <#xxx:(id)xxx#> callItem:(ZHJSApiCallItem *)callItem{}
+ 对应的原生方法实现 - (void)js_request:(ZHJSApiArgItem *)arg <#xxx:(ZHJSApiArgItem *)xxx#>{}
  */
 //js api方法名前缀  如：fund
 - (NSString *)zh_jsApiPrefixName;
@@ -60,28 +60,28 @@
         json：          params= [NSDictionary class]
  异步方法
    - (void)js_<#functionName#>{}
-   - (void)js_<#functionName#>:(id)params{}
-   - (void)js_<#functionName#>:(id)params params1:(id)params1 <#xxx:(id)xxx#> callItem:(ZHJSApiCallItem *)callItem{}
+   - (void)js_<#functionName#>:(ZHJSApiArgItem *)arg{}
+   - (void)js_<#functionName#>:(ZHJSApiArgItem *)arg <#xxx:(ZHJSApiArgItem *)xxx#>{}
 
  同步方法
    //返回JS类型Object
    - (NSDictionary *)js_<#functionName#>Sync{}
-   - (NSDictionary *)js_<#functionName#>Sync:(id)params params1:(id)params1 <#xxx:(id)xxx#> callItem:(ZHJSApiCallItem *)callItem{}
+   - (NSDictionary *)js_<#functionName#>Sync:(ZHJSApiArgItem *)arg <#xxx:(ZHJSApiArgItem *)xxx#>{}
 
    //返回JS类型Array
    - (NSArray *)js_<#functionName#>Sync{}
-   - (NSArray *)js_<#functionName#>Sync:(id)params params1:(id)params1 <#xxx:(id)xxx#> callItem:(ZHJSApiCallItem *)callItem{}
+   - (NSArray *)js_<#functionName#>Sync:(ZHJSApiArgItem *)arg <#xxx:(ZHJSApiArgItem *)xxx#>{}
 
    //返回JS类型String
    - (NSString *)js_<#functionName#>Sync{}
-   - (NSString *)js_<#functionName#>Sync:(id)params params1:(id)params1 <#xxx:(id)xxx#> callItem:(ZHJSApiCallItem *)callItem{}
+   - (NSString *)js_<#functionName#>Sync:(ZHJSApiArgItem *)arg <#xxx:(ZHJSApiArgItem *)xxx#>{}
 
    //返回JS类型Number
    - (NSNumber *)js_<#functionName#>Sync{}
-   - (NSNumber *)js_<#functionName#>Sync:(id)params params1:(id)params1 <#xxx:(id)xxx#> callItem:(ZHJSApiCallItem *)callItem{}
+   - (NSNumber *)js_<#functionName#>Sync:(ZHJSApiArgItem *)arg <#xxx:(ZHJSApiArgItem *)xxx#>{}
    
    //返回JS类型Boolean：@(YES)、@(NO)
    - (NSNumber *)js_<#functionName#>Sync{}
-   - (NSNumber *)js_<#functionName#>Sync:(id)params params1:(id)params1 <#xxx:(id)xxx#> callItem:(ZHJSApiCallItem *)callItem{}
+   - (NSNumber *)js_<#functionName#>Sync:(ZHJSApiArgItem *)arg <#xxx:(ZHJSApiArgItem *)xxx#>{}
  */
 @end

@@ -22,7 +22,7 @@
 
 #pragma mark - 回调js function后的js处理结果
 
-@interface ZHJSApiRunJsReturnItem : NSObject
+@interface ZHJSApiCallJsResItem : NSObject
 + (instancetype)item;
 + (instancetype)item:(id)result error:(NSError *)error;
 @property (nonatomic,strong) id result;
@@ -31,18 +31,18 @@
 
 #pragma mark - 回调js function后js的处理结果 交给原生 原生的处理结果
 
-@interface ZHJSApiRuniOSReturnItem : NSObject
+@interface ZHJSApiCallJsResNativeResItem : NSObject
 + (instancetype)item;
 @end
 
 // 调用js函数（success、fail、complete）的返回值
-#define ZHJSApi_RunJsReturnBlock_Args ZHJSApiRunJsReturnItem *jsReturnItem
-#define ZHJSApi_RunJsReturnBlock_Header ZHJSApiRuniOSReturnItem *(ZHJSApi_RunJsReturnBlock_Args)
-typedef ZHJSApiRuniOSReturnItem *(^ZHJSApiRunJsReturnBlock)(ZHJSApi_RunJsReturnBlock_Args);
+#define ZHJSApi_CallJsResNativeBlock_Args ZHJSApiCallJsResItem *jsResItem
+#define ZHJSApi_CallJsResNativeBlock_Header ZHJSApiCallJsResNativeResItem *(ZHJSApi_CallJsResNativeBlock_Args)
+typedef ZHJSApiCallJsResNativeResItem *(^ZHJSApiCallJsResNativeBlock)(ZHJSApi_CallJsResNativeBlock_Args);
 
 #pragma mark - 回调js function参数
 
-@interface ZHJSApiCallArgItem : NSObject
+@interface ZHJSApiCallJsArgItem : NSObject
 + (instancetype)item;
 // 回调数据 success
 @property (nonatomic,strong) id successData;
@@ -55,40 +55,35 @@ typedef ZHJSApiRuniOSReturnItem *(^ZHJSApiRunJsReturnBlock)(ZHJSApi_RunJsReturnB
 // 允许多次调用js函数
 @property (nonatomic,assign) BOOL alive;
 /** 调用js函数（success、fail、complete）的返回值
- ^ZHJSApi_RunJsReturnBlock_Header{
-     NSLog(@"res: %@--%@",jsReturnItem.result, jsReturnItem.error);
-     return [ZHJSApiRuniOSReturnItem item];
+ ^ZHJSApi_CallJsResNativeBlock_Header{
+     NSLog(@"res: %@--%@",jsResItem.result, jsResItem.error);
+     return [ZHJSApiCallJsResNativeResItem item];
  },
  */
-@property (nonatomic,copy) ZHJSApiRunJsReturnBlock jsReturnSuccessBlock;
-@property (nonatomic,copy) ZHJSApiRunJsReturnBlock jsReturnFailBlock;
-@property (nonatomic,copy) ZHJSApiRunJsReturnBlock jsReturnCompleteBlock;
+@property (nonatomic,copy) ZHJSApiCallJsResNativeBlock jsResSuccessBlock;
+@property (nonatomic,copy) ZHJSApiCallJsResNativeBlock jsResFailBlock;
+@property (nonatomic,copy) ZHJSApiCallJsResNativeBlock jsResCompleteBlock;
 @end
 
 #pragma mark - 回调js function后的原生处理结果
 
-@interface ZHJSApiCallReturnItem : NSObject
+@interface ZHJSApiCallJsNativeResItem : NSObject
 + (instancetype)item;
 @end
 
-#define ZHJSApi_InCallBlock_Args ZHJSApiCallArgItem *argItem
-#define ZHJSApi_InCallBlock_Header ZHJSApiCallReturnItem *(ZHJSApi_InCallBlock_Args)
-typedef ZHJSApiCallReturnItem * (^ZHJSApiInCallBlock)(ZHJSApi_InCallBlock_Args);
+#define ZHJSApi_InCallBlock_Args ZHJSApiCallJsArgItem *argItem
+#define ZHJSApi_InCallBlock_Header ZHJSApiCallJsNativeResItem *(ZHJSApi_InCallBlock_Args)
+typedef ZHJSApiCallJsNativeResItem * (^ZHJSApiInCallBlock)(ZHJSApi_InCallBlock_Args);
 
 #pragma mark - 用于回调js function
 
-/**js传递给原生的参数：（json格式 && 有success、fail、complete函数），
- 就会带有此key值ZHJSApiCallItemKey，其value是个ZHJSApiCallItem,可用于回调给js
- */
-static NSString * const ZHJSApiCallItemKey = @"ZHJSApiCallItemKey";
-
-@interface ZHJSApiCallItem : NSObject
+@interface ZHJSApiCallJsItem : NSObject
 + (instancetype)itemWithBlock:(ZHJSApiInCallBlock)callInBlock;
-- (ZHJSApiCallReturnItem * (^) (id successData, NSError *error))call;
-- (ZHJSApiCallReturnItem * (^) (id successData, NSError *error, BOOL alive))callA;
-- (ZHJSApiCallReturnItem * (^) (id successData, id failData, id completeData, NSError *error))callSFC;
-- (ZHJSApiCallReturnItem * (^) (id successData, id failData, id completeData, NSError *error, BOOL alive))callSFCA;
-- (ZHJSApiCallReturnItem * (^) (ZHJSApiCallArgItem *argItem))callArg;
+- (ZHJSApiCallJsNativeResItem * (^) (id successData, NSError *error))call;
+- (ZHJSApiCallJsNativeResItem * (^) (id successData, NSError *error, BOOL alive))callA;
+- (ZHJSApiCallJsNativeResItem * (^) (id successData, id failData, id completeData, NSError *error))callSFC;
+- (ZHJSApiCallJsNativeResItem * (^) (id successData, id failData, id completeData, NSError *error, BOOL alive))callSFCA;
+- (ZHJSApiCallJsNativeResItem * (^) (ZHJSApiCallJsArgItem *argItem))callArg;
 @end
 
 ////if (block2) block2(x(@"2222", nil, @(YES), @{}));
@@ -98,3 +93,15 @@ static NSString * const ZHJSApiCallItemKey = @"ZHJSApiCallItemKey";
 ////if (block2) v(block2, @"2222", nil, @(YES), @{});
 //#define v(bb, result, error, ...) \
 //bb(result, error, ## __VA_ARGS__, nil)
+
+#pragma mark - js调用原生，原生接收的js参数
+
+@interface ZHJSApiArgItem : NSObject
++ (instancetype)item:(id)jsData callItem:(ZHJSApiCallJsItem *)callItem;
+@property (nonatomic, strong, readonly) id jsData;
+@property (nonatomic, strong, readonly) ZHJSApiCallJsItem *callItem;
+- (NSDictionary *)jsonData;
+- (NSArray *)arrData;
+- (NSNumber *)numberData;
+- (NSString *)stringData;
+@end

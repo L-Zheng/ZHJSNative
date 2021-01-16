@@ -10,9 +10,9 @@
 
 @implementation ZHCustom2ApiHandler
 
-- (void)js_commonLinkTo11:(NSDictionary *)params{
+- (void)js_commonLinkTo11:(ZHJSApiArgItem *)arg{
     NSLog(@"-------%s---------", __func__);
-    NSLog(@"%@",params);
+    NSLog(@"%@",arg.jsonData);
 }
 
 //js api方法名前缀  如：fund

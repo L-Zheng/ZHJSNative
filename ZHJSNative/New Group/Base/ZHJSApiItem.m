@@ -16,68 +16,68 @@
 @implementation ZHJSApiRegisterItem
 @end
 
-@implementation ZHJSApiRunJsReturnItem
+@implementation ZHJSApiCallJsResItem
 + (instancetype)item{
-    return [[ZHJSApiRunJsReturnItem alloc] init];
+    return [[ZHJSApiCallJsResItem alloc] init];
 }
 + (instancetype)item:(id)result error:(NSError *)error{
-    ZHJSApiRunJsReturnItem *item = [self item];
+    ZHJSApiCallJsResItem *item = [self item];
     item.result = result;
     item.error = error;
     return item;
 }
 @end
 
-@implementation ZHJSApiRuniOSReturnItem
+@implementation ZHJSApiCallJsResNativeResItem
 + (instancetype)item{
-    return [[ZHJSApiRuniOSReturnItem alloc] init];
+    return [[ZHJSApiCallJsResNativeResItem alloc] init];
 }
 @end
 
-@implementation ZHJSApiCallArgItem
+@implementation ZHJSApiCallJsArgItem
 + (instancetype)item{
-    return [[ZHJSApiCallArgItem alloc] init];
+    return [[ZHJSApiCallJsArgItem alloc] init];
 }
 @end
 
-@implementation ZHJSApiCallReturnItem
+@implementation ZHJSApiCallJsNativeResItem
 + (instancetype)item{
-    return [[ZHJSApiCallReturnItem alloc] init];
+    return [[ZHJSApiCallJsNativeResItem alloc] init];
 }
 @end
 
-@interface ZHJSApiCallItem ()
+@interface ZHJSApiCallJsItem ()
 @property (nonatomic,copy) ZHJSApiInCallBlock callInBlock;
 @end
 
-@implementation ZHJSApiCallItem
+@implementation ZHJSApiCallJsItem
 + (instancetype)itemWithBlock:(ZHJSApiInCallBlock)callInBlock{
-    ZHJSApiCallItem *item = [[ZHJSApiCallItem alloc] init];
+    ZHJSApiCallJsItem *item = [[ZHJSApiCallJsItem alloc] init];
     item.callInBlock = callInBlock;
     return item;
 }
-- (ZHJSApiCallReturnItem * (^) (id successData, NSError *error))call{
+- (ZHJSApiCallJsNativeResItem * (^) (id successData, NSError *error))call{
     __weak __typeof__(self) __self = self;
-    return ^ZHJSApiCallReturnItem *(id successData, NSError *error){
+    return ^ZHJSApiCallJsNativeResItem *(id successData, NSError *error){
         return __self.callSFCA(successData, nil, nil, error, NO);
     };
 }
-- (ZHJSApiCallReturnItem * (^) (id successData, NSError *error, BOOL alive))callA{
+- (ZHJSApiCallJsNativeResItem * (^) (id successData, NSError *error, BOOL alive))callA{
     __weak __typeof__(self) __self = self;
-    return ^ZHJSApiCallReturnItem *(id successData, NSError *error, BOOL alive){
+    return ^ZHJSApiCallJsNativeResItem *(id successData, NSError *error, BOOL alive){
         return __self.callSFCA(successData, nil, nil, error, alive);
     };
 }
-- (ZHJSApiCallReturnItem * (^) (id successData, id failData, id completeData, NSError *error))callSFC{
+- (ZHJSApiCallJsNativeResItem * (^) (id successData, id failData, id completeData, NSError *error))callSFC{
     __weak __typeof__(self) __self = self;
-    return ^ZHJSApiCallReturnItem *(id successData, id failData, id completeData, NSError *error){
+    return ^ZHJSApiCallJsNativeResItem *(id successData, id failData, id completeData, NSError *error){
         return __self.callSFCA(successData, failData, completeData, error, NO);
     };
 }
-- (ZHJSApiCallReturnItem * (^) (id successData, id failData, id completeData, NSError *error, BOOL alive))callSFCA{
+- (ZHJSApiCallJsNativeResItem * (^) (id successData, id failData, id completeData, NSError *error, BOOL alive))callSFCA{
     __weak __typeof__(self) __self = self;
-    return ^ZHJSApiCallReturnItem *(id successData, id failData, id completeData, NSError *error, BOOL alive){
-        ZHJSApiCallArgItem *caItem = [ZHJSApiCallArgItem item];
+    return ^ZHJSApiCallJsNativeResItem *(id successData, id failData, id completeData, NSError *error, BOOL alive){
+        ZHJSApiCallJsArgItem *caItem = [ZHJSApiCallJsArgItem item];
         caItem.successData = successData;
         caItem.failData = failData;
         caItem.completeData = completeData;
@@ -86,13 +86,13 @@
         return __self.callArg(caItem);
     };
 }
-- (ZHJSApiCallReturnItem * (^) (ZHJSApiCallArgItem *argItem))callArg{
+- (ZHJSApiCallJsNativeResItem * (^) (ZHJSApiCallJsArgItem *argItem))callArg{
     __weak __typeof__(self) __self = self;
-    return ^ZHJSApiCallReturnItem *(ZHJSApiCallArgItem *argItem){
+    return ^ZHJSApiCallJsNativeResItem *(ZHJSApiCallJsArgItem *argItem){
         if (__self.callInBlock) {
             return __self.callInBlock(argItem);
         }
-        return [ZHJSApiCallReturnItem item];
+        return [ZHJSApiCallJsNativeResItem item];
     };
     
     
@@ -110,7 +110,7 @@
 //        BOOL alive = ((bArgs.count > 0 && [bArgs[0] isKindOfClass:[NSNumber class]]) ? [(NSNumber *)bArgs[0] boolValue] : NO);
 //        NSDictionary *runResMap = ((bArgs.count > 1 && [bArgs[1] isKindOfClass:[NSDictionary class]]) ? (NSDictionary *)bArgs[1] : @{});
 //
-//        ZHJSApiCallArgItem *callArgItem = [ZHJSApiCallArgItem item];
+//        ZHJSApiCallJsArgItem *callArgItem = [ZHJSApiCallJsArgItem item];
 //        callArgItem.result = result;
 //        callArgItem.error = error;
 //        callArgItem.alive = alive;
@@ -120,4 +120,38 @@
 //    return block;
 }
 
+@end
+
+@interface ZHJSApiArgItem ()
+@property (nonatomic, strong) id jsData;
+@property (nonatomic, strong) ZHJSApiCallJsItem *callItem;
+@end
+@implementation ZHJSApiArgItem : NSObject
++ (instancetype)item:(id)jsData callItem:(ZHJSApiCallJsItem *)callItem{
+    ZHJSApiArgItem *item = [[ZHJSApiArgItem alloc] init];
+    item.jsData = ((!jsData || [jsData isEqual:[NSNull null]]) ? nil : jsData);
+    item.callItem = callItem;
+    return item;
+}
+- (id)fetchData:(Class)class{
+    id data = self.jsData;
+    if (!class || !data ||
+        [data isEqual:[NSNull null]] ||
+        ![data isKindOfClass:class]) {
+        return nil;
+    }
+    return data;
+}
+- (NSDictionary *)jsonData{
+    return [self fetchData:[NSDictionary class]];
+}
+- (NSArray *)arrData{
+    return [self fetchData:[NSArray class]];
+}
+- (NSNumber *)numberData{
+    return [self fetchData:[NSNumber class]];
+}
+- (NSString *)stringData{
+    return [self fetchData:[NSString class]];
+}
 @end

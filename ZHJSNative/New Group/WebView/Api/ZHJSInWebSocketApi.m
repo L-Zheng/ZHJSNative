@@ -13,19 +13,19 @@
 
 //socket链接调试
 /** socket调试代理  声明方法 */
-- (void)js_socketDidOpen:(NSDictionary *)params{
-    [self socketPerformSel:__func__ params:params];
+- (void)js_socketDidOpen:(ZHJSApiArgItem *)arg{
+    [self socketPerformSel:__func__ params:arg.jsonData];
 }
-- (void)js_socketDidReceiveMessage:(NSDictionary *)params{
+- (void)js_socketDidReceiveMessage:(ZHJSApiArgItem *)arg{
     NSLog(@"---------js_socketDidReceiveMessage-----------");
-    NSLog(@"%@",params);
-    [self socketPerformSel:__func__ params:params];
+    NSLog(@"%@",arg.jsonData);
+    [self socketPerformSel:__func__ params:arg.jsonData];
 }
-- (void)js_socketDidError:(NSDictionary *)params{
-    [self socketPerformSel:__func__ params:params];
+- (void)js_socketDidError:(ZHJSApiArgItem *)arg{
+    [self socketPerformSel:__func__ params:arg.jsonData];
 }
-- (void)js_socketDidClose:(NSDictionary *)params{
-    [self socketPerformSel:__func__ params:params];
+- (void)js_socketDidClose:(ZHJSApiArgItem *)arg{
+    [self socketPerformSel:__func__ params:arg.jsonData];
 }
 - (void)socketPerformSel:(const char *)funcName params:(NSDictionary *)params{
     NSString *funcStr = [NSString stringWithUTF8String:funcName];

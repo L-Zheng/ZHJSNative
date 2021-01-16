@@ -13,24 +13,24 @@
 
 #pragma mark - api
 
-- (NSNumber *)js_getNumberSync:(NSDictionary *)params{
+- (NSNumber *)js_getNumberSync:(ZHJSApiArgItem *)arg{
     NSLog(@"-------%s---------", __func__);
     return @(22);
 }
-- (NSNumber *)js_getBoolSync:(NSDictionary *)params{
+- (NSNumber *)js_getBoolSync:(ZHJSApiArgItem *)arg{
     NSLog(@"-------%s---------", __func__);
     return @(YES);
 }
-- (NSString *)js_getStringSync:(NSDictionary *)params{
+- (NSString *)js_getStringSync:(ZHJSApiArgItem *)arg{
     NSLog(@"-------%s---------", __func__);
     return @"dfgewrefdwd";
 }
 
-- (NSDictionary *)js_getEmotionResourceSync:(NSDictionary *)params{
+- (NSDictionary *)js_getEmotionResourceSync:(ZHJSApiArgItem *)arg{
     return [ZHEmotion shareManager].emotionMap;
 }
 //获取大表情资源
-- (NSDictionary *)js_getBigEmotionResourceSync:(NSDictionary *)params{
+- (NSDictionary *)js_getBigEmotionResourceSync:(ZHJSApiArgItem *)arg{
     return [ZHEmotion shareManager].bigEmotionMap;
 }
 
