@@ -131,6 +131,9 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+//    [self testJSContext];
+//    return;
+    
     
     UIView *bgView = [[UIView alloc] initWithFrame:CGRectMake(100, 50, 100, 100)];
     bgView.backgroundColor = [UIColor redColor];

@@ -33,10 +33,13 @@
 // return;
 const resa = fund.getJsonSync({
     ff: 'qqq',
-    success: function (res) {
+    success: function (res, res1) {
         console.log('success-qqq')
         console.log(res)
-        return '11111q'
+        console.log(res1)
+        console.log(Object.prototype.toString.call(res))
+        console.log(Object.prototype.toString.call(res1))
+        return '11111q--' + res;
     },
     fail: function (res) {
         console.log('fail-qqq')

@@ -78,9 +78,9 @@
     __weak __typeof__(self) __self = self;
     return ^ZHJSApiCallJsNativeResItem *(id successData, id failData, id completeData, NSError *error, BOOL alive){
         ZHJSApiCallJsArgItem *caItem = [ZHJSApiCallJsArgItem item];
-        caItem.successData = successData;
-        caItem.failData = failData;
-        caItem.completeData = completeData;
+        caItem.successDatas = successData ? @[successData] : @[];
+        caItem.failDatas = failData ? @[failData] : @[];
+        caItem.completeDatas = completeData ? @[completeData] : @[];
         caItem.error = error;
         caItem.alive = alive;
         return __self.callArg(caItem);

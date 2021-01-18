@@ -45,11 +45,11 @@ typedef ZHJSApiCallJsResNativeResItem *(^ZHJSApiCallJsResNativeBlock)(ZHJSApi_Ca
 @interface ZHJSApiCallJsArgItem : NSObject
 + (instancetype)item;
 // 回调数据 success
-@property (nonatomic,strong) id successData;
+@property (nonatomic,retain) NSArray *successDatas;
 // 回调数据 fail
-@property (nonatomic,strong) id failData;
+@property (nonatomic,retain) NSArray *failDatas;
 // 回调数据 complete
-@property (nonatomic,strong) id completeData;
+@property (nonatomic,retain) NSArray *completeDatas;
 // 调用js函数（success、fail）
 @property (nonatomic,strong) NSError *error;
 // 允许多次调用js函数

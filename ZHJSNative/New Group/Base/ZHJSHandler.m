@@ -87,13 +87,24 @@ case cType:{\
     void (^logBlock)(void) = ^(){
         NSArray *args = [JSContext currentArguments];
         if (args.count == 0) return;
+        
+        id (^formatLog)(JSValue *) = ^id(JSValue *aJSValue){
+            if ([aJSValue isUndefined]) {
+                return @"the params is [object Undefined]";
+            }
+            if ([aJSValue isNull]) {
+                return @"the params is [object Null]";
+            }
+            return [aJSValue toObject];
+        };
+        
         if (args.count == 1) {
-            NSLog(@"👉JSCore log >>: %@",[args[0] toObject]);
+            NSLog(@"👉JSCore log >>: %@", formatLog(args[0]));
             return;
         }
         NSMutableArray *messages = [NSMutableArray array];
         for (JSValue *obj in args) {
-            [messages addObject:[obj toObject]];
+            [messages addObject:formatLog(obj)?:@"null"];
         }
         NSLog(@"👉JSCore log >>: %@", messages);
     };
@@ -169,21 +180,39 @@ case cType:{\
             JSValue *failFunc = [jsArg valueForProperty:fail];
             JSValue *completeFunc = [jsArg valueForProperty:complete];
             ZHJSApiInCallBlock block = ^ZHJSApi_InCallBlock_Header{
-                id successData = argItem.successData;
-                id failData = argItem.failData;
-                id completeData = argItem.completeData;
+                NSArray *successDatas = argItem.successDatas;
+                NSArray *failDatas = argItem.failDatas;
+                NSArray *completeDatas = argItem.completeDatas;
                 NSError *error = argItem.error;
                 
+                /** JSValue callWithArguments 调用js function
+                 原生传参@[]
+                    success: function () {}
+                    success: function (res) {}   res为[object Undefined]类型
+                    success: function (res, res1) {}   res/res1均为[object Undefined]类型
+                 原生传参@[[NSNull null]]
+                    success: function () {}
+                    success: function (res) {}   res为[object Null]类型
+                    success: function (res, res1) {}   res为[object Null]类型  res1为[object Undefined]类型
+                 原生传参@[@"x1"]
+                    success: function () {}
+                    success: function (res) {}   res为[object String]类型
+                    success: function (res, res1) {}   res为[object String]类型  res1为[object Undefined]类型
+                 原生传参@[@"x1", @"x2"]
+                    success: function () {}
+                    success: function (res) {}   res为[object String]类型
+                    success: function (res, res1, res2) {}   res/res1均为[object String]类型  res2为[object Undefined]类型
+                 */
                 if (!error && successFunc) {
                     // 运行参数里的success方法
                     // [paramsValue invokeMethod:success withArguments:@[successData]];
-                    JSValue *resValue = [successFunc callWithArguments:@[successData?:[NSNull null]]];
+                    JSValue *resValue = [successFunc callWithArguments:((successDatas && [successDatas isKindOfClass:NSArray.class]) ? successDatas : @[])];
                     if (argItem.jsResSuccessBlock) {
                         argItem.jsResSuccessBlock([ZHJSApiCallJsResItem item:[__self jsValueToNative:resValue] error:nil]);
                     }
                 }
                 if (error && failFunc) {
-                    JSValue *resValue = [failFunc callWithArguments:@[failData?:[NSNull null]]];
+                    JSValue *resValue = [failFunc callWithArguments:((failDatas && [failDatas isKindOfClass:NSArray.class]) ? failDatas : @[])];
                     if (argItem.jsResFailBlock) {
                         argItem.jsResFailBlock([ZHJSApiCallJsResItem item:[__self jsValueToNative:resValue] error:nil]);
                     }
@@ -194,7 +223,7 @@ case cType:{\
                  callWithArguments: @[]  原生传参数 上面里两个都运行正常
                  */
                 if (completeFunc) {
-                    JSValue *resValue = [completeFunc callWithArguments:@[completeData?:[NSNull null]]];
+                    JSValue *resValue = [completeFunc callWithArguments:((completeDatas && [completeDatas isKindOfClass:NSArray.class]) ? completeDatas : @[])];
                     if (argItem.jsResCompleteBlock) {
                         argItem.jsResCompleteBlock([ZHJSApiCallJsResItem item:[__self jsValueToNative:resValue] error:nil]);
                     }
@@ -471,28 +500,28 @@ case cType:{\
         }
         //需要回调
         ZHJSApiInCallBlock block = ^ZHJSApi_InCallBlock_Header{
-            id successData = argItem.successData;
-            id failData = argItem.failData;
-            id completeData = argItem.completeData;
+            NSArray *successDatas = argItem.successDatas;
+            NSArray *failDatas = argItem.failDatas;
+            NSArray *completeDatas = argItem.completeDatas;
             NSError *error = argItem.error;
             BOOL alive = argItem.alive;
             
             if (!error && successId.length) {
-                [__self callBackJsFunc:successId data:successData?:[NSNull null] alive:alive callBack:^(id jsRes, NSError *jsError) {
+                [__self callBackJsFunc:successId datas:((successDatas && [successDatas isKindOfClass:NSArray.class]) ? successDatas : @[]) alive:alive callBack:^(id jsRes, NSError *jsError) {
                     if (argItem.jsResSuccessBlock) {
                         argItem.jsResSuccessBlock([ZHJSApiCallJsResItem item:jsRes error:jsError]);
                     }
                 }];
             }
             if (error && failId.length) {
-                [__self callBackJsFunc:failId data:failData?:[NSNull null] alive:alive callBack:^(id jsRes, NSError *jsError) {
+                [__self callBackJsFunc:failId datas:((failDatas && [failDatas isKindOfClass:NSArray.class]) ? failDatas : @[]) alive:alive callBack:^(id jsRes, NSError *jsError) {
                     if (argItem.jsResFailBlock) {
                         argItem.jsResFailBlock([ZHJSApiCallJsResItem item:jsRes error:jsError]);
                     }
                 }];
             }
             if (completeId.length) {
-                [__self callBackJsFunc:completeId data:completeData?:[NSNull null] alive:alive callBack:^(id jsRes, NSError *jsError) {
+                [__self callBackJsFunc:completeId datas:((completeDatas && [completeDatas isKindOfClass:NSArray.class]) ? completeDatas : @[]) alive:alive callBack:^(id jsRes, NSError *jsError) {
                     if (argItem.jsResCompleteBlock) {
                         argItem.jsResCompleteBlock([ZHJSApiCallJsResItem item:jsRes error:jsError]);
                     }
@@ -667,13 +696,10 @@ case cType:{\
 }
 
 //js消息回调
-- (void)callBackJsFunc:(NSString *)funcId data:(id)result alive:(BOOL)alive callBack:(void (^) (id jsRes, NSError *jsError))callBack{
-    /**
-     data:[NSNull null]  对应js的Null类型
-     */
+- (void)callBackJsFunc:(NSString *)funcId datas:(NSArray *)datas alive:(BOOL)alive callBack:(void (^) (id jsRes, NSError *jsError))callBack{
     if (funcId.length == 0) return;
-    result = @{@"funcId": funcId, @"data": result?:[NSNull null], @"alive": @(alive)};
-    [self.webView postMessageToJs:self.fetchWebViewCallFuncName params:result completionHandler:^(id res, NSError *error) {
+    NSDictionary *sendParams = @{@"funcId": funcId, @"data": ((datas && [datas isKindOfClass:NSArray.class]) ? datas : @[]), @"alive": @(alive)};
+    [self.webView postMessageToJs:self.fetchWebViewCallFuncName params:sendParams completionHandler:^(id res, NSError *error) {
         if (callBack) callBack((!res || [res isEqual:[NSNull null]]) ? nil : res, error);
     }];
 }

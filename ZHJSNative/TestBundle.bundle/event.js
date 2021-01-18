@@ -57,7 +57,7 @@ var ZhengReplaceIosCallBack = function(params) {
         return funcRes;
     }
     var funcId = newParams.funcId;
-    var res = newParams.data;
+    var resDatas = (ZhengJSType.isArray(newParams.data) ? newParams.data : []);
     var alive = newParams.alive;
 
     var randomKey = '',
@@ -82,11 +82,43 @@ var ZhengReplaceIosCallBack = function(params) {
     var func = funcMap[funcNameKey];
     if (!ZhengJSType.isFunction(func)) return funcRes;
     try {
-        /** 
-         * 原函数没有参数 complete: () => {}  调用func(res) 不会报错
-         * 原函数有参数 complete: (res) => {}  调用func() 会报错 走catch
-         */
-        funcRes = func(res);
+        /** 调用js function
+        原生传参@[] resDatas=[] 调用func()
+            success: function () {}
+            success: function (res) {}   res为[object Undefined]类型
+            success: function (res, res1) {}   res/res1均为[object Undefined]类型
+        原生传参@[[NSNull null]] resDatas=[null] 调用func(null)
+            success: function () {}
+            success: function (res) {}   res为[object Null]类型
+            success: function (res, res1) {}   res为[object Null]类型  res1为[object Undefined]类型
+        原生传参@[@"x1"] resDatas=["x1"] 调用func("x1")
+            success: function () {}
+            success: function (res) {}   res为[object String]类型
+            success: function (res, res1) {}   res为[object String]类型  res1为[object Undefined]类型
+        原生传参@[@"x1", @"x2"] resDatas=["x1", "x2"] 调用func("x1", "x2")
+            success: function () {}
+            success: function (res) {}   res为[object String]类型
+            success: function (res, res1, res2) {}   res/res1均为[object String]类型  res2为[object Undefined]类型
+            */
+        /** js中数组越界为 [object Undefined] 
+        * 可变参数长度 可以直接使用 func.apply(this, resDatas) 调用
+        * 此处this指向暂时不知怎么获取？
+        */
+        if (resDatas.length == 0) {
+            funcRes = func();
+        } else if (resDatas.length == 1) {
+            funcRes = func(resDatas[0]);
+        } else if (resDatas.length == 2) {
+            funcRes = func(resDatas[0], resDatas[1]);
+        } else if (resDatas.length == 3) {
+            funcRes = func(resDatas[0], resDatas[1], resDatas[2]);
+        } else if (resDatas.length == 4) {
+            funcRes = func(resDatas[0], resDatas[1], resDatas[2], resDatas[3]);
+        } else if (resDatas.length == 5) {
+            funcRes = func(resDatas[0], resDatas[1], resDatas[2], resDatas[3], resDatas[4]);
+        } else {
+            funcRes = func(resDatas);
+        }
     } catch (error) {
         if (ZhengJSType.isFunction(window.onerror) && Object.prototype.toString.call(error) == '[object Error]') {
             window.onerror.apply(window, [error]);
