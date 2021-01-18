@@ -47,15 +47,20 @@
 @end
 
 @interface ZHJSApiCallJsItem ()
-@property (nonatomic,copy) ZHJSApiInCallBlock callInBlock;
+@property (nonatomic,copy) ZHJSApiInCallBlock callInSFCBlock;
+@property (nonatomic,copy) ZHJSApiInCallBlock callInJsFuncArgBlock;
 @end
 
 @implementation ZHJSApiCallJsItem
-+ (instancetype)itemWithBlock:(ZHJSApiInCallBlock)callInBlock{
+
++ (instancetype)itemWithSFCBlock:(ZHJSApiInCallBlock)SFCBlock jsFuncArgBlock:(ZHJSApiInCallBlock)jsFuncArgBlock{
     ZHJSApiCallJsItem *item = [[ZHJSApiCallJsItem alloc] init];
-    item.callInBlock = callInBlock;
+    item.callInSFCBlock = SFCBlock;
+    item.callInJsFuncArgBlock = jsFuncArgBlock;
     return item;
 }
+
+// 单参数回调 success/fail/complete
 - (ZHJSApiCallJsNativeResItem * (^) (id successData, NSError *error))call{
     __weak __typeof__(self) __self = self;
     return ^ZHJSApiCallJsNativeResItem *(id successData, NSError *error){
@@ -77,20 +82,46 @@
 - (ZHJSApiCallJsNativeResItem * (^) (id successData, id failData, id completeData, NSError *error, BOOL alive))callSFCA{
     __weak __typeof__(self) __self = self;
     return ^ZHJSApiCallJsNativeResItem *(id successData, id failData, id completeData, NSError *error, BOOL alive){
+        return __self.m_callSFCA(successData ? @[successData] : @[], failData ? @[failData] : @[], completeData ? @[completeData] : @[], error, alive);
+    };
+}
+// 多参数回调 success/fail/complete
+- (ZHJSApiCallJsNativeResItem * (^) (NSArray *successDatas, NSError *error))m_call{
+    __weak __typeof__(self) __self = self;
+    return ^ZHJSApiCallJsNativeResItem *(NSArray *successDatas, NSError *error){
+        return __self.m_callSFCA(successDatas, nil, nil, error, NO);
+    };
+}
+- (ZHJSApiCallJsNativeResItem * (^) (NSArray *successDatas, NSError *error, BOOL alive))m_callA{
+    __weak __typeof__(self) __self = self;
+    return ^ZHJSApiCallJsNativeResItem *(NSArray *successDatas, NSError *error, BOOL alive){
+        return __self.m_callSFCA(successDatas, nil, nil, error, alive);
+    };
+}
+- (ZHJSApiCallJsNativeResItem * (^) (NSArray *successDatas, NSArray *failDatas, NSArray *completeDatas, NSError *error))m_callSFC{
+    __weak __typeof__(self) __self = self;
+    return ^ZHJSApiCallJsNativeResItem *(NSArray *successDatas, NSArray *failDatas, NSArray *completeDatas, NSError *error){
+        return __self.m_callSFCA(successDatas, failDatas, completeDatas, error, NO);
+    };
+}
+- (ZHJSApiCallJsNativeResItem * (^) (NSArray *successDatas, NSArray *failDatas, NSArray *completeDatas, NSError *error, BOOL alive))m_callSFCA{
+    __weak __typeof__(self) __self = self;
+    return ^ZHJSApiCallJsNativeResItem *(NSArray *successDatas, NSArray *failDatas, NSArray *completeDatas, NSError *error, BOOL alive){
         ZHJSApiCallJsArgItem *caItem = [ZHJSApiCallJsArgItem item];
-        caItem.successDatas = successData ? @[successData] : @[];
-        caItem.failDatas = failData ? @[failData] : @[];
-        caItem.completeDatas = completeData ? @[completeData] : @[];
+        caItem.successDatas = (successDatas && [successDatas isKindOfClass:NSArray.class]) ? successDatas : @[];
+        caItem.failDatas = (failDatas && [failDatas isKindOfClass:NSArray.class]) ? failDatas : @[];
+        caItem.completeDatas = (completeDatas && [completeDatas isKindOfClass:NSArray.class]) ? completeDatas : @[];
         caItem.error = error;
         caItem.alive = alive;
         return __self.callArg(caItem);
     };
 }
+// 自定义回调
 - (ZHJSApiCallJsNativeResItem * (^) (ZHJSApiCallJsArgItem *argItem))callArg{
     __weak __typeof__(self) __self = self;
     return ^ZHJSApiCallJsNativeResItem *(ZHJSApiCallJsArgItem *argItem){
-        if (__self.callInBlock) {
-            return __self.callInBlock(argItem);
+        if (__self.callInSFCBlock) {
+            return __self.callInSFCBlock(argItem);
         }
         return [ZHJSApiCallJsNativeResItem item];
     };
@@ -118,6 +149,48 @@
 //
 //    };
 //    return block;
+}
+
+
+
+
+// 回调 js 直接传递的 function
+- (ZHJSApiCallJsNativeResItem * (^) (id data))jsFuncArg_call{
+    __weak __typeof__(self) __self = self;
+    return ^ZHJSApiCallJsNativeResItem *(id data){
+        return __self.jsFuncArg_m_callA(data ? @[data] : @[], NO);
+    };
+}
+- (ZHJSApiCallJsNativeResItem * (^) (id data, BOOL alive))jsFuncArg_callA{
+    __weak __typeof__(self) __self = self;
+    return ^ZHJSApiCallJsNativeResItem *(id data, BOOL alive){
+        return __self.jsFuncArg_m_callA(data ? @[data] : @[], alive);
+    };
+}
+- (ZHJSApiCallJsNativeResItem * (^) (NSArray *args))jsFuncArg_m_call{
+    __weak __typeof__(self) __self = self;
+    return ^ZHJSApiCallJsNativeResItem *(NSArray *args){
+        return __self.jsFuncArg_m_callA(args, NO);
+    };
+}
+- (ZHJSApiCallJsNativeResItem * (^) (NSArray *args, BOOL alive))jsFuncArg_m_callA{
+    __weak __typeof__(self) __self = self;
+    return ^ZHJSApiCallJsNativeResItem *(NSArray *args, BOOL alive){
+        ZHJSApiCallJsArgItem *caItem = [ZHJSApiCallJsArgItem item];
+        caItem.alive = alive;
+        caItem.jsFuncArgDatas = args;
+        return __self.jsFuncArg_callArg(caItem);
+    };
+}
+// 自定义回调
+- (ZHJSApiCallJsNativeResItem * (^) (ZHJSApiCallJsArgItem *argItem))jsFuncArg_callArg{
+    __weak __typeof__(self) __self = self;
+    return ^ZHJSApiCallJsNativeResItem *(ZHJSApiCallJsArgItem *argItem){
+        if (__self.callInJsFuncArgBlock) {
+            return __self.callInJsFuncArgBlock(argItem);
+        }
+        return [ZHJSApiCallJsNativeResItem item];
+    };
 }
 
 @end

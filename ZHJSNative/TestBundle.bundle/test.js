@@ -31,7 +31,12 @@
 //     }
 //   }, 'a string', ['gf', 555], 234, null, undefined, false, true, function () { console.log('jjjj') });
 // return;
-const resa = fund.getJsonSync({
+const resa = fund.getJsonSync(function(resfff, resttt){
+  console.log('13245623--uuuu', 243, 'gdf')
+  console.log(resfff)
+  console.log(resttt)
+  return 'wwwwwwq--' + resfff
+},{
     ff: 'qqq',
     success: function (res, res1) {
         console.log('success-qqq')

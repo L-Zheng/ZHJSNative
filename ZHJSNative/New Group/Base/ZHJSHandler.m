@@ -158,10 +158,21 @@ case cType:{\
         NSMutableArray *resArgs = [NSMutableArray array];
         for (NSUInteger idx = 0; idx < jsArgs.count; idx++) {
             JSValue *jsArg = jsArgs[idx];
+            
+            ZHJSApiInCallBlock jsFuncArgBlock = ^ZHJSApi_InCallBlock_Header{
+                NSArray *jsFuncArgDatas = argItem.jsFuncArgDatas;
+                // BOOL alive = argItem.alive;
+                JSValue *resValue = [jsArg callWithArguments:((jsFuncArgDatas && [jsFuncArgDatas isKindOfClass:NSArray.class]) ? jsFuncArgDatas : @[])];
+                if (argItem.jsFuncArgResBlock) {
+                    argItem.jsFuncArgResBlock([ZHJSApiCallJsResItem item:[__self jsValueToNative:resValue] error:nil]);
+                }
+                return [ZHJSApiCallJsNativeResItem item];
+            };
+            
             // 转换成原生类型
             id nativeValue = [__self jsValueToNative:jsArg];
             if (!nativeValue || ![nativeValue isKindOfClass:NSDictionary.class]) {
-                [resArgs addObject:[ZHJSApiArgItem item:nativeValue?:[NSNull null] callItem:nil]];
+                [resArgs addObject:[ZHJSApiArgItem item:nativeValue?:[NSNull null] callItem:[ZHJSApiCallJsItem itemWithSFCBlock:nil jsFuncArgBlock:jsFuncArgBlock]]];
                 continue;
             }
             
@@ -172,7 +183,7 @@ case cType:{\
             BOOL hasCallFunction = ([jsArg hasProperty:success] || [jsArg hasProperty:fail] || [jsArg hasProperty:complete]);
             //不需要回调方法
             if (!hasCallFunction) {
-                [resArgs addObject:[ZHJSApiArgItem item:nativeValue callItem:nil]];
+                [resArgs addObject:[ZHJSApiArgItem item:nativeValue?:[NSNull null] callItem:[ZHJSApiCallJsItem itemWithSFCBlock:nil jsFuncArgBlock:jsFuncArgBlock]]];
                 continue;
             }
             //需要回调
@@ -186,6 +197,7 @@ case cType:{\
                 NSError *error = argItem.error;
                 
                 /** JSValue callWithArguments 调用js function
+                 如果JSValue对应的不是js function，而是js array/number或其他数据 调用[JSValue callWithArguments:]函数，不会崩溃，可正常使用
                  原生传参@[]
                     success: function () {}
                     success: function (res) {}   res为[object Undefined]类型
@@ -231,7 +243,7 @@ case cType:{\
                 return [ZHJSApiCallJsNativeResItem item];
             };
             
-            [resArgs addObject:[ZHJSApiArgItem item:nativeValue callItem:[ZHJSApiCallJsItem itemWithBlock:block]]];
+            [resArgs addObject:[ZHJSApiArgItem item:nativeValue?:[NSNull null] callItem:[ZHJSApiCallJsItem itemWithSFCBlock:block jsFuncArgBlock:nil]]];
         }
         return [__self runNativeFunc:key apiPrefix:apiPrefix arguments:resArgs.copy];
     };
@@ -317,6 +329,7 @@ case cType:{\
      self.fetchWebViewCallSuccessFuncKey,
      self.fetchWebViewCallFailFuncKey,
      self.fetchWebViewCallCompleteFuncKey,
+     self.fetchWebViewJsFunctionArgKey,
      self.fetchWebViewCallFuncName,
      self.fetchWebViewGeneratorApiFuncName];
     return [res copy];
@@ -492,44 +505,61 @@ case cType:{\
         NSString *successId = [newParams valueForKey:[self fetchWebViewCallSuccessFuncKey]];
         NSString *failId = [newParams valueForKey:[self fetchWebViewCallFailFuncKey]];
         NSString *completeId = [newParams valueForKey:[self fetchWebViewCallCompleteFuncKey]];
-        BOOL hasCallFunction = (successId.length || failId.length || completeId.length);
+        NSString *jsFuncArgId = [newParams valueForKey:[self fetchWebViewJsFunctionArgKey]];
+        BOOL hasCallFunction = (successId.length || failId.length || completeId.length || jsFuncArgId.length);
         //不需要回调方法
         if (!hasCallFunction) {
             [resArgs addObject:[ZHJSApiArgItem item:jsArg callItem:nil]];
             continue;
         }
-        //需要回调
-        ZHJSApiInCallBlock block = ^ZHJSApi_InCallBlock_Header{
-            NSArray *successDatas = argItem.successDatas;
-            NSArray *failDatas = argItem.failDatas;
-            NSArray *completeDatas = argItem.completeDatas;
-            NSError *error = argItem.error;
-            BOOL alive = argItem.alive;
-            
-            if (!error && successId.length) {
-                [__self callBackJsFunc:successId datas:((successDatas && [successDatas isKindOfClass:NSArray.class]) ? successDatas : @[]) alive:alive callBack:^(id jsRes, NSError *jsError) {
-                    if (argItem.jsResSuccessBlock) {
-                        argItem.jsResSuccessBlock([ZHJSApiCallJsResItem item:jsRes error:jsError]);
+        //js function 参数回调
+        if (jsFuncArgId.length) {
+            ZHJSApiInCallBlock block = ^ZHJSApi_InCallBlock_Header{
+                NSArray *jsFuncArgDatas = argItem.jsFuncArgDatas;
+                BOOL alive = argItem.alive;
+                
+                [__self callBackJsFunc:jsFuncArgId datas:((jsFuncArgDatas && [jsFuncArgDatas isKindOfClass:NSArray.class]) ? jsFuncArgDatas : @[]) alive:alive callBack:^(id jsRes, NSError *jsError) {
+                    if (argItem.jsFuncArgResBlock) {
+                        argItem.jsFuncArgResBlock([ZHJSApiCallJsResItem item:jsRes error:jsError]);
                     }
                 }];
-            }
-            if (error && failId.length) {
-                [__self callBackJsFunc:failId datas:((failDatas && [failDatas isKindOfClass:NSArray.class]) ? failDatas : @[]) alive:alive callBack:^(id jsRes, NSError *jsError) {
-                    if (argItem.jsResFailBlock) {
-                        argItem.jsResFailBlock([ZHJSApiCallJsResItem item:jsRes error:jsError]);
-                    }
-                }];
-            }
-            if (completeId.length) {
-                [__self callBackJsFunc:completeId datas:((completeDatas && [completeDatas isKindOfClass:NSArray.class]) ? completeDatas : @[]) alive:alive callBack:^(id jsRes, NSError *jsError) {
-                    if (argItem.jsResCompleteBlock) {
-                        argItem.jsResCompleteBlock([ZHJSApiCallJsResItem item:jsRes error:jsError]);
-                    }
-                }];
-            }
-            return [ZHJSApiCallJsNativeResItem item];
-        };
-        [resArgs addObject:[ZHJSApiArgItem item:jsArg callItem:[ZHJSApiCallJsItem itemWithBlock:block]]];
+                return [ZHJSApiCallJsNativeResItem item];
+            };
+            [resArgs addObject:[ZHJSApiArgItem item:jsArg callItem:[ZHJSApiCallJsItem itemWithSFCBlock:nil jsFuncArgBlock:block]]];
+        }else{
+            //js success/fail/complete 回调
+            ZHJSApiInCallBlock block = ^ZHJSApi_InCallBlock_Header{
+                NSArray *successDatas = argItem.successDatas;
+                NSArray *failDatas = argItem.failDatas;
+                NSArray *completeDatas = argItem.completeDatas;
+                NSError *error = argItem.error;
+                BOOL alive = argItem.alive;
+                
+                if (!error && successId.length) {
+                    [__self callBackJsFunc:successId datas:((successDatas && [successDatas isKindOfClass:NSArray.class]) ? successDatas : @[]) alive:alive callBack:^(id jsRes, NSError *jsError) {
+                        if (argItem.jsResSuccessBlock) {
+                            argItem.jsResSuccessBlock([ZHJSApiCallJsResItem item:jsRes error:jsError]);
+                        }
+                    }];
+                }
+                if (error && failId.length) {
+                    [__self callBackJsFunc:failId datas:((failDatas && [failDatas isKindOfClass:NSArray.class]) ? failDatas : @[]) alive:alive callBack:^(id jsRes, NSError *jsError) {
+                        if (argItem.jsResFailBlock) {
+                            argItem.jsResFailBlock([ZHJSApiCallJsResItem item:jsRes error:jsError]);
+                        }
+                    }];
+                }
+                if (completeId.length) {
+                    [__self callBackJsFunc:completeId datas:((completeDatas && [completeDatas isKindOfClass:NSArray.class]) ? completeDatas : @[]) alive:alive callBack:^(id jsRes, NSError *jsError) {
+                        if (argItem.jsResCompleteBlock) {
+                            argItem.jsResCompleteBlock([ZHJSApiCallJsResItem item:jsRes error:jsError]);
+                        }
+                    }];
+                }
+                return [ZHJSApiCallJsNativeResItem item];
+            };
+            [resArgs addObject:[ZHJSApiArgItem item:jsArg callItem:[ZHJSApiCallJsItem itemWithSFCBlock:block jsFuncArgBlock:nil]]];
+        }
     }
     return [self runNativeFunc:jsMethodName apiPrefix:apiPrefix arguments:resArgs.copy];
 }
@@ -730,6 +760,9 @@ case cType:{\
 }
 - (NSString *)fetchWebViewCallCompleteFuncKey{
     return @"ZhengCallBackCompleteKey";
+}
+- (NSString *)fetchWebViewJsFunctionArgKey{
+    return @"ZhengJSToNativeFunctionArgKey";
 }
 - (NSString *)fetchWebViewApiFinishFlag{
     return @"ZhengJSBridgeReady";

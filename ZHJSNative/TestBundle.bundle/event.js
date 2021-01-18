@@ -34,6 +34,7 @@ var ZhengJSToNativeHandlerName = 'ZhengReplaceJSEventHandler';
 var ZhengCallBackSuccessKey = 'ZhengReplaceCallBackSuccessKey';
 var ZhengCallBackFailKey = 'ZhengReplaceCallBackFailKey';
 var ZhengCallBackCompleteKey = 'ZhengReplaceCallBackCompleteKey';
+var ZhengJSToNativeFunctionArgKey = 'ZhengReplaceJSToNativeFunctionArgKey';
 var ZhengJSType = (function() {
     var type = {};
     var typeArr = ['String', 'Object', 'Number', 'Array', 'Undefined', 'Function', 'Null', 'Symbol', 'Boolean'];
@@ -74,7 +75,7 @@ var ZhengReplaceIosCallBack = function(params) {
         funcNameKey = key;
         return true;
     };
-    var matchRes = (matchKey(ZhengCallBackSuccessKey) || matchKey(ZhengCallBackFailKey) || matchKey(ZhengCallBackCompleteKey));
+    var matchRes = (matchKey(ZhengCallBackSuccessKey) || matchKey(ZhengCallBackFailKey) || matchKey(ZhengCallBackCompleteKey) || matchKey(ZhengJSToNativeFunctionArgKey));
     if (!matchRes) return funcRes;
 
     var funcMap = ZhengCallBackMap[randomKey];
@@ -127,17 +128,18 @@ var ZhengReplaceIosCallBack = function(params) {
     }
     if (alive) return funcRes;
     /** 回调complete后删除 */
-    if (funcNameKey == ZhengCallBackCompleteKey) {
+    if (funcNameKey == ZhengCallBackCompleteKey || funcNameKey == ZhengJSToNativeFunctionArgKey) {
         ZhengRemoveCallBack(randomKey);
     }
     return funcRes;
 }
 /**
 {
-    '-request-1582972065568-79-': {
+    '-fund-request-1582972065568-arg0-79-': {
         ZhengCallBackSuccessKey: function
         ZhengCallBackFailKey: function
         ZhengCallBackCompleteKey: function
+        ZhengJSToNativeFunctionArgKey: function
     }
 }
  */
@@ -147,45 +149,52 @@ var ZhengAddCallBack = function(randomKey, funcNameKey, func) {
         var map = {};
         map[funcNameKey] = func;
         ZhengCallBackMap[randomKey] = map;
-        return;
+    } else {
+        /** if (funcMap.hasOwnProperty(funcNameKey)) return; */
+        funcMap[funcNameKey] = func;
+        ZhengCallBackMap[randomKey] = funcMap;
     }
-    if (funcMap.hasOwnProperty(funcNameKey)) return;
-    funcMap[funcNameKey] = func;
-    ZhengCallBackMap[randomKey] = funcMap;
+    return randomKey + funcNameKey;
 };
 var ZhengRemoveCallBack = function(randomKey) {
     if (!ZhengCallBackMap.hasOwnProperty(randomKey)) return;
     delete ZhengCallBackMap[randomKey];
 };
-var ZhengHandleCallBackParams = function(methodName, params, index) {
-    if (!ZhengJSType.isObject(params)) {
+var ZhengHandleCallBackParams = function(apiPrefix, methodName, params, index) {
+    if (!ZhengJSType.isObject(params) && !ZhengJSType.isFunction(params)) {
         return params;
     }
-    /** 0-10000的随机整数 -request-1582972065568-0-79- */
-    var randomKey = '-' + methodName + '-' + new Date().getTime().toString() + '-' + index + '-' + Math.floor(Math.random() * 10000).toString() + '-';
+    /** 0-10000的随机整数 -fund-request-1582972065568-arg0-79- */
+    var randomKey = '-' + apiPrefix + '-' + methodName + '-' + new Date().getTime().toString() + '-arg' + index + '-' + Math.floor(Math.random() * 10000).toString() + '-';
+    
     /** 参数 */
-    var newParams = params;
+    var newParams = {};
     var funcId = '';
 
+    /** function 参数 */
+    if (ZhengJSType.isFunction(params)) {
+        funcId = ZhengAddCallBack(randomKey, ZhengJSToNativeFunctionArgKey, params);
+        newParams[ZhengJSToNativeFunctionArgKey] = funcId;
+        return newParams;
+    }
+
+    newParams = params;
     /** 成功回调 */
     var success = params.success;
     if (success && ZhengJSType.isFunction(success)) {
-        funcId = randomKey + ZhengCallBackSuccessKey;
-        ZhengAddCallBack(randomKey, ZhengCallBackSuccessKey, success);
+        funcId = ZhengAddCallBack(randomKey, ZhengCallBackSuccessKey, success);
         newParams[ZhengCallBackSuccessKey] = funcId;
     }
     /** 失败回调 */
     var fail = params.fail;
     if (fail && ZhengJSType.isFunction(fail)) {
-        funcId = randomKey + ZhengCallBackFailKey;
-        ZhengAddCallBack(randomKey, ZhengCallBackFailKey, fail);
+        funcId = ZhengAddCallBack(randomKey, ZhengCallBackFailKey, fail);
         newParams[ZhengCallBackFailKey] = funcId;
     }
     /** 完成回调 */
     var complete = params.complete;
     if (complete && ZhengJSType.isFunction(complete)) {
-        funcId = randomKey + ZhengCallBackCompleteKey;
-        ZhengAddCallBack(randomKey, ZhengCallBackCompleteKey, complete);
+        funcId = ZhengAddCallBack(randomKey, ZhengCallBackCompleteKey, complete);
         newParams[ZhengCallBackCompleteKey] = funcId;
     }
     return newParams;
@@ -200,7 +209,7 @@ var ZhengSendParams = function(apiPrefix, methodName, params) {
     if (Object.prototype.toString.call(newParams) === '[object Arguments]') {
         var argCount = newParams.length;
         for (var argIdx = 0; argIdx < argCount; argIdx++) {
-            resArgs.push(ZhengHandleCallBackParams(methodName, newParams[argIdx], argIdx));
+            resArgs.push(ZhengHandleCallBackParams(apiPrefix, methodName, newParams[argIdx], argIdx));
         }
     }
     return {methodName, apiPrefix, args: resArgs};
