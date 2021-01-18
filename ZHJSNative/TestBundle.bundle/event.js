@@ -135,7 +135,7 @@ var ZhengReplaceIosCallBack = function(params) {
 }
 /**
 {
-    '-fund-request-1582972065568-arg0-79-': {
+    '-fund-request-1582972065568-arg0-79-88-': {
         ZhengCallBackSuccessKey: function
         ZhengCallBackFailKey: function
         ZhengCallBackCompleteKey: function
@@ -164,8 +164,8 @@ var ZhengHandleCallBackParams = function(apiPrefix, methodName, params, index) {
     if (!ZhengJSType.isObject(params) && !ZhengJSType.isFunction(params)) {
         return params;
     }
-    /** 0-10000的随机整数 -fund-request-1582972065568-arg0-79- */
-    var randomKey = '-' + apiPrefix + '-' + methodName + '-' + new Date().getTime().toString() + '-arg' + index + '-' + Math.floor(Math.random() * 10000).toString() + '-';
+    /** 0-10000的随机整数 -fund-request-1582972065568-arg0-79-88- */
+    var randomKey = '-' + apiPrefix + '-' + methodName + '-' + new Date().getTime().toString() + '-arg' + index + '-' + Math.floor(Math.random() * 10000).toString() + '-' + Math.floor(Math.random() * 10000).toString() + '-';
     
     /** 参数 */
     var newParams = {};
