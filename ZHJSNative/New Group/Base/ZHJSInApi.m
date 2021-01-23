@@ -69,6 +69,27 @@
    ZHJSApiCallJsItem *item1 = arg.callItem;
    if (item1.call) item1.call(@"2222", nil);
 }
+ZHJS_EXPORT_FUNC(getTest111, @(YES))
+ - (NSNumber *)js_getTest111:(ZHJSApiArgItem *)arg{
+     NSLog(@"-------%s---------", __func__);
+     return @(22);
+}
+
+ZHJS_EXPORT_FUNC(getNumberSync, @(YES))
+ - (NSNumber *)js_getNumberSync:(ZHJSApiArgItem *)arg{
+     NSLog(@"-------%s---------", __func__);
+     return @(22);
+ }
+ZHJS_EXPORT_FUNC(getBoolSync, @(YES))
+ - (NSNumber *)js_getBoolSync:(ZHJSApiArgItem *)arg{
+     NSLog(@"-------%s---------", __func__);
+     return @(YES);
+ }
+ZHJS_EXPORT_FUNC(getStringSync, @(YES), @{@"dd": @"vvv"})
+ - (NSString *)js_getStringSync:(ZHJSApiArgItem *)arg{
+     NSLog(@"-------%s---------", __func__);
+     return @"dfgewrefdwd";
+ }
 
 
 - (ZHWebView *)webView{

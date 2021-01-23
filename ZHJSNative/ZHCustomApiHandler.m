@@ -13,6 +13,12 @@
 
 #pragma mark - api
 
+ZHJS_EXPORT_FUNC(getTest111, @(NO))
+ - (NSNumber *)js_getTest111:(ZHJSApiArgItem *)arg{
+     NSLog(@"-------%s---------", __func__);
+     return @(22);
+}
+
 - (NSNumber *)js_getNumberSync:(ZHJSApiArgItem *)arg{
     NSLog(@"-------%s---------", __func__);
     return @(22);

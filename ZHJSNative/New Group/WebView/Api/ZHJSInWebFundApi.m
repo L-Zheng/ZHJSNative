@@ -132,21 +132,6 @@
      }];
      return [arguments componentsJoinedByString:@"&"];
  }
-ZHJS_EXPORT_FUNC(getNumberSync, @(YES))
- - (NSNumber *)js_getNumberSync:(ZHJSApiArgItem *)arg{
-     NSLog(@"-------%s---------", __func__);
-     return @(22);
- }
-ZHJS_EXPORT_FUNC(getBoolSync, @(YES))
- - (NSNumber *)js_getBoolSync:(ZHJSApiArgItem *)arg{
-     NSLog(@"-------%s---------", __func__);
-     return @(YES);
- }
-ZHJS_EXPORT_FUNC(getStringSync, @(YES), @{@"dd": @"vvv"})
- - (NSString *)js_getStringSync:(ZHJSApiArgItem *)arg{
-     NSLog(@"-------%s---------", __func__);
-     return @"dfgewrefdwd";
- }
 
 #pragma mark - ZHJSApiProtocol
 

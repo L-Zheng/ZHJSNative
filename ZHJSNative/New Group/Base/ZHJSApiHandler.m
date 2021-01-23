@@ -293,7 +293,8 @@
         
         NSMutableDictionary <NSString *, ZHJSApiRegisterItem *> *functionMap = [@{} mutableCopy];
         
-        [handlerMaps enumerateObjectsUsingBlock:^(NSDictionary *handlerMap, NSUInteger idx, BOOL *handlerStop) {
+        // 倒叙
+        [handlerMaps enumerateObjectsWithOptions:NSEnumerationReverse usingBlock:^(NSDictionary *handlerMap, NSUInteger idx, BOOL *handlerStop) {
             //            id <ZHJSApiProtocol> handler = [handlerMap objectForKey:@"handler"];
             NSDictionary *map = [handlerMap objectForKey:@"map"];
             [map enumerateKeysAndObjectsUsingBlock:^(NSString *jsMethod, NSArray *methodItems, BOOL *mapStop) {
@@ -325,21 +326,21 @@
         if (block) block(apiPrefix, apiMap);
     }];
 }
-- (void)fetchRegsiterApiMap:(NSArray <id <ZHJSApiProtocol>> *)handlers block:(void (^)(NSString *apiPrefix, NSDictionary <NSString *, ZHJSApiRegisterItem *> *apiMap))block{
-    if (!handlers || handlers.count == 0) {
-        if (block) block(nil, nil);
-        return;
-    }
-    //构造api
-    NSMutableDictionary *apiMap = [@{} mutableCopy];
-    [self addApiMap:apiMap handlers:handlers];
-    
-    //转换成注册api
-    NSDictionary *mergeApiMap = [self parseApiMapToRegsiterApiMap:apiMap];
-    [mergeApiMap enumerateKeysAndObjectsUsingBlock:^(NSString *apiPrefix, NSDictionary *apiMap, BOOL *stop) {
-        if (block) block(apiPrefix, apiMap);
-    }];
-}
+//- (void)fetchRegsiterApiMap:(NSArray <id <ZHJSApiProtocol>> *)handlers block:(void (^)(NSString *apiPrefix, NSDictionary <NSString *, ZHJSApiRegisterItem *> *apiMap))block{
+//    if (!handlers || handlers.count == 0) {
+//        if (block) block(nil, nil);
+//        return;
+//    }
+//    //构造api
+//    NSMutableDictionary *apiMap = [@{} mutableCopy];
+//    [self addApiMap:apiMap handlers:handlers];
+//
+//    //转换成注册api
+//    NSDictionary *mergeApiMap = [self parseApiMapToRegsiterApiMap:apiMap];
+//    [mergeApiMap enumerateKeysAndObjectsUsingBlock:^(NSString *apiPrefix, NSDictionary *apiMap, BOOL *stop) {
+//        if (block) block(apiPrefix, apiMap);
+//    }];
+//}
 
 //获取方法名
 - (void)fetchSelectorByName:(NSString *)jsMethodName apiPrefix:(NSString *)apiPrefix callBack:(void (^) (id target, SEL sel))callBack{
