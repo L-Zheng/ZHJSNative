@@ -49,10 +49,6 @@ typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
 
 @property (nonatomic,strong) ZHWebViewItem *webItem;
 
-#pragma mark - controller
-
-@property (nonatomic,weak) UIViewController *controller;
-
 #pragma mark - load call
 
 @property (nonatomic, assign, readonly) BOOL loadSuccess;

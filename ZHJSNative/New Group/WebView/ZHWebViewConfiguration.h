@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <WebKit/WebKit.h>
 #import "ZHJSApiProtocol.h"
+#import "ZHJSPageItem.h" // WebView/JSContext页面信息数据
 @class ZHWebView;
 
 
@@ -64,11 +65,17 @@
 @end
 
 
+/** 👉webview api配置 */
+@interface ZHWebViewApiConfiguration : ZHWebViewModuleConfiguration <ZHJSPageApiProtocol>
+@end
+
+
 /** 👉webview 配置 */
 @interface ZHWebViewConfiguration : ZHWebViewModuleConfiguration
 @property (nonatomic,strong) ZHWebViewAppletConfiguration *appletConfig;
 @property (nonatomic,strong) ZHWebViewCreateConfiguration *createConfig;
 @property (nonatomic,strong) ZHWebViewLoadConfiguration *loadConfig;
+@property (nonatomic,strong) ZHWebViewApiConfiguration <ZHJSPageApiProtocol> *apiConfig;
 @end
 
 

@@ -249,7 +249,15 @@
     self.webView = webView;
     //配置代理
     [self configWebViewDelegate:webView target:self];
-    //配置handler
+    
+    //配置controller
+    ZHWebViewApiConfiguration *apiConfig = [[ZHWebViewApiConfiguration alloc] init];
+    apiConfig.belong_controller = self;
+    apiConfig.status_controller = self;
+    apiConfig.navigationItem = self.navigationItem;
+    apiConfig.navigationBar = self.navigationController.navigationBar;
+    apiConfig.router_navigationController = self.navigationController;
+    webView.globalConfig.apiConfig = apiConfig;
 }
 - (void)configWebViewFrame:(WKWebView *)webView{
     if (@available(iOS 11.0, *)) {

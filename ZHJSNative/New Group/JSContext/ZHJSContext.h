@@ -64,10 +64,6 @@
 
 @property (nonatomic,strong) ZHJSContextItem *contextItem;
 
-#pragma mark - controller
-
-@property (nonatomic,weak) UIViewController *controller;
-
 
 @end
 

@@ -7,7 +7,6 @@
 //
 
 #import "ZHJSContextConfiguration.h"
-#import "ZHJSPageItem.h" // WebView/JSContext页面信息数据
 
 @implementation ZHJSContextModuleConfiguration
 - (NSDictionary *)formatInfo{
@@ -21,6 +20,15 @@
 
 /** 👉JSContext 绑定的小程序配置 */
 @implementation ZHJSContextAppletConfiguration
+- (NSString *)envVersion{
+    if (!_envVersion ||
+        ![_envVersion isKindOfClass:[NSString class]] ||
+        _envVersion.length == 0 ) {
+        return @"release";
+    }
+    return _envVersion;
+}
+
 - (NSDictionary *)formatInfo{
     return @{
         @"appId": self.appId?:@"",
@@ -53,13 +61,30 @@
 @end
 
 
+/** 👉JSContext api配置 */
+@implementation ZHJSContextApiConfiguration
+@synthesize belong_controller = _belong_controller;
+@synthesize status_controller = _status_controller;
+@synthesize navigationBar = _navigationBar;
+@synthesize navigationItem = _navigationItem;
+@synthesize router_navigationController = _router_navigationController;
+- (void)dealloc{
+    NSLog(@"%s", __func__);
+}
+- (NSDictionary *)formatInfo{
+    return @{};
+}
+@end
+
+
 /** 👉JSContext 配置 */
 @implementation ZHJSContextConfiguration
 - (NSDictionary *)formatInfo{
     return @{
-        @"appletConfig": [self.appletConfig formatInfo],
-        @"createConfig": [self.createConfig formatInfo],
-        @"loadConfig": [self.loadConfig formatInfo]
+        @"appletConfig": [self.appletConfig formatInfo]?:@{},
+        @"createConfig": [self.createConfig formatInfo]?:@{},
+        @"loadConfig": [self.loadConfig formatInfo]?:@{},
+        @"apiConfig": [self.apiConfig formatInfo]?:@{}
     };
 }
 - (void)dealloc{

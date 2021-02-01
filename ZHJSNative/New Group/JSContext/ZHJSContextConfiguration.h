@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "ZHJSApiProtocol.h"
+#import "ZHJSPageItem.h" // WebView/JSContext页面信息数据
 @class ZHJSContext;
 
 
@@ -45,11 +46,17 @@
 @end
 
 
+/** 👉JSContext api配置 */
+@interface ZHJSContextApiConfiguration : ZHJSContextModuleConfiguration <ZHJSPageApiProtocol>
+@end
+
+
 /** 👉JSContext 配置 */
 @interface ZHJSContextConfiguration : ZHJSContextModuleConfiguration
 @property (nonatomic,strong) ZHJSContextAppletConfiguration *appletConfig;
 @property (nonatomic,strong) ZHJSContextCreateConfiguration *createConfig;
 @property (nonatomic,strong) ZHJSContextLoadConfiguration *loadConfig;
+@property (nonatomic,strong) ZHJSContextApiConfiguration <ZHJSPageApiProtocol> *apiConfig;
 @end
 
 

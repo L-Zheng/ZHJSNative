@@ -34,6 +34,19 @@
 
 @end
 
+// WebView JSContext页面api协议
+@protocol ZHJSPageApiProtocol <NSObject>
+// controller
+@property (nonatomic,weak) UIViewController *belong_controller;
+// status
+@property (nonatomic,weak) UIViewController *status_controller;
+// api navigation
+@property (nonatomic,weak) UINavigationItem *navigationItem;
+@property (nonatomic,weak) UINavigationBar *navigationBar;
+// api router
+@property (nonatomic,weak) UINavigationController *router_navigationController;
+@end
+
 
 // WebView JSContext页面协议
 @protocol ZHJSPageProtocol <NSObject>
@@ -43,11 +56,6 @@
 - (NSURL *)zh_runSandBoxURL;
 // pageitem
 - (ZHJSPageItem *)zh_pageItem;
-// controller
-- (UIViewController *)zh_controller;
-// navigation
-- (UINavigationItem *)zh_navigationItem;
-- (UINavigationBar *)zh_navigationBar;
-- (UINavigationController *)zh_navigationController;
-- (UINavigationController *)zh_router_navigationController;
+// api
+- (id <ZHJSPageApiProtocol>)zh_api;
 @end

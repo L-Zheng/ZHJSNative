@@ -869,22 +869,9 @@
 - (ZHJSPageItem *)zh_pageItem{
     return self.webItem;
 }
-// controller
-- (UIViewController *)zh_controller{
-    return self.controller;
-}
-// navigation
-- (UINavigationItem *)zh_navigationItem{
-    return self.controller.navigationItem;
-}
-- (UINavigationBar *)zh_navigationBar{
-    return self.controller.navigationController.navigationBar;
-}
-- (UINavigationController *)zh_navigationController{
-    return self.controller.navigationController;
-}
-- (UINavigationController *)zh_router_navigationController{
-    return self.controller.navigationController;
+// api
+- (id <ZHJSPageApiProtocol>)zh_api{
+    return self.globalConfig.apiConfig;
 }
 
 #pragma mark - UIScrollViewDelegate
