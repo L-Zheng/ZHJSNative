@@ -12,6 +12,7 @@
 #import "ZHJSApiProtocol.h"
 @class ZHWebView;
 @class ZHWebViewConfiguration;
+@class ZHWebViewFetchConfiguration;
 
 //NS_ASSUME_NONNULL_BEGIN
 
@@ -29,7 +30,8 @@
                  finish:(void (^) (NSDictionary *info, NSError *error))finish;
 
 //查找预加载的webview
-- (ZHWebView *)fetchWebView:(NSString *)key;
+- (NSDictionary *)fetchLatestWebViewInfo:(NSString *)key;
+- (ZHWebView *)fetchWebView:(ZHWebViewFetchConfiguration *)config;
 // 操作所有加载的webview
 - (void)opAllWebViewUsingBlock:(void (^) (ZHWebView *webView))block;
 

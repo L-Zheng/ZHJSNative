@@ -204,7 +204,10 @@
 - (void)readyLoadWebView{
     ZHWebViewManager *mg = [ZHWebViewManager shareManager];
     //查找可用WebView
-    ZHWebView *webView = [mg fetchWebView:[self currentTemplateKey]];
+    ZHWebViewFetchConfiguration *fetchConfig = [[ZHWebViewFetchConfiguration alloc] init];
+    fetchConfig.appId = [self currentTemplateKey];
+    fetchConfig.fullInfo = nil;
+    ZHWebView *webView = [mg fetchWebView:fetchConfig];
     if (webView) {
         //检查是否异常
         ZHWebViewExceptionOperate operate = [webView checkException];

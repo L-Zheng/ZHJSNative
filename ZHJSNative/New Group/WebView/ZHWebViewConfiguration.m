@@ -91,6 +91,11 @@
 @end
 
 
+/** 👉webview fetch配置 */
+@implementation ZHWebViewFetchConfiguration
+@end
+
+
 NSString * const ZHWebViewSocketDebugUrlKey = @"ZHWebViewSocketDebugUrlKey";
 NSString * const ZHWebViewLocalDebugUrlKey = @"ZHWebViewLocalDebugUrlKey";
 

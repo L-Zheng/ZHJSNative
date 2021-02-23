@@ -104,10 +104,34 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
     }];
 }
 
-- (ZHWebView *)fetchWebView:(NSString *)key{
+- (NSDictionary *)fetchWebViewLatestInfo:(NSString *)key{
+    if (!key || ![key isKindOfClass:NSString.class] || key.length == 0) {
+        return nil;
+    }
+    NSDictionary *latest = nil;
+    return latest;
+}
+
+- (ZHWebView *)fetchWebView:(ZHWebViewFetchConfiguration *)config{
+    NSString *key = config.appId;
+    NSDictionary *fullInfo = config.fullInfo;
     NSMutableArray *webs = [self fetchMap:self.websMap key:key];
     if (webs.count) {
-        ZHWebView *web = webs.firstObject;
+        ZHWebView *web = nil;
+        
+        if (!fullInfo || ![fullInfo isKindOfClass:NSDictionary.class] || fullInfo.allKeys.count == 0) {
+            web = webs.firstObject;
+        }else{
+            for (ZHWebView *tWeb in webs) {
+//                tWeb.webItem.downLoadInfo   fullInfo
+                if (1) {
+                    web = tWeb;
+                    break;
+                }
+            }
+        }
+        if (!web) return nil;
+        
         [self opMap:self.websMap key:key webView:web add:NO];
 
         ZHWebViewDebugModel cMode = web.debugConfig.debugModel;
@@ -241,45 +265,45 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
 }
 
 /// 重新下载模板文件加载webView
-- (void)retryLoadWebView:(ZHWebView *)webView
-                  config:(ZHWebViewConfiguration *)config
-           downLoadStart:(void (^) (void))downLoadStart
-          downLoadFinish:(void (^) (NSDictionary *info ,NSError *error))downLoadFinish
-                  finish:(void (^) (NSDictionary *info ,NSError *error))finish{
-    if (!webView ||
-        ![webView isKindOfClass:[ZHWebView class]]) {
-        if (finish) finish(nil, ZHInlineError(404, ZHLCInlineString(@"webview is invalid")));
-        return;
-    }
-    
-    NSString *key = config.appletConfig.appId;
-    if (![ZHWebView checkString:key]) {
-        if (finish) finish(nil, ZHInlineError(404, ZHLCInlineString(@"key(%@) is invalid", key)));
-        return;
-    }
-    
-    __weak __typeof__(self) __self = self;
-    //下载
-    if (downLoadStart) downLoadStart();
-    [self.class waitDownLoadTemplate:key callBack:^(NSString *templateFolder, NSDictionary *resultInfo, NSError *error) {
-        if (downLoadFinish) downLoadFinish(error ? nil : resultInfo, error);
-        if (error) {
-            if (finish) finish(nil, ZHInlineError(error.code, ZHLCInlineString(@"%@", ZHErrorDesc(error))));
-            return;
-        }
-        
-        // 拷贝到沙盒
-        [__self copyTemplateFolderToSandBox:webView templateFolder:templateFolder callBack:^(NSString *loadFolder, NSError *error) {
-            //检查
-            if (error) {
-                if (finish) finish(nil, ZHInlineError(error.code, ZHLCInlineString(@"%@", ZHErrorDesc(error))));
-                return;
-            }
-            webView.webItem.downLoadInfo = [resultInfo copy];
-            [__self realLoadWebView:webView loadFolder:loadFolder config:config finish:finish];
-        }];
-    }];
-}
+//- (void)retryLoadWebView:(ZHWebView *)webView
+//                  config:(ZHWebViewConfiguration *)config
+//           downLoadStart:(void (^) (void))downLoadStart
+//          downLoadFinish:(void (^) (NSDictionary *info ,NSError *error))downLoadFinish
+//                  finish:(void (^) (NSDictionary *info ,NSError *error))finish{
+//    if (!webView ||
+//        ![webView isKindOfClass:[ZHWebView class]]) {
+//        if (finish) finish(nil, ZHInlineError(404, ZHLCInlineString(@"webview is invalid")));
+//        return;
+//    }
+//
+//    NSString *key = config.appletConfig.appId;
+//    if (![ZHWebView checkString:key]) {
+//        if (finish) finish(nil, ZHInlineError(404, ZHLCInlineString(@"key(%@) is invalid", key)));
+//        return;
+//    }
+//
+//    __weak __typeof__(self) __self = self;
+//    //下载
+//    if (downLoadStart) downLoadStart();
+//    [self.class waitDownLoadTemplate:key callBack:^(NSString *templateFolder, NSDictionary *resultInfo, NSError *error) {
+//        if (downLoadFinish) downLoadFinish(error ? nil : resultInfo, error);
+//        if (error) {
+//            if (finish) finish(nil, ZHInlineError(error.code, ZHLCInlineString(@"%@", ZHErrorDesc(error))));
+//            return;
+//        }
+//
+//        // 拷贝到沙盒
+//        [__self copyTemplateFolderToSandBox:webView templateFolder:templateFolder callBack:^(NSString *loadFolder, NSError *error) {
+//            //检查
+//            if (error) {
+//                if (finish) finish(nil, ZHInlineError(error.code, ZHLCInlineString(@"%@", ZHErrorDesc(error))));
+//                return;
+//            }
+//            webView.webItem.downLoadInfo = [resultInfo copy];
+//            [__self realLoadWebView:webView loadFolder:loadFolder config:config finish:finish];
+//        }];
+//    }];
+//}
 
 - (void)realLoadWebView:(ZHWebView *)webView
              loadFolder:(NSString *)loadFolder
@@ -422,6 +446,18 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
     NSString *presetFolder = appletConfig.presetFilePath;
     NSDictionary *presetFileInfo = appletConfig.presetFileInfo;
     NSString *loadFileName = appletConfig.loadFileName;
+    NSDictionary *fullInfo = appletConfig.fullInfo;
+
+    NSDictionary *latest = nil;
+    
+    // 检查加载信息
+    if (fullInfo &&
+        [fullInfo isKindOfClass:NSDictionary.class] &&
+        fullInfo.allKeys.count > 0) {
+        latest = fullInfo;
+    }else{
+    }
+
     
     //检查本地缓存
     NSString *latestFolder = nil;

@@ -21,6 +21,8 @@
 
 /** 👉webview 绑定的小程序配置 */
 @interface ZHWebViewAppletConfiguration : ZHWebViewModuleConfiguration
+// 加载webview资源的完整信息
+@property (nonatomic,strong) NSDictionary *fullInfo;
 // 小程序appId
 @property (nonatomic,copy) NSString *appId;
 @property (nonatomic,copy) NSString *envVersion;
@@ -76,6 +78,15 @@
 @property (nonatomic,strong) ZHWebViewCreateConfiguration *createConfig;
 @property (nonatomic,strong) ZHWebViewLoadConfiguration *loadConfig;
 @property (nonatomic,strong) ZHWebViewApiConfiguration <ZHJSPageApiProtocol> *apiConfig;
+@end
+
+
+/** 👉webview fetch配置 */
+@interface ZHWebViewFetchConfiguration : NSObject
+// 查找webview资源的完整信息
+@property (nonatomic,strong) NSDictionary *fullInfo;
+// 小程序appId
+@property (nonatomic,copy) NSString *appId;
 @end
 
 
