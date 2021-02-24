@@ -378,6 +378,7 @@ static id _instance;
     }];
     [alert addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {
         textField.placeholder = @"输入socket调试地址";
+        textField.clearButtonMode = UITextFieldViewModeAlways;
         NSString *cacheUrl = __self.socketDebugUrlStr?:fetchCacheBlock();
         if (cacheUrl && cacheUrl.length > 0) {
             textField.text = cacheUrl;
@@ -432,6 +433,7 @@ static id _instance;
     }];
     [alert addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {
         textField.placeholder = @"输入本机WebView项目目录地址";
+        textField.clearButtonMode = UITextFieldViewModeAlways;
         NSString *cacheUrl = __self.localDebugUrlStr?:fetchCacheBlock();
         if (cacheUrl && cacheUrl.length > 0) {
             textField.text = cacheUrl;
