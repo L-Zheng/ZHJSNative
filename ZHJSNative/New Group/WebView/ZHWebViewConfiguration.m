@@ -390,7 +390,7 @@ static id _instance;
 }
 //local debug调试弹窗
 - (void)alertDebugModelLocal:(UIAlertAction *)action debugModel:(ZHWebViewDebugModel)debugModel{
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:action.title message:@"该模式将会运行本机WebView项目目录release文件下内容。\n将 本机WebView项目目录 填在此处【如：/Users/em/Desktop/EMCode/fund-projects/fund-details，会自动填充上一次的地址】\n在你改动代码后，运行yarn build，点击浮窗刷新。" preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:action.title message:@"该模式将会运行本机WebView项目目录下的内容。\n【如：/Users/em/Desktop/EMCode/fund-projects/fund-details/release】\n在你改动代码后，运行yarn build，点击浮窗刷新。" preferredStyle:UIAlertControllerStyleAlert];
     
     NSString *localDebugUrlCacheKey = @"ZHWebViewLocalDebugUrlCacheKey";
     void (^cacheBlock)(NSString *) = ^(NSString *urlStr){

@@ -226,7 +226,7 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
     
     ZHWebViewDebugModel debugModel = webView.debugConfig.debugModel;
     if (debugModel == ZHWebViewDebugModelLocal) {
-        NSString *templateFolder = [webView.debugConfig.localDebugUrlStr stringByAppendingPathComponent:@"release"];
+        NSString *templateFolder = webView.debugConfig.localDebugUrlStr;
         [self loadLocalDebugWebView:webView
                      templateFolder:templateFolder
                              config:webView.globalConfig
