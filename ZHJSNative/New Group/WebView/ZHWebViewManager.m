@@ -201,6 +201,13 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
                    templateFolder:(NSString *)templateFolder
                        config:(ZHWebViewConfiguration *)config
                        finish:(void (^) (NSDictionary *info, NSError *error))finish{
+    // 调试模式下：检查templateFolder是否包含加载文件
+    NSString *htmlPath = [templateFolder stringByAppendingPathComponent:config.appletConfig.loadFileName];
+    if (![self.fm fileExistsAtPath:htmlPath]) {
+        if (finish) finish(nil, ZHInlineError(404, ZHLCInlineString(@"htmlPath(%@) is not exists. %@", htmlPath, [NSString stringWithFormat:@"config is %@.", [config formatInfo]])));
+        return;
+    }
+    
     __weak __typeof__(self) __self = self;
     //加载模板 拷贝到沙盒
     [self copyTemplateFolderToSandBox:webView templateFolder:templateFolder callBack:^(NSString *loadFolder, NSError *error) {
