@@ -8,7 +8,7 @@
 
 #import "ZHJSApiHandler.h"
 #import "ZHJSHandler.h"
-#import "ZHWebViewConfiguration.h"
+#import "ZHWebDebugItem.h"
 #import "ZHJSInWebSocketApi.h"
 #import "ZHJSInWebFundApi.h"
 #import "ZHJSInContextFundApi.h"
@@ -53,16 +53,16 @@
     return _apiMap;
 }
 
-- (instancetype)initWithWebViewHandler:(ZHJSHandler *)handler
-                           debugConfig:(ZHWebViewDebugConfiguration *)debugConfig
-                           apiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers{
+- (instancetype)initWithWebHandler:(ZHJSHandler *)handler
+                         debugItem:(ZHWebDebugItem *)debugItem
+                       apiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers{
     self = [super init];
     if (self) {
         self.handler = handler;
         
         //默认内部api
         NSMutableArray *internalApiHandlers = [@[] mutableCopy];
-        if (debugConfig && debugConfig.debugModelEnable) {
+        if (debugItem && debugItem.debugModeEnable) {
             [internalApiHandlers addObject:[[ZHJSInWebSocketApi alloc] init]];
         }
         [internalApiHandlers addObject:[[ZHJSInWebFundApi alloc] init]];
@@ -74,8 +74,8 @@
     }
     return self;
 }
-- (instancetype)initWithJSContextHandler:(ZHJSHandler *)handler
-                             debugConfig:(ZHJSContextDebugConfiguration *)debugConfig
+- (instancetype)initWithContextHandler:(ZHJSHandler *)handler
+                             debugItem:(ZHContextDebugItem *)debugItem
                              apiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers{
     self = [super init];
     if (self) {
@@ -224,6 +224,8 @@
             ZHJSApiRegisterItem *item = [[ZHJSApiRegisterItem alloc] init];
             item.jsMethodName = jsName;
             item.nativeMethodName = nativeName;
+            item.nativeMethodInClassName = NSStringFromClass(opCalss);
+            item.nativeInstance = api;
             
             // 如果有func配置，优先使用
             SEL syncSel = NSSelectorFromString([NSString stringWithFormat:ZHJS_Export_Func_Config_Prefix_Format, jsName]);

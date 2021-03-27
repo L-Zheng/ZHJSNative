@@ -9,9 +9,11 @@
 #import <UIKit/UIKit.h>
 #import <WebKit/WebKit.h>
 #import "ZHJSApiProtocol.h"
-#import "ZHWebViewConfiguration.h"
+#import "ZHWebConfig.h"
+#import "ZHWebDebugManager.h"
 #import "ZHJSPageItem.h" // WebView/JSContext页面信息数据
 @class ZHWebView;
+@class ZHJSHandler;
 
 typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
     ZHWebViewExceptionOperateNothing     = 0,//不做任何操作
@@ -22,16 +24,16 @@ typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
 //NS_ASSUME_NONNULL_BEGIN
 
 /** socket调试代理 */
-@protocol ZHWebViewSocketDebugDelegate <NSObject>
+@protocol ZHWebViewDebugSocketDelegate <NSObject>
 @optional
-- (void)webViewReadyRefresh:(ZHWebView *)webView;
-- (void)webViewRefresh:(ZHWebView *)webView debugModel:(ZHWebViewDebugModel)debugModel info:(NSDictionary *)info;
+- (void)zh_webViewReadyRefresh:(ZHWebView *)webView;
+- (void)zh_webViewStartRefresh:(ZHWebView *)webView;
 @end
 
 /** webview异常代理 */
 @protocol ZHWebViewExceptionDelegate <NSObject>
 @optional
-- (void)webViewException:(ZHWebView *)webView info:(NSDictionary *)info;
+- (void)zh_webView:(ZHWebView *)webView exception:(NSDictionary *)exception;
 @end
 
 /** 重写系统代理 */
@@ -56,7 +58,7 @@ typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
 
 #pragma mark - delegate
 
-@property (nonatomic,weak) id <ZHWebViewSocketDebugDelegate> zh_socketDebugDelegate;
+@property (nonatomic,weak) id <ZHWebViewDebugSocketDelegate> zh_debugSocketDelegate;
 @property (nonatomic,weak) id <ZHWebViewExceptionDelegate> zh_exceptionDelegate;
 @property (nonatomic,weak) id <ZHWKNavigationDelegate> zh_navigationDelegate;
 @property (nonatomic,weak) id <ZHWKUIDelegate> zh_UIDelegate;
@@ -64,18 +66,19 @@ typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
 
 #pragma mark - config
 
-@property (nonatomic,strong) ZHWebViewConfiguration *globalConfig;
-@property (nonatomic,strong) ZHWebViewAppletConfiguration *appletConfig;
-@property (nonatomic,strong) ZHWebViewCreateConfiguration *createConfig;
-@property (nonatomic,strong) ZHWebViewLoadConfiguration *loadConfig;
+@property (nonatomic,strong) ZHWebConfig *globalConfig;
+@property (nonatomic,strong) ZHWebMpConfig *mpConfig;
+@property (nonatomic,strong) ZHWebCreateConfig *createConfig;
+@property (nonatomic,strong) ZHWebLoadConfig *loadConfig;
 // 调试配置
-@property (nonatomic,strong) ZHWebViewDebugConfiguration *debugConfig;
+@property (nonatomic,strong) ZHWebDebugItem *debugItem;
 
 #pragma mark - init
 
 // 创建
-- (instancetype)initWithGlobalConfig:(ZHWebViewConfiguration *)globalConfig;
-- (instancetype)initWithCreateConfig:(ZHWebViewCreateConfiguration *)createConfig;
+- (instancetype)initWithGlobalConfig:(ZHWebConfig *)globalConfig;
+- (instancetype)initWithCreateConfig:(ZHWebCreateConfig *)createConfig;
+@property (nonatomic, strong) ZHJSHandler *handler;
 
 //添加移除api
 - (void)addJsCode:(NSString *)jsCode completion:(void (^) (id res, NSError *error))completion;
@@ -104,7 +107,7 @@ typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
 /// @param finish  回调
 - (void)loadWithUrl:(NSURL *)url
             baseURL:(NSURL *)baseURL
-         loadConfig:(ZHWebViewLoadConfiguration *)loadConfig
+         loadConfig:(ZHWebLoadConfig *)loadConfig
      startLoadBlock:(void (^) (NSURL *runSandBoxURL))startLoadBlock
              finish:(void (^) (NSDictionary *info, NSError *error))finish;
 

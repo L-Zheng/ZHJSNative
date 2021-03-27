@@ -20,24 +20,24 @@
 
 @implementation ZHJSContext
 
-- (instancetype)initWithGlobalConfig:(ZHJSContextConfiguration *)globalConfig{
+- (instancetype)initWithGlobalConfig:(ZHContextConfig *)globalConfig{
     self.globalConfig = globalConfig;
     globalConfig.jsContext = self;
     
-    ZHJSContextAppletConfiguration *appletConfig = globalConfig.appletConfig;
-    appletConfig.jsContext = self;
-    self.appletConfig = appletConfig;
+    ZHContextMpConfig *mpConfig = globalConfig.mpConfig;
+    mpConfig.jsContext = self;
+    self.mpConfig = mpConfig;
     
     self.contextItem = [ZHJSContextItem createByInfo:@{
-        @"appId": appletConfig.appId?:@"",
-        @"envVersion": appletConfig.envVersion?:@"",
-        @"url": appletConfig.loadFileName?:@"",
+        @"appId": mpConfig.appId?:@"",
+        @"envVersion": mpConfig.envVersion?:@"",
+        @"url": mpConfig.loadFileName?:@"",
         @"params": @{}
     }];
     
     return [self initWithCreateConfig:globalConfig.createConfig];
 }
-- (instancetype)initWithCreateConfig:(ZHJSContextCreateConfiguration *)createConfig{
+- (instancetype)initWithCreateConfig:(ZHContextCreateConfig *)createConfig{
     // 初始化配置
     self.createConfig = createConfig;
     createConfig.jsContext = self;
@@ -48,18 +48,18 @@
     self = [self initWithVirtualMachine:vm];
     if (self) {
         // debug配置
-        ZHJSContextDebugConfiguration *debugConfig = [ZHJSContextDebugConfiguration configuration:self];
-        self.debugConfig = debugConfig;
+        ZHContextDebugItem *debugItem = [ZHContextDebugItem configuration:self];
+        self.debugItem = debugItem;
         
         // api处理配置
         ZHJSHandler *handler = [[ZHJSHandler alloc] init];
-        handler.apiHandler = [[ZHJSApiHandler alloc] initWithJSContextHandler:handler debugConfig:debugConfig apiHandlers:apiHandlers?:@[]];
+        handler.apiHandler = [[ZHJSApiHandler alloc] initWithContextHandler:handler debugItem:debugItem apiHandlers:apiHandlers?:@[]];
         handler.jsContext = self;
         self.handler = handler;
         
         //注入api
         [self registerException];
-        if (debugConfig.logOutputXcodeEnable) {
+        if (debugItem.logOutputXcodeEnable) {
             [self registerLogAPI];
         }
         [self registerAPI];
@@ -158,7 +158,7 @@
 /// @param loadFinishBlock  回调
 - (void)renderWithUrl:(NSURL *)url
               baseURL:(NSURL *)baseURL
-           loadConfig:(ZHJSContextLoadConfiguration *)loadConfig
+           loadConfig:(ZHContextLoadConfig *)loadConfig
        loadStartBlock:(void (^) (NSURL *runSandBoxURL))loadStartBlock
       loadFinishBlock:(void (^) (NSDictionary *info, NSError *error))loadFinishBlock{
     
@@ -257,8 +257,8 @@
     return self.contextItem;
 }
 // api
-- (id <ZHJSPageApiProtocol>)zh_api{
-    return self.globalConfig.apiConfig;
+- (id <ZHJSPageApiOpProtocol>)zh_apiOp{
+    return self.globalConfig.apiOpConfig;
 }
 
 - (void)dealloc{

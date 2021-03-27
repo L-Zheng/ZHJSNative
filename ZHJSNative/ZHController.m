@@ -8,10 +8,12 @@
 
 #import "ZHController.h"
 #import "ZHWebView.h"
-#import "ZHWebViewConfiguration.h"
+#import "ZHWebFetchConfig.h"
+#import "ZHWebDebugItem.h"
 #import "ZHJSApiProtocol.h"
 #import "ZHJSContext.h"
 #import "ZHWebViewManager.h"
+#import "ZHContextDebugManager.h"
 #import "ZHCustomApiHandler.h"
 #import "ZHCustom1ApiHandler.h"
 #import "ZHCustomExtra1ApiHandler.h"
@@ -20,7 +22,7 @@
 #import "ZHCustom1ApiHandler.h"
 #import "ZHCustom2ApiHandler.h"
 
-@interface ZHController ()<ZHWebViewSocketDebugDelegate>
+@interface ZHController ()<ZHWebViewDebugSocketDelegate>
 @property (nonatomic, strong) ZHWebView *webView;
 @property (nonatomic, strong) ZHJSContext *context;
 
@@ -52,47 +54,47 @@
     return _processPool;
 }
 
-- (ZHWebViewConfiguration *)createConfig{
-    ZHWebViewAppletConfiguration *appletConfig = [ZHWebViewAppletConfiguration new];
-    appletConfig.appId = [self currentTemplateKey];
-    appletConfig.loadFileName = [self currentTemplateLoadName];
-    appletConfig.presetFilePath = [self currentTemplatePresetFolder];
+- (ZHWebConfig *)createConfig{
+    ZHWebMpConfig *mpConfig = [ZHWebMpConfig new];
+    mpConfig.appId = [self currentTemplateKey];
+    mpConfig.loadFileName = [self currentTemplateLoadName];
+    mpConfig.presetFilePath = [self currentTemplatePresetFolder];
     
-    ZHWebViewCreateConfiguration *createConfig = [ZHWebViewCreateConfiguration new];
+    ZHWebCreateConfig *createConfig = [ZHWebCreateConfig new];
     createConfig.frameValue = [NSValue valueWithCGRect:[UIScreen mainScreen].bounds];
     createConfig.processPool = [self processPool];
     createConfig.apiHandlers = [self apiHandlers];
     createConfig.extraScriptStart = @"var testGlobalFunc = function (params) {var res = JSON.parse(decodeURIComponent(params));console.log(res);return true;}";
     
-    ZHWebViewLoadConfiguration *loadConfig = [ZHWebViewLoadConfiguration new];
+    ZHWebLoadConfig *loadConfig = [ZHWebLoadConfig new];
     loadConfig.cachePolicy = nil;
     loadConfig.timeoutInterval = nil;
     loadConfig.readAccessURL = [NSURL fileURLWithPath:[ZHWebView getDocumentFolder]];
     
     
-    ZHWebViewConfiguration *config = [ZHWebViewConfiguration new];
-    config.appletConfig = appletConfig;
+    ZHWebConfig *config = [ZHWebConfig new];
+    config.mpConfig = mpConfig;
     config.createConfig = createConfig;
     config.loadConfig = loadConfig;
     
     return config;
 }
 
-- (ZHJSContextConfiguration *)createContextConfig{
-    ZHJSContextAppletConfiguration *appletConfig = [ZHJSContextAppletConfiguration new];
-    appletConfig.appId = nil;
-    appletConfig.envVersion = nil;
-    appletConfig.loadFileName = nil;
-    appletConfig.presetFilePath = nil;
-    appletConfig.presetFileInfo = nil;
+- (ZHContextConfig *)createContextConfig{
+    ZHContextMpConfig *mpConfig = [ZHContextMpConfig new];
+    mpConfig.appId = nil;
+    mpConfig.envVersion = nil;
+    mpConfig.loadFileName = nil;
+    mpConfig.presetFilePath = nil;
+    mpConfig.presetFileInfo = nil;
     
-    ZHJSContextCreateConfiguration *createConfig = [ZHJSContextCreateConfiguration new];
+    ZHContextCreateConfig *createConfig = [ZHContextCreateConfig new];
     createConfig.apiHandlers = [self apiHandlers];
     
-    ZHJSContextLoadConfiguration *loadConfig = [ZHJSContextLoadConfiguration new];
+    ZHContextLoadConfig *loadConfig = [ZHContextLoadConfig new];
     
-    ZHJSContextConfiguration *config = [ZHJSContextConfiguration new];
-    config.appletConfig = appletConfig;
+    ZHContextConfig *config = [ZHContextConfig new];
+    config.mpConfig = mpConfig;
     config.createConfig = createConfig;
     config.loadConfig = loadConfig;
     
@@ -118,7 +120,7 @@
 - (void)testJSContext{
     
     //运算js
-    ZHJSContextConfiguration *contextConfig = [self createContextConfig];
+    ZHContextConfig *contextConfig = [self createContextConfig];
     self.context = [[ZHJSContext alloc] initWithGlobalConfig:contextConfig];
     NSURL *url = [NSURL fileURLWithPath:[[[NSBundle mainBundle] pathForResource:@"TestBundle" ofType:@"bundle"] stringByAppendingPathComponent:@"test.js"]];
     [self.context renderWithUrl:url baseURL:nil loadConfig:contextConfig.loadConfig loadStartBlock:^(NSURL *runSandBoxURL) {
@@ -204,7 +206,7 @@
 - (void)readyLoadWebView{
     ZHWebViewManager *mg = [ZHWebViewManager shareManager];
     //查找可用WebView
-    ZHWebViewFetchConfiguration *fetchConfig = [[ZHWebViewFetchConfiguration alloc] init];
+    ZHWebFetchConfig *fetchConfig = [[ZHWebFetchConfig alloc] init];
     fetchConfig.appId = [self currentTemplateKey];
     fetchConfig.fullInfo = nil;
     ZHWebView *webView = [mg fetchWebView:fetchConfig];
@@ -254,13 +256,13 @@
     [self configWebViewDelegate:webView target:self];
     
     //配置controller
-    ZHWebViewApiConfiguration *apiConfig = [[ZHWebViewApiConfiguration alloc] init];
-    apiConfig.belong_controller = self;
-    apiConfig.status_controller = self;
-    apiConfig.navigationItem = self.navigationItem;
-    apiConfig.navigationBar = self.navigationController.navigationBar;
-    apiConfig.router_navigationController = self.navigationController;
-    webView.globalConfig.apiConfig = apiConfig;
+    ZHWebApiOpConfig *apiOpConfig = [[ZHWebApiOpConfig alloc] init];
+    apiOpConfig.belong_controller = self;
+    apiOpConfig.status_controller = self;
+    apiOpConfig.navigationItem = self.navigationItem;
+    apiOpConfig.navigationBar = self.navigationController.navigationBar;
+    apiOpConfig.router_navigationController = self.navigationController;
+    webView.globalConfig.apiOpConfig = apiOpConfig;
 }
 - (void)configWebViewFrame:(WKWebView *)webView{
     if (@available(iOS 11.0, *)) {
@@ -272,7 +274,7 @@
 - (void)configWebViewDelegate:(ZHWebView *)webView target:(id)target{
     webView.zh_navigationDelegate = target;
     webView.zh_UIDelegate = target;
-    webView.zh_socketDebugDelegate = target;
+    webView.zh_debugSocketDelegate = target;
 }
 
 - (void)configGesture{
@@ -411,12 +413,11 @@
     _webView = nil;
 }
 
-#pragma mark - ZHWebViewSocketDebugDelegate
+#pragma mark - ZHWebViewDebugSocketDelegate
 
-- (void)webViewReadyRefresh:(ZHWebView *)webView{
+- (void)zh_webViewReadyRefresh:(ZHWebView *)webView{
 }
-- (void)webViewRefresh:(ZHWebView *)webView debugModel:(ZHWebViewDebugModel)debugModel info:(NSDictionary *)info{
-    
+- (void)zh_webViewStartRefresh:(ZHWebView *)webView{
     [self doLoadWebView:webView];
 }
 @end

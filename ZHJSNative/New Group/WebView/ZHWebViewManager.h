@@ -11,8 +11,8 @@
 #import <WebKit/WebKit.h>
 #import "ZHJSApiProtocol.h"
 @class ZHWebView;
-@class ZHWebViewConfiguration;
-@class ZHWebViewFetchConfiguration;
+@class ZHWebConfig;
+@class ZHWebFetchConfig;
 
 //NS_ASSUME_NONNULL_BEGIN
 
@@ -26,12 +26,12 @@
 /// 预加载webview
 /// @param config 配置
 /// @param finish 加载完成回调
-- (void)preReadyWebView:(ZHWebViewConfiguration *)config
+- (void)preReadyWebView:(ZHWebConfig *)config
                  finish:(void (^) (NSDictionary *info, NSError *error))finish;
 
 //查找预加载的webview
-- (NSDictionary *)fetchLatestWebViewInfo:(NSString *)key;
-- (ZHWebView *)fetchWebView:(ZHWebViewFetchConfiguration *)config;
+- (NSDictionary *)fetchWebViewLatestInfo:(NSString *)key;
+- (ZHWebView *)fetchWebView:(ZHWebFetchConfig *)config;
 // 操作所有加载的webview
 - (void)opAllWebViewUsingBlock:(void (^) (ZHWebView *webView))block;
 
@@ -40,7 +40,7 @@
 /// @param config config
 /// @param finish 回调
 - (void)loadWebView:(ZHWebView *)webView
-             config:(ZHWebViewConfiguration *)config
+             config:(ZHWebConfig *)config
              finish:(void (^) (NSDictionary *info, NSError *error))finish;
 
 /// 重新下载模板文件加载webView
@@ -50,7 +50,7 @@
 /// @param downLoadFinish 下载完成回调
 /// @param finish webview加载完成回调
 //- (void)retryLoadWebView:(ZHWebView *)webView
-//                  config:(ZHWebViewConfiguration *)config
+//                  config:(ZHWebConfig *)config
 //           downLoadStart:(void (^) (void))downLoadStart
 //          downLoadFinish:(void (^) (NSDictionary *info ,NSError *error))downLoadFinish
 //                  finish:(void (^) (NSDictionary *info ,NSError *error))finish;
@@ -58,11 +58,11 @@
 //调试下使用
 //- (void)loadOnlineDebugWebView:(ZHWebView *)webView
 //                           url:(NSURL *)url
-//                        config:(ZHWebViewConfiguration *)config
+//                        config:(ZHWebConfig *)config
 //                        finish:(void (^) (NSDictionary *info, NSError *error))finish;
 //- (void)loadLocalDebugWebView:(ZHWebView *)webView
 //                   templateFolder:(NSString *)templateFolder
-//                       config:(ZHWebViewConfiguration *)config
+//                       config:(ZHWebConfig *)config
 //                       finish:(void (^) (NSDictionary *info, NSError *error))finish;
 
 #pragma mark - cache

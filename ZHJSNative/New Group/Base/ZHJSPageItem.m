@@ -61,20 +61,6 @@
     self.receiveInfo = info;
     return self;
 }
-
-- (NSString *)floatVersionDesc{
-    // 版本信息
-    NSString *env = self.envVersion;
-    NSString *verison = [env isEqualToString:@"release"] ? @"线上版" : ([env isEqualToString:@"trial"] ? @"体验版" : @"开发版");
-    
-    NSString *desc = nil;
-    if (self.fromAssistant) {
-        desc = [NSString stringWithFormat:@"%@\n来自助手", verison];
-    }else{
-        desc = [NSString stringWithFormat:@"%@", verison];
-    }
-    return desc;
-}
 @end
 
 @implementation ZHWebViewItem

@@ -17,6 +17,8 @@
 @interface ZHJSApiRegisterItem : NSObject
 @property (nonatomic,copy) NSString *jsMethodName;
 @property (nonatomic,copy) NSString *nativeMethodName;
+@property (nonatomic,copy) NSString *nativeMethodInClassName;
+@property (nonatomic,weak) id nativeInstance;
 @property (nonatomic,assign,getter=isSync) BOOL sync;
 @end
 

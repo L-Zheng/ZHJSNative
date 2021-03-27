@@ -25,7 +25,6 @@
 
 @property (nonatomic, assign) BOOL didTerminate;//WebContentProcess进程被终结
 @property (nonatomic, strong) UIGestureRecognizer *pressGes;
-@property (nonatomic, strong) ZHJSHandler *handler;
 
 @property (nonatomic, strong) NSLock *lock;
 
@@ -33,24 +32,24 @@
 
 @implementation ZHWebView
 
-- (instancetype)initWithGlobalConfig:(ZHWebViewConfiguration *)globalConfig{
+- (instancetype)initWithGlobalConfig:(ZHWebConfig *)globalConfig{
     self.globalConfig = globalConfig;
     globalConfig.webView = self;
     
-    ZHWebViewAppletConfiguration *appletConfig = globalConfig.appletConfig;
-    appletConfig.webView = self;
-    self.appletConfig = appletConfig;
+    ZHWebMpConfig *mpConfig = globalConfig.mpConfig;
+    mpConfig.webView = self;
+    self.mpConfig = mpConfig;
     
     self.webItem = [ZHWebViewItem createByInfo:@{
-        @"appId": appletConfig.appId?:@"",
-        @"envVersion": appletConfig.envVersion?:@"",
-        @"url": appletConfig.loadFileName?:@"",
+        @"appId": mpConfig.appId?:@"",
+        @"envVersion": mpConfig.envVersion?:@"",
+        @"url": mpConfig.loadFileName?:@"",
         @"params": @{}
     }];
     
     return [self initWithCreateConfig:globalConfig.createConfig];
 }
-- (instancetype)initWithCreateConfig:(ZHWebViewCreateConfiguration *)createConfig{
+- (instancetype)initWithCreateConfig:(ZHWebCreateConfig *)createConfig{
     // 初始化配置
     self.createConfig = createConfig;
     createConfig.webView = self;
@@ -63,19 +62,19 @@
     WKUserContentController *userContent = [[WKUserContentController alloc] init];
     
     // debug配置
-    ZHWebViewDebugConfiguration *debugConfig = [ZHWebViewDebugConfiguration configuration:self];
-    self.debugConfig = debugConfig;
+    ZHWebDebugItem *debugItem = [ZHWebDebugItem configuration:self];
+    self.debugItem = debugItem;
     
     // api处理配置    
     ZHJSHandler *handler = [[ZHJSHandler alloc] init];
-    handler.apiHandler = [[ZHJSApiHandler alloc] initWithWebViewHandler:handler debugConfig:debugConfig apiHandlers:apiHandlers?:@[]];
+    handler.apiHandler = [[ZHJSApiHandler alloc] initWithWebHandler:handler debugItem:debugItem apiHandlers:apiHandlers?:@[]];
     handler.webView = self;
     self.handler = handler;
     
     //注入api
     NSMutableArray *apis = [NSMutableArray array];
     //log
-    if (debugConfig.logOutputXcodeEnable) {
+    if (debugItem.logOutputXcodeEnable) {
         [apis addObject:@{
             @"code": [handler fetchWebViewLogApi]?:@"",
             @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentStart),
@@ -83,7 +82,7 @@
         }];
     }
     //error
-    if (debugConfig.alertWebViewErrorEnable) {
+    if (debugItem.alertWebErrorEnable) {
         [apis addObject:@{
             @"code": [handler fetchWebViewErrorApi]?:@"",
             @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentStart),
@@ -91,7 +90,7 @@
         }];
     }
     //websocket js用于监听socket链接
-    if (debugConfig.debugModelEnable) {
+    if (debugItem.debugModeEnable) {
         [apis addObject:@{
             @"code": [handler fetchWebViewSocketApi]?:@"",
             @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentStart),
@@ -99,7 +98,7 @@
         }];
     }
     //webview log控制台
-    if (debugConfig.logOutputWebviewEnable) {
+    if (debugItem.logOutputWebEnable) {
         [apis addObject:@{
             @"code": @"var ZhengVconsoleLog = document.createElement('script'); ZhengVconsoleLog.type = 'text/javascript'; ZhengVconsoleLog.src = 'http://wechatfe.github.io/vconsole/lib/vconsole.min.js?v=3.3.0'; ZhengVconsoleLog.charset = 'UTF-8'; ZhengVconsoleLog.onload = function(){var vConsole = new VConsole();}; ZhengVconsoleLog.onerror = function(error){}; window.document.body.appendChild(ZhengVconsoleLog);",
             @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentEnd),
@@ -107,7 +106,7 @@
         }];
     }
     //禁用webview长按弹出菜单
-    if (debugConfig.touchCalloutEnable) {
+    if (debugItem.touchCalloutEnable) {
         [apis addObject:@{
             @"code": [handler fetchWebViewTouchCalloutApi]?:@"",
             @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentEnd),
@@ -184,10 +183,10 @@
 //    setAllowUniversalAccessFromFileURLs(false);
     
     // 设置是否允许通过 file url 加载的 Js代码读取其他的本地文件
-    if ([ZHWebViewDebugConfiguration availableIOS9]) {
+    if ([ZHWebDebugMg() availableIOS9]) {
         [wkConfig.preferences setValue:@YES forKey:@"allowFileAccessFromFileURLs"];
     }
-    if ([ZHWebViewDebugConfiguration availableIOS10]) {
+    if ([ZHWebDebugMg() availableIOS10]) {
         // 设置是否允许通过 file url 加载的 Javascript 可以访问其他的源(包括http、https等源)
         [wkConfig setValue:@YES forKey:@"allowUniversalAccessFromFileURLs"];
     }
@@ -274,7 +273,7 @@
     //禁用链接预览
     //    [webView setAllowsLinkPreview:NO];
     
-    if ([ZHWebViewDebugConfiguration availableIOS11]) {
+    if ([ZHWebDebugMg() availableIOS11]) {
         self.scrollView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
     }
     
@@ -288,11 +287,11 @@
      */
     //        self.scrollView.delegate = self;
     
-    [self.debugConfig showFlowView];
+    [self.debugItem showFloatView];
 }
 
 - (void)updateUI{
-    [self.debugConfig updateFloatViewLocation];
+    [self.debugItem updateFloatViewLocation];
 }
 
 #pragma mark - config gesture
@@ -395,7 +394,7 @@
  */
 - (void)loadWithUrl:(NSURL *)url
             baseURL:(NSURL *)baseURL
-         loadConfig:(ZHWebViewLoadConfiguration *)loadConfig
+         loadConfig:(ZHWebLoadConfig *)loadConfig
      startLoadBlock:(void (^) (NSURL *runSandBoxURL))startLoadBlock
              finish:(void (^) (NSDictionary *info, NSError *error))finish{
     self.loadConfig = loadConfig;
@@ -404,11 +403,11 @@
     NSNumber *timeoutInterval = loadConfig.timeoutInterval;
     NSURL *readAccessURL = loadConfig.readAccessURL;
     
-    [self.debugConfig updateFloatViewTitle:@"刷新中..."];
+    [self.debugItem updateFloatViewTitle:@"刷新中..."];
     __weak __typeof__(self) __self = self;
     void (^callBack)(NSDictionary *, NSError *) = ^(NSDictionary *info, NSError *error){
         if (finish) finish(info, error);
-        [__self.debugConfig updateFloatViewTitle:@"刷新"];
+        [__self.debugItem updateFloatViewTitle:@"刷新"];
     };
     
     NSString *extraErrorDesc = [NSString stringWithFormat:@"file path is %@. url is %@. baseURL is %@. loadConfig is %@.", url.path, url, baseURL, [loadConfig formatInfo]];
@@ -443,7 +442,7 @@
         callBack(nil, ZHInlineError(404, ZHLCInlineString(@"file path is directory. %@", extraErrorDesc)));
         return;
     }
-    if ([ZHWebViewDebugConfiguration availableIOS9]) {
+    if ([ZHWebDebugMg() availableIOS9]) {
         NSURL *fileURL = [ZHWebView fileURLWithPath:path isDirectory:NO];
         if (!fileURL) {
             callBack(nil, ZHInlineError(404, ZHLCInlineString(@"parse url params is failed. %@", extraErrorDesc)));
@@ -786,7 +785,7 @@
 
 //当WKWebView总体内存占用过大，页面即将白屏的时候，系统会调用上面的回调函数，我们在该函数里执行[webView reload]（这个时候webView.URL取值尚不为零）解决白屏问题。在一些高内存消耗的页面可能会频繁刷新当前页面
 - (void)webViewWebContentProcessDidTerminate:(WKWebView *)webView{
-    if ([ZHWebViewDebugConfiguration availableIOS9]) {
+    if ([ZHWebDebugMg() availableIOS9]) {
         // webview content进程被系统终结，抛出异常
         NSDictionary *exceptionInfo = @{
             @"reason": @"The web view whose underlying web content process was terminated.",
@@ -870,8 +869,8 @@
     return self.webItem;
 }
 // api
-- (id <ZHJSPageApiProtocol>)zh_api{
-    return self.globalConfig.apiConfig;
+- (id <ZHJSPageApiOpProtocol>)zh_apiOp{
+    return self.globalConfig.apiOpConfig;
 }
 
 #pragma mark - UIScrollViewDelegate
@@ -944,7 +943,7 @@
 //获取webView准备运行沙盒
 - (NSString *)fetchReadyRunSandBox{
     NSString *boxFolder = [NSString stringWithFormat:@"%p", self];
-    if ([ZHWebViewDebugConfiguration availableIOS9]) {
+    if ([ZHWebDebugMg() availableIOS9]) {
         return [ZHWebViewFolder() stringByAppendingPathComponent:boxFolder];
     }
     return [ZHWebViewTmpFolder() stringByAppendingPathComponent:boxFolder];
@@ -1015,7 +1014,7 @@
 #pragma mark - clear
 
 - (void)clearWebViewSystemCache{
-    if ([ZHWebViewDebugConfiguration availableIOS9]) {
+    if ([ZHWebDebugMg() availableIOS9]) {
         WKWebsiteDataStore *dataSource = [WKWebsiteDataStore defaultDataStore];
 //        NSMutableSet *set = [WKWebsiteDataStore allWebsiteDataTypes];
         NSMutableSet *set = [NSMutableSet set];

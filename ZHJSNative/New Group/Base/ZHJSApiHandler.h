@@ -9,19 +9,19 @@
 #import <Foundation/Foundation.h>
 #import "ZHJSApiProtocol.h"
 @class ZHJSHandler;
-@class ZHWebViewDebugConfiguration;
-@class ZHJSContextDebugConfiguration;
+@class ZHWebDebugItem;
+@class ZHContextDebugItem;
 
 //NS_ASSUME_NONNULL_BEGIN
 
 @interface ZHJSApiHandler : NSObject
 
-- (instancetype)initWithWebViewHandler:(ZHJSHandler *)handler
-                           debugConfig:(ZHWebViewDebugConfiguration *)debugConfig
-                           apiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers;
+- (instancetype)initWithWebHandler:(ZHJSHandler *)handler
+                         debugItem:(ZHWebDebugItem *)debugItem
+                       apiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers;
 
-- (instancetype)initWithJSContextHandler:(ZHJSHandler *)handler
-                             debugConfig:(ZHJSContextDebugConfiguration *)debugConfig
+- (instancetype)initWithContextHandler:(ZHJSHandler *)handler
+                             debugItem:(ZHContextDebugItem *)debugItem
                              apiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers;
 
 @property (nonatomic,weak,readonly) ZHJSHandler *handler;

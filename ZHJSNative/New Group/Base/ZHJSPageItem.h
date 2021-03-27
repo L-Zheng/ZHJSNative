@@ -18,12 +18,7 @@
 @property (nonatomic,copy) NSString *envVersion;
 @property (nonatomic,copy) NSString *appName;
 
-@property (nonatomic,assign) BOOL fromAssistant;
-
 + (instancetype)createByInfo:(NSDictionary *)info;
-
-// 版本浮窗信息
-@property (nonatomic,copy,readonly) NSString *floatVersionDesc;
 @end
 
 @interface ZHWebViewItem : ZHJSPageItem
@@ -34,8 +29,8 @@
 
 @end
 
-// WebView JSContext页面api协议
-@protocol ZHJSPageApiProtocol <NSObject>
+// WebView JSContext页面api操作的原生控件协议
+@protocol ZHJSPageApiOpProtocol <NSObject>
 // controller
 @property (nonatomic,weak) UIViewController *belong_controller;
 // status
@@ -57,5 +52,5 @@
 // pageitem
 - (ZHJSPageItem *)zh_pageItem;
 // api
-- (id <ZHJSPageApiProtocol>)zh_api;
+- (id <ZHJSPageApiOpProtocol>)zh_apiOp;
 @end

@@ -8,6 +8,7 @@
 
 #import "ZHWebViewManager.h"
 #import "ZHWebView.h"
+#import "ZHWebFetchConfig.h"
 #import "NSError+ZH.h"
 #import "ZHUtil.h"
 #import "ZHJSPageItem.h" // WebView/JSContext页面信息数据
@@ -67,11 +68,11 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
 
 #pragma mark - webview
 
-- (void)preReadyWebView:(ZHWebViewConfiguration *)config
+- (void)preReadyWebView:(ZHWebConfig *)config
                  finish:(void (^) (NSDictionary *info, NSError *error))finish{
     
-    ZHWebViewAppletConfiguration *appletConfig = config.appletConfig;
-    NSString *key = appletConfig.appId;
+    ZHWebMpConfig *mpConfig = config.mpConfig;
+    NSString *key = mpConfig.appId;
     
     if (![ZHWebView checkString:key]) {
         if (finish) finish(nil, ZHInlineError(404, ZHLCInlineString(@"key(%@) is invalid", key)));
@@ -112,7 +113,7 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
     return latest;
 }
 
-- (ZHWebView *)fetchWebView:(ZHWebViewFetchConfiguration *)config{
+- (ZHWebView *)fetchWebView:(ZHWebFetchConfig *)config{
     NSString *key = config.appId;
     NSDictionary *fullInfo = config.fullInfo;
     NSMutableArray *webs = [self fetchMap:self.websMap key:key];
@@ -134,8 +135,8 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
         
         [self opMap:self.websMap key:key webView:web add:NO];
 
-        ZHWebViewDebugModel cMode = web.debugConfig.debugModel;
-        ZHWebViewDebugModel gMode = [[ZHWebViewDebugGlobalConfiguration shareConfiguration] fetchConfigurationItem:web.globalConfig.appletConfig.appId].debugModel;
+        ZHWebDebugMode cMode = web.debugItem.debugMode;
+        ZHWebDebugMode gMode = [ZHWebDebugMg() getConfigItem:web.globalConfig.mpConfig.appId].debugMode;
         return (cMode == gMode ? web : nil);
     }
     return nil;
@@ -180,7 +181,7 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
 
 - (void)loadOnlineDebugWebView:(ZHWebView *)webView
                            url:(NSURL *)url
-                        config:(ZHWebViewConfiguration *)config
+                        config:(ZHWebConfig *)config
                         finish:(void (^) (NSDictionary *info, NSError *error))finish{
     if (!webView || !url || url.isFileURL) {
         NSError *error = ZHInlineError(404, ZHLCInlineString(@"webView is null / url is null / url is not filr URL.  URL is %@.", url));
@@ -199,10 +200,10 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
 }
 - (void)loadLocalDebugWebView:(ZHWebView *)webView
                    templateFolder:(NSString *)templateFolder
-                       config:(ZHWebViewConfiguration *)config
+                       config:(ZHWebConfig *)config
                        finish:(void (^) (NSDictionary *info, NSError *error))finish{
     // 调试模式下：检查templateFolder是否包含加载文件
-    NSString *htmlPath = [templateFolder stringByAppendingPathComponent:config.appletConfig.loadFileName];
+    NSString *htmlPath = [templateFolder stringByAppendingPathComponent:config.mpConfig.loadFileName];
     if (![self.fm fileExistsAtPath:htmlPath]) {
         if (finish) finish(nil, ZHInlineError(404, ZHLCInlineString(@"htmlPath(%@) is not exists. %@", htmlPath, [NSString stringWithFormat:@"config is %@.", [config formatInfo]])));
         return;
@@ -223,7 +224,7 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
 }
 
 - (void)loadWebView:(ZHWebView *)webView
-             config:(ZHWebViewConfiguration *)config
+             config:(ZHWebConfig *)config
              finish:(void (^) (NSDictionary *info, NSError *error))finish{
     if (!webView ||
         ![webView isKindOfClass:[ZHWebView class]]) {
@@ -231,18 +232,18 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
         return;
     }
     
-    ZHWebViewDebugModel debugModel = webView.debugConfig.debugModel;
-    if (debugModel == ZHWebViewDebugModelLocal) {
-        NSString *templateFolder = webView.debugConfig.localDebugUrlStr;
+    ZHWebDebugMode debugMode = webView.debugItem.debugMode;
+    if (debugMode == ZHWebDebugMode_Local) {
+        NSString *templateFolder = webView.debugItem.localUrlStr;
         [self loadLocalDebugWebView:webView
                      templateFolder:templateFolder
                              config:webView.globalConfig
                              finish:finish];
         return;
     }
-    if (debugModel == ZHWebViewDebugModelOnline) {
+    if (debugMode == ZHWebDebugMode_Online) {
         [self loadOnlineDebugWebView:webView
-                                 url:[NSURL URLWithString:webView.debugConfig.socketDebugUrlStr]
+                                 url:[NSURL URLWithString:webView.debugItem.socketUrlStr]
                               config:webView.globalConfig
                               finish:finish];
         return;
@@ -250,7 +251,7 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
         
     __weak __typeof__(self) __self = self;
     //加载模板 不存在会下载
-    [self.class localReleaseTemplateFolder:config.appletConfig
+    [self.class localReleaseTemplateFolder:config.mpConfig
                                    webView:webView
                                   callBack:^(NSString *templateFolder, NSDictionary *resultInfo, NSError *error) {
         if (error) {
@@ -273,7 +274,7 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
 
 /// 重新下载模板文件加载webView
 //- (void)retryLoadWebView:(ZHWebView *)webView
-//                  config:(ZHWebViewConfiguration *)config
+//                  config:(ZHWebConfig *)config
 //           downLoadStart:(void (^) (void))downLoadStart
 //          downLoadFinish:(void (^) (NSDictionary *info ,NSError *error))downLoadFinish
 //                  finish:(void (^) (NSDictionary *info ,NSError *error))finish{
@@ -283,7 +284,7 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
 //        return;
 //    }
 //
-//    NSString *key = config.appletConfig.appId;
+//    NSString *key = config.mpConfig.appId;
 //    if (![ZHWebView checkString:key]) {
 //        if (finish) finish(nil, ZHInlineError(404, ZHLCInlineString(@"key(%@) is invalid", key)));
 //        return;
@@ -314,11 +315,11 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
 
 - (void)realLoadWebView:(ZHWebView *)webView
              loadFolder:(NSString *)loadFolder
-                 config:(ZHWebViewConfiguration *)config
+                 config:(ZHWebConfig *)config
                  finish:(void (^) (NSDictionary *info, NSError *error))finish{
-    ZHWebViewAppletConfiguration *appletConfig = config.appletConfig;
-    ZHWebViewLoadConfiguration *loadConfig = config.loadConfig;
-    NSString *loadFileName = appletConfig.loadFileName;
+    ZHWebMpConfig *mpConfig = config.mpConfig;
+    ZHWebLoadConfig *loadConfig = config.loadConfig;
+    NSString *loadFileName = mpConfig.loadFileName;
     
     NSString *extraErrorDesc = [NSString stringWithFormat:@"config is %@.", [config formatInfo]];
     
@@ -446,14 +447,14 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
 #pragma mark - debug
 
 //加载线上资源
-+ (void)localReleaseTemplateFolder:(ZHWebViewAppletConfiguration *)appletConfig
++ (void)localReleaseTemplateFolder:(ZHWebMpConfig *)mpConfig
                            webView:(ZHWebView *)webView
                           callBack:(void (^) (NSString *templateFolder, NSDictionary *resultInfo, NSError *error))callBack{
-    NSString *key = appletConfig.appId;
-    NSString *presetFolder = appletConfig.presetFilePath;
-    NSDictionary *presetFileInfo = appletConfig.presetFileInfo;
-    NSString *loadFileName = appletConfig.loadFileName;
-    NSDictionary *fullInfo = appletConfig.fullInfo;
+    NSString *key = mpConfig.appId;
+    NSString *presetFolder = mpConfig.presetFilePath;
+    NSDictionary *presetFileInfo = mpConfig.presetFileInfo;
+    NSString *loadFileName = mpConfig.loadFileName;
+    NSDictionary *fullInfo = mpConfig.fullInfo;
 
     NSDictionary *latest = nil;
     
@@ -542,7 +543,7 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
 
 //清理WebView加载缓存
 - (void)cleanWebViewLoadCache{
-    if ([ZHWebViewDebugConfiguration availableIOS9]) {
+    if ([ZHWebDebugMg() availableIOS9]) {
         [self cleanWebViewLoadCache:ZHWebViewFolder()];
         return;
     }
@@ -733,10 +734,6 @@ static id _instance;
     dispatch_once(&onceToken, ^{
         _instance = [super allocWithZone:zone];
     });
-    return _instance;
-}
-
-+ (instancetype)copyWithZone:(struct _NSZone *)zone{
     return _instance;
 }
 

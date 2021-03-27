@@ -98,7 +98,4 @@ static id _instance;
     return _instance;
 }
 
-+ (instancetype)copyWithZone:(struct _NSZone *)zone{
-    return _instance;
-}
 @end

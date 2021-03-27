@@ -6,12 +6,16 @@
 //  Copyright © 2020 Zheng. All rights reserved.
 //
 
-#import "ZHJSInApi.h"
+#import <Foundation/Foundation.h>
+#import "ZHJSApiProtocol.h"
+@class ZHJSApiHandler;
+@class ZHWebView;
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface ZHJSInWebSocketApi : ZHJSInApi
-
+@interface ZHJSInWebSocketApi : NSObject<ZHJSApiProtocol>
+@property (nonatomic,weak) ZHJSApiHandler *apiHandler;
+- (ZHWebView *)webView;
 @end
 
 NS_ASSUME_NONNULL_END

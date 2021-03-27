@@ -14,6 +14,9 @@
 @interface ZHJSApiRegisterItem ()
 @end
 @implementation ZHJSApiRegisterItem
+- (void)dealloc{
+    NSLog(@"%s",__func__);
+}
 @end
 
 @implementation ZHJSApiCallJsResItem

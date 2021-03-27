@@ -7,6 +7,8 @@
 //
 
 #import "ZHJSInWebSocketApi.h"
+#import "ZHJSApiHandler.h"
+#import "ZHJSHandler.h"
 #import "ZHWebView.h"
 
 @implementation ZHJSInWebSocketApi
@@ -17,8 +19,6 @@
     [self socketPerformSel:__func__ params:arg.jsonData];
 }
 - (void)js_socketDidReceiveMessage:(ZHJSApiArgItem *)arg{
-    NSLog(@"---------js_socketDidReceiveMessage-----------");
-    NSLog(@"%@",arg.jsonData);
     [self socketPerformSel:__func__ params:arg.jsonData];
 }
 - (void)js_socketDidError:(ZHJSApiArgItem *)arg{
@@ -35,11 +35,57 @@
     funcStr = [funcStr substringWithRange:NSMakeRange(range.location + range.length, funcStr.length - range.location - range.length - 1)];
     
     SEL sel = NSSelectorFromString(funcStr);
-    if (![self.webView.debugConfig respondsToSelector:sel]) return;
+    if (![self respondsToSelector:sel]) return;
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
-    [self.webView.debugConfig performSelector:sel withObject:params];
+    [self performSelector:sel withObject:params];
 #pragma clang diagnostic pop
+}
+
+- (void)socketDidOpen:(NSDictionary *)params{
+    
+}
+- (void)socketDidReceiveMessage:(NSDictionary *)params{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (![params isKindOfClass:[NSDictionary class]]) return;
+        NSString *type = [params valueForKey:@"type"];
+        if (![type isKindOfClass:[NSString class]]) return;
+        
+        NSObject *target = self.webView.debugItem;
+        
+        if ([type isEqualToString:@"invalid"]) {
+            if ([target respondsToSelector:@selector(webViewCallReadyRefresh)]) {
+                [target performSelector:@selector(webViewCallReadyRefresh) withObject:nil];
+            }
+            if ([target respondsToSelector:@selector(webViewCallStartRefresh:)]) {
+                [NSObject cancelPreviousPerformRequestsWithTarget:target selector:@selector(webViewCallStartRefresh:) object:nil];
+            }
+            return;
+        }
+        if ([type isEqualToString:@"hash"]) {
+            if ([target respondsToSelector:@selector(webViewCallStartRefresh:)]) {
+                [NSObject cancelPreviousPerformRequestsWithTarget:target selector:@selector(webViewCallStartRefresh:) object:nil];
+            }
+            return;
+        }
+        if ([type isEqualToString:@"ok"] || [type isEqualToString:@"warnings"]) {
+            if ([target respondsToSelector:@selector(webViewCallStartRefresh:)]) {
+                [NSObject cancelPreviousPerformRequestsWithTarget:target selector:@selector(webViewCallStartRefresh:) object:nil];
+                [target performSelector:@selector(webViewCallStartRefresh:) withObject:nil afterDelay:0.3];
+            }
+            return;
+        }
+    });
+}
+- (void)socketDidError:(NSDictionary *)params{
+    
+}
+- (void)socketDidClose:(NSDictionary *)params{
+    
+}
+
+- (ZHWebView *)webView{
+    return self.apiHandler.handler.webView;
 }
 
 //js api方法名前缀  如：fund

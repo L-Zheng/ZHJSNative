@@ -375,16 +375,16 @@ case cType:{\
 - (void)showWebViewException:(NSDictionary *)exception{
     // 异常抛出
     id <ZHWebViewExceptionDelegate> de = self.webView.zh_exceptionDelegate;
-    if (ZHCheckDelegate(de, @selector(webViewException:info:))) {
-        [de webViewException:self.webView info:exception];
+    if (ZHCheckDelegate(de, @selector(zh_webView:exception:))) {
+        [de zh_webView:self.webView exception:exception];
     }
     // 调试弹窗
-    if (self.webView.debugConfig.alertWebViewErrorEnable) {
+    if (self.webView.debugItem.alertWebErrorEnable) {
         [self showException:@"WebView JS异常" exception:exception];
     }
 }
 - (void)showJSContextException:(NSDictionary *)exception{
-    if (self.jsContext.debugConfig.alertJsContextErrorEnable) {
+    if (self.jsContext.debugItem.alertContextErrorEnable) {
         [self showException:@"JSCore异常" exception:exception];
     }
 }
