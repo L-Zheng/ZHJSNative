@@ -44,39 +44,39 @@ case cType:{\
 
 #pragma mark - init
 
-- (NSArray<id<ZHJSApiProtocol>> *)apiHandlers{
-    return [self.apiHandler apiHandlers];
+- (NSArray<id<ZHJSApiProtocol>> *)apis{
+    return [self.apiHandler apis];
 }
 
 //添加移除api
-- (void)addApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers completion:(void (^) (NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, NSString *jsCode, NSError *error))completion{
+- (void)addApis:(NSArray <id <ZHJSApiProtocol>> *)apis completion:(void (^) (NSArray<id<ZHJSApiProtocol>> *successApis, NSArray<id<ZHJSApiProtocol>> *failApis, NSString *jsCode, NSError *error))completion{
     __weak __typeof__(self) __self = self;
-    [self.apiHandler addApiHandlers:apiHandlers completion:^(NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, NSError *error) {
+    [self.apiHandler addApis:apis completion:^(NSArray<id<ZHJSApiProtocol>> *successApis, NSArray<id<ZHJSApiProtocol>> *failApis, NSError *error) {
         if (error) {
-            if (completion) completion(successApiHandlers, failApiHandlers, nil, error);
+            if (completion) completion(successApis, failApis, nil, error);
             return;
         }
         //直接添加  会覆盖掉先前定义的
         NSString *jsCode = [__self fetchWebViewApi:NO];
-        if (completion) completion(successApiHandlers, failApiHandlers, jsCode, nil);
+        if (completion) completion(successApis, failApis, jsCode, nil);
     }];
 }
-- (void)removeApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers completion:(void (^) (NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, NSString *jsCode, NSError *error))completion{
+- (void)removeApis:(NSArray <id <ZHJSApiProtocol>> *)apis completion:(void (^) (NSArray<id<ZHJSApiProtocol>> *successApis, NSArray<id<ZHJSApiProtocol>> *failApis, NSString *jsCode, NSError *error))completion{
     
     __weak __typeof__(self) __self = self;
     
     //先重置掉原来定义的所有api
     NSString *resetApiJsCode = [self fetchWebViewApi:YES];
     
-    [self.apiHandler removeApiHandlers:apiHandlers completion:^(NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, NSError *error) {
+    [self.apiHandler removeApis:apis completion:^(NSArray<id<ZHJSApiProtocol>> *successApis, NSArray<id<ZHJSApiProtocol>> *failApis, NSError *error) {
         if (error) {
-            if (completion) completion(successApiHandlers, failApiHandlers, nil, error);
+            if (completion) completion(successApis, failApis, nil, error);
             return;
         }
         //添加新的api
         NSString *newApiJsCode = [__self fetchWebViewApi:NO];
         NSString *resJsCode = [NSString stringWithFormat:@"%@%@", resetApiJsCode?:@"", newApiJsCode];
-        if (completion) completion(successApiHandlers, failApiHandlers, resJsCode, nil);
+        if (completion) completion(successApis, failApis, resJsCode, nil);
     }];
 }
 
@@ -119,10 +119,10 @@ case cType:{\
         callBack(resMap ? apiPrefix : nil, resMap);
     }];
 }
-//- (void)fetchJSContextApiWithApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers callBack:(void (^) (NSString *apiPrefix, NSDictionary *apiBlockMap))callBack{
+//- (void)fetchJSContextApiWithApis:(NSArray <id <ZHJSApiProtocol>> *)apis callBack:(void (^) (NSString *apiPrefix, NSDictionary *apiBlockMap))callBack{
 //    if (!callBack) return;
 //    __weak __typeof__(self) __self = self;
-//    [self.apiHandler fetchRegsiterApiMap:apiHandlers block:^(NSString *apiPrefix, NSDictionary<NSString *,ZHJSApiRegisterItem *> *apiMap) {
+//    [self.apiHandler fetchRegsiterApiMap:apis block:^(NSString *apiPrefix, NSDictionary<NSString *,ZHJSApiRegisterItem *> *apiMap) {
 //        NSDictionary *resMap = [__self fetchJSContextNativeImpMap:apiPrefix apiMap:apiMap];
 //        callBack(resMap ? apiPrefix : nil, resMap);
 //    }];

@@ -22,7 +22,7 @@
 
 - (instancetype)initWithGlobalConfig:(ZHCtxConfig *)globalConfig;
 //- (instancetype)initWithCreateConfig:(ZHCtxCreateConfig *)createConfig;
-@property (nonatomic,strong,readonly) NSArray <id <ZHJSApiProtocol>> *apiHandlers;
+@property (nonatomic,strong,readonly) NSArray <id <ZHJSApiProtocol>> *apis;
 
 #pragma mark - config
 
@@ -36,8 +36,8 @@
 #pragma mark - api
 
 //添加移除api
-- (void)addApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers completion:(void (^) (NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, id res, NSError *error))completion;
-- (void)removeApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers completion:(void (^) (NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, id res, NSError *error))completion;
+- (void)addApis:(NSArray <id <ZHJSApiProtocol>> *)apis completion:(void (^) (NSArray<id<ZHJSApiProtocol>> *successApis, NSArray<id<ZHJSApiProtocol>> *failApis, id res, NSError *error))completion;
+- (void)removeApis:(NSArray <id <ZHJSApiProtocol>> *)apis completion:(void (^) (NSArray<id<ZHJSApiProtocol>> *successApis, NSArray<id<ZHJSApiProtocol>> *failApis, id res, NSError *error))completion;
 
 #pragma mark - render
 

@@ -41,7 +41,7 @@
     // 初始化配置
     self.createConfig = createConfig;
     createConfig.jsContext = self;
-    NSArray <id <ZHJSApiProtocol>> *apiHandlers = createConfig.apiHandlers;
+    NSArray <id <ZHJSApiProtocol>> *apis = createConfig.apis;
     
     //创建虚拟机
     JSVirtualMachine *vm = [[JSVirtualMachine alloc] init];
@@ -53,7 +53,7 @@
         
         // api处理配置
         ZHJSHandler *handler = [[ZHJSHandler alloc] init];
-        handler.apiHandler = [[ZHJSApiHandler alloc] initWithContextHandler:handler debugItem:debugItem apiHandlers:apiHandlers?:@[]];
+        handler.apiHandler = [[ZHJSApiHandler alloc] initWithContextHandler:handler debugItem:debugItem apis:apis?:@[]];
         handler.jsContext = self;
         self.handler = handler;
         
@@ -71,37 +71,37 @@
     return self;
 }
 
-- (NSArray<id<ZHJSApiProtocol>> *)apiHandlers{
-    return [self.handler apiHandlers];
+- (NSArray<id<ZHJSApiProtocol>> *)apis{
+    return [self.handler apis];
 }
 
 //添加移除api
-- (void)addApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers completion:(void (^) (NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, id res, NSError *error))completion{
+- (void)addApis:(NSArray <id <ZHJSApiProtocol>> *)apis completion:(void (^) (NSArray<id<ZHJSApiProtocol>> *successApis, NSArray<id<ZHJSApiProtocol>> *failApis, id res, NSError *error))completion{
     __weak __typeof__(self) __self = self;
-    [self.handler addApiHandlers:apiHandlers completion:^(NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, NSString *jsCode, NSError *error) {
+    [self.handler addApis:apis completion:^(NSArray<id<ZHJSApiProtocol>> *successApis, NSArray<id<ZHJSApiProtocol>> *failApis, NSString *jsCode, NSError *error) {
         if (error) {
-            if (completion) completion(successApiHandlers, failApiHandlers, nil, error?:[NSError errorWithDomain:@"" code:404 userInfo:@{NSLocalizedDescriptionKey: @"api注入失败"}]);
+            if (completion) completion(successApis, failApis, nil, error?:[NSError errorWithDomain:@"" code:404 userInfo:@{NSLocalizedDescriptionKey: @"api注入失败"}]);
             return;
         }
         //直接添加  会覆盖掉先前定义的
         [__self registerAPI];
-        if (completion) completion(successApiHandlers, failApiHandlers, @{}, nil);
+        if (completion) completion(successApis, failApis, @{}, nil);
     }];
 }
-- (void)removeApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers completion:(void (^) (NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, id res, NSError *error))completion{
+- (void)removeApis:(NSArray <id <ZHJSApiProtocol>> *)apis completion:(void (^) (NSArray<id<ZHJSApiProtocol>> *successApis, NSArray<id<ZHJSApiProtocol>> *failApis, id res, NSError *error))completion{
     __weak __typeof__(self) __self = self;
     
     //先重置掉原来定义的所有api
     [self removeAPI];
     
-    [self.handler removeApiHandlers:apiHandlers completion:^(NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, NSString *jsCode, NSError *error) {
+    [self.handler removeApis:apis completion:^(NSArray<id<ZHJSApiProtocol>> *successApis, NSArray<id<ZHJSApiProtocol>> *failApis, NSString *jsCode, NSError *error) {
         if (error) {
-            if (completion) completion(successApiHandlers, failApiHandlers, nil, error?:[NSError errorWithDomain:@"" code:404 userInfo:@{NSLocalizedDescriptionKey: @"api移除失败"}]);
+            if (completion) completion(successApis, failApis, nil, error?:[NSError errorWithDomain:@"" code:404 userInfo:@{NSLocalizedDescriptionKey: @"api移除失败"}]);
             return;
         }
         //添加新的api
         [__self registerAPI];
-        if (completion) completion(successApiHandlers, failApiHandlers, @{}, nil);
+        if (completion) completion(successApis, failApis, @{}, nil);
     }];
 }
 

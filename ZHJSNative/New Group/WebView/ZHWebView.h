@@ -82,10 +82,10 @@ typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
 
 //添加移除api
 - (void)addJsCode:(NSString *)jsCode completion:(void (^) (id res, NSError *error))completion;
-- (void)addApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers completion:(void (^) (NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, id res, NSError *error))completion;
-- (void)removeApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers completion:(void (^) (NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, id res, NSError *error))completion;
+- (void)addApis:(NSArray <id <ZHJSApiProtocol>> *)apis completion:(void (^) (NSArray<id<ZHJSApiProtocol>> *successApis, NSArray<id<ZHJSApiProtocol>> *failApis, id res, NSError *error))completion;
+- (void)removeApis:(NSArray <id <ZHJSApiProtocol>> *)apis completion:(void (^) (NSArray<id<ZHJSApiProtocol>> *successApis, NSArray<id<ZHJSApiProtocol>> *failApis, id res, NSError *error))completion;
 
-@property (nonatomic,strong,readonly) NSArray <id <ZHJSApiProtocol>> *apiHandlers;
+@property (nonatomic,strong,readonly) NSArray <id <ZHJSApiProtocol>> *apis;
 
 #pragma mark - Exception
 

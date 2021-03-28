@@ -31,7 +31,7 @@
 
 @implementation ZHController
 
-- (NSArray <id <ZHJSApiProtocol>> *)apiHandlers{
+- (NSArray <id <ZHJSApiProtocol>> *)apis{
     return @[[[ZHCustomApiHandler alloc] init], [[ZHCustom1ApiHandler alloc] init], [[ZHCustom2ApiHandler alloc] init]];
 }
 
@@ -63,7 +63,7 @@
     ZHWebCreateConfig *createConfig = [ZHWebCreateConfig new];
     createConfig.frameValue = [NSValue valueWithCGRect:[UIScreen mainScreen].bounds];
     createConfig.processPool = [self processPool];
-    createConfig.apiHandlers = [self apiHandlers];
+    createConfig.apis = [self apis];
     createConfig.extraScriptStart = @"var testGlobalFunc = function (params) {var res = JSON.parse(decodeURIComponent(params));console.log(res);return true;}";
     
     ZHWebLoadConfig *loadConfig = [ZHWebLoadConfig new];
@@ -89,7 +89,7 @@
     mpConfig.presetFileInfo = nil;
     
     ZHCtxCreateConfig *createConfig = [ZHCtxCreateConfig new];
-    createConfig.apiHandlers = [self apiHandlers];
+    createConfig.apis = [self apis];
     
     ZHCtxLoadConfig *loadConfig = [ZHCtxLoadConfig new];
     
@@ -152,12 +152,12 @@
     [self readyLoadWebView];
 //
 ////    ZHCustomExtra1ApiHandler *extr1 = [ZHCustomExtra1ApiHandler new];
-////    [self.context addApiHandlers:@[extr1] completion:^(NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, id res, NSError *error) {
+////    [self.context addApis:@[extr1] completion:^(NSArray<id<ZHJSApiProtocol>> *successApis, NSArray<id<ZHJSApiProtocol>> *failApis, id res, NSError *error) {
 ////        JSValue *addApiTestValue = [self.context objectForKeyedSubscript:@"addApiTest"];
 ////        [addApiTestValue callWithArguments:@[]];
 ////
 ////
-////        [self.context removeApiHandlers:@[extr1] completion:^(NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, id res, NSError *error) {
+////        [self.context removeApis:@[extr1] completion:^(NSArray<id<ZHJSApiProtocol>> *successApis, NSArray<id<ZHJSApiProtocol>> *failApis, id res, NSError *error) {
 ////            JSValue *addApiTestValue = [self.context objectForKeyedSubscript:@"addApiTest"];
 ////            [addApiTestValue callWithArguments:@[]];
 ////
@@ -324,13 +324,13 @@
             NSLog(@"----✅%@---", desc);
         }
 //        ZHCustomExtra1ApiHandler *extraApi = [ZHCustomExtra1ApiHandler new];
-//        [self.webView addApiHandlers:@[extraApi] completion:^(NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, id res, NSError *error) {
+//        [self.webView addApis:@[extraApi] completion:^(NSArray<id<ZHJSApiProtocol>> *successApis, NSArray<id<ZHJSApiProtocol>> *failApis, id res, NSError *error) {
 //            NSLog(@"--------------------");
 //            [self.webView evaluateJs:@"window.addApiTest();" completionHandler:^(id res, NSError *error) {
 //                NSLog(@"--------------------");
 //
 //
-//                [self.webView removeApiHandlers:@[extraApi] completion:^(NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, id res, NSError *error) {
+//                [self.webView removeApis:@[extraApi] completion:^(NSArray<id<ZHJSApiProtocol>> *successApis, NSArray<id<ZHJSApiProtocol>> *failApis, id res, NSError *error) {
 //                    NSLog(@"--------------------");
 //
 //                    [self.webView evaluateJs:@"window.addApiTest();" completionHandler:^(id res, NSError *error) {

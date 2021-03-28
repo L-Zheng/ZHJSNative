@@ -12,6 +12,6 @@
 /** 👉JSContext 创建配置 */
 @interface ZHCtxCreateConfig : ZHCtxBaseConfig
 // JSContext需要注入的api【如：fund API】
-@property (nonatomic,retain) NSArray <id <ZHJSApiProtocol>> *apiHandlers;
+@property (nonatomic,retain) NSArray <id <ZHJSApiProtocol>> *apis;
 @end
 

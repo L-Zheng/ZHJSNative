@@ -20,7 +20,7 @@
  */
 @property (nonatomic,strong) WKProcessPool *processPool;
 // web需要注入的api【如：fund API】
-@property (nonatomic,retain) NSArray <id <ZHJSApiProtocol>> *apiHandlers;
+@property (nonatomic,retain) NSArray <id <ZHJSApiProtocol>> *apis;
 // web初始化附加脚本：document start时注入
 @property (nonatomic,copy) NSString *extraScriptStart;
 // web初始化附加脚本：document end时注入

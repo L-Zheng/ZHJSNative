@@ -18,22 +18,21 @@
 
 - (instancetype)initWithWebHandler:(ZHJSHandler *)handler
                          debugItem:(ZHWebDebugItem *)debugItem
-                       apiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers;
+                       apis:(NSArray <id <ZHJSApiProtocol>> *)apis;
 
 - (instancetype)initWithContextHandler:(ZHJSHandler *)handler
                              debugItem:(ZHCtxDebugItem *)debugItem
-                             apiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers;
+                             apis:(NSArray <id <ZHJSApiProtocol>> *)apis;
 
 @property (nonatomic,weak,readonly) ZHJSHandler *handler;
-@property (nonatomic,strong,readonly) NSArray <id <ZHJSApiProtocol>> *apiHandlers;
+@property (nonatomic,strong,readonly) NSArray <id <ZHJSApiProtocol>> *apis;
 
 //添加移除api
-- (void)addApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers completion:(void (^) (NSArray <id <ZHJSApiProtocol>> *successApiHandlers, NSArray <id <ZHJSApiProtocol>> *failApiHandlers, NSError *error))completion;
-- (void)removeApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers completion:(void (^) (NSArray <id <ZHJSApiProtocol>> *successApiHandlers, NSArray <id <ZHJSApiProtocol>> *failApiHandlers, NSError *error))completion;
+- (void)addApis:(NSArray <id <ZHJSApiProtocol>> *)apis completion:(void (^) (NSArray <id <ZHJSApiProtocol>> *successApis, NSArray <id <ZHJSApiProtocol>> *failApis, NSError *error))completion;
+- (void)removeApis:(NSArray <id <ZHJSApiProtocol>> *)apis completion:(void (^) (NSArray <id <ZHJSApiProtocol>> *successApis, NSArray <id <ZHJSApiProtocol>> *failApis, NSError *error))completion;
 
 //api映射表
 - (void)enumRegsiterApiMap:(void (^)(NSString *apiPrefix, NSDictionary <NSString *, ZHJSApiRegisterItem *> *apiMap))block;
-//- (void)fetchRegsiterApiMap:(NSArray <id <ZHJSApiProtocol>> *)handlers block:(void (^)(NSString *apiPrefix, NSDictionary <NSString *, ZHJSApiRegisterItem *> *apiMap))block;
 //获取方法名
 - (void)fetchSelectorByName:(NSString *)jsMethodName apiPrefix:(NSString *)apiPrefix callBack:(void (^) (id target, SEL sel))callBack;
 

@@ -53,7 +53,7 @@
     // 初始化配置
     self.createConfig = createConfig;
     createConfig.webView = self;
-    NSArray <id <ZHJSApiProtocol>> *apiHandlers = createConfig.apiHandlers;
+    NSArray <id <ZHJSApiProtocol>> *apis = createConfig.apis;
     WKProcessPool *processPool = createConfig.processPool;
     CGRect frame = createConfig.frameValue.CGRectValue;
     
@@ -67,15 +67,15 @@
     
     // api处理配置    
     ZHJSHandler *handler = [[ZHJSHandler alloc] init];
-    handler.apiHandler = [[ZHJSApiHandler alloc] initWithWebHandler:handler debugItem:debugItem apiHandlers:apiHandlers?:@[]];
+    handler.apiHandler = [[ZHJSApiHandler alloc] initWithWebHandler:handler debugItem:debugItem apis:apis?:@[]];
     handler.webView = self;
     self.handler = handler;
     
     //注入api
-    NSMutableArray *apis = [NSMutableArray array];
+    NSMutableArray *apiCodes = [NSMutableArray array];
     //log
     if (debugItem.logOutputXcodeEnable) {
-        [apis addObject:@{
+        [apiCodes addObject:@{
             @"code": [handler fetchWebViewLogApi]?:@"",
             @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentStart),
             @"mainFrameOnly": @(YES)
@@ -83,7 +83,7 @@
     }
     //error
     if (debugItem.alertWebErrorEnable) {
-        [apis addObject:@{
+        [apiCodes addObject:@{
             @"code": [handler fetchWebViewErrorApi]?:@"",
             @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentStart),
             @"mainFrameOnly": @(YES)
@@ -91,7 +91,7 @@
     }
     //websocket js用于监听socket链接
     if (debugItem.debugModeEnable) {
-        [apis addObject:@{
+        [apiCodes addObject:@{
             @"code": [handler fetchWebViewSocketApi]?:@"",
             @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentStart),
             @"mainFrameOnly": @(YES)
@@ -99,7 +99,7 @@
     }
     //webview log控制台
     if (debugItem.logOutputWebEnable) {
-        [apis addObject:@{
+        [apiCodes addObject:@{
             @"code": @"var ZhengVconsoleLog = document.createElement('script'); ZhengVconsoleLog.type = 'text/javascript'; ZhengVconsoleLog.src = 'http://wechatfe.github.io/vconsole/lib/vconsole.min.js?v=3.3.0'; ZhengVconsoleLog.charset = 'UTF-8'; ZhengVconsoleLog.onload = function(){var vConsole = new VConsole();}; ZhengVconsoleLog.onerror = function(error){}; window.document.body.appendChild(ZhengVconsoleLog);",
             @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentEnd),
             @"mainFrameOnly": @(YES)
@@ -107,46 +107,46 @@
     }
     //禁用webview长按弹出菜单
     if (debugItem.touchCalloutEnable) {
-        [apis addObject:@{
+        [apiCodes addObject:@{
             @"code": [handler fetchWebViewTouchCalloutApi]?:@"",
             @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentEnd),
             @"mainFrameOnly": @(YES)
         }];
     }
     //api support js
-    [apis addObject:@{
+    [apiCodes addObject:@{
         @"code": [handler fetchWebViewSupportApi]?:@"",
         @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentStart),
         @"mainFrameOnly": @(YES)
     }];
     //api js
-    [apis addObject:@{
+    [apiCodes addObject:@{
         @"code": [handler fetchWebViewApi:NO]?:@"",
         @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentStart),
         @"mainFrameOnly": @(YES)
     }];
     //api 注入完成
-    [apis addObject:@{
+    [apiCodes addObject:@{
         @"code": [handler fetchWebViewApiFinish]?:@"",
         @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentEnd),
         @"mainFrameOnly": @(YES)
     }];
     //api 注入附加脚本
     if ([ZHWebView checkString:createConfig.extraScriptStart]) {
-        [apis addObject:@{
+        [apiCodes addObject:@{
             @"code": createConfig.extraScriptStart?:@"",
             @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentStart),
             @"mainFrameOnly": @(YES)
         }];
     }
     if ([ZHWebView checkString:createConfig.extraScriptEnd]) {
-        [apis addObject:@{
+        [apiCodes addObject:@{
             @"code": createConfig.extraScriptEnd?:@"",
             @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentEnd),
             @"mainFrameOnly": @(YES)
         }];
     }
-    for (NSDictionary *map in apis) {
+    for (NSDictionary *map in apiCodes) {
         NSString *code = [map valueForKey:@"code"];
         if (code.length == 0) continue;
         NSNumber *jectionTime = [map valueForKey:@"jectionTime"];
@@ -205,8 +205,8 @@
     return self;
 }
 
-- (NSArray<id<ZHJSApiProtocol>> *)apiHandlers{
-    return [self.handler apiHandlers];
+- (NSArray<id<ZHJSApiProtocol>> *)apis{
+    return [self.handler apis];
 }
 
 //添加移除api
@@ -225,29 +225,29 @@
         if (completion) completion(res, error);
     }];
 }
-- (void)addApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers completion:(void (^) (NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, id res, NSError *error))completion{
+- (void)addApis:(NSArray <id <ZHJSApiProtocol>> *)apis completion:(void (^) (NSArray<id<ZHJSApiProtocol>> *successApis, NSArray<id<ZHJSApiProtocol>> *failApis, id res, NSError *error))completion{
     __weak __typeof__(self) __self = self;
-    [self.handler addApiHandlers:apiHandlers completion:^(NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, NSString *jsCode, NSError *error) {
+    [self.handler addApis:apis completion:^(NSArray<id<ZHJSApiProtocol>> *successApis, NSArray<id<ZHJSApiProtocol>> *failApis, NSString *jsCode, NSError *error) {
         if (jsCode.length == 0 || error) {
-            if (completion) completion(successApiHandlers, failApiHandlers, nil, error?:[NSError errorWithDomain:@"" code:404 userInfo:@{NSLocalizedDescriptionKey: @"api注入失败"}]);
+            if (completion) completion(successApis, failApis, nil, error?:[NSError errorWithDomain:@"" code:404 userInfo:@{NSLocalizedDescriptionKey: @"api注入失败"}]);
             return;
         }
         //注入新的jsCode
         [__self addJsCode:jsCode completion:^(id res, NSError *error) {
-            if (completion) completion(successApiHandlers, failApiHandlers, res, error);
+            if (completion) completion(successApis, failApis, res, error);
         }];
     }];
 }
-- (void)removeApiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers completion:(void (^) (NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, id res, NSError *error))completion{
+- (void)removeApis:(NSArray <id <ZHJSApiProtocol>> *)apis completion:(void (^) (NSArray<id<ZHJSApiProtocol>> *successApis, NSArray<id<ZHJSApiProtocol>> *failApis, id res, NSError *error))completion{
     __weak __typeof__(self) __self = self;
-    [self.handler removeApiHandlers:apiHandlers completion:^(NSArray<id<ZHJSApiProtocol>> *successApiHandlers, NSArray<id<ZHJSApiProtocol>> *failApiHandlers, NSString *jsCode, NSError *error) {
+    [self.handler removeApis:apis completion:^(NSArray<id<ZHJSApiProtocol>> *successApis, NSArray<id<ZHJSApiProtocol>> *failApis, NSString *jsCode, NSError *error) {
         if (jsCode.length == 0 || error) {
-            if (completion) completion(successApiHandlers, failApiHandlers, nil, error?:[NSError errorWithDomain:@"" code:404 userInfo:@{NSLocalizedDescriptionKey: @"api移除失败"}]);
+            if (completion) completion(successApis, failApis, nil, error?:[NSError errorWithDomain:@"" code:404 userInfo:@{NSLocalizedDescriptionKey: @"api移除失败"}]);
             return;
         }
         //注入新的jsCode
         [__self addJsCode:jsCode completion:^(id res, NSError *error) {
-            if (completion) completion(successApiHandlers, failApiHandlers, res, error);
+            if (completion) completion(successApis, failApis, res, error);
         }];
     }];
 }
