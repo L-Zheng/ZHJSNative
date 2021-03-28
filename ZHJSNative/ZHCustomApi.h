@@ -1,5 +1,5 @@
 //
-//  ZHCustomApiHandler.h
+//  ZHCustomApi.h
 //  ZHJSNative
 //
 //  Created by EM on 2020/3/24.
@@ -11,7 +11,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface ZHCustomApiHandler : NSObject <ZHJSApiProtocol>
+@interface ZHCustomApi : NSObject <ZHJSApiProtocol>
 
 @property (nonatomic,strong) NSDictionary *emotionMap;
 @property (nonatomic,strong) NSDictionary *bigEmotionMap;

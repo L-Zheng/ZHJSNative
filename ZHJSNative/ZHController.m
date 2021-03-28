@@ -14,13 +14,13 @@
 #import "ZHJSContext.h"
 #import "ZHWebViewManager.h"
 #import "ZHCtxDebugManager.h"
-#import "ZHCustomApiHandler.h"
-#import "ZHCustom1ApiHandler.h"
-#import "ZHCustomExtra1ApiHandler.h"
+#import "ZHCustomApi.h"
+#import "ZHCustom1Api.h"
+#import "ZHCustomExtra1Api.h"
 
-#import "ZHCustomApiHandler.h"
-#import "ZHCustom1ApiHandler.h"
-#import "ZHCustom2ApiHandler.h"
+#import "ZHCustomApi.h"
+#import "ZHCustom1Api.h"
+#import "ZHCustom2Api.h"
 
 @interface ZHController ()<ZHWebViewDebugSocketDelegate>
 @property (nonatomic, strong) ZHWebView *webView;
@@ -32,7 +32,7 @@
 @implementation ZHController
 
 - (NSArray <id <ZHJSApiProtocol>> *)apis{
-    return @[[[ZHCustomApiHandler alloc] init], [[ZHCustom1ApiHandler alloc] init], [[ZHCustom2ApiHandler alloc] init]];
+    return @[[[ZHCustomApi alloc] init], [[ZHCustom1Api alloc] init], [[ZHCustom2Api alloc] init]];
 }
 
 - (NSString *)currentTemplateKey{
@@ -151,7 +151,7 @@
     [self configView];
     [self readyLoadWebView];
 //
-////    ZHCustomExtra1ApiHandler *extr1 = [ZHCustomExtra1ApiHandler new];
+////    ZHCustomExtra1Api *extr1 = [ZHCustomExtra1Api new];
 ////    [self.context addApis:@[extr1] completion:^(NSArray<id<ZHJSApiProtocol>> *successApis, NSArray<id<ZHJSApiProtocol>> *failApis, id res, NSError *error) {
 ////        JSValue *addApiTestValue = [self.context objectForKeyedSubscript:@"addApiTest"];
 ////        [addApiTestValue callWithArguments:@[]];
@@ -323,7 +323,7 @@
         }else{
             NSLog(@"----✅%@---", desc);
         }
-//        ZHCustomExtra1ApiHandler *extraApi = [ZHCustomExtra1ApiHandler new];
+//        ZHCustomExtra1Api *extraApi = [ZHCustomExtra1Api new];
 //        [self.webView addApis:@[extraApi] completion:^(NSArray<id<ZHJSApiProtocol>> *successApis, NSArray<id<ZHJSApiProtocol>> *failApis, id res, NSError *error) {
 //            NSLog(@"--------------------");
 //            [self.webView evaluateJs:@"window.addApiTest();" completionHandler:^(id res, NSError *error) {

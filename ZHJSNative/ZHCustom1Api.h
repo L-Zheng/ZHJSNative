@@ -1,18 +1,17 @@
 //
-//  ZHCustom2ApiHandler.h
+//  ZHCustom1Api.h
 //  ZHJSNative
 //
-//  Created by EM on 2020/5/15.
+//  Created by Zheng on 2020/3/28.
 //  Copyright © 2020 Zheng. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
 #import "ZHJSApiProtocol.h"
 
-
 NS_ASSUME_NONNULL_BEGIN
 
-@interface ZHCustom2ApiHandler : NSObject<ZHJSApiProtocol>
+@interface ZHCustom1Api : NSObject<ZHJSApiProtocol>
 
 @end
 

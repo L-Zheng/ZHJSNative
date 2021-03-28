@@ -1,5 +1,5 @@
 //
-//  ZHCustomExtra1ApiHandler.h
+//  ZHCustomExtra1Api.h
 //  ZHJSNative
 //
 //  Created by EM on 2020/5/20.
@@ -11,7 +11,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface ZHCustomExtra1ApiHandler : NSObject<ZHJSApiProtocol>
+@interface ZHCustomExtra1Api : NSObject<ZHJSApiProtocol>
 
 @end
 

@@ -1,14 +1,14 @@
 //
-//  ZHCustom2ApiHandler.m
+//  ZHCustom2Api.m
 //  ZHJSNative
 //
 //  Created by EM on 2020/5/15.
 //  Copyright © 2020 Zheng. All rights reserved.
 //
 
-#import "ZHCustom2ApiHandler.h"
+#import "ZHCustom2Api.h"
 
-@implementation ZHCustom2ApiHandler
+@implementation ZHCustom2Api
 
 - (void)js_commonLinkTo11:(ZHJSApiArgItem *)arg{
     NSLog(@"-------%s---------", __func__);

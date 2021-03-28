@@ -1,15 +1,15 @@
 //
-//  ZHCustomApiHandler.m
+//  ZHCustomApi.m
 //  ZHJSNative
 //
 //  Created by EM on 2020/3/24.
 //  Copyright © 2020 Zheng. All rights reserved.
 //
 
-#import "ZHCustomApiHandler.h"
+#import "ZHCustomApi.h"
 #import "ZHEmotion.h"
 
-@implementation ZHCustomApiHandler
+@implementation ZHCustomApi
 
 #pragma mark - api
 
