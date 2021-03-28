@@ -1,5 +1,5 @@
 //
-//  ZHContextBaseConfig.h
+//  ZHCtxBaseConfig.h
 //  ZHJSNative
 //
 //  Created by Zheng on 2021/3/27.
@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 @class ZHJSContext;
 
-@interface ZHContextBaseConfig : NSObject
+@interface ZHCtxBaseConfig : NSObject
 @property (nonatomic,weak) ZHJSContext *jsContext;
 - (NSDictionary *)formatInfo;
 @end

@@ -1,15 +1,15 @@
 //
-//  ZHContextMpConfig.h
+//  ZHCtxMpConfig.h
 //  ZHJSNative
 //
 //  Created by Zheng on 2021/3/27.
 //  Copyright © 2021 Zheng. All rights reserved.
 //
 
-#import "ZHContextBaseConfig.h"
+#import "ZHCtxBaseConfig.h"
 
 /** 👉JSContext 绑定的小程序配置 */
-@interface ZHContextMpConfig : ZHContextBaseConfig
+@interface ZHCtxMpConfig : ZHCtxBaseConfig
 // 小程序appId
 @property (nonatomic,copy) NSString *appId;
 @property (nonatomic,copy) NSString *envVersion;

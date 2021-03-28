@@ -1,14 +1,14 @@
 //
-//  ZHContextConfig.m
+//  ZHCtxConfig.m
 //  ZHJSNative
 //
 //  Created by Zheng on 2021/3/27.
 //  Copyright © 2021 Zheng. All rights reserved.
 //
 
-#import "ZHContextConfig.h"
+#import "ZHCtxConfig.h"
 
-@implementation ZHContextConfig
+@implementation ZHCtxConfig
 - (NSDictionary *)formatInfo{
     return @{
         @"mpConfig": [self.mpConfig formatInfo]?:@{},

@@ -1,21 +1,21 @@
 //
-//  ZHContextDebugManager.m
+//  ZHCtxDebugManager.m
 //  ZHJSNative
 //
 //  Created by Zheng on 2021/3/27.
 //  Copyright © 2021 Zheng. All rights reserved.
 //
 
-#import "ZHContextDebugManager.h"
+#import "ZHCtxDebugManager.h"
 
-NSString * const ZHContextDebugEnableKey = @"ZHContextDebugEnableKey";
+NSString * const ZHCtxDebugEnableKey = @"ZHCtxDebugEnableKey";
 
-@interface ZHContextDebugManager ()
+@interface ZHCtxDebugManager ()
 @property (nonatomic,strong) NSNumber *debugEnable_memory;
 @property (nonatomic,strong) NSMutableDictionary *itemMap;
 @end
 
-@implementation ZHContextDebugManager
+@implementation ZHCtxDebugManager
 
 - (void)config{
 #ifdef DEBUG
@@ -28,12 +28,12 @@ NSString * const ZHContextDebugEnableKey = @"ZHContextDebugEnableKey";
     if ([self getDebugEnable] == enable) {
         return;
     }
-    [[NSUserDefaults standardUserDefaults] setObject:@(enable) forKey:ZHContextDebugEnableKey];
+    [[NSUserDefaults standardUserDefaults] setObject:@(enable) forKey:ZHCtxDebugEnableKey];
     [[NSUserDefaults standardUserDefaults] synchronize];
     self.debugEnable_memory = @(enable);
 }
 - (void)setDebugEnableWhenNoStore:(BOOL)enable{
-    NSNumber *res = [[NSUserDefaults standardUserDefaults] objectForKey:ZHContextDebugEnableKey];
+    NSNumber *res = [[NSUserDefaults standardUserDefaults] objectForKey:ZHCtxDebugEnableKey];
     if (res) return;
     [self setDebugEnable:enable];
 }
@@ -41,22 +41,22 @@ NSString * const ZHContextDebugEnableKey = @"ZHContextDebugEnableKey";
     if (self.debugEnable_memory) {
         return self.debugEnable_memory.boolValue;
     }
-    NSNumber *res = [[NSUserDefaults standardUserDefaults] objectForKey:ZHContextDebugEnableKey];
+    NSNumber *res = [[NSUserDefaults standardUserDefaults] objectForKey:ZHCtxDebugEnableKey];
     BOOL enable = res ? res.boolValue : NO;
     self.debugEnable_memory = @(enable);
     return enable;
 }
 
-- (ZHContextDebugItem *)getConfigItem:(NSString *)key{
+- (ZHCtxDebugItem *)getConfigItem:(NSString *)key{
     if (!key || ![key isKindOfClass:NSString.class] || key.length == 0) {
         return nil;
     }
     if (!self.itemMap) {
         self.itemMap = [NSMutableDictionary dictionary];
     }
-    ZHContextDebugItem *item = [self.itemMap objectForKey:key];
+    ZHCtxDebugItem *item = [self.itemMap objectForKey:key];
     if (!item) {
-        item = [[ZHContextDebugItem alloc] init];
+        item = [[ZHCtxDebugItem alloc] init];
         [self.itemMap setObject:item forKey:key];
     }
     return item;

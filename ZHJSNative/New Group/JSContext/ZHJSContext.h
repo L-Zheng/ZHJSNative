@@ -9,8 +9,8 @@
 #import <UIKit/UIKit.h>
 #import <JavaScriptCore/JavaScriptCore.h>
 #import "ZHJSApiProtocol.h"
-#import "ZHContextConfig.h"
-#import "ZHContextDebugItem.h"
+#import "ZHCtxConfig.h"
+#import "ZHCtxDebugItem.h"
 #import "ZHJSPageItem.h" // WebView/JSContext页面信息数据
 @class ZHJSPageProtocol;//页面协议
 
@@ -20,18 +20,18 @@
 
 #pragma mark - init
 
-- (instancetype)initWithGlobalConfig:(ZHContextConfig *)globalConfig;
-//- (instancetype)initWithCreateConfig:(ZHContextCreateConfig *)createConfig;
+- (instancetype)initWithGlobalConfig:(ZHCtxConfig *)globalConfig;
+//- (instancetype)initWithCreateConfig:(ZHCtxCreateConfig *)createConfig;
 @property (nonatomic,strong,readonly) NSArray <id <ZHJSApiProtocol>> *apiHandlers;
 
 #pragma mark - config
 
-@property (nonatomic,strong) ZHContextConfig *globalConfig;
-@property (nonatomic,strong) ZHContextMpConfig *mpConfig;
-@property (nonatomic,strong) ZHContextCreateConfig *createConfig;
-@property (nonatomic,strong) ZHContextLoadConfig *loadConfig;
+@property (nonatomic,strong) ZHCtxConfig *globalConfig;
+@property (nonatomic,strong) ZHCtxMpConfig *mpConfig;
+@property (nonatomic,strong) ZHCtxCreateConfig *createConfig;
+@property (nonatomic,strong) ZHCtxLoadConfig *loadConfig;
 // 调试配置
-@property (nonatomic, strong) ZHContextDebugItem *debugItem;
+@property (nonatomic, strong) ZHCtxDebugItem *debugItem;
 
 #pragma mark - api
 
@@ -49,7 +49,7 @@
 /// @param loadFinishBlock  回调
 - (void)renderWithUrl:(NSURL *)url
               baseURL:(NSURL *)baseURL
-           loadConfig:(ZHContextLoadConfig *)loadConfig
+           loadConfig:(ZHCtxLoadConfig *)loadConfig
        loadStartBlock:(void (^) (NSURL *runSandBoxURL))loadStartBlock
       loadFinishBlock:(void (^) (NSDictionary *info, NSError *error))loadFinishBlock;
 

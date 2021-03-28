@@ -1,14 +1,17 @@
 //
-//  ZHContextCreateConfig.m
+//  ZHCtxLoadConfig.m
 //  ZHJSNative
 //
 //  Created by Zheng on 2021/3/27.
 //  Copyright © 2021 Zheng. All rights reserved.
 //
 
-#import "ZHContextCreateConfig.h"
+#import "ZHCtxLoadConfig.h"
 
-@implementation ZHContextCreateConfig
+@implementation ZHCtxLoadConfig
+- (NSDictionary *)formatInfo{
+    return @{};
+}
 - (void)dealloc{
     NSLog(@"%s", __func__);
 }

@@ -20,11 +20,11 @@
 
 @implementation ZHJSContext
 
-- (instancetype)initWithGlobalConfig:(ZHContextConfig *)globalConfig{
+- (instancetype)initWithGlobalConfig:(ZHCtxConfig *)globalConfig{
     self.globalConfig = globalConfig;
     globalConfig.jsContext = self;
     
-    ZHContextMpConfig *mpConfig = globalConfig.mpConfig;
+    ZHCtxMpConfig *mpConfig = globalConfig.mpConfig;
     mpConfig.jsContext = self;
     self.mpConfig = mpConfig;
     
@@ -37,7 +37,7 @@
     
     return [self initWithCreateConfig:globalConfig.createConfig];
 }
-- (instancetype)initWithCreateConfig:(ZHContextCreateConfig *)createConfig{
+- (instancetype)initWithCreateConfig:(ZHCtxCreateConfig *)createConfig{
     // 初始化配置
     self.createConfig = createConfig;
     createConfig.jsContext = self;
@@ -48,7 +48,7 @@
     self = [self initWithVirtualMachine:vm];
     if (self) {
         // debug配置
-        ZHContextDebugItem *debugItem = [ZHContextDebugItem configuration:self];
+        ZHCtxDebugItem *debugItem = [ZHCtxDebugItem configuration:self];
         self.debugItem = debugItem;
         
         // api处理配置
@@ -158,7 +158,7 @@
 /// @param loadFinishBlock  回调
 - (void)renderWithUrl:(NSURL *)url
               baseURL:(NSURL *)baseURL
-           loadConfig:(ZHContextLoadConfig *)loadConfig
+           loadConfig:(ZHCtxLoadConfig *)loadConfig
        loadStartBlock:(void (^) (NSURL *runSandBoxURL))loadStartBlock
       loadFinishBlock:(void (^) (NSDictionary *info, NSError *error))loadFinishBlock{
     

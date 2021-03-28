@@ -13,7 +13,7 @@
 #import "ZHJSApiProtocol.h"
 #import "ZHJSContext.h"
 #import "ZHWebViewManager.h"
-#import "ZHContextDebugManager.h"
+#import "ZHCtxDebugManager.h"
 #import "ZHCustomApiHandler.h"
 #import "ZHCustom1ApiHandler.h"
 #import "ZHCustomExtra1ApiHandler.h"
@@ -80,20 +80,20 @@
     return config;
 }
 
-- (ZHContextConfig *)createContextConfig{
-    ZHContextMpConfig *mpConfig = [ZHContextMpConfig new];
+- (ZHCtxConfig *)createContextConfig{
+    ZHCtxMpConfig *mpConfig = [ZHCtxMpConfig new];
     mpConfig.appId = nil;
     mpConfig.envVersion = nil;
     mpConfig.loadFileName = nil;
     mpConfig.presetFilePath = nil;
     mpConfig.presetFileInfo = nil;
     
-    ZHContextCreateConfig *createConfig = [ZHContextCreateConfig new];
+    ZHCtxCreateConfig *createConfig = [ZHCtxCreateConfig new];
     createConfig.apiHandlers = [self apiHandlers];
     
-    ZHContextLoadConfig *loadConfig = [ZHContextLoadConfig new];
+    ZHCtxLoadConfig *loadConfig = [ZHCtxLoadConfig new];
     
-    ZHContextConfig *config = [ZHContextConfig new];
+    ZHCtxConfig *config = [ZHCtxConfig new];
     config.mpConfig = mpConfig;
     config.createConfig = createConfig;
     config.loadConfig = loadConfig;
@@ -120,7 +120,7 @@
 - (void)testJSContext{
     
     //运算js
-    ZHContextConfig *contextConfig = [self createContextConfig];
+    ZHCtxConfig *contextConfig = [self createContextConfig];
     self.context = [[ZHJSContext alloc] initWithGlobalConfig:contextConfig];
     NSURL *url = [NSURL fileURLWithPath:[[[NSBundle mainBundle] pathForResource:@"TestBundle" ofType:@"bundle"] stringByAppendingPathComponent:@"test.js"]];
     [self.context renderWithUrl:url baseURL:nil loadConfig:contextConfig.loadConfig loadStartBlock:^(NSURL *runSandBoxURL) {

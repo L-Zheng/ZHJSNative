@@ -1,14 +1,14 @@
 //
-//  ZHContextApiOpConfig.m
+//  ZHCtxApiOpConfig.m
 //  ZHJSNative
 //
 //  Created by Zheng on 2021/3/27.
 //  Copyright © 2021 Zheng. All rights reserved.
 //
 
-#import "ZHContextApiOpConfig.h"
+#import "ZHCtxApiOpConfig.h"
 
-@implementation ZHContextApiOpConfig
+@implementation ZHCtxApiOpConfig
 @synthesize belong_controller = _belong_controller;
 @synthesize status_controller = _status_controller;
 @synthesize navigationBar = _navigationBar;

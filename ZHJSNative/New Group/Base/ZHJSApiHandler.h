@@ -10,7 +10,7 @@
 #import "ZHJSApiProtocol.h"
 @class ZHJSHandler;
 @class ZHWebDebugItem;
-@class ZHContextDebugItem;
+@class ZHCtxDebugItem;
 
 //NS_ASSUME_NONNULL_BEGIN
 
@@ -21,7 +21,7 @@
                        apiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers;
 
 - (instancetype)initWithContextHandler:(ZHJSHandler *)handler
-                             debugItem:(ZHContextDebugItem *)debugItem
+                             debugItem:(ZHCtxDebugItem *)debugItem
                              apiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers;
 
 @property (nonatomic,weak,readonly) ZHJSHandler *handler;

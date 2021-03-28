@@ -1,14 +1,14 @@
 //
-//  ZHContextMpConfig.m
+//  ZHCtxMpConfig.m
 //  ZHJSNative
 //
 //  Created by Zheng on 2021/3/27.
 //  Copyright © 2021 Zheng. All rights reserved.
 //
 
-#import "ZHContextMpConfig.h"
+#import "ZHCtxMpConfig.h"
 
-@implementation ZHContextMpConfig
+@implementation ZHCtxMpConfig
 - (NSString *)envVersion{
     if (!_envVersion ||
         ![_envVersion isKindOfClass:[NSString class]] ||

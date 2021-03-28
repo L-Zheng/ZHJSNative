@@ -75,7 +75,7 @@
     return self;
 }
 - (instancetype)initWithContextHandler:(ZHJSHandler *)handler
-                             debugItem:(ZHContextDebugItem *)debugItem
+                             debugItem:(ZHCtxDebugItem *)debugItem
                              apiHandlers:(NSArray <id <ZHJSApiProtocol>> *)apiHandlers{
     self = [super init];
     if (self) {

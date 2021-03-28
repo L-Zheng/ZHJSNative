@@ -1,28 +1,28 @@
 //
-//  ZHContextDebugItem.m
+//  ZHCtxDebugItem.m
 //  ZHJSNative
 //
 //  Created by Zheng on 2021/3/27.
 //  Copyright © 2021 Zheng. All rights reserved.
 //
 
-#import "ZHContextDebugItem.h"
-#import "ZHContextDebugManager.h"
+#import "ZHCtxDebugItem.h"
+#import "ZHCtxDebugManager.h"
 #import "ZHJSContext.h"
 
-@interface ZHContextDebugItem ()
+@interface ZHCtxDebugItem ()
 @property (nonatomic,assign) BOOL debugEnable;
 @end
 
-@implementation ZHContextDebugItem
+@implementation ZHCtxDebugItem
 
 + (instancetype)configuration:(ZHJSContext *)jsContext{
-    ZHContextDebugItem *config = [[ZHContextDebugItem alloc] init];
+    ZHCtxDebugItem *config = [[ZHCtxDebugItem alloc] init];
     config.jsContext = jsContext;
     
-    config.debugEnable = [ZHContextDebugMg() getDebugEnable];
+    config.debugEnable = [ZHCtxDebugMg() getDebugEnable];
     
-    ZHContextDebugItem *item = [ZHContextDebugMg() getConfigItem:jsContext.globalConfig.mpConfig.appId];
+    ZHCtxDebugItem *item = [ZHCtxDebugMg() getConfigItem:jsContext.globalConfig.mpConfig.appId];
     
     config.debugMode = item.debugMode;
     

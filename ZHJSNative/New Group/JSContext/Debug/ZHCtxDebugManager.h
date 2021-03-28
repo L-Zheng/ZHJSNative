@@ -1,5 +1,5 @@
 //
-//  ZHContextDebugManager.h
+//  ZHCtxDebugManager.h
 //  ZHJSNative
 //
 //  Created by Zheng on 2021/3/27.
@@ -7,24 +7,24 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "ZHContextDebugItem.h"
+#import "ZHCtxDebugItem.h"
 
 /** 👉Context 全局调试配置 */
-@interface ZHContextDebugManager : NSObject
+@interface ZHCtxDebugManager : NSObject
 
 + (instancetype)shareManager;
 
 - (void)setDebugEnable:(BOOL)enable;
 - (BOOL)getDebugEnable;
 
-- (ZHContextDebugItem *)getConfigItem:(NSString *)key;
+- (ZHCtxDebugItem *)getConfigItem:(NSString *)key;
 
 - (BOOL)availableIOS11;
 - (BOOL)availableIOS10;
 - (BOOL)availableIOS9;
 @end
 
-__attribute__((unused)) static ZHContextDebugManager * ZHContextDebugMg() {
-    return [ZHContextDebugManager shareManager];
+__attribute__((unused)) static ZHCtxDebugManager * ZHCtxDebugMg() {
+    return [ZHCtxDebugManager shareManager];
 }
 
