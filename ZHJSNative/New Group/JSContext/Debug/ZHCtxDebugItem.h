@@ -42,7 +42,7 @@ __attribute__((unused)) static NSString * ZHCtxDebugDescByMode(ZHCtxDebugMode mo
 // console.log 输出到 Xcode调试控制台
 @property (nonatomic,assign,readonly) BOOL logOutputXcodeEnable;
 // 弹窗显示 JSContext异常
-@property (nonatomic,assign,readonly) BOOL alertContextErrorEnable;
+@property (nonatomic,assign,readonly) BOOL alertCtxErrorEnable;
 
 @end
 

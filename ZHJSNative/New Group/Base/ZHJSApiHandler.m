@@ -11,7 +11,7 @@
 #import "ZHWebDebugItem.h"
 #import "ZHJSInWebSocketApi.h"
 #import "ZHJSInWebFundApi.h"
-#import "ZHJSInContextFundApi.h"
+#import "ZHJSInCtxFundApi.h"
 #import <objc/runtime.h>
 
 @interface ZHJSApiHandler ()
@@ -74,16 +74,16 @@
     }
     return self;
 }
-- (instancetype)initWithContextHandler:(ZHJSHandler *)handler
-                             debugItem:(ZHCtxDebugItem *)debugItem
-                             apis:(NSArray <id <ZHJSApiProtocol>> *)apis{
+- (instancetype)initWithCtxHandler:(ZHJSHandler *)handler
+                         debugItem:(ZHCtxDebugItem *)debugItem
+                              apis:(NSArray <id <ZHJSApiProtocol>> *)apis{
     self = [super init];
     if (self) {
         self.handler = handler;
         
         //默认内部api
         NSMutableArray *internalApis = [@[] mutableCopy];
-        [internalApis addObject:[[ZHJSInContextFundApi alloc] init]];
+        [internalApis addObject:[[ZHJSInCtxFundApi alloc] init]];
         for (ZHJSInApi *api in internalApis) {
             api.apiHandler = self;
         }

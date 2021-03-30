@@ -51,13 +51,13 @@
 - (void)alertDebugModeOnline:(UIAlertAction *)action debugMode:(ZHWebDebugMode)debugMode{
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:action.title message:@"该模式将会监听代码改动，同步刷新页面UI。\n在Web项目目录下运行 yarn serve，将http地址填在此处【如：http://192.168.2.21:8080】。" preferredStyle:UIAlertControllerStyleAlert];
     
-    NSString *localDebugUrlCacheKey = @"ZHWebViewOnlineDebugUrlCacheKey";
+    NSString *debugOnlineUrlCacheKey = @"ZHWebViewDebugOnlineUrlCacheKey";
     void (^cacheBlock)(NSString *) = ^(NSString *urlStr){
-        [[NSUserDefaults standardUserDefaults] setValue:urlStr forKey:localDebugUrlCacheKey];
+        [[NSUserDefaults standardUserDefaults] setValue:urlStr forKey:debugOnlineUrlCacheKey];
         [[NSUserDefaults standardUserDefaults] synchronize];
     };
     NSString* (^fetchCacheBlock)(void) = ^NSString *(void){
-        return [[NSUserDefaults standardUserDefaults] valueForKey:localDebugUrlCacheKey];
+        return [[NSUserDefaults standardUserDefaults] valueForKey:debugOnlineUrlCacheKey];
     };
     
     __weak __typeof__(self) __self = self;
@@ -106,13 +106,13 @@
 - (void)alertDebugModeLocal:(UIAlertAction *)action debugMode:(ZHWebDebugMode)debugMode{
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:action.title message:@"该模式将会运行本机Web项目目录下的内容。\n【如：/Users/em/Desktop/EMCode/fund-projects/fund-details/release】\n在你改动代码后，运行yarn build，点击浮窗刷新。" preferredStyle:UIAlertControllerStyleAlert];
     
-    NSString *localDebugUrlCacheKey = @"ZHWebViewLocalDebugUrlCacheKey";
+    NSString *debugLocalUrlCacheKey = @"ZHWebViewDebugLocalUrlCacheKey";
     void (^cacheBlock)(NSString *) = ^(NSString *urlStr){
-        [[NSUserDefaults standardUserDefaults] setValue:urlStr forKey:localDebugUrlCacheKey];
+        [[NSUserDefaults standardUserDefaults] setValue:urlStr forKey:debugLocalUrlCacheKey];
         [[NSUserDefaults standardUserDefaults] synchronize];
     };
     NSString* (^fetchCacheBlock)(void) = ^NSString *(void){
-        return [[NSUserDefaults standardUserDefaults] valueForKey:localDebugUrlCacheKey];
+        return [[NSUserDefaults standardUserDefaults] valueForKey:debugLocalUrlCacheKey];
     };
     
     __weak __typeof__(self) __self = self;
@@ -199,27 +199,27 @@
     __weak __typeof__(self) __self = self;
     
     
-    UIAlertAction *action = [UIAlertAction actionWithTitle:ZHWebDebugDescByMode(ZHWebDebugMode_Release) style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-        [__self alertSheetSelected:action debugMode:ZHWebDebugMode_Release];
-    }];
-    UIAlertAction *action1 = [UIAlertAction actionWithTitle:ZHWebDebugDescByMode(ZHWebDebugMode_Online) style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-        [__self alertSheetSelected:action debugMode:ZHWebDebugMode_Online];
-    }];
-    UIAlertAction *action2 = [UIAlertAction actionWithTitle:ZHWebDebugDescByMode(ZHWebDebugMode_Local) style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-        [__self alertSheetSelected:action debugMode:ZHWebDebugMode_Local];
-    }];
-    UIAlertAction *action3 = [UIAlertAction actionWithTitle:@"查看原生注入的API" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+    UIAlertAction *action0 = [UIAlertAction actionWithTitle:@"查看原生注入的API" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         ZHJSApiListController *list = [[ZHJSApiListController alloc] initWithApiHandler:__self.webView.handler.apiHandler];
         UINavigationController *navi = [[UINavigationController alloc] initWithRootViewController:list];
         navi.modalPresentationStyle = UIModalPresentationFullScreen;
         [[__self fetchActivityCtrl] presentViewController:navi animated:YES completion:nil];
     }];
+    UIAlertAction *action1 = [UIAlertAction actionWithTitle:ZHWebDebugDescByMode(ZHWebDebugMode_Release) style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [__self alertSheetSelected:action debugMode:ZHWebDebugMode_Release];
+    }];
+    UIAlertAction *action2 = [UIAlertAction actionWithTitle:ZHWebDebugDescByMode(ZHWebDebugMode_Online) style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [__self alertSheetSelected:action debugMode:ZHWebDebugMode_Online];
+    }];
+    UIAlertAction *action3 = [UIAlertAction actionWithTitle:ZHWebDebugDescByMode(ZHWebDebugMode_Local) style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [__self alertSheetSelected:action debugMode:ZHWebDebugMode_Local];
+    }];
     UIAlertAction *action4 = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
     }];
-    [alert addAction:action];
+    [alert addAction:action0];
     [alert addAction:action1];
-    if (TARGET_OS_SIMULATOR) [alert addAction:action2];
-    [alert addAction:action3];
+    [alert addAction:action2];
+    if (TARGET_OS_SIMULATOR) [alert addAction:action3];
     [alert addAction:action4];
     [[self fetchActivityCtrl] presentViewController:alert animated:YES completion:nil];
 }

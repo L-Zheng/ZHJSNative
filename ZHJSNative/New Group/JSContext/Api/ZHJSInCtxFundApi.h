@@ -1,5 +1,5 @@
 //
-//  ZHJSInContextFundApi.h
+//  ZHJSInCtxFundApi.h
 //  ZHJSNative
 //
 //  Created by EM on 2020/12/20.
@@ -10,7 +10,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface ZHJSInContextFundApi : ZHJSInApi
+@interface ZHJSInCtxFundApi : ZHJSInApi
 
 @end
 

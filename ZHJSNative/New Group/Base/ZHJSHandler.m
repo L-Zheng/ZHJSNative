@@ -384,7 +384,7 @@ case cType:{\
     }
 }
 - (void)showJSContextException:(NSDictionary *)exception{
-    if (self.jsContext.debugItem.alertContextErrorEnable) {
+    if (self.jsContext.debugItem.alertCtxErrorEnable) {
         [self showException:@"JSCore异常" exception:exception];
     }
 }

@@ -20,9 +20,9 @@
                          debugItem:(ZHWebDebugItem *)debugItem
                        apis:(NSArray <id <ZHJSApiProtocol>> *)apis;
 
-- (instancetype)initWithContextHandler:(ZHJSHandler *)handler
-                             debugItem:(ZHCtxDebugItem *)debugItem
-                             apis:(NSArray <id <ZHJSApiProtocol>> *)apis;
+- (instancetype)initWithCtxHandler:(ZHJSHandler *)handler
+                         debugItem:(ZHCtxDebugItem *)debugItem
+                              apis:(NSArray <id <ZHJSApiProtocol>> *)apis;
 
 @property (nonatomic,weak,readonly) ZHJSHandler *handler;
 @property (nonatomic,strong,readonly) NSArray <id <ZHJSApiProtocol>> *apis;

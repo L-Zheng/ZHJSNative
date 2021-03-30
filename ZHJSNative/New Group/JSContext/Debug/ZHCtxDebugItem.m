@@ -35,7 +35,7 @@
 - (BOOL)logOutputXcodeEnable{
     return self.debugEnable;
 }
-- (BOOL)alertContextErrorEnable{
+- (BOOL)alertCtxErrorEnable{
     return self.debugEnable;
 }
 @end

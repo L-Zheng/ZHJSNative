@@ -53,7 +53,7 @@
 		8581BAAA258F3075004E25DC /* ZHJSInApi.m in Sources */ = {isa = PBXBuildFile; fileRef = 8581BAA9258F3075004E25DC /* ZHJSInApi.m */; };
 		8581BAB3258F370B004E25DC /* ZHJSInWebSocketApi.m in Sources */ = {isa = PBXBuildFile; fileRef = 8581BAB2258F370B004E25DC /* ZHJSInWebSocketApi.m */; };
 		8581BABC258F3755004E25DC /* ZHJSInWebFundApi.m in Sources */ = {isa = PBXBuildFile; fileRef = 8581BABB258F3755004E25DC /* ZHJSInWebFundApi.m */; };
-		8581BAC5258F3795004E25DC /* ZHJSInContextFundApi.m in Sources */ = {isa = PBXBuildFile; fileRef = 8581BAC4258F3795004E25DC /* ZHJSInContextFundApi.m */; };
+		8581BAC5258F3795004E25DC /* ZHJSInCtxFundApi.m in Sources */ = {isa = PBXBuildFile; fileRef = 8581BAC4258F3795004E25DC /* ZHJSInCtxFundApi.m */; };
 		8582282425AD97BF00FECFB9 /* ZHJSPageItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 8582282325AD97BF00FECFB9 /* ZHJSPageItem.m */; };
 		85A4A30F243FF80A002AE903 /* ZHWebViewManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 85A4A30E243FF80A002AE903 /* ZHWebViewManager.m */; };
 		85A4A3122440003C002AE903 /* ZHEmotion.m in Sources */ = {isa = PBXBuildFile; fileRef = 85A4A3112440003C002AE903 /* ZHEmotion.m */; };
@@ -169,8 +169,8 @@
 		8581BAB2258F370B004E25DC /* ZHJSInWebSocketApi.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHJSInWebSocketApi.m; sourceTree = "<group>"; };
 		8581BABA258F3755004E25DC /* ZHJSInWebFundApi.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHJSInWebFundApi.h; sourceTree = "<group>"; };
 		8581BABB258F3755004E25DC /* ZHJSInWebFundApi.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHJSInWebFundApi.m; sourceTree = "<group>"; };
-		8581BAC3258F3795004E25DC /* ZHJSInContextFundApi.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHJSInContextFundApi.h; sourceTree = "<group>"; };
-		8581BAC4258F3795004E25DC /* ZHJSInContextFundApi.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHJSInContextFundApi.m; sourceTree = "<group>"; };
+		8581BAC3258F3795004E25DC /* ZHJSInCtxFundApi.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHJSInCtxFundApi.h; sourceTree = "<group>"; };
+		8581BAC4258F3795004E25DC /* ZHJSInCtxFundApi.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHJSInCtxFundApi.m; sourceTree = "<group>"; };
 		8582282225AD97BF00FECFB9 /* ZHJSPageItem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHJSPageItem.h; sourceTree = "<group>"; };
 		8582282325AD97BF00FECFB9 /* ZHJSPageItem.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHJSPageItem.m; sourceTree = "<group>"; };
 		85A4A30D243FF80A002AE903 /* ZHWebViewManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHWebViewManager.h; sourceTree = "<group>"; };
@@ -402,8 +402,8 @@
 		853D438B25A9A23300CF0D35 /* Api */ = {
 			isa = PBXGroup;
 			children = (
-				8581BAC3258F3795004E25DC /* ZHJSInContextFundApi.h */,
-				8581BAC4258F3795004E25DC /* ZHJSInContextFundApi.m */,
+				8581BAC3258F3795004E25DC /* ZHJSInCtxFundApi.h */,
+				8581BAC4258F3795004E25DC /* ZHJSInCtxFundApi.m */,
 			);
 			path = Api;
 			sourceTree = "<group>";
@@ -695,7 +695,7 @@
 				0FCF2D28260EEF27003797EF /* ZHCtxDebugManager.m in Sources */,
 				0FCF2CF9260EC462003797EF /* ZHWebMpConfig.m in Sources */,
 				85A4A3122440003C002AE903 /* ZHEmotion.m in Sources */,
-				8581BAC5258F3795004E25DC /* ZHJSInContextFundApi.m in Sources */,
+				8581BAC5258F3795004E25DC /* ZHJSInCtxFundApi.m in Sources */,
 				8581BABC258F3755004E25DC /* ZHJSInWebFundApi.m in Sources */,
 				0F079862240104FA004AAFBC /* SceneDelegate.m in Sources */,
 				0FCF2D31260EFF3C003797EF /* ZHJSApiListController.m in Sources */,

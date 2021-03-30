@@ -1,14 +1,14 @@
 //
-//  ZHJSInContextFundApi.m
+//  ZHJSInCtxFundApi.m
 //  ZHJSNative
 //
 //  Created by EM on 2020/12/20.
 //  Copyright © 2020 Zheng. All rights reserved.
 //
 
-#import "ZHJSInContextFundApi.h"
+#import "ZHJSInCtxFundApi.h"
 
-@implementation ZHJSInContextFundApi
+@implementation ZHJSInCtxFundApi
 
 #pragma mark - ZHJSApiProtocol
 
