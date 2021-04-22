@@ -43,7 +43,7 @@
 
 //切换模式
 - (void)doSwitchDebugMode:(ZHWebDebugMode)debugMode{
-    [self.debugModeFloatView updateTitle:ZHWebDebugDescByMode(debugMode)];
+    [self updateDebugModeFloatViewTitle:ZHWebDebugDescByMode(debugMode)];
     [self webViewCallReadyRefresh];
     [self webViewCallStartRefresh:nil];
 }
@@ -227,13 +227,13 @@
 #pragma mark - Call ZHWebViewDebugSocketDelegate
 
 - (void)webViewCallReadyRefresh{
-    [self updateFloatViewTitle:@"准备中..."];
+    [self updateRefreshFloatViewTitle:@"准备中..."];
     if (ZHCheckDelegate(self.webView.zh_debugSocketDelegate, @selector(zh_webViewReadyRefresh:))) {
         [self.webView.zh_debugSocketDelegate zh_webViewReadyRefresh:self.webView];
     }
 }
 - (void)webViewCallStartRefresh:(NSDictionary *)info{
-    [self updateFloatViewTitle:@"刷新中..."];
+    [self updateRefreshFloatViewTitle:@"刷新中..."];
         
         /** presented 与dismiss同时进行 会crash */
     //    if ([self.presentedViewController isKindOfClass:[UIAlertController class]]) {
@@ -274,11 +274,17 @@
     }
     if (self.debugModeEnable) {
         [self.debugModeFloatView showInView:self.webView location:ZHFloatLocationRight locationScale:0.6];
+        [self updateDebugModeFloatViewTitle:ZHWebDebugDescByMode(self.debugMode)];
     }
 }
-- (void)updateFloatViewTitle:(NSString *)title{
+- (void)updateRefreshFloatViewTitle:(NSString *)title{
     if (self.refreshEnable) {
         [self.refreshFloatView updateTitle:title];
+    }
+}
+- (void)updateDebugModeFloatViewTitle:(NSString *)title{
+    if (self.debugModeEnable) {
+        [self.debugModeFloatView updateTitle:title];
     }
 }
 - (void)updateFloatViewLocation{
@@ -326,7 +332,6 @@
 - (ZHFloatView *)debugModeFloatView{
     if (!_debugModeFloatView) {
         _debugModeFloatView = [ZHFloatView floatViewWithItems:nil];
-        [_debugModeFloatView updateTitle:ZHWebDebugDescByMode(self.debugMode)];
         __weak __typeof__(self) __self = self;
         _debugModeFloatView.tapClickBlock = ^{
             [__self alertDebugModeSheet];

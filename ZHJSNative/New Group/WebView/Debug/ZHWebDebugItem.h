@@ -40,7 +40,7 @@ __attribute__((unused)) static NSString * ZHWebDebugDescByMode(ZHWebDebugMode mo
 #pragma mark - float view
 
 - (void)showFloatView;
-- (void)updateFloatViewTitle:(NSString *)title;
+- (void)updateRefreshFloatViewTitle:(NSString *)title;
 - (void)updateFloatViewLocation;
 
 #pragma mark - Call ZHWebViewDebugSocketDelegate

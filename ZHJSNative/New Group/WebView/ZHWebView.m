@@ -403,11 +403,11 @@
     NSNumber *timeoutInterval = loadConfig.timeoutInterval;
     NSURL *readAccessURL = loadConfig.readAccessURL;
     
-    [self.debugItem updateFloatViewTitle:@"刷新中..."];
+    [self.debugItem updateRefreshFloatViewTitle:@"刷新中..."];
     __weak __typeof__(self) __self = self;
     void (^callBack)(NSDictionary *, NSError *) = ^(NSDictionary *info, NSError *error){
         if (finish) finish(info, error);
-        [__self.debugItem updateFloatViewTitle:@"刷新"];
+        [__self.debugItem updateRefreshFloatViewTitle:@"刷新"];
     };
     
     NSString *extraErrorDesc = [NSString stringWithFormat:@"file path is %@. url is %@. baseURL is %@. loadConfig is %@.", url.path, url, baseURL, [loadConfig formatInfo]];
