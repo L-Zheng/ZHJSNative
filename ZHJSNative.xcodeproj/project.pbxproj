@@ -59,6 +59,7 @@
 		85A4A3122440003C002AE903 /* ZHEmotion.m in Sources */ = {isa = PBXBuildFile; fileRef = 85A4A3112440003C002AE903 /* ZHEmotion.m */; };
 		85B4FC9924349EA300CD910B /* EFEmoji.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 85B4FC9824349EA300CD910B /* EFEmoji.bundle */; };
 		85B4FC9C2435702900CD910B /* ZhengFile.m in Sources */ = {isa = PBXBuildFile; fileRef = 85B4FC9A2435702900CD910B /* ZhengFile.m */; };
+		85B578F5263535EB0078281E /* ZHJSWebTestController.m in Sources */ = {isa = PBXBuildFile; fileRef = 85B578F4263535EB0078281E /* ZHJSWebTestController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -180,6 +181,8 @@
 		85B4FC9824349EA300CD910B /* EFEmoji.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = EFEmoji.bundle; sourceTree = "<group>"; };
 		85B4FC9A2435702900CD910B /* ZhengFile.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZhengFile.m; sourceTree = "<group>"; };
 		85B4FC9B2435702900CD910B /* ZhengFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZhengFile.h; sourceTree = "<group>"; };
+		85B578F3263535EB0078281E /* ZHJSWebTestController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHJSWebTestController.h; sourceTree = "<group>"; };
+		85B578F4263535EB0078281E /* ZHJSWebTestController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHJSWebTestController.m; sourceTree = "<group>"; };
 		E56B9B5085C846D362800AF3 /* Pods-ZHJSNative.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ZHJSNative.release.xcconfig"; path = "Target Support Files/Pods-ZHJSNative/Pods-ZHJSNative.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -470,12 +473,22 @@
 		85A4A3132440062C002AE903 /* New Group */ = {
 			isa = PBXGroup;
 			children = (
+				85B578BB26352C180078281E /* Test */,
 				0F5A908B260F6994003859D4 /* Controller */,
 				8581BCB0258F55E5004E25DC /* Base */,
 				8581BCB1258F55EE004E25DC /* WebView */,
 				8581BCB2258F55F6004E25DC /* JSContext */,
 			);
 			path = "New Group";
+			sourceTree = "<group>";
+		};
+		85B578BB26352C180078281E /* Test */ = {
+			isa = PBXGroup;
+			children = (
+				85B578F3263535EB0078281E /* ZHJSWebTestController.h */,
+				85B578F4263535EB0078281E /* ZHJSWebTestController.m */,
+			);
+			path = Test;
 			sourceTree = "<group>";
 		};
 		F36BDC771E812F2A1E158D04 /* Pods */ = {
@@ -670,6 +683,7 @@
 				0FCF2D2B260EEF32003797EF /* ZHCtxDebugItem.m in Sources */,
 				0FCF2D06260EC8F8003797EF /* ZHWebDebugManager.m in Sources */,
 				0FCF2CEF260EC2C7003797EF /* ZHWebConfig.m in Sources */,
+				85B578F5263535EB0078281E /* ZHJSWebTestController.m in Sources */,
 				0FCF2D1F260EEEC9003797EF /* ZHCtxLoadConfig.m in Sources */,
 				0F07985F240104FA004AAFBC /* AppDelegate.m in Sources */,
 				8581BAB3258F370B004E25DC /* ZHJSInWebSocketApi.m in Sources */,

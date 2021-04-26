@@ -110,6 +110,12 @@ typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
          loadConfig:(ZHWebLoadConfig *)loadConfig
      startLoadBlock:(void (^) (NSURL *runSandBoxURL))startLoadBlock
              finish:(void (^) (NSDictionary *info, NSError *error))finish;
+- (void)loadLocalDebug:(NSString *)loadFileName
+            loadFolder:(NSString *)loadFolder
+                finish:(void (^) (NSDictionary *info, NSError *error))finish;
+- (void)loadOnlineDebug:(NSURL *)url
+         startLoadBlock:(void (^) (NSURL *runSandBoxURL))startLoadBlock
+                 finish:(void (^) (NSDictionary *info, NSError *error))finish;
 
 /// 渲染js页面
 /// @param jsSourceBaseURL 渲染该js文件所需的资源【jsSourceBaseURL的目录下包含有jsSourceURL文件】

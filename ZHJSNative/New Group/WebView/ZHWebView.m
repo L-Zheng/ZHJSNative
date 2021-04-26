@@ -99,8 +99,9 @@
     }
     //webview log控制台
     if (debugItem.logOutputWebEnable) {
+//    http://wechatfe.github.io/vconsole/lib/vconsole.min.js?v=3.3.0
         [apiCodes addObject:@{
-            @"code": @"var ZhengVconsoleLog = document.createElement('script'); ZhengVconsoleLog.type = 'text/javascript'; ZhengVconsoleLog.src = 'http://wechatfe.github.io/vconsole/lib/vconsole.min.js?v=3.3.0'; ZhengVconsoleLog.charset = 'UTF-8'; ZhengVconsoleLog.onload = function(){var vConsole = new VConsole();}; ZhengVconsoleLog.onerror = function(error){}; window.document.body.appendChild(ZhengVconsoleLog);",
+            @"code": [NSString stringWithFormat:@"var ZhengVconsoleLog = document.createElement('script'); ZhengVconsoleLog.type = 'text/javascript'; ZhengVconsoleLog.src = '%@'; ZhengVconsoleLog.charset = 'UTF-8'; ZhengVconsoleLog.onload = function(){var vConsole = new VConsole();}; ZhengVconsoleLog.onerror = function(error){}; window.document.body.appendChild(ZhengVconsoleLog);", [handler fetchWebViewJsVConsolePath]],
             @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentEnd),
             @"mainFrameOnly": @(YES)
         }];
@@ -541,6 +542,59 @@
     [self configWebViewFinishCallBack:callBack];
     [self loadRequest:request];
 }
+
+- (void)loadLocalDebug:(NSString *)loadFileName
+            loadFolder:(NSString *)loadFolder
+                finish:(void (^) (NSDictionary *info, NSError *error))finish{
+    if (!loadFolder || ![loadFolder isKindOfClass:NSString.class] || loadFolder.length == 0 ||
+        !loadFileName || ![loadFileName isKindOfClass:NSString.class] || loadFileName.length == 0) {
+        if (finish) finish(nil, ZHInlineError(404, ZHLCInlineString(@"webview loadFolder(%@) or loadFileName(%@) is null.", loadFolder, loadFileName)));
+        return;
+    }
+    
+    // 拷贝到临时目录
+    NSString *baseFolder = ZHWebViewTmpFolder();
+    NSString *tempFolder = [baseFolder stringByAppendingPathComponent:[NSString stringWithFormat:@"%p", self]];
+    NSFileManager *fm = [NSFileManager defaultManager];
+    if (![fm fileExistsAtPath:baseFolder]) {
+        [fm createDirectoryAtPath:baseFolder withIntermediateDirectories:YES attributes:nil error:nil];
+    }
+    if ([fm fileExistsAtPath:tempFolder]) {
+        [fm removeItemAtPath:tempFolder error:nil];
+    }
+    [fm copyItemAtPath:loadFolder toPath:tempFolder error:nil];
+    
+    ZHWebLoadConfig *loadConfig = self.globalConfig.loadConfig;
+    loadConfig.readAccessURL = loadConfig.readAccessURL?:[NSURL fileURLWithPath:loadFolder];
+    
+    NSString *htmlPath = [loadFolder stringByAppendingPathComponent:loadFileName];
+    NSURL *url = [NSURL fileURLWithPath:htmlPath];
+    NSURL *baseURL = [NSURL fileURLWithPath:loadFolder isDirectory:YES];
+    
+    [self loadWithUrl:url
+                 baseURL:baseURL
+              loadConfig:loadConfig
+          startLoadBlock:^(NSURL *runSandBoxURL) {
+    }
+                  finish:^(NSDictionary *info, NSError *error) {
+        if (finish) finish(error ? nil : info, error);
+    }];
+}
+- (void)loadOnlineDebug:(NSURL *)url
+         startLoadBlock:(void (^) (NSURL *runSandBoxURL))startLoadBlock
+                 finish:(void (^) (NSDictionary *info, NSError *error))finish{
+    if (!url || url.isFileURL) {
+        if (finish) finish(nil, [NSError new]);
+        return;
+    }
+    [self loadWithUrl:url baseURL:nil loadConfig:self.globalConfig.loadConfig startLoadBlock:^(NSURL *runSandBoxURL) {
+        if (startLoadBlock) startLoadBlock(runSandBoxURL);
+    } finish:^(NSDictionary *info, NSError *error) {
+        if (finish) finish(info, error);
+    }];
+}
+
+
 //配置webview渲染回调
 - (void)callWebViewStartLoad:(NSURL *)runSandBoxURL renderURL:(NSURL *)renderURL block:(void (^) (NSURL *runSandBoxURL))block{
     self.didTerminate = NO;

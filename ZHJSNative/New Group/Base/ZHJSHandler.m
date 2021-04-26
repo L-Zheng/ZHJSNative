@@ -368,6 +368,9 @@ case cType:{\
     NSString *jsCode = [NSString stringWithFormat:@"var ZhengReadyEvent = document.createEvent('Event');ZhengReadyEvent.initEvent('%@');window.dispatchEvent(ZhengReadyEvent);", self.fetchWebViewApiFinishFlag];
     return jsCode;
 }
+- (NSString *)fetchWebViewJsVConsolePath{
+    return [self.class jsVConsolePath];
+}
 
 #pragma mark - exception
 
@@ -785,6 +788,9 @@ case cType:{\
 }
 + (NSString *)jsSocketEventPath{
     return [self pathWithName:@"min-socket.js"];
+}
++ (NSString *)jsVConsolePath{
+    return [self pathWithName:@"vconsole.min.js"];
 }
 + (NSString *)pathWithName:(NSString *)name{
     NSBundle *bundle = [NSBundle bundleWithPath:[[NSBundle mainBundle] pathForResource:@"TestBundle" ofType:@"bundle"]];
