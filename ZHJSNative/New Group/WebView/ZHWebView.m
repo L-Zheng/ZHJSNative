@@ -77,7 +77,7 @@
      WKUserScriptInjectionTimeAtDocumentStart:
         document创建完成之后，其它任何内容加载之前。此时h5里面只有window、document对象，没有head、body对象
      WKUserScriptInjectionTimeAtDocumentEnd:
-        document加载完成之后，其它任何子资源可能加载完成之前
+        document加载完成之后（html根标签代码执行到末尾），其它任何子资源可能加载完成之前
      js执行顺序：(vue项目打包后会把js插入到body的末尾)
      start脚本 -> header里面的script标签 -> body里面的script标签 ->vue插入到body末尾的script标签 (beforeCreate -> created -> mounted) -> 与body同级的后面的script标签 ->html根标签执行结束 -> end脚本
      */
