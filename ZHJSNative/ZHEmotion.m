@@ -24,7 +24,7 @@
     NSString *jsonPath = [[NSBundle bundleWithPath:bundlePath] pathForResource:@"ef_emoji" ofType:@"json"];
     
     NSData *data = [NSData dataWithContentsOfFile:jsonPath];
-    NSArray *emojiArr = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+    NSArray *emojiArr = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:nil];
     
     //key值转换 @{@"[滴汗]": @"common_ef_emot07.png"}
     NSMutableDictionary *callInfo = [@{} mutableCopy];
@@ -49,7 +49,7 @@
     [ZhengFile copySourceFile:imagesPath toDesPath:targetEmotionPath];
     
     NSData *data = [NSData dataWithContentsOfFile:[targetEmotionPath stringByAppendingPathComponent:@"index.json"]];
-    NSArray *emojiArr = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+    NSArray *emojiArr = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:nil];
     
     //key值转换 @{@"[滴汗]": @"common_ef_emot07.png"}
     NSMutableDictionary *callInfo = [@{} mutableCopy];

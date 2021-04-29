@@ -41,7 +41,7 @@
                  NSData *data = [[self queryString:parameters] dataUsingEncoding:NSUTF8StringEncoding];
                  if (data) [request setHTTPBody:data];
              }else{
-                 NSData *data = [NSJSONSerialization dataWithJSONObject:parameters options:0 error:nil];
+                 NSData *data = [NSJSONSerialization dataWithJSONObject:parameters options:kNilOptions error:nil];
                  if (data) [request setHTTPBody:data];
              }
          }

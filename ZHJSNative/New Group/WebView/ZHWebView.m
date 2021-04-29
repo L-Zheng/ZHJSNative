@@ -811,7 +811,7 @@
     if (webView.loadFinish) webView.loadFinish(nil, ZHInlineError(error.code, ZHLCInlineString(@"%@", error.zh_localizedDescription)));
     
     id <ZHWKNavigationDelegate> de = self.zh_navigationDelegate;
-    if (ZHCheckDelegate(de, @selector(webView:didFailNavigation:withError:))) {
+    if (ZHCheckDelegate(de, _cmd)) {
         [de webView:webView didFailNavigation:navigation withError:error];
     }
 }
@@ -820,7 +820,7 @@
     if (webView.loadFinish) webView.loadFinish(nil, nil);
     
     id <ZHWKNavigationDelegate> de = self.zh_navigationDelegate;
-    if (ZHCheckDelegate(de, @selector(webView:didFinishNavigation:))) {
+    if (ZHCheckDelegate(de, _cmd)) {
         [de webView:webView didFinishNavigation:navigation];
     }
 }
@@ -830,7 +830,7 @@
     NSLog(@"%@",error);
     
     id <ZHWKNavigationDelegate> de = self.zh_navigationDelegate;
-    if (ZHCheckDelegate(de, @selector(webView:didFailProvisionalNavigation:withError:))) {
+    if (ZHCheckDelegate(de, _cmd)) {
         [de webView:webView didFailProvisionalNavigation:navigation withError:error];
     }
 }
@@ -838,7 +838,7 @@
 - (void)webView:(ZHWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler{
     
     id <ZHWKNavigationDelegate> de = self.zh_navigationDelegate;
-    if (ZHCheckDelegate(de, @selector(webView:decidePolicyForNavigationAction:decisionHandler:))) {
+    if (ZHCheckDelegate(de, _cmd)) {
         [de webView:webView decidePolicyForNavigationAction:navigationAction decisionHandler:decisionHandler];
         return;
     }
@@ -863,7 +863,7 @@
         self.didTerminate = YES;
 
         id <ZHWKNavigationDelegate> de = self.zh_navigationDelegate;
-        if (ZHCheckDelegate(de, @selector(webViewWebContentProcessDidTerminate:))) {
+        if (ZHCheckDelegate(de, _cmd)) {
             [de webViewWebContentProcessDidTerminate:webView];
         }else{
             [self.handler showWebViewException:exceptionInfo];
@@ -876,7 +876,7 @@
 // 页面是弹出窗口 _blank 处理
 - (WKWebView *)webView:(ZHWebView *)webView createWebViewWithConfiguration:(WKWebViewConfiguration *)configuration forNavigationAction:(WKNavigationAction *)navigationAction windowFeatures:(WKWindowFeatures *)windowFeatures {
     id <ZHWKUIDelegate> de = self.zh_UIDelegate;
-    if (ZHCheckDelegate(de, @selector(webView:createWebViewWithConfiguration:forNavigationAction:windowFeatures:))) {
+    if (ZHCheckDelegate(de, _cmd)) {
         return [de webView:webView createWebViewWithConfiguration:configuration forNavigationAction:navigationAction windowFeatures:windowFeatures];
     }
     
@@ -888,9 +888,43 @@
 
 //处理js的同步消息
 -(void)webView:(WKWebView *)webView runJavaScriptTextInputPanelWithPrompt:(NSString *)prompt defaultText:(NSString *)defaultText initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(NSString * _Nullable))completionHandler{
-    NSError *error;
-    NSDictionary *receiveInfo = [NSJSONSerialization JSONObjectWithData:[prompt dataUsingEncoding:NSUTF8StringEncoding] options:0 error:&error];
+    __weak __typeof__(self) weakSelf = self;
+    void (^block) (void) = ^(void){
+        id <ZHWKUIDelegate> de = weakSelf.zh_UIDelegate;
+        if (ZHCheckDelegate(de, _cmd)) {
+           [de webView:webView runJavaScriptTextInputPanelWithPrompt:prompt defaultText:defaultText initiatedByFrame:frame completionHandler:completionHandler];
+           return;
+        }
+        if (completionHandler) completionHandler(nil);
+    };
     
+    if (!prompt || ![prompt isKindOfClass:NSString.class] || prompt.length == 0) {
+        block();
+        return;
+    }
+    
+    NSData *promptData = [prompt dataUsingEncoding:NSUTF8StringEncoding];
+    if (!promptData || ![promptData isKindOfClass:NSData.class] || promptData.length == 0) {
+        block();
+        return;
+    }
+    
+    NSError *error;
+    NSDictionary *receiveInfo = [NSJSONSerialization JSONObjectWithData:[prompt dataUsingEncoding:NSUTF8StringEncoding] options:NSJSONReadingAllowFragments error:&error];
+    
+    if (error || !receiveInfo || ![receiveInfo isKindOfClass:NSDictionary.class] || receiveInfo.allKeys.count == 0) {
+        block();
+        return;
+    }
+    
+//    methodSync
+//    NSString *testKey = @"lbz-id-key";
+//    if (![receiveInfo.allKeys containsObject:testKey]) {
+//        block();
+//        return;
+//    }
+    
+    // 说明此函数api调用过来的
     id result = [self.handler handleScriptMessage:receiveInfo];
     if (!result) {
         if (completionHandler) completionHandler(nil);
@@ -908,7 +942,7 @@
     result = @{@"data": result};
     NSData *data = nil;
     @try {
-        data = [NSJSONSerialization dataWithJSONObject:result options:0 error:nil];
+        data = [NSJSONSerialization dataWithJSONObject:result options:kNilOptions error:nil];
     } @catch (NSException *exception) {
         NSLog(@"❌-------%s---------", __func__);
         NSLog(@"%@",exception);
@@ -1040,9 +1074,9 @@
         NSData *jsonData = nil;
         @try {
             // 当原生传来的json中包含有NSObject对象，数据解析异常导致crash
-            jsonData = [NSJSONSerialization dataWithJSONObject:data options:0 error:&jsonError];
+            jsonData = [NSJSONSerialization dataWithJSONObject:data options:kNilOptions error:&jsonError];
         } @catch (NSException *exception) {
-            jsonData = [NSJSONSerialization dataWithJSONObject:@{} options:0 error:&jsonError];
+            jsonData = [NSJSONSerialization dataWithJSONObject:@{} options:kNilOptions error:&jsonError];
         } @finally {
         }
         if (jsonError || !jsonData) return nil;
