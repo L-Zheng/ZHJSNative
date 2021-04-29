@@ -296,6 +296,11 @@ case cType:{\
     NSString *jsCode = [NSString stringWithFormat:formatJS, ZHJSHandlerLogName];
     return jsCode;
 }
+- (NSString *)fetchWebViewConsoleApi{
+    NSString *formatJS = [NSString stringWithContentsOfFile:[ZHJSHandler jsConsolePath] encoding:NSUTF8StringEncoding error:nil];
+    NSString *jsCode = [NSString stringWithFormat:@"%@; var vConsole = new VConsole();", formatJS];
+    return jsCode;
+}
 - (NSString *)fetchWebViewErrorApi{
     //以下代码由errorEvent.js压缩而成
     NSString *formatJS = [NSString stringWithContentsOfFile:[ZHJSHandler jsErrorEventPath] encoding:NSUTF8StringEncoding error:nil];
@@ -367,9 +372,6 @@ case cType:{\
     //api注入完成通知
     NSString *jsCode = [NSString stringWithFormat:@"var ZhengReadyEvent = document.createEvent('Event');ZhengReadyEvent.initEvent('%@');window.dispatchEvent(ZhengReadyEvent);", self.fetchWebViewApiFinishFlag];
     return jsCode;
-}
-- (NSString *)fetchWebViewJsVConsolePath{
-    return [self.class jsVConsolePath];
 }
 
 #pragma mark - exception
@@ -782,6 +784,9 @@ case cType:{\
 }
 + (NSString *)jsLogEventPath{
     return [self pathWithName:@"min-log.js"];
+}
++ (NSString *)jsConsolePath{
+    return [self pathWithName:@"vconsole.min.js"];
 }
 + (NSString *)jsErrorEventPath{
     return [self pathWithName:@"min-error.js"];

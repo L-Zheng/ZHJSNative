@@ -12,8 +12,6 @@
 
 @interface ZHJSWebTestApi : NSObject<ZHJSApiProtocol>
 @property (nonatomic,weak) ZHWebView *webView;
-//@property (nonatomic,weak) ZHJSApiHandler *apiHandler;
-//- (ZHWebView *)webView;
 @end
 @implementation ZHJSWebTestApi
 
@@ -26,9 +24,7 @@
     return self.webView;
 }
 
-//- (ZHWebView *)webView{
-//    return self.apiHandler.handler.webView;
-//}
+#pragma mark - ZHJSApiProtocol
 
 //js api方法名前缀  如：fund
 - (NSString *)zh_jsApiPrefixName{
@@ -111,6 +107,12 @@
 
 - (void)readyLoadWebView{
     ZHWebView *webView = [[ZHWebView alloc] initWithGlobalConfig:[self createConfig]];
+    NSArray *arr = [self apis];
+    for (NSObject *apiObj in arr) {
+        if ([apiObj isKindOfClass:ZHJSWebTestApi.class]) {
+            ((ZHJSWebTestApi *)apiObj).webView = webView;
+        }
+    }
     
     [self doLoadWebView:webView];
     if (!webView.superview) [self.view addSubview:webView];

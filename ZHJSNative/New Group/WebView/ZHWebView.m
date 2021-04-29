@@ -107,9 +107,14 @@
     }
     //webview log控制台
     if (debugItem.logOutputWebEnable) {
-//    http://wechatfe.github.io/vconsole/lib/vconsole.min.js?v=3.3.0
+        // 不可使用本地url地址：socket调试时，访问的是http地址，浏览器不允许访问本地地址
+//        [apiCodes addObject:@{
+//            @"code": @"var ZhengVconsoleLog = document.createElement('script'); ZhengVconsoleLog.type = 'text/javascript'; ZhengVconsoleLog.src = 'http://wechatfe.github.io/vconsole/lib/vconsole.min.js?v=3.3.0'; ZhengVconsoleLog.charset = 'UTF-8'; ZhengVconsoleLog.onload = function(){var vConsole = new VConsole();}; ZhengVconsoleLog.onerror = function(error){}; window.document.body.appendChild(ZhengVconsoleLog);",
+//            @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentEnd),
+//            @"mainFrameOnly": @(YES)
+//        }];
         [apiCodes addObject:@{
-            @"code": [NSString stringWithFormat:@"var ZhengVconsoleLog = document.createElement('script'); ZhengVconsoleLog.type = 'text/javascript'; ZhengVconsoleLog.src = '%@'; ZhengVconsoleLog.charset = 'UTF-8'; ZhengVconsoleLog.onload = function(){var vConsole = new VConsole();}; ZhengVconsoleLog.onerror = function(error){}; window.document.body.appendChild(ZhengVconsoleLog);", [handler fetchWebViewJsVConsolePath]],
+            @"code": [handler fetchWebViewConsoleApi]?:@"",
             @"jectionTime": @(WKUserScriptInjectionTimeAtDocumentEnd),
             @"mainFrameOnly": @(YES)
         }];

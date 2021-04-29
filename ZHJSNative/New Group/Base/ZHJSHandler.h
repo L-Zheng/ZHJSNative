@@ -38,13 +38,13 @@ static NSString * const ZHJSHandlerErrorName = @"ZHJSErrorEventHandler";
 - (void)fetchJSContextLogApi:(void (^) (NSString *apiPrefix, NSDictionary *apiBlockMap))callBack;
 //WebView注入的api
 - (NSString *)fetchWebViewLogApi;
+- (NSString *)fetchWebViewConsoleApi;
 - (NSString *)fetchWebViewErrorApi;
 - (NSString *)fetchWebViewSocketApi;
 - (NSString *)fetchWebViewTouchCalloutApi;
 - (NSString *)fetchWebViewSupportApi;
 - (NSString *)fetchWebViewApi:(BOOL)isReset;
 - (NSString *)fetchWebViewApiFinish;
-- (NSString *)fetchWebViewJsVConsolePath;
 //异常弹窗
 - (void)showWebViewException:(NSDictionary *)exception;
 - (void)showJSContextException:(NSDictionary *)exception;
