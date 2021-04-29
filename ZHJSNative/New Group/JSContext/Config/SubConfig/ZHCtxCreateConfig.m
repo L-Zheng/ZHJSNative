@@ -9,6 +9,13 @@
 #import "ZHCtxCreateConfig.h"
 
 @implementation ZHCtxCreateConfig
+- (instancetype)init{
+    self = [super init];
+    if (self) {
+        self.injectInAPI = YES;
+    }
+    return self;
+}
 - (void)dealloc{
     NSLog(@"%s", __func__);
 }

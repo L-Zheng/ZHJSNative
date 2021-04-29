@@ -9,6 +9,13 @@
 #import "ZHWebCreateConfig.h"
 
 @implementation ZHWebCreateConfig
+- (instancetype)init{
+    self = [super init];
+    if (self) {
+        self.injectInAPI = YES;
+    }
+    return self;
+}
 - (void)dealloc{
     NSLog(@"%s", __func__);
 }

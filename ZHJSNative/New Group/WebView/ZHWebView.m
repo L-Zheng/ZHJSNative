@@ -67,7 +67,7 @@
     
     // api处理配置    
     ZHJSHandler *handler = [[ZHJSHandler alloc] init];
-    handler.apiHandler = [[ZHJSApiHandler alloc] initWithWebHandler:handler debugItem:debugItem apis:apis?:@[]];
+    handler.apiHandler = [[ZHJSApiHandler alloc] initWithWebHandler:handler injectInAPI:createConfig.injectInAPI debugItem:debugItem apis:apis?:@[]];
     handler.webView = self;
     self.handler = handler;
     

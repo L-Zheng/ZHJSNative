@@ -13,5 +13,7 @@
 @interface ZHCtxCreateConfig : ZHCtxBaseConfig
 // JSContext需要注入的api【如：fund API】
 @property (nonatomic,retain) NSArray <id <ZHJSApiProtocol>> *apis;
+// 是否注入内置默认api  默认YES
+@property (nonatomic,assign) BOOL injectInAPI;
 @end
 

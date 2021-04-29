@@ -17,10 +17,12 @@
 @interface ZHJSApiHandler : NSObject
 
 - (instancetype)initWithWebHandler:(ZHJSHandler *)handler
+                       injectInAPI:(BOOL)injectInAPI
                          debugItem:(ZHWebDebugItem *)debugItem
                        apis:(NSArray <id <ZHJSApiProtocol>> *)apis;
 
 - (instancetype)initWithCtxHandler:(ZHJSHandler *)handler
+                       injectInAPI:(BOOL)injectInAPI
                          debugItem:(ZHCtxDebugItem *)debugItem
                               apis:(NSArray <id <ZHJSApiProtocol>> *)apis;
 

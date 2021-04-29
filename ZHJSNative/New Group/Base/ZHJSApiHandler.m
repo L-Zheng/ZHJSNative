@@ -54,6 +54,7 @@
 }
 
 - (instancetype)initWithWebHandler:(ZHJSHandler *)handler
+                       injectInAPI:(BOOL)injectInAPI
                          debugItem:(ZHWebDebugItem *)debugItem
                        apis:(NSArray <id <ZHJSApiProtocol>> *)apis{
     self = [super init];
@@ -65,7 +66,9 @@
         if (debugItem && debugItem.debugModeEnable) {
             [internalApis addObject:[[ZHJSInWebSocketApi alloc] init]];
         }
-        [internalApis addObject:[[ZHJSInWebFundApi alloc] init]];
+        if (injectInAPI) {
+            [internalApis addObject:[[ZHJSInWebFundApi alloc] init]];
+        }
         for (ZHJSInApi *api in internalApis) {
             api.apiHandler = self;
         }
@@ -75,6 +78,7 @@
     return self;
 }
 - (instancetype)initWithCtxHandler:(ZHJSHandler *)handler
+                       injectInAPI:(BOOL)injectInAPI
                          debugItem:(ZHCtxDebugItem *)debugItem
                               apis:(NSArray <id <ZHJSApiProtocol>> *)apis{
     self = [super init];
@@ -83,7 +87,9 @@
         
         //默认内部api
         NSMutableArray *internalApis = [@[] mutableCopy];
-        [internalApis addObject:[[ZHJSInCtxFundApi alloc] init]];
+        if (injectInAPI) {
+            [internalApis addObject:[[ZHJSInCtxFundApi alloc] init]];
+        }
         for (ZHJSInApi *api in internalApis) {
             api.apiHandler = self;
         }
