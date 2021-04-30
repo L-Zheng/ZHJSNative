@@ -12,7 +12,7 @@
 #define ZHJS_Export_Func_Config_Prefix_Format @"ZHJS_Export_Func_Config_Prefix_%@"
 #define ZHJS_EXPORT_FUNC_CONFIG_INTERNAL(selArg, ...) \
 - (NSDictionary *)ZHJS_Export_Func_Config_Prefix_ ## selArg { \
-    NSDictionary *(^block)(id selStr, ...) = ^NSDictionary *(id selStr, ...){\
+    NSDictionary *(^block)(id selStr, ...) = ^NSDictionary *(id selStr, ...){ \
         NSMutableArray *bArgs = [NSMutableArray array]; \
         va_list bList; id bArg; \
         va_start(bList, selStr); \
@@ -20,15 +20,21 @@
             [bArgs addObject:bArg]; \
         } \
         va_end(bList); \
-        NSUInteger idx = 0;\
-        BOOL sync = ((bArgs.count > idx && [bArgs[idx] isKindOfClass:[NSNumber class]]) ? [(NSNumber *)bArgs[idx] boolValue] : NO);\
-        idx = 1;\
-        NSDictionary *other = ((bArgs.count > idx && [bArgs[idx] isKindOfClass:[NSDictionary class]]) ? (NSDictionary *)bArgs[idx] : @{});\
-        return @{\
-            @"sync": @(sync),\
-            @"other": other\
-        }; \
-    };\
+        NSMutableDictionary *config = [NSMutableDictionary dictionary]; \
+        NSUInteger idx = 0; \
+        if (bArgs.count > idx && [bArgs[idx] isKindOfClass:[NSNumber class]]) { \
+            [config setObject:@([(NSNumber *)bArgs[idx] boolValue]) forKey:@"sync"]; \
+        } \
+        idx = 1; \
+        if (bArgs.count > idx && [bArgs[idx] isKindOfClass:[NSString class]] && [(NSString *)bArgs[idx] length] > 0) { \
+            [config setObject:bArgs[idx] forKey:@"supportVersion"]; \
+        } \
+        idx = 2; \
+        if (bArgs.count > idx && [bArgs[idx] isKindOfClass:[NSDictionary class]]) { \
+            [config setObject:bArgs[idx] forKey:@"extraInfo"]; \
+        } \
+        return config.copy; \
+    }; \
     return block(@" ## selArg ## ", ## __VA_ARGS__, nil);\
 }
 #define ZHJS_EXPORT_FUNC(sel, ...) ZHJS_EXPORT_FUNC_CONFIG_INTERNAL(sel, ## __VA_ARGS__)

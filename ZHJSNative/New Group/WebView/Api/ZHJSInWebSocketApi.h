@@ -8,14 +8,13 @@
 
 #import <Foundation/Foundation.h>
 #import "ZHJSApiProtocol.h"
-@class ZHJSApiHandler;
+#import "ZHJSPageItem.h"
 @class ZHWebView;
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface ZHJSInWebSocketApi : NSObject<ZHJSApiProtocol>
-@property (nonatomic,weak) ZHJSApiHandler *apiHandler;
-- (ZHWebView *)webView;
+@property (nonatomic,weak) ZHWebView <ZHJSPageProtocol> *webView;
 @end
 
 NS_ASSUME_NONNULL_END

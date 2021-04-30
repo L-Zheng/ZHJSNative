@@ -7,11 +7,6 @@
 //
 
 #import "ZHJSApiHandler.h"
-#import "ZHJSHandler.h"
-#import "ZHWebDebugItem.h"
-#import "ZHJSInWebSocketApi.h"
-#import "ZHJSInWebFundApi.h"
-#import "ZHJSInCtxFundApi.h"
 #import <objc/runtime.h>
 
 @interface ZHJSApiHandler ()
@@ -36,10 +31,8 @@
  */
 @property (nonatomic,strong) NSMutableDictionary <NSString *, NSArray *> *apiMap;
 
-@property (nonatomic,strong) NSArray <ZHJSInApi <ZHJSApiProtocol> *> *internalApis;
+@property (nonatomic,strong) NSArray <id <ZHJSApiProtocol>> *internalApis;
 @property (nonatomic,strong) NSMutableArray <id <ZHJSApiProtocol>> *outsideApis;
-
-@property (nonatomic,weak) ZHJSHandler *handler;
 @end
 
 @implementation ZHJSApiHandler
@@ -53,53 +46,21 @@
     return _apiMap;
 }
 
-- (instancetype)initWithWebHandler:(ZHJSHandler *)handler
-                       injectInAPI:(BOOL)injectInAPI
-                         debugItem:(ZHWebDebugItem *)debugItem
-                       apis:(NSArray <id <ZHJSApiProtocol>> *)apis{
+- (instancetype)initWithApis:(NSArray <id <ZHJSApiProtocol>> *)inApis apis:(NSArray <id <ZHJSApiProtocol>> *)apis{
     self = [super init];
     if (self) {
-        self.handler = handler;
-        
         //默认内部api
         NSMutableArray *internalApis = [@[] mutableCopy];
-        if (debugItem && debugItem.debugModeEnable) {
-            [internalApis addObject:[[ZHJSInWebSocketApi alloc] init]];
+        if (inApis && [inApis isKindOfClass:NSArray.class] && inApis.count > 0) {
+            [internalApis addObjectsFromArray:inApis];
         }
-        if (injectInAPI) {
-            [internalApis addObject:[[ZHJSInWebFundApi alloc] init]];
-        }
-        for (ZHJSInApi *api in internalApis) {
-            api.apiHandler = self;
-        }
-        
-        [self config:internalApis outsideApis:[apis?:@[] mutableCopy]];
-    }
-    return self;
-}
-- (instancetype)initWithCtxHandler:(ZHJSHandler *)handler
-                       injectInAPI:(BOOL)injectInAPI
-                         debugItem:(ZHCtxDebugItem *)debugItem
-                              apis:(NSArray <id <ZHJSApiProtocol>> *)apis{
-    self = [super init];
-    if (self) {
-        self.handler = handler;
-        
-        //默认内部api
-        NSMutableArray *internalApis = [@[] mutableCopy];
-        if (injectInAPI) {
-            [internalApis addObject:[[ZHJSInCtxFundApi alloc] init]];
-        }
-        for (ZHJSInApi *api in internalApis) {
-            api.apiHandler = self;
-        }
-        
+        // 处理
         [self config:internalApis outsideApis:[apis?:@[] mutableCopy]];
     }
     return self;
 }
 
-- (void)config:(NSArray <ZHJSInApi <ZHJSApiProtocol> *> *)internalApis outsideApis:(NSArray <id <ZHJSApiProtocol>> *)outsideApis{
+- (void)config:(NSArray <id <ZHJSApiProtocol>> *)internalApis outsideApis:(NSArray <id <ZHJSApiProtocol>> *)outsideApis{
     self.internalApis = [internalApis copy];
     self.outsideApis = [outsideApis?:@[] mutableCopy];
     //查找api
@@ -239,8 +200,9 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
                 NSDictionary *funcConfig = [api performSelector:syncSel];
-                NSNumber *syncNum = funcConfig[@"sync"];
-                item.sync = syncNum ? syncNum.boolValue : NO;
+                NSNumber *syncNum = [funcConfig objectForKey:@"sync"];
+                item.sync = syncNum ? syncNum.boolValue : [jsName hasSuffix:@"Sync"];
+                item.supportVersion = [funcConfig objectForKey:@"supportVersion"];
 #pragma clang diagnostic pop
             }else{
                 item.sync = [jsName hasSuffix:@"Sync"];

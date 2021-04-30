@@ -20,6 +20,7 @@
 @property (nonatomic,copy) NSString *nativeMethodInClassName;
 @property (nonatomic,weak) id nativeInstance;
 @property (nonatomic,assign,getter=isSync) BOOL sync;
+@property (nonatomic,copy) NSString *supportVersion;
 @end
 
 #pragma mark - 回调js function后的js处理结果

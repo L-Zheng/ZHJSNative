@@ -27,6 +27,7 @@ ZHJS_EXPORT_FUNC(getTest111, @(NO))
     NSLog(@"-------%s---------", __func__);
     return @(YES);
 }
+ZHJS_EXPORT_FUNC(getStringSync, @(YES), @"9.4.2", @{@"dd": @"vvv"})
 - (NSString *)js_getStringSync:(ZHJSApiArgItem *)arg{
     NSLog(@"-------%s---------", __func__);
     return @"dfgewrefdwd";

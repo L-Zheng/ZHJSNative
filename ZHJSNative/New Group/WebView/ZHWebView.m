@@ -8,6 +8,8 @@
 
 #import "ZHWebView.h"
 #import "ZHJSHandler.h"
+#import "ZHJSInWebSocketApi.h"
+#import "ZHJSInWebFundApi.h"
 #import "NSError+ZH.h"
 #import "ZHUtil.h"
 
@@ -65,9 +67,22 @@
     ZHWebDebugItem *debugItem = [ZHWebDebugItem configuration:self];
     self.debugItem = debugItem;
     
-    // api处理配置    
+    // 内置api
+    NSMutableArray *inApis = [NSMutableArray array];
+    if (debugItem && debugItem.debugModeEnable) {
+        ZHJSInWebSocketApi *socket = [[ZHJSInWebSocketApi alloc] init];
+        socket.webView = self;
+        [inApis addObject:socket];
+    }
+    if (createConfig.injectInAPI) {
+        ZHJSInWebFundApi *fund = [[ZHJSInWebFundApi alloc] init];
+        fund.webView = self;
+        [inApis addObject:fund];
+    }
+    
+    // api处理配置
     ZHJSHandler *handler = [[ZHJSHandler alloc] init];
-    handler.apiHandler = [[ZHJSApiHandler alloc] initWithWebHandler:handler injectInAPI:createConfig.injectInAPI debugItem:debugItem apis:apis?:@[]];
+    handler.apiHandler = [[ZHJSApiHandler alloc] initWithApis:inApis apis:apis?:@[]];
     handler.webView = self;
     self.handler = handler;
     
@@ -807,34 +822,6 @@
 
 #pragma mark - WKNavigationDelegate
 
-- (void)webView:(ZHWebView *)webView didFailNavigation:(WKNavigation *)navigation withError:(NSError *)error{
-    if (webView.loadFinish) webView.loadFinish(nil, ZHInlineError(error.code, ZHLCInlineString(@"%@", error.zh_localizedDescription)));
-    
-    id <ZHWKNavigationDelegate> de = self.zh_navigationDelegate;
-    if (ZHCheckDelegate(de, _cmd)) {
-        [de webView:webView didFailNavigation:navigation withError:error];
-    }
-}
-
-- (void)webView:(ZHWebView *)webView didFinishNavigation:(WKNavigation *)navigation{
-    if (webView.loadFinish) webView.loadFinish(nil, nil);
-    
-    id <ZHWKNavigationDelegate> de = self.zh_navigationDelegate;
-    if (ZHCheckDelegate(de, _cmd)) {
-        [de webView:webView didFinishNavigation:navigation];
-    }
-}
-
-- (void)webView:(ZHWebView *)webView didFailProvisionalNavigation:(WKNavigation *)navigation withError:(NSError *)error{
-    NSLog(@"-----❌didFailProvisionalNavigation---------------");
-    NSLog(@"%@",error);
-    
-    id <ZHWKNavigationDelegate> de = self.zh_navigationDelegate;
-    if (ZHCheckDelegate(de, _cmd)) {
-        [de webView:webView didFailProvisionalNavigation:navigation withError:error];
-    }
-}
-
 - (void)webView:(ZHWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler{
     
     id <ZHWKNavigationDelegate> de = self.zh_navigationDelegate;
@@ -849,7 +836,62 @@
     }
     if (decisionHandler) decisionHandler(WKNavigationActionPolicyAllow);
 }
-
+- (void)webView:(WKWebView *)webView decidePolicyForNavigationResponse:(WKNavigationResponse *)navigationResponse decisionHandler:(void (^)(WKNavigationResponsePolicy))decisionHandler{
+    id <ZHWKNavigationDelegate> de = self.zh_navigationDelegate;
+    if (ZHCheckDelegate(de, _cmd)) {
+        return [de webView:webView decidePolicyForNavigationResponse:navigationResponse decisionHandler:decisionHandler];
+    }
+    if (decisionHandler) decisionHandler(WKNavigationResponsePolicyAllow);
+}
+- (void)webView:(WKWebView *)webView didStartProvisionalNavigation:(null_unspecified WKNavigation *)navigation{
+    id <ZHWKNavigationDelegate> de = self.zh_navigationDelegate;
+    if (ZHCheckDelegate(de, _cmd)) {
+        return [de webView:webView didStartProvisionalNavigation:navigation];
+    }
+}
+- (void)webView:(WKWebView *)webView didReceiveServerRedirectForProvisionalNavigation:(null_unspecified WKNavigation *)navigation{
+    id <ZHWKNavigationDelegate> de = self.zh_navigationDelegate;
+    if (ZHCheckDelegate(de, _cmd)) {
+        return [de webView:webView didReceiveServerRedirectForProvisionalNavigation:navigation];
+    }
+}
+- (void)webView:(ZHWebView *)webView didFailProvisionalNavigation:(WKNavigation *)navigation withError:(NSError *)error{
+    NSLog(@"-----❌didFailProvisionalNavigation---------------");
+    NSLog(@"%@",error);
+    
+    id <ZHWKNavigationDelegate> de = self.zh_navigationDelegate;
+    if (ZHCheckDelegate(de, _cmd)) {
+        return [de webView:webView didFailProvisionalNavigation:navigation withError:error];
+    }
+}
+- (void)webView:(WKWebView *)webView didCommitNavigation:(null_unspecified WKNavigation *)navigation{
+    id <ZHWKNavigationDelegate> de = self.zh_navigationDelegate;
+    if (ZHCheckDelegate(de, _cmd)) {
+        return [de webView:webView didCommitNavigation:navigation];
+    }
+}
+- (void)webView:(ZHWebView *)webView didFinishNavigation:(WKNavigation *)navigation{
+    if (webView.loadFinish) webView.loadFinish(nil, nil);
+    
+    id <ZHWKNavigationDelegate> de = self.zh_navigationDelegate;
+    if (ZHCheckDelegate(de, _cmd)) {
+        return [de webView:webView didFinishNavigation:navigation];
+    }
+}
+- (void)webView:(ZHWebView *)webView didFailNavigation:(WKNavigation *)navigation withError:(NSError *)error{
+    if (webView.loadFinish) webView.loadFinish(nil, ZHInlineError(error.code, ZHLCInlineString(@"%@", error.zh_localizedDescription)));
+    
+    id <ZHWKNavigationDelegate> de = self.zh_navigationDelegate;
+    if (ZHCheckDelegate(de, _cmd)) {
+        return [de webView:webView didFailNavigation:navigation withError:error];
+    }
+}
+//- (void)webView:(WKWebView *)webView didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(NSURLSessionAuthChallengeDisposition disposition, NSURLCredential * _Nullable credential))completionHandler{
+//    id <ZHWKNavigationDelegate> de = self.zh_navigationDelegate;
+//    if (ZHCheckDelegate(de, _cmd)) {
+//        return [de webView:webView didReceiveAuthenticationChallenge:challenge completionHandler:completionHandler];
+//    }
+//}
 //当WKWebView总体内存占用过大，页面即将白屏的时候，系统会调用上面的回调函数，我们在该函数里执行[webView reload]（这个时候webView.URL取值尚不为零）解决白屏问题。在一些高内存消耗的页面可能会频繁刷新当前页面
 - (void)webViewWebContentProcessDidTerminate:(WKWebView *)webView{
     if ([ZHWebDebugMg() availableIOS9]) {
@@ -885,7 +927,48 @@
     }
     return nil;
 }
-
+- (void)webViewDidClose:(WKWebView *)webView{
+    if (![ZHWebDebugMg() availableIOS9]) return;
+    id <ZHWKUIDelegate> de = self.zh_UIDelegate;
+    if (ZHCheckDelegate(de, _cmd)) {
+        return [de webViewDidClose:webView];
+    }
+}
+- (void)webView:(WKWebView *)webView runJavaScriptAlertPanelWithMessage:(NSString *)message initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(void))completionHandler{
+    id <ZHWKUIDelegate> de = self.zh_UIDelegate;
+    if (ZHCheckDelegate(de, _cmd)) {
+        return [de webView:webView runJavaScriptAlertPanelWithMessage:message initiatedByFrame:frame completionHandler:completionHandler];
+    }
+    
+    // 默认实现
+    UIAlertAction *action = [UIAlertAction actionWithTitle:@"好" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        if (completionHandler) completionHandler();
+    }];
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"提示" message:message preferredStyle:UIAlertControllerStyleAlert];
+    [alert addAction:action];
+    UIViewController *router_ctrl = self.globalConfig.apiOpConfig.router_navigationController?:[self.handler fetchActivityCtrl];
+    [router_ctrl presentViewController:alert animated:YES completion:nil];
+}
+- (void)webView:(WKWebView *)webView runJavaScriptConfirmPanelWithMessage:(NSString *)message initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(BOOL result))completionHandler{
+    id <ZHWKUIDelegate> de = self.zh_UIDelegate;
+    if (ZHCheckDelegate(de, _cmd)) {
+        return [de webView:webView runJavaScriptConfirmPanelWithMessage:message initiatedByFrame:frame completionHandler:completionHandler];
+    }
+    
+    // 默认实现
+    UIAlertAction *action1 = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        if (completionHandler) completionHandler(YES);
+    }];
+    UIAlertAction *action2 = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+        if (completionHandler) completionHandler(NO);
+    }];
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"提示" message:message preferredStyle:UIAlertControllerStyleAlert];
+    [alert addAction:action1];
+    [alert addAction:action2];
+    
+    UIViewController *router_ctrl = self.globalConfig.apiOpConfig.router_navigationController?:[self.handler fetchActivityCtrl];
+    [router_ctrl presentViewController:alert animated:YES completion:nil];
+}
 //处理js的同步消息
 -(void)webView:(WKWebView *)webView runJavaScriptTextInputPanelWithPrompt:(NSString *)prompt defaultText:(NSString *)defaultText initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(NSString * _Nullable))completionHandler{
     __weak __typeof__(self) weakSelf = self;
@@ -895,7 +978,22 @@
            [de webView:webView runJavaScriptTextInputPanelWithPrompt:prompt defaultText:defaultText initiatedByFrame:frame completionHandler:completionHandler];
            return;
         }
-        if (completionHandler) completionHandler(nil);
+        
+        // 默认实现
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:prompt message:defaultText preferredStyle:UIAlertControllerStyleAlert];
+        __weak __typeof__(alert) weakAlert = alert;
+        UIAlertAction *action1 = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            if (completionHandler) completionHandler(weakAlert.textFields[0].text);
+        }];
+        UIAlertAction *action2 = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+            if (completionHandler) completionHandler(nil);
+        }];
+        [alert addAction:action1];
+        [alert addAction:action2];
+        [alert addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {
+        }];
+        UIViewController *router_ctrl = weakSelf.globalConfig.apiOpConfig.router_navigationController?:[weakSelf.handler fetchActivityCtrl];
+        [router_ctrl presentViewController:alert animated:YES completion:nil];
     };
     
     if (!prompt || ![prompt isKindOfClass:NSString.class] || prompt.length == 0) {
@@ -917,14 +1015,13 @@
         return;
     }
     
-//    methodSync
-//    NSString *testKey = @"lbz-id-key";
-//    if (![receiveInfo.allKeys containsObject:testKey]) {
-//        block();
-//        return;
-//    }
+    // 检查是否允许处理此消息
+    if (![self.handler allowHandleScriptMessage:receiveInfo]) {
+        block();
+        return;
+    }
     
-    // 说明此函数api调用过来的
+    // 说明此函数是api调用过来的
     id result = [self.handler handleScriptMessage:receiveInfo];
     if (!result) {
         if (completionHandler) completionHandler(nil);
@@ -1163,7 +1260,7 @@
         WKUserContentController *userContent = self.configuration.userContentController;
         [userContent removeAllUserScripts];
 
-        NSArray *handlerNames = [ZHWebView fetchHandlerNames];
+        NSArray *handlerNames = [self.class fetchHandlerNames];
         for (NSString *key in handlerNames) {
             [userContent removeScriptMessageHandlerForName:key];
         }

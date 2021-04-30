@@ -7,8 +7,6 @@
 //
 
 #import "ZHJSInWebSocketApi.h"
-#import "ZHJSApiHandler.h"
-#import "ZHJSHandler.h"
 #import "ZHWebView.h"
 
 @implementation ZHJSInWebSocketApi
@@ -82,10 +80,6 @@
 }
 - (void)socketDidClose:(NSDictionary *)params{
     
-}
-
-- (ZHWebView *)webView{
-    return self.apiHandler.handler.webView;
 }
 
 //js api方法名前缀  如：fund

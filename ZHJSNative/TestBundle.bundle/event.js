@@ -31,6 +31,8 @@
  */
 /** 发送消息name:与iOS原生保持一致 */
 var ZhengJSToNativeHandlerName = 'ZhengReplaceJSEventHandler';
+var ZhengJSToNativeMethodSyncKey = 'ZhengReplaceJSToNativeMethodSyncKey';
+var ZhengJSToNativeMethodAsyncKey = 'ZhengReplaceJSToNativeMethodAsyncKey';
 var ZhengCallBackSuccessKey = 'ZhengReplaceCallBackSuccessKey';
 var ZhengCallBackFailKey = 'ZhengReplaceCallBackFailKey';
 var ZhengCallBackCompleteKey = 'ZhengReplaceCallBackCompleteKey';
@@ -201,7 +203,7 @@ var ZhengHandleCallBackParams = function(apiPrefix, methodName, params, index) {
 };
 
 /** 构造发送参数 */
-var ZhengSendParams = function(apiPrefix, methodName, params) {
+var ZhengSendParams = function(apiPrefix, methodName, methodSync, params) {
     /** arguments */
     var newParams = params;
     /** 处理参数 */
@@ -212,7 +214,7 @@ var ZhengSendParams = function(apiPrefix, methodName, params) {
             resArgs.push(ZhengHandleCallBackParams(apiPrefix, methodName, newParams[argIdx], argIdx));
         }
     }
-    return {methodName, apiPrefix, args: resArgs};
+    return {apiPrefix, methodName, methodSync, args: resArgs};
 };
 var ZhengSendNative = function(params) {
     var handler = window.webkit.messageHandlers[ZhengJSToNativeHandlerName];
@@ -246,9 +248,9 @@ var ZhengReplaceGeneratorAPI = function(apiPrefix, apiMap) {
             var isSync = config.hasOwnProperty('sync') ? config.sync : false;
             /** 生成function */
             res[name] = isSync ? (function () {
-                return ZhengSendNativeSync(ZhengSendParams(apiPrefix, name, arguments));
+                return ZhengSendNativeSync(ZhengSendParams(apiPrefix, name, ZhengJSToNativeMethodSyncKey, arguments));
             }) : (function () {
-                ZhengSendNative(ZhengSendParams(apiPrefix, name, arguments));
+                ZhengSendNative(ZhengSendParams(apiPrefix, name, ZhengJSToNativeMethodAsyncKey, arguments));
             });
         })(mapKeys[i]);
     }

@@ -199,7 +199,7 @@
     __weak __typeof__(self) __self = self;
     
     
-    UIAlertAction *action0 = [UIAlertAction actionWithTitle:@"查看原生注入的API" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+    UIAlertAction *action0 = [UIAlertAction actionWithTitle:@"查看App注入的API" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         ZHJSApiListController *list = [[ZHJSApiListController alloc] initWithApiHandler:__self.webView.handler.apiHandler];
         UINavigationController *navi = [[UINavigationController alloc] initWithRootViewController:list];
         navi.modalPresentationStyle = UIModalPresentationFullScreen;

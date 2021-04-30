@@ -331,6 +331,8 @@ case cType:{\
     NSMutableString *res = [NSMutableString string];
     [res appendFormat:formatJS,
      ZHJSHandlerName,
+     self.fetchWebViewJsToNativeMethodSyncKey,
+     self.fetchWebViewJsToNativeMethodAsyncKey,
      self.fetchWebViewCallSuccessFuncKey,
      self.fetchWebViewCallFailFuncKey,
      self.fetchWebViewCallCompleteFuncKey,
@@ -477,8 +479,27 @@ case cType:{\
 #pragma mark - webview-js消息处理
     
 //处理WebView js消息
+- (BOOL)allowHandleScriptMessage:(NSDictionary *)jsInfo{
+    // js同步、异步函数标识
+    NSString *jsMethodSyncKey = [jsInfo valueForKey:@"methodSync"];
+    if (!jsMethodSyncKey || ![jsMethodSyncKey isKindOfClass:NSString.class] || jsMethodSyncKey.length == 0) {
+        return NO;
+    }
+    NSString *syncKey = [self fetchWebViewJsToNativeMethodSyncKey];
+    NSString *asyncKey = [self fetchWebViewJsToNativeMethodAsyncKey];
+    if ([jsMethodSyncKey isEqualToString:syncKey] ||
+        [jsMethodSyncKey isEqualToString:asyncKey]) {
+        return YES;
+    }
+    return NO;
+}
 - (id)handleScriptMessage:(NSDictionary *)jsInfo{
     if (!jsInfo || ![jsInfo isKindOfClass:[NSDictionary class]]) return nil;
+    // 检查是否允许处理此消息
+    if (![self allowHandleScriptMessage:jsInfo]) {
+        return nil;
+    }
+    // 解析消息
     NSString *jsMethodName = [jsInfo valueForKey:@"methodName"];
     NSString *apiPrefix = [jsInfo valueForKey:@"apiPrefix"];
     NSArray *jsArgs = [jsInfo valueForKey:@"args"];
@@ -768,6 +789,12 @@ case cType:{\
 }
 - (NSString *)fetchWebViewJsFunctionArgKey{
     return @"ZhengJSToNativeFunctionArgKey";
+}
+- (NSString *)fetchWebViewJsToNativeMethodSyncKey{
+    return @"ZhengJSToNativeMethodSyncKey";
+}
+- (NSString *)fetchWebViewJsToNativeMethodAsyncKey{
+    return @"ZhengJSToNativeMethodAsyncKey";
 }
 - (NSString *)fetchWebViewApiFinishFlag{
     return @"ZhengJSBridgeReady";

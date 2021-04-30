@@ -8,6 +8,7 @@
 
 #import "ZHJSContext.h"
 #import "ZHJSHandler.h"
+#import "ZHJSInCtxFundApi.h"
 #import "NSError+ZH.h"
 #import "ZHUtil.h"
 
@@ -51,9 +52,17 @@
         ZHCtxDebugItem *debugItem = [ZHCtxDebugItem configuration:self];
         self.debugItem = debugItem;
         
+        // 内置api
+        NSMutableArray *inApis = [NSMutableArray array];
+        if (createConfig.injectInAPI) {
+            ZHJSInCtxFundApi *fund = [[ZHJSInCtxFundApi alloc] init];
+            fund.jsContext = self;
+            [inApis addObject:fund];
+        }
+        
         // api处理配置
         ZHJSHandler *handler = [[ZHJSHandler alloc] init];
-        handler.apiHandler = [[ZHJSApiHandler alloc] initWithCtxHandler:handler injectInAPI:createConfig.injectInAPI debugItem:debugItem apis:apis?:@[]];
+        handler.apiHandler = [[ZHJSApiHandler alloc] initWithApis:inApis apis:apis?:@[]];
         handler.jsContext = self;
         self.handler = handler;
         

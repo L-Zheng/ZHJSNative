@@ -36,7 +36,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.view.backgroundColor = [UIColor whiteColor];
-    self.title = @"原生注入的API";
+    self.title = @"API列表";
     self.navigationController.navigationBar.translucent = NO;
     
     self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"关闭" style:UIBarButtonItemStylePlain target:self action:@selector(closeClick)];
@@ -205,7 +205,7 @@
     NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc] init];
     
     NSArray *strings = @[
-        @"JsFunc:  ", [NSString stringWithFormat:@"%@ (%@)", subItem[@"funcName"], registerItem.isSync ? @"同步函数" : @"异步函数"], @"\n",
+        @"JsFunc:  ", [NSString stringWithFormat:@"%@ %@ (%@)", subItem[@"funcName"], registerItem.supportVersion ? [NSString stringWithFormat:@">=%@", registerItem.supportVersion] : @"", registerItem.isSync ? @"同步函数" : @"异步函数"], @"\n",
         @"iOSFunc:  ", registerItem.nativeMethodName?:@"", @"\n",
         @"iOSInstance:  ", [NSString stringWithFormat:@"<%@: %p>", NSStringFromClass([registerItem.nativeInstance class]), registerItem.nativeInstance], @"\n",
         @"iOSClassName:  ", registerItem.nativeMethodInClassName?:@"",

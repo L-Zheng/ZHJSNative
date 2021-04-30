@@ -8,25 +8,13 @@
 
 #import <Foundation/Foundation.h>
 #import "ZHJSApiProtocol.h"
-@class ZHJSHandler;
-@class ZHWebDebugItem;
-@class ZHCtxDebugItem;
 
 //NS_ASSUME_NONNULL_BEGIN
 
 @interface ZHJSApiHandler : NSObject
 
-- (instancetype)initWithWebHandler:(ZHJSHandler *)handler
-                       injectInAPI:(BOOL)injectInAPI
-                         debugItem:(ZHWebDebugItem *)debugItem
-                       apis:(NSArray <id <ZHJSApiProtocol>> *)apis;
+- (instancetype)initWithApis:(NSArray <id <ZHJSApiProtocol>> *)inApis apis:(NSArray <id <ZHJSApiProtocol>> *)apis;
 
-- (instancetype)initWithCtxHandler:(ZHJSHandler *)handler
-                       injectInAPI:(BOOL)injectInAPI
-                         debugItem:(ZHCtxDebugItem *)debugItem
-                              apis:(NSArray <id <ZHJSApiProtocol>> *)apis;
-
-@property (nonatomic,weak,readonly) ZHJSHandler *handler;
 @property (nonatomic,strong,readonly) NSArray <id <ZHJSApiProtocol>> *apis;
 
 //添加移除api

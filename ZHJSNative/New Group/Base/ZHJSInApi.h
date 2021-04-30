@@ -8,15 +8,12 @@
 
 #import <Foundation/Foundation.h>
 #import "ZHJSApiProtocol.h"
-@class ZHJSApiHandler;
-@class ZHWebView;
-@class ZHJSContext;
+#import "ZHJSPageItem.h"
 
 /** 内部api  ZHJSInternalApi */
 @interface ZHJSInApi : NSObject<ZHJSApiProtocol>
-@property (nonatomic,weak) ZHJSApiHandler *apiHandler;
-- (ZHWebView *)webView;
-- (ZHJSContext *)jsContext;
+@property (nonatomic,weak) id <ZHJSPageProtocol> webView;
+@property (nonatomic,weak) id <ZHJSPageProtocol> jsContext;
 
 @end
 

@@ -49,8 +49,12 @@ static NSString * const ZHJSHandlerErrorName = @"ZHJSErrorEventHandler";
 - (void)showWebViewException:(NSDictionary *)exception;
 - (void)showJSContextException:(NSDictionary *)exception;
 
+// 获取顶层视图Controller
+- (UIViewController *)fetchActivityCtrl;
+
 
 //处理js消息
+- (BOOL)allowHandleScriptMessage:(NSDictionary *)jsInfo;
 - (id)handleScriptMessage:(NSDictionary *)jsInfo;
 @end
 

@@ -7,8 +7,6 @@
 //
 
 #import "ZHJSInApi.h"
-#import "ZHJSApiHandler.h"
-#import "ZHJSHandler.h"
 
 @implementation ZHJSInApi
 
@@ -85,19 +83,14 @@ ZHJS_EXPORT_FUNC(getBoolSync, @(YES))
      NSLog(@"-------%s---------", __func__);
      return @(YES);
  }
-ZHJS_EXPORT_FUNC(getStringSync, @(YES), @{@"dd": @"vvv"})
+ZHJS_EXPORT_FUNC(getStringSync, @(YES), @"5.4.2", @{@"dd": @"vvv"})
  - (NSString *)js_getStringSync:(ZHJSApiArgItem *)arg{
      NSLog(@"-------%s---------", __func__);
      return @"dfgewrefdwd";
  }
 
-
-- (ZHWebView *)webView{
-    return self.apiHandler.handler.webView;
-}
-
-- (ZHJSContext *)jsContext{
-    return self.apiHandler.handler.jsContext;
+- (id <ZHJSPageProtocol>)jsPage{
+    return self.webView?:self.jsContext;
 }
 
 //js api方法名前缀  如：fund
