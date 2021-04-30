@@ -205,7 +205,7 @@
     NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc] init];
     
     NSArray *strings = @[
-        @"JsFunc:  ", [NSString stringWithFormat:@"%@ %@ (%@)", subItem[@"funcName"], registerItem.supportVersion ? [NSString stringWithFormat:@">=%@", registerItem.supportVersion] : @"", registerItem.isSync ? @"同步函数" : @"异步函数"], @"\n",
+        @"JsFunc:  ", [NSString stringWithFormat:@"%@ %@ (%@)", subItem[@"funcName"], registerItem.supportVersion ? [NSString stringWithFormat:@"(>=%@)", registerItem.supportVersion] : @"", registerItem.isSync ? @"同步函数" : @"异步函数"], @"\n",
         @"iOSFunc:  ", registerItem.nativeMethodName?:@"", @"\n",
         @"iOSInstance:  ", [NSString stringWithFormat:@"<%@: %p>", NSStringFromClass([registerItem.nativeInstance class]), registerItem.nativeInstance], @"\n",
         @"iOSClassName:  ", registerItem.nativeMethodInClassName?:@"",
