@@ -101,6 +101,10 @@ ZHJS_EXPORT_FUNC(getStringSync, @(YES), @"5.4.2", @{@"dd": @"vvv"})
 - (NSString *)zh_iosApiPrefixName{
     return @"js_";
 }
+//js api注入完成通知H5事件的名称
+- (NSString *)zh_jsApiInjectFinishEventName{
+    return @"zhengApiInjectFinishEvent";
+}
 
 - (void)dealloc{
     NSLog(@"%s", __func__);

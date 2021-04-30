@@ -90,6 +90,10 @@
 - (NSString *)zh_iosApiPrefixName{
     return @"js_";
 }
+//js api注入完成通知H5事件的名称
+- (NSString *)zh_jsApiInjectFinishEventName{
+    return @"ZhengSocketApiInjectFinishEvent";
+}
 
 - (void)dealloc{
     NSLog(@"%s", __func__);

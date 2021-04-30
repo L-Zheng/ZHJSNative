@@ -263,7 +263,7 @@
         
         NSMutableDictionary <NSString *, ZHJSApiRegisterItem *> *functionMap = [@{} mutableCopy];
         
-        // 倒叙
+        // 倒序
         [prefixItems enumerateObjectsWithOptions:NSEnumerationReverse usingBlock:^(NSDictionary *prefixItem, NSUInteger idx, BOOL *apiStop) {
             //            id <ZHJSApiProtocol> api = [prefixItem objectForKey:@"api"];
             NSDictionary *map = [prefixItem objectForKey:@"map"];
@@ -286,7 +286,7 @@
     return [mergeApiMap copy];
 }
 
-//遍历方法映射表
+//遍历方法映射表->获取所有api
 - (void)enumRegsiterApiMap:(void (^)(NSString *apiPrefix, NSDictionary <NSString *, ZHJSApiRegisterItem *> *apiMap))block{
     if (!block) return;
     
@@ -294,6 +294,40 @@
     NSDictionary *mergeApiMap = [self parseApiMapToRegsiterApiMap:self.apiMap];
     [mergeApiMap enumerateKeysAndObjectsUsingBlock:^(NSString *apiPrefix, NSDictionary *apiMap, BOOL *stop) {
         if (block) block(apiPrefix, apiMap);
+    }];
+}
+
+//遍历方法映射表->获取api注入完成事件名
+- (void)enumRegsiterApiInjectFinishEventNameMap:(void (^)(NSString *apiPrefix, NSString *apiInjectFinishEventName))block{
+    if (!block) return;
+    /**
+     @{
+             @"fund" : @"fundJSBridgeReady"
+             @"Zheng" : @"ZhengJSBridgeReady"
+     }
+     */
+    NSMutableDictionary <NSString *, NSString *> *resMap = [@{} mutableCopy];
+    
+    // 遍历api总映射表，正序查找（映射表里面最新的api是插入到最前面） id<ZHJSApiProtocol>，直到找到 注入完成事件名
+    NSDictionary *apiMap = self.apiMap.copy;
+    [apiMap enumerateKeysAndObjectsUsingBlock:^(NSString *apiPrefix, NSArray *prefixItems, BOOL *prefixStop) {
+        // 正序遍历
+        for (NSDictionary *prefixItem in prefixItems) {
+            id <ZHJSApiProtocol> api = [prefixItem objectForKey:@"api"];
+            if (!api || ![api conformsToProtocol:@protocol(ZHJSApiProtocol)] ||
+                ![api respondsToSelector:@selector(zh_jsApiInjectFinishEventName)]) {
+                continue;
+            }
+            NSString *name = [api zh_jsApiInjectFinishEventName];
+            if (!name || ![name isKindOfClass:NSString.class] || name.length == 0) {
+                continue;
+            }
+            [resMap setObject:name forKey:apiPrefix];
+            break;
+        }
+    }];
+    [resMap enumerateKeysAndObjectsUsingBlock:^(NSString *apiPrefix, NSString *injectFinishEventName, BOOL *stop) {
+        if (block) block(apiPrefix, injectFinishEventName);
     }];
 }
 

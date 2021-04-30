@@ -371,9 +371,20 @@ case cType:{\
 }
 
 - (NSString *)fetchWebViewApiFinish{
-    //api注入完成通知
-    NSString *jsCode = [NSString stringWithFormat:@"var ZhengReadyEvent = document.createEvent('Event');ZhengReadyEvent.initEvent('%@');window.dispatchEvent(ZhengReadyEvent);", self.fetchWebViewApiFinishFlag];
-    return jsCode;
+    /**
+     // h5监听  @"window.addEventListener('fundJSBridgeReady', () => {});"
+     //api注入完成通知  事件名称ZhengJSBridgeReady
+     NSString *jsCode = [NSString stringWithFormat:@"var ZhengReadyEvent = document.createEvent('Event');ZhengReadyEvent.initEvent('%@');window.dispatchEvent(ZhengReadyEvent);", self.fetchWebViewApiFinishFlag];
+     return jsCode;
+     */
+    __block NSMutableString *resCode = [NSMutableString string];
+    [self.apiHandler enumRegsiterApiInjectFinishEventNameMap:^(NSString *apiPrefix, NSString *apiInjectFinishEventName) {
+        if (apiPrefix && [apiPrefix isKindOfClass:NSString.class] && apiPrefix.length > 0 &&
+            apiInjectFinishEventName && [apiInjectFinishEventName isKindOfClass:NSString.class] && apiInjectFinishEventName.length > 0) {
+            [resCode appendFormat:@"var ZhengReadyEvent_%@ = document.createEvent('Event');ZhengReadyEvent_%@.initEvent('%@');window.dispatchEvent(ZhengReadyEvent_%@);", apiPrefix, apiPrefix, apiInjectFinishEventName, apiPrefix];
+        }
+    }];
+    return resCode.copy;
 }
 
 #pragma mark - exception
@@ -795,9 +806,6 @@ case cType:{\
 }
 - (NSString *)fetchWebViewJsToNativeMethodAsyncKey{
     return @"ZhengJSToNativeMethodAsyncKey";
-}
-- (NSString *)fetchWebViewApiFinishFlag{
-    return @"ZhengJSBridgeReady";
 }
 
 - (void)dealloc{

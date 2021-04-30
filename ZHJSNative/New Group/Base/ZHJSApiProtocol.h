@@ -52,6 +52,10 @@
 //ios api方法名前缀 如：js_
 - (NSString *)zh_iosApiPrefixName;
 
+@optional
+//js api注入完成通知H5事件的名称(WebView可能需要)
+// h5监听代码： window.addEventListener('xxx', () => {});
+- (NSString *)zh_jsApiInjectFinishEventName;
 /**
  ⚠️⚠️⚠️添加API步骤：
  在服从协议ZHJSApiProtocol的类中实现方法即可：

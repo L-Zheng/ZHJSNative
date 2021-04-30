@@ -638,7 +638,10 @@ var vm = {
     },
     prepareRender() {
       try {
-        //检查fund api
+        //检查fund api  
+        // if (typeof fund === 'object'){
+
+        // }
         // ❌不能使用 if(fund)来判断 如果fund没有 js直接报错 代码不再向下运行
         console.log(fund);
         console.log("window.fund");
