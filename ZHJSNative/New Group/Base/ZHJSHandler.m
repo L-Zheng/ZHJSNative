@@ -160,8 +160,12 @@ case cType:{\
             JSValue *jsArg = jsArgs[idx];
             
             ZHJSApiInCallBlock jsFuncArgBlock = ^ZHJSApi_InCallBlock_Header{
+                if (!__self) {
+                    return [ZHJSApiCallJsNativeResItem item];
+                }
                 NSArray *jsFuncArgDatas = argItem.jsFuncArgDatas;
                 // BOOL alive = argItem.alive;
+                // 如果jsArg不是js的function类型  调用callWithArguments函数也不会报错
                 JSValue *resValue = [jsArg callWithArguments:((jsFuncArgDatas && [jsFuncArgDatas isKindOfClass:NSArray.class]) ? jsFuncArgDatas : @[])];
                 if (argItem.jsFuncArgResBlock) {
                     argItem.jsFuncArgResBlock([ZHJSApiCallJsResItem item:[__self jsValueToNative:resValue] error:nil]);
@@ -191,6 +195,9 @@ case cType:{\
             JSValue *failFunc = [jsArg valueForProperty:fail];
             JSValue *completeFunc = [jsArg valueForProperty:complete];
             ZHJSApiInCallBlock block = ^ZHJSApi_InCallBlock_Header{
+                if (!__self) {
+                    return [ZHJSApiCallJsNativeResItem item];
+                }
                 NSArray *successDatas = argItem.successDatas;
                 NSArray *failDatas = argItem.failDatas;
                 NSArray *completeDatas = argItem.completeDatas;
@@ -552,6 +559,9 @@ case cType:{\
         //js function 参数回调
         if (jsFuncArgId.length) {
             ZHJSApiInCallBlock block = ^ZHJSApi_InCallBlock_Header{
+                if (!__self) {
+                    return [ZHJSApiCallJsNativeResItem item];
+                }
                 NSArray *jsFuncArgDatas = argItem.jsFuncArgDatas;
                 BOOL alive = argItem.alive;
                 
@@ -566,6 +576,9 @@ case cType:{\
         }else{
             //js success/fail/complete 回调
             ZHJSApiInCallBlock block = ^ZHJSApi_InCallBlock_Header{
+                if (!__self) {
+                    return [ZHJSApiCallJsNativeResItem item];
+                }
                 NSArray *successDatas = argItem.successDatas;
                 NSArray *failDatas = argItem.failDatas;
                 NSArray *completeDatas = argItem.completeDatas;
