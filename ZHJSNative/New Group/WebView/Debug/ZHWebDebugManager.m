@@ -47,7 +47,7 @@ NSString * const ZHWebDebugEnableKey = @"ZHWebDebugEnableKey";
     return enable;
 }
 
-- (ZHWebDebugItem *)getConfigItem:(NSString *)key{
+- (ZHWebDebugItem *)getDebugItem:(NSString *)key{
     if (!key || ![key isKindOfClass:NSString.class] || key.length == 0) {
         return nil;
     }
@@ -56,10 +56,7 @@ NSString * const ZHWebDebugEnableKey = @"ZHWebDebugEnableKey";
     }
     ZHWebDebugItem *item = [self.itemMap objectForKey:key];
     if (!item) {
-        item = [[ZHWebDebugItem alloc] init];
-        item.debugMode = ZHWebDebugMode_Release;
-        item.socketUrlStr = nil;
-        item.localUrlStr = nil;
+        item = [ZHWebDebugItem defaultItem];
         [self.itemMap setObject:item forKey:key];
     }
     return item;

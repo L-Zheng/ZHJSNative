@@ -11,31 +11,35 @@
 #import "ZHJSContext.h"
 
 @interface ZHCtxDebugItem ()
-@property (nonatomic,assign) BOOL debugEnable;
 @end
 
 @implementation ZHCtxDebugItem
 
-+ (instancetype)configuration:(ZHJSContext *)jsContext{
-    ZHCtxDebugItem *config = [[ZHCtxDebugItem alloc] init];
-    config.jsContext = jsContext;
-    
-    config.debugEnable = [ZHCtxDebugMg() getDebugEnable];
-    
-    ZHCtxDebugItem *item = [ZHCtxDebugMg() getConfigItem:jsContext.globalConfig.mpConfig.appId];
-    
-    config.debugMode = item.debugMode;
-    
-    return config;
++ (instancetype)defaultItem{
+    ZHCtxDebugItem *item = [[ZHCtxDebugItem alloc] init];
+    [item configProperty:nil];
+    return item;
 }
-
-- (BOOL)debugModeEnable{
-    return self.debugEnable;
++ (instancetype)item:(ZHJSContext *)jsContext{
+    ZHCtxDebugItem *item = [ZHCtxDebugMg() getDebugItem:jsContext.globalConfig.mpConfig.appId];
+    
+    ZHCtxDebugItem *resItem = [item sameItem];
+    resItem.jsContext = jsContext;
+    return resItem;
 }
-- (BOOL)logOutputXcodeEnable{
-    return self.debugEnable;
+- (ZHCtxDebugItem *)sameItem{
+    ZHCtxDebugItem *resItem = [[ZHCtxDebugItem alloc] init];
+    [resItem configProperty:self];
+    return resItem;
 }
-- (BOOL)alertCtxErrorEnable{
-    return self.debugEnable;
+- (void)configProperty:(ZHCtxDebugItem *)item{
+    self.debugMode = item ? item.debugMode : ZHCtxDebugMode_Release;
+    self.jsContext = item ? item.jsContext : nil;
+    
+    BOOL globalDebugEnable = [ZHCtxDebugMg() getDebugEnable];
+    
+    self.debugModeEnable = item ? item.debugModeEnable : globalDebugEnable;
+    self.logOutputXcodeEnable = item ? item.logOutputXcodeEnable : globalDebugEnable;
+    self.alertCtxErrorEnable = item ? item.alertCtxErrorEnable : globalDebugEnable;
 }
 @end

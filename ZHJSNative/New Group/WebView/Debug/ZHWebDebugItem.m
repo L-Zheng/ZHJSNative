@@ -14,8 +14,6 @@
 #import <ZHFloatWindow/ZHFloatView.h>
 
 @interface ZHWebDebugItem ()
-@property (nonatomic,assign) BOOL debugEnable;
-
 // 浮窗
 @property (nonatomic,strong) ZHFloatView *refreshFloatView;
 @property (nonatomic,strong) ZHFloatView *debugModeFloatView;
@@ -23,20 +21,37 @@
 
 @implementation ZHWebDebugItem
 
-+ (instancetype)configuration:(ZHWebView *)webview{
-    ZHWebDebugItem *config = [[ZHWebDebugItem alloc] init];
++ (instancetype)defaultItem{
+    ZHWebDebugItem *item = [[ZHWebDebugItem alloc] init];
+    [item configProperty:nil];
+    return item;
+}
++ (instancetype)item:(ZHWebView *)webView{
+    ZHWebDebugItem *item = [ZHWebDebugMg() getDebugItem:webView.globalConfig.mpConfig.appId];
     
-    config.webView = webview;
+    ZHWebDebugItem *resItem = [item sameItem];
+    resItem.webView = webView;
+    return resItem;
+}
+- (ZHWebDebugItem *)sameItem{
+    ZHWebDebugItem *resItem = [[ZHWebDebugItem alloc] init];
+    [resItem configProperty:self];
+    return resItem;
+}
+- (void)configProperty:(ZHWebDebugItem *)item{
+    self.debugMode = item ? item.debugMode : ZHWebDebugMode_Release;
+    self.socketUrlStr = item ? item.socketUrlStr : nil;
+    self.localUrlStr = item ? item.localUrlStr : nil;
+    self.webView = item ? item.webView : nil;
     
-    config.debugEnable = [ZHWebDebugMg() getDebugEnable];
+    BOOL globalDebugEnable = [ZHWebDebugMg() getDebugEnable];
     
-    ZHWebDebugItem *item = [ZHWebDebugMg() getConfigItem:webview.globalConfig.mpConfig.appId];
-    
-    config.debugMode = item.debugMode;
-    config.socketUrlStr = item.socketUrlStr;
-    config.localUrlStr = item.localUrlStr;
-    
-    return config;
+    self.debugModeEnable = item ? item.debugModeEnable : globalDebugEnable;
+    self.refreshEnable = item ? item.refreshEnable : globalDebugEnable;
+    self.logOutputWebEnable = item ? item.logOutputWebEnable : globalDebugEnable;
+    self.logOutputXcodeEnable = item ? item.logOutputXcodeEnable : globalDebugEnable;
+    self.alertWebErrorEnable = item ? item.alertWebErrorEnable : globalDebugEnable;
+    self.touchCalloutEnable = item ? item.touchCalloutEnable : globalDebugEnable;
 }
 
 #pragma mark - alert
@@ -78,7 +93,7 @@
         NSString *urlStr = [alert.textFields.firstObject text];
         if (urlStr.length == 0) return;
         
-        ZHWebDebugItem *item = [ZHWebDebugMg() getConfigItem:__self.webView.globalConfig.mpConfig.appId];
+        ZHWebDebugItem *item = [ZHWebDebugMg() getDebugItem:__self.webView.globalConfig.mpConfig.appId];
         item.socketUrlStr = urlStr;
         item.debugMode = debugMode;
         
@@ -133,7 +148,7 @@
         NSString *urlStr = [alert.textFields.firstObject text];
         if (urlStr.length == 0) return;
         
-        ZHWebDebugItem *item = [ZHWebDebugMg() getConfigItem:__self.webView.globalConfig.mpConfig.appId];
+        ZHWebDebugItem *item = [ZHWebDebugMg() getDebugItem:__self.webView.globalConfig.mpConfig.appId];
         item.localUrlStr = urlStr;
         item.debugMode = debugMode;
         
@@ -171,7 +186,7 @@
     }];
     UIAlertAction *ac3 = [UIAlertAction actionWithTitle:@"App全局设置" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actionT) {
         
-        ZHWebDebugItem *item = [ZHWebDebugMg() getConfigItem:__self.webView.globalConfig.mpConfig.appId];
+        ZHWebDebugItem *item = [ZHWebDebugMg() getDebugItem:__self.webView.globalConfig.mpConfig.appId];
         item.debugMode = debugMode;
         
         __self.debugMode = debugMode;
@@ -294,27 +309,6 @@
     if (self.debugModeEnable) {
         [self.debugModeFloatView updateWhenSuperViewLayout];
     }
-}
-
-#pragma mark - enable
-
-- (BOOL)debugModeEnable{
-    return self.debugEnable;
-}
-- (BOOL)refreshEnable{
-    return self.debugEnable;
-}
-- (BOOL)logOutputWebEnable{
-    return self.debugEnable;
-}
-- (BOOL)logOutputXcodeEnable{
-    return self.debugEnable;
-}
-- (BOOL)alertWebErrorEnable{
-    return self.debugEnable;
-}
-- (BOOL)touchCalloutEnable{
-    return self.debugEnable;
 }
 
 #pragma mark - getter

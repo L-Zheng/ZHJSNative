@@ -136,7 +136,7 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
         [self opMap:self.websMap key:key webView:web add:NO];
 
         ZHWebDebugMode cMode = web.debugItem.debugMode;
-        ZHWebDebugMode gMode = [ZHWebDebugMg() getConfigItem:web.globalConfig.mpConfig.appId].debugMode;
+        ZHWebDebugMode gMode = [ZHWebDebugMg() getDebugItem:web.globalConfig.mpConfig.appId].debugMode;
         return (cMode == gMode ? web : nil);
     }
     return nil;

@@ -28,21 +28,22 @@ __attribute__((unused)) static NSString * ZHCtxDebugDescByMode(ZHCtxDebugMode mo
 /** 👉JSContext 调试配置 */
 @interface ZHCtxDebugItem : NSObject
 
-@property (nonatomic, assign) ZHCtxDebugMode debugMode;
-
 #pragma mark - init
 
-+ (instancetype)configuration:(ZHJSContext *)jsContext;
++ (instancetype)defaultItem;
++ (instancetype)item:(ZHJSContext *)jsContext;
 @property (nonatomic,weak) ZHJSContext *jsContext;
 
-#pragma mark - enable
+#pragma mark - debug
+
+@property (nonatomic, assign) ZHCtxDebugMode debugMode;
     
 // 长连接调试【切换调试模式】 浮窗
-@property (nonatomic,assign,readonly) BOOL debugModeEnable;
+@property (nonatomic,assign) BOOL debugModeEnable;
 // console.log 输出到 Xcode调试控制台
-@property (nonatomic,assign,readonly) BOOL logOutputXcodeEnable;
+@property (nonatomic,assign) BOOL logOutputXcodeEnable;
 // 弹窗显示 JSContext异常
-@property (nonatomic,assign,readonly) BOOL alertCtxErrorEnable;
+@property (nonatomic,assign) BOOL alertCtxErrorEnable;
 
 @end
 

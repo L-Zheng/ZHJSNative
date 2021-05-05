@@ -47,7 +47,7 @@ NSString * const ZHCtxDebugEnableKey = @"ZHCtxDebugEnableKey";
     return enable;
 }
 
-- (ZHCtxDebugItem *)getConfigItem:(NSString *)key{
+- (ZHCtxDebugItem *)getDebugItem:(NSString *)key{
     if (!key || ![key isKindOfClass:NSString.class] || key.length == 0) {
         return nil;
     }
@@ -56,7 +56,7 @@ NSString * const ZHCtxDebugEnableKey = @"ZHCtxDebugEnableKey";
     }
     ZHCtxDebugItem *item = [self.itemMap objectForKey:key];
     if (!item) {
-        item = [[ZHCtxDebugItem alloc] init];
+        item = [ZHCtxDebugItem defaultItem];
         [self.itemMap setObject:item forKey:key];
     }
     return item;

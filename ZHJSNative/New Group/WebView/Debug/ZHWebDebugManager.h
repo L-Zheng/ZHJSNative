@@ -17,7 +17,7 @@
 - (void)setDebugEnable:(BOOL)enable;
 - (BOOL)getDebugEnable;
 
-- (ZHWebDebugItem *)getConfigItem:(NSString *)key;
+- (ZHWebDebugItem *)getDebugItem:(NSString *)key;
 
 - (BOOL)availableIOS11;
 - (BOOL)availableIOS10;

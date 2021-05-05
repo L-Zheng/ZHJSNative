@@ -28,13 +28,8 @@ __attribute__((unused)) static NSString * ZHWebDebugDescByMode(ZHWebDebugMode mo
 }
 
 @interface ZHWebDebugItem : NSObject
-
-@property (nonatomic, assign) ZHWebDebugMode debugMode;
-@property (nonatomic, copy) NSString *socketUrlStr;
-@property (nonatomic, copy) NSString *localUrlStr;
-
-
-+ (instancetype)configuration:(ZHWebView *)webview;
++ (instancetype)defaultItem;
++ (instancetype)item:(ZHWebView *)webView;
 @property (nonatomic,weak) ZHWebView *webView;
 
 #pragma mark - float view
@@ -48,18 +43,22 @@ __attribute__((unused)) static NSString * ZHWebDebugDescByMode(ZHWebDebugMode mo
 - (void)webViewCallReadyRefresh;
 - (void)webViewCallStartRefresh:(NSDictionary *)info;
 
-#pragma mark - enable
+#pragma mark - debug
+
+@property (nonatomic, assign) ZHWebDebugMode debugMode;
+@property (nonatomic, copy) NSString *socketUrlStr;
+@property (nonatomic, copy) NSString *localUrlStr;
     
 // 长连接调试【切换调试模式】 浮窗
-@property (nonatomic,assign,readonly) BOOL debugModeEnable;
+@property (nonatomic,assign) BOOL debugModeEnable;
 // 手动刷新 浮窗
-@property (nonatomic,assign,readonly) BOOL refreshEnable;
+@property (nonatomic,assign) BOOL refreshEnable;
 // web 中添加 log调试控制台
-@property (nonatomic,assign,readonly) BOOL logOutputWebEnable;
+@property (nonatomic,assign) BOOL logOutputWebEnable;
 // console.log 输出到 Xcode调试控制台
-@property (nonatomic,assign,readonly) BOOL logOutputXcodeEnable;
+@property (nonatomic,assign) BOOL logOutputXcodeEnable;
 // 弹窗显示 web异常  window.onerror
-@property (nonatomic,assign,readonly) BOOL alertWebErrorEnable;
+@property (nonatomic,assign) BOOL alertWebErrorEnable;
 // 禁用web长按弹出菜单
-@property (nonatomic,assign,readonly) BOOL touchCalloutEnable;
+@property (nonatomic,assign) BOOL touchCalloutEnable;
 @end

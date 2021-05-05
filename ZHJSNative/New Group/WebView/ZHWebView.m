@@ -64,7 +64,7 @@
     WKUserContentController *userContent = [[WKUserContentController alloc] init];
     
     // debug配置
-    ZHWebDebugItem *debugItem = [ZHWebDebugItem configuration:self];
+    ZHWebDebugItem *debugItem = [ZHWebDebugItem item:self];
     self.debugItem = debugItem;
     
     // 内置api

@@ -49,7 +49,7 @@
     self = [self initWithVirtualMachine:vm];
     if (self) {
         // debug配置
-        ZHCtxDebugItem *debugItem = [ZHCtxDebugItem configuration:self];
+        ZHCtxDebugItem *debugItem = [ZHCtxDebugItem item:self];
         self.debugItem = debugItem;
         
         // 内置api
