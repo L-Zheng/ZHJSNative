@@ -472,7 +472,7 @@ case cType:{\
 
 - (void)userContentController:(WKUserContentController *)userContentController didReceiveScriptMessage:(WKScriptMessage *)message {
     if ([message.name isEqualToString:ZHJSHandlerLogName]) {
-        NSLog(@"👉Web log >>: %@", message.body);
+        NSLog(@"👉Web log >>: %@\n", message.body);
         return;
     }
     if ([message.name isEqualToString:ZHJSHandlerErrorName]) {

@@ -51,6 +51,8 @@
 - (NSURL *)zh_runSandBoxURL;
 // pageitem
 - (ZHJSPageItem *)zh_pageItem;
+// pageId
+- (NSString *)zh_pageApplicationId;
 // api
 - (id <ZHJSPageApiOpProtocol>)zh_apiOp;
 @end

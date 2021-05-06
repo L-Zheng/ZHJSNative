@@ -1066,6 +1066,15 @@
 - (ZHJSPageItem *)zh_pageItem{
     return self.webItem;
 }
+// pageId
+- (NSString *)zh_pageApplicationId{
+    NSString *appId = self.webItem.appId;
+    if (!appId || ![appId isKindOfClass:NSString.class] || appId.length == 0) {
+        return [NSString stringWithFormat:@"%p", self];
+    }
+    return appId;
+}
+
 // api
 - (id <ZHJSPageApiOpProtocol>)zh_apiOp{
     return self.globalConfig.apiOpConfig;
