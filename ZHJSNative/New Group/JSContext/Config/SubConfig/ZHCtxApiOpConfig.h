@@ -7,7 +7,7 @@
 //
 
 #import "ZHCtxBaseConfig.h"
-#import "ZHJSPageItem.h"
+#import "ZHJSPageProtocol.h"
 
 /** 👉JSContext api配置 */
 @interface ZHCtxApiOpConfig : ZHCtxBaseConfig<ZHJSPageApiOpProtocol>

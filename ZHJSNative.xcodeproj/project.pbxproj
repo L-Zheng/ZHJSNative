@@ -188,6 +188,7 @@
 		8307D4E4EB21B8BB3CAF8B7E /* libPods-ZHJSNative.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ZHJSNative.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8505EC1324752EDB00628FD8 /* ZHCustomExtra1Api.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHCustomExtra1Api.h; sourceTree = "<group>"; };
 		8505EC1424752EDB00628FD8 /* ZHCustomExtra1Api.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHCustomExtra1Api.m; sourceTree = "<group>"; };
+		851EDB07264E6A5000970A3C /* ZHJSPageProtocol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHJSPageProtocol.h; sourceTree = "<group>"; };
 		8539A2E1246E9C2800FD7EFB /* ZHCustom2Api.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHCustom2Api.h; sourceTree = "<group>"; };
 		8539A2E2246E9C2800FD7EFB /* ZHCustom2Api.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHCustom2Api.m; sourceTree = "<group>"; };
 		856980802429E0F50042755A /* ZHCustomApi.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHCustomApi.h; sourceTree = "<group>"; };
@@ -541,6 +542,7 @@
 				0F247F9225B2C23000A2D8A3 /* ZHJSApiItem.m */,
 				8582282225AD97BF00FECFB9 /* ZHJSPageItem.h */,
 				8582282325AD97BF00FECFB9 /* ZHJSPageItem.m */,
+				851EDB07264E6A5000970A3C /* ZHJSPageProtocol.h */,
 				8581BAA8258F3075004E25DC /* ZHJSInApi.h */,
 				8581BAA9258F3075004E25DC /* ZHJSInApi.m */,
 			);

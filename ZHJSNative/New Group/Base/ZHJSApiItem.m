@@ -199,12 +199,14 @@
 @end
 
 @interface ZHJSApiArgItem ()
+@property (nonatomic, weak) id <ZHJSPageProtocol> jsPage;
 @property (nonatomic, strong) id jsData;
 @property (nonatomic, strong) ZHJSApiCallJsItem *callItem;
 @end
 @implementation ZHJSApiArgItem : NSObject
-+ (instancetype)item:(id)jsData callItem:(ZHJSApiCallJsItem *)callItem{
++ (instancetype)item:(id<ZHJSPageProtocol>)jsPage jsData:(id)jsData callItem:(ZHJSApiCallJsItem *)callItem{
     ZHJSApiArgItem *item = [[ZHJSApiArgItem alloc] init];
+    item.jsPage = ([jsPage conformsToProtocol:@protocol(ZHJSPageProtocol)] ? jsPage : nil);
     item.jsData = ((!jsData || [jsData isEqual:[NSNull null]]) ? nil : jsData);
     item.callItem = callItem;
     return item;

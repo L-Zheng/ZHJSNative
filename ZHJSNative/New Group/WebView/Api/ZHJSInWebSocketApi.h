@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "ZHJSApiProtocol.h"
-#import "ZHJSPageItem.h"
+#import "ZHJSPageProtocol.h"
 @class ZHWebView;
 
 NS_ASSUME_NONNULL_BEGIN

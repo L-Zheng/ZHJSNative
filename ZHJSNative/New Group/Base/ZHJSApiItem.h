@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "ZHJSPageProtocol.h"
 
 @interface ZHJSApiItem : NSObject
 
@@ -128,7 +129,8 @@ typedef ZHJSApiCallJsNativeResItem * (^ZHJSApiInCallBlock)(ZHJSApi_InCallBlock_A
 #pragma mark - js调用原生，原生接收的js参数
 
 @interface ZHJSApiArgItem : NSObject
-+ (instancetype)item:(id)jsData callItem:(ZHJSApiCallJsItem *)callItem;
++ (instancetype)item:(id<ZHJSPageProtocol>)jsPage jsData:(id)jsData callItem:(ZHJSApiCallJsItem *)callItem;
+@property (nonatomic, weak, readonly) id <ZHJSPageProtocol> jsPage;
 @property (nonatomic, strong, readonly) id jsData;
 @property (nonatomic, strong, readonly) ZHJSApiCallJsItem *callItem;
 - (NSDictionary *)jsonData;

@@ -7,7 +7,7 @@
 //
 
 #import "ZHWebBaseConfig.h"
-#import "ZHJSPageItem.h"
+#import "ZHJSPageProtocol.h"
 
 /** 👉web api 操作的UI配置 */
 @interface ZHWebApiOpConfig : ZHWebBaseConfig <ZHJSPageApiOpProtocol>

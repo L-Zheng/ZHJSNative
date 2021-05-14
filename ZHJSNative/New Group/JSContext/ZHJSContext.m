@@ -63,6 +63,7 @@
         // api处理配置
         ZHJSHandler *handler = [[ZHJSHandler alloc] init];
         handler.apiHandler = [[ZHJSApiHandler alloc] initWithApis:inApis apis:apis?:@[]];
+        handler.jsPage = self;
         handler.jsContext = self;
         self.handler = handler;
         

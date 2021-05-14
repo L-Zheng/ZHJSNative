@@ -49,7 +49,7 @@ NSString * const ZHCtxDebugEnableKey = @"ZHCtxDebugEnableKey";
 
 - (ZHCtxDebugItem *)getDebugItem:(NSString *)key{
     if (!key || ![key isKindOfClass:NSString.class] || key.length == 0) {
-        return nil;
+        return [ZHCtxDebugItem defaultItem];
     }
     if (!self.itemMap) {
         self.itemMap = [NSMutableDictionary dictionary];

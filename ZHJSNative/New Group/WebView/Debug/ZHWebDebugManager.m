@@ -49,7 +49,7 @@ NSString * const ZHWebDebugEnableKey = @"ZHWebDebugEnableKey";
 
 - (ZHWebDebugItem *)getDebugItem:(NSString *)key{
     if (!key || ![key isKindOfClass:NSString.class] || key.length == 0) {
-        return nil;
+        return [ZHWebDebugItem defaultItem];
     }
     if (!self.itemMap) {
         self.itemMap = [NSMutableDictionary dictionary];

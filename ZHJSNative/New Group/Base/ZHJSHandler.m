@@ -176,7 +176,7 @@ case cType:{\
             // 转换成原生类型
             id nativeValue = [__self jsValueToNative:jsArg];
             if (!nativeValue || ![nativeValue isKindOfClass:NSDictionary.class]) {
-                [resArgs addObject:[ZHJSApiArgItem item:nativeValue?:[NSNull null] callItem:[ZHJSApiCallJsItem itemWithSFCBlock:nil jsFuncArgBlock:jsFuncArgBlock]]];
+                [resArgs addObject:[ZHJSApiArgItem item:__self.jsPage jsData:nativeValue?:[NSNull null] callItem:[ZHJSApiCallJsItem itemWithSFCBlock:nil jsFuncArgBlock:jsFuncArgBlock]]];
                 continue;
             }
             
@@ -187,7 +187,7 @@ case cType:{\
             BOOL hasCallFunction = ([jsArg hasProperty:success] || [jsArg hasProperty:fail] || [jsArg hasProperty:complete]);
             //不需要回调方法
             if (!hasCallFunction) {
-                [resArgs addObject:[ZHJSApiArgItem item:nativeValue?:[NSNull null] callItem:[ZHJSApiCallJsItem itemWithSFCBlock:nil jsFuncArgBlock:jsFuncArgBlock]]];
+                [resArgs addObject:[ZHJSApiArgItem item:__self.jsPage jsData:nativeValue?:[NSNull null] callItem:[ZHJSApiCallJsItem itemWithSFCBlock:nil jsFuncArgBlock:jsFuncArgBlock]]];
                 continue;
             }
             //需要回调
@@ -250,7 +250,7 @@ case cType:{\
                 return [ZHJSApiCallJsNativeResItem item];
             };
             
-            [resArgs addObject:[ZHJSApiArgItem item:nativeValue?:[NSNull null] callItem:[ZHJSApiCallJsItem itemWithSFCBlock:block jsFuncArgBlock:nil]]];
+            [resArgs addObject:[ZHJSApiArgItem item:__self.jsPage jsData:nativeValue?:[NSNull null] callItem:[ZHJSApiCallJsItem itemWithSFCBlock:block jsFuncArgBlock:nil]]];
         }
         return [__self runNativeFunc:key apiPrefix:apiPrefix arguments:resArgs.copy];
     };
@@ -541,7 +541,7 @@ case cType:{\
     for (NSUInteger idx = 0; idx < jsArgs.count; idx++) {
         id jsArg = jsArgs[idx];
         if (![jsArg isKindOfClass:[NSDictionary class]]) {
-            [resArgs addObject:[ZHJSApiArgItem item:jsArg callItem:nil]];
+            [resArgs addObject:[ZHJSApiArgItem item:self.jsPage jsData:jsArg callItem:nil]];
             continue;
         }
         NSDictionary *newParams = (NSDictionary *)jsArg;
@@ -553,7 +553,7 @@ case cType:{\
         BOOL hasCallFunction = (successId.length || failId.length || completeId.length || jsFuncArgId.length);
         //不需要回调方法
         if (!hasCallFunction) {
-            [resArgs addObject:[ZHJSApiArgItem item:jsArg callItem:nil]];
+            [resArgs addObject:[ZHJSApiArgItem item:self.jsPage jsData:jsArg callItem:nil]];
             continue;
         }
         //js function 参数回调
@@ -572,7 +572,7 @@ case cType:{\
                 }];
                 return [ZHJSApiCallJsNativeResItem item];
             };
-            [resArgs addObject:[ZHJSApiArgItem item:jsArg callItem:[ZHJSApiCallJsItem itemWithSFCBlock:nil jsFuncArgBlock:block]]];
+            [resArgs addObject:[ZHJSApiArgItem item:self.jsPage jsData:jsArg callItem:[ZHJSApiCallJsItem itemWithSFCBlock:nil jsFuncArgBlock:block]]];
         }else{
             //js success/fail/complete 回调
             ZHJSApiInCallBlock block = ^ZHJSApi_InCallBlock_Header{
@@ -608,7 +608,7 @@ case cType:{\
                 }
                 return [ZHJSApiCallJsNativeResItem item];
             };
-            [resArgs addObject:[ZHJSApiArgItem item:jsArg callItem:[ZHJSApiCallJsItem itemWithSFCBlock:block jsFuncArgBlock:nil]]];
+            [resArgs addObject:[ZHJSApiArgItem item:self.jsPage jsData:jsArg callItem:[ZHJSApiCallJsItem itemWithSFCBlock:block jsFuncArgBlock:nil]]];
         }
     }
     return [self runNativeFunc:jsMethodName apiPrefix:apiPrefix arguments:resArgs.copy];
