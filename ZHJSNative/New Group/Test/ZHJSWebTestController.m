@@ -289,6 +289,13 @@
 
 - (void)zh_webView:(ZHWebView *)webView exception:(NSDictionary *)exception{
     
+    if (exception && [exception isKindOfClass:NSDictionary.class] && exception.allKeys.count > 0) {
+        // 此exception里面可能包含对象  序列化可能会导致崩溃  改为直接创建string
+//        NSData *data = [NSJSONSerialization dataWithJSONObject:exception options:NSJSONWritingPrettyPrinted error:nil];
+//        [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+        
+        [NSString stringWithFormat:@"%@", exception];
+    }
 }
 
 #pragma mark - ZHWebViewDebugSocketDelegate
