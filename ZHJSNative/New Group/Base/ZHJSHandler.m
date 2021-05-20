@@ -442,17 +442,18 @@ case cType:{\
     
     ZHErrorAlertController *alert = [ZHErrorAlertController alertControllerWithTitle:title message:[info description] preferredStyle:UIAlertControllerStyleAlert];
     __weak __typeof__(self) __self = self;
-    UIAlertAction *action = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
-    }];
-    UIAlertAction *action1 = [UIAlertAction actionWithTitle:@"关闭所有" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
+    [alert addAction:[UIAlertAction actionWithTitle:@"复制" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [UIPasteboard generalPasteboard].string = [info description];
+    }]];
+    [alert addAction:[UIAlertAction actionWithTitle:@"关闭" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
+    }]];
+    [alert addAction:[UIAlertAction actionWithTitle:@"关闭所有" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
         UIViewController *last = [__self fetchActivityCtrl].presentingViewController;
         while ([last isKindOfClass:[ZHErrorAlertController class]]) {
             last = last.presentingViewController;
         }
         [last dismissViewControllerAnimated:YES completion:nil];
-    }];
-    [alert addAction:action];
-    [alert addAction:action1];
+    }]];
     [[self fetchActivityCtrl] presentViewController:alert animated:YES completion:nil];
 }
 
