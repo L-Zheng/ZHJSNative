@@ -31,6 +31,9 @@ NSString * const ZHCtxDebugEnableKey = @"ZHCtxDebugEnableKey";
     [[NSUserDefaults standardUserDefaults] setObject:@(enable) forKey:ZHCtxDebugEnableKey];
     [[NSUserDefaults standardUserDefaults] synchronize];
     self.debugEnable_memory = @(enable);
+    
+    // 调试开关发生改变 移除全局debugItem
+    [self removeGlobalDebugItem];
 }
 - (void)setDebugEnableWhenNoStore:(BOOL)enable{
     NSNumber *res = [[NSUserDefaults standardUserDefaults] objectForKey:ZHCtxDebugEnableKey];
@@ -47,6 +50,9 @@ NSString * const ZHCtxDebugEnableKey = @"ZHCtxDebugEnableKey";
     return enable;
 }
 
+- (void)removeGlobalDebugItem{
+    [self.itemMap removeAllObjects];
+}
 - (ZHCtxDebugItem *)getDebugItem:(NSString *)key{
     if (!key || ![key isKindOfClass:NSString.class] || key.length == 0) {
         return [ZHCtxDebugItem defaultItem];
