@@ -213,30 +213,31 @@
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"切换调试模式" message:nil preferredStyle:UIAlertControllerStyleActionSheet];
     __weak __typeof__(self) __self = self;
     
-    
-    UIAlertAction *action0 = [UIAlertAction actionWithTitle:@"查看App注入的API" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+    [alert addAction:[UIAlertAction actionWithTitle:@"查看App注入的API" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         ZHJSApiListController *list = [[ZHJSApiListController alloc] initWithApiHandler:__self.webView.handler.apiHandler];
         UINavigationController *navi = [[UINavigationController alloc] initWithRootViewController:list];
         navi.modalPresentationStyle = UIModalPresentationFullScreen;
         [[__self fetchActivityCtrl] presentViewController:navi animated:YES completion:nil];
-    }];
-    UIAlertAction *action1 = [UIAlertAction actionWithTitle:ZHWebDebugDescByMode(ZHWebDebugMode_Release) style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+    }]];
+    [alert addAction:[UIAlertAction actionWithTitle:ZHWebDebugDescByMode(ZHWebDebugMode_Release) style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         [__self alertSheetSelected:action debugMode:ZHWebDebugMode_Release];
-    }];
-    UIAlertAction *action2 = [UIAlertAction actionWithTitle:ZHWebDebugDescByMode(ZHWebDebugMode_Online) style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+    }]];
+    [alert addAction:[UIAlertAction actionWithTitle:ZHWebDebugDescByMode(ZHWebDebugMode_Online) style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         [__self alertSheetSelected:action debugMode:ZHWebDebugMode_Online];
-    }];
-    UIAlertAction *action3 = [UIAlertAction actionWithTitle:ZHWebDebugDescByMode(ZHWebDebugMode_Local) style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+    }]];
+    if (TARGET_OS_SIMULATOR) [alert addAction:[UIAlertAction actionWithTitle:ZHWebDebugDescByMode(ZHWebDebugMode_Local) style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         [__self alertSheetSelected:action debugMode:ZHWebDebugMode_Local];
-    }];
-    UIAlertAction *action4 = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
-    }];
-    [alert addAction:action0];
-    [alert addAction:action1];
-    [alert addAction:action2];
-    if (TARGET_OS_SIMULATOR) [alert addAction:action3];
-    [alert addAction:action4];
-    [[self fetchActivityCtrl] presentViewController:alert animated:YES completion:nil];
+    }]];
+    [alert addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+    }]];    
+    UIViewController *ctrl = [self fetchActivityCtrl];
+    if ((UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)) {
+        UIPopoverPresentationController *popover = alert.popoverPresentationController;
+        popover.sourceView = ctrl.view;
+        popover.sourceRect = CGRectMake(ctrl.view.center.x - 1, ctrl.view.frame.size.height - 1, 2, 1);
+        popover.permittedArrowDirections = UIPopoverArrowDirectionDown;
+    }
+    [ctrl presentViewController:alert animated:YES completion:nil];
 }
 
 #pragma mark - Call ZHWebViewDebugSocketDelegate
