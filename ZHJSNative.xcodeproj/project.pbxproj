@@ -28,6 +28,20 @@
 		0F2629DA262A6EF900257DAC /* ZHDebugPanel.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F2629D9262A6EF900257DAC /* ZHDebugPanel.m */; };
 		0F5E33D9242F084E00623068 /* ZHCustom1Api.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F5E33D8242F084E00623068 /* ZHCustom1Api.m */; };
 		0F6807DD24016A0500E6B4C6 /* ZHJSApiHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F6807DC24016A0500E6B4C6 /* ZHJSApiHandler.m */; };
+		0F845D10265A39DC00626E96 /* min-error.js in Resources */ = {isa = PBXBuildFile; fileRef = 0F845D02265A39DB00626E96 /* min-error.js */; };
+		0F845D11265A39DC00626E96 /* min-socket.js in Resources */ = {isa = PBXBuildFile; fileRef = 0F845D03265A39DB00626E96 /* min-socket.js */; };
+		0F845D12265A39DC00626E96 /* errorEvent.js in Resources */ = {isa = PBXBuildFile; fileRef = 0F845D04265A39DB00626E96 /* errorEvent.js */; };
+		0F845D13265A39DC00626E96 /* min-event.js in Resources */ = {isa = PBXBuildFile; fileRef = 0F845D05265A39DB00626E96 /* min-event.js */; };
+		0F845D14265A39DC00626E96 /* min-log.js in Resources */ = {isa = PBXBuildFile; fileRef = 0F845D06265A39DB00626E96 /* min-log.js */; };
+		0F845D15265A39DC00626E96 /* event.js in Resources */ = {isa = PBXBuildFile; fileRef = 0F845D07265A39DB00626E96 /* event.js */; };
+		0F845D16265A39DC00626E96 /* shell-event.sh in Resources */ = {isa = PBXBuildFile; fileRef = 0F845D08265A39DB00626E96 /* shell-event.sh */; };
+		0F845D17265A39DC00626E96 /* socketEvent.js in Resources */ = {isa = PBXBuildFile; fileRef = 0F845D09265A39DB00626E96 /* socketEvent.js */; };
+		0F845D18265A39DC00626E96 /* shell-error.sh in Resources */ = {isa = PBXBuildFile; fileRef = 0F845D0A265A39DC00626E96 /* shell-error.sh */; };
+		0F845D19265A39DC00626E96 /* shell-log.sh in Resources */ = {isa = PBXBuildFile; fileRef = 0F845D0B265A39DC00626E96 /* shell-log.sh */; };
+		0F845D1A265A39DC00626E96 /* vconsole.min.js in Resources */ = {isa = PBXBuildFile; fileRef = 0F845D0C265A39DC00626E96 /* vconsole.min.js */; };
+		0F845D1B265A39DC00626E96 /* logEvent.js in Resources */ = {isa = PBXBuildFile; fileRef = 0F845D0D265A39DC00626E96 /* logEvent.js */; };
+		0F845D1C265A39DC00626E96 /* shell-socket.sh in Resources */ = {isa = PBXBuildFile; fileRef = 0F845D0E265A39DC00626E96 /* shell-socket.sh */; };
+		0F845D1D265A39DC00626E96 /* shell.sh in Resources */ = {isa = PBXBuildFile; fileRef = 0F845D0F265A39DC00626E96 /* shell.sh */; };
 		0F96C07B262B0ABD0030942B /* ZHDebugPanelContent.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F96C07A262B0ABD0030942B /* ZHDebugPanelContent.m */; };
 		0F96C091262B20470030942B /* ZHDebugPanelContentCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F96C090262B20470030942B /* ZHDebugPanelContentCell.m */; };
 		0F96C094262B20670030942B /* ZHDebugPanelContentHeader.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F96C093262B20670030942B /* ZHDebugPanelContentHeader.m */; };
@@ -130,6 +144,20 @@
 		0F5E33D8242F084E00623068 /* ZHCustom1Api.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHCustom1Api.m; sourceTree = "<group>"; };
 		0F6807DB24016A0500E6B4C6 /* ZHJSApiHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHJSApiHandler.h; sourceTree = "<group>"; };
 		0F6807DC24016A0500E6B4C6 /* ZHJSApiHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHJSApiHandler.m; sourceTree = "<group>"; };
+		0F845D02265A39DB00626E96 /* min-error.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = "min-error.js"; sourceTree = "<group>"; };
+		0F845D03265A39DB00626E96 /* min-socket.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = "min-socket.js"; sourceTree = "<group>"; };
+		0F845D04265A39DB00626E96 /* errorEvent.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = errorEvent.js; sourceTree = "<group>"; };
+		0F845D05265A39DB00626E96 /* min-event.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = "min-event.js"; sourceTree = "<group>"; };
+		0F845D06265A39DB00626E96 /* min-log.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = "min-log.js"; sourceTree = "<group>"; };
+		0F845D07265A39DB00626E96 /* event.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = event.js; sourceTree = "<group>"; };
+		0F845D08265A39DB00626E96 /* shell-event.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "shell-event.sh"; sourceTree = "<group>"; };
+		0F845D09265A39DB00626E96 /* socketEvent.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = socketEvent.js; sourceTree = "<group>"; };
+		0F845D0A265A39DC00626E96 /* shell-error.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "shell-error.sh"; sourceTree = "<group>"; };
+		0F845D0B265A39DC00626E96 /* shell-log.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "shell-log.sh"; sourceTree = "<group>"; };
+		0F845D0C265A39DC00626E96 /* vconsole.min.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = vconsole.min.js; sourceTree = "<group>"; };
+		0F845D0D265A39DC00626E96 /* logEvent.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = logEvent.js; sourceTree = "<group>"; };
+		0F845D0E265A39DC00626E96 /* shell-socket.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "shell-socket.sh"; sourceTree = "<group>"; };
+		0F845D0F265A39DC00626E96 /* shell.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = shell.sh; sourceTree = "<group>"; };
 		0F96C079262B0ABD0030942B /* ZHDebugPanelContent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHDebugPanelContent.h; sourceTree = "<group>"; };
 		0F96C07A262B0ABD0030942B /* ZHDebugPanelContent.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHDebugPanelContent.m; sourceTree = "<group>"; };
 		0F96C08F262B20470030942B /* ZHDebugPanelContentCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHDebugPanelContentCell.h; sourceTree = "<group>"; };
@@ -296,7 +324,7 @@
 				8505EC1324752EDB00628FD8 /* ZHCustomExtra1Api.h */,
 				8505EC1424752EDB00628FD8 /* ZHCustomExtra1Api.m */,
 				0F2629D1262A6E1800257DAC /* DebugPanel */,
-				85A4A3132440062C002AE903 /* New Group */,
+				85A4A3132440062C002AE903 /* JSNative */,
 				0F079866240104FA004AAFBC /* Main.storyboard */,
 				0F079869240104FB004AAFBC /* Assets.xcassets */,
 				0F07986B240104FB004AAFBC /* LaunchScreen.storyboard */,
@@ -345,13 +373,25 @@
 			path = DebugPanel;
 			sourceTree = "<group>";
 		};
-		0F5A908B260F6994003859D4 /* Controller */ = {
+		0F845D01265A39DB00626E96 /* Js */ = {
 			isa = PBXGroup;
 			children = (
-				0FCF2D2F260EFF3C003797EF /* ZHJSApiListController.h */,
-				0FCF2D30260EFF3C003797EF /* ZHJSApiListController.m */,
+				0F845D02265A39DB00626E96 /* min-error.js */,
+				0F845D03265A39DB00626E96 /* min-socket.js */,
+				0F845D04265A39DB00626E96 /* errorEvent.js */,
+				0F845D05265A39DB00626E96 /* min-event.js */,
+				0F845D06265A39DB00626E96 /* min-log.js */,
+				0F845D07265A39DB00626E96 /* event.js */,
+				0F845D08265A39DB00626E96 /* shell-event.sh */,
+				0F845D09265A39DB00626E96 /* socketEvent.js */,
+				0F845D0A265A39DC00626E96 /* shell-error.sh */,
+				0F845D0B265A39DC00626E96 /* shell-log.sh */,
+				0F845D0C265A39DC00626E96 /* vconsole.min.js */,
+				0F845D0D265A39DC00626E96 /* logEvent.js */,
+				0F845D0E265A39DC00626E96 /* shell-socket.sh */,
+				0F845D0F265A39DC00626E96 /* shell.sh */,
 			);
-			path = Controller;
+			path = Js;
 			sourceTree = "<group>";
 		};
 		0F96C082262B12180030942B /* Content */ = {
@@ -545,6 +585,8 @@
 				851EDB07264E6A5000970A3C /* ZHJSPageProtocol.h */,
 				8581BAA8258F3075004E25DC /* ZHJSInApi.h */,
 				8581BAA9258F3075004E25DC /* ZHJSInApi.m */,
+				0FCF2D2F260EFF3C003797EF /* ZHJSApiListController.h */,
+				0FCF2D30260EFF3C003797EF /* ZHJSApiListController.m */,
 			);
 			path = Base;
 			sourceTree = "<group>";
@@ -559,6 +601,7 @@
 				0FCF2CE6260EC1D7003797EF /* Debug */,
 				0FCF2CE5260EC1CA003797EF /* Config */,
 				853D438C25A9A23D00CF0D35 /* Api */,
+				85B578BB26352C180078281E /* Test */,
 			);
 			path = WebView;
 			sourceTree = "<group>";
@@ -575,16 +618,15 @@
 			path = JSContext;
 			sourceTree = "<group>";
 		};
-		85A4A3132440062C002AE903 /* New Group */ = {
+		85A4A3132440062C002AE903 /* JSNative */ = {
 			isa = PBXGroup;
 			children = (
-				85B578BB26352C180078281E /* Test */,
-				0F5A908B260F6994003859D4 /* Controller */,
+				0F845D01265A39DB00626E96 /* Js */,
 				8581BCB0258F55E5004E25DC /* Base */,
 				8581BCB1258F55EE004E25DC /* WebView */,
 				8581BCB2258F55F6004E25DC /* JSContext */,
 			);
-			path = "New Group";
+			path = JSNative;
 			sourceTree = "<group>";
 		};
 		85B578BB26352C180078281E /* Test */ = {
@@ -710,11 +752,25 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0F845D14265A39DC00626E96 /* min-log.js in Resources */,
 				0F07986D240104FB004AAFBC /* LaunchScreen.storyboard in Resources */,
+				0F845D16265A39DC00626E96 /* shell-event.sh in Resources */,
+				0F845D1B265A39DC00626E96 /* logEvent.js in Resources */,
 				0F07986A240104FB004AAFBC /* Assets.xcassets in Resources */,
+				0F845D15265A39DC00626E96 /* event.js in Resources */,
+				0F845D1A265A39DC00626E96 /* vconsole.min.js in Resources */,
+				0F845D1D265A39DC00626E96 /* shell.sh in Resources */,
+				0F845D19265A39DC00626E96 /* shell-log.sh in Resources */,
+				0F845D10265A39DC00626E96 /* min-error.js in Resources */,
+				0F845D17265A39DC00626E96 /* socketEvent.js in Resources */,
 				85B4FC9924349EA300CD910B /* EFEmoji.bundle in Resources */,
+				0F845D13265A39DC00626E96 /* min-event.js in Resources */,
+				0F845D1C265A39DC00626E96 /* shell-socket.sh in Resources */,
+				0F845D12265A39DC00626E96 /* errorEvent.js in Resources */,
 				0F079868240104FA004AAFBC /* Main.storyboard in Resources */,
 				0F0798A72401089A004AAFBC /* TestBundle.bundle in Resources */,
+				0F845D18265A39DC00626E96 /* shell-error.sh in Resources */,
+				0F845D11265A39DC00626E96 /* min-socket.js in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

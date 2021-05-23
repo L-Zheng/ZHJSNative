@@ -843,13 +843,10 @@ case cType:{\
 + (NSString *)jsSocketEventPath{
     return [self pathWithName:@"min-socket.js"];
 }
-+ (NSString *)jsVConsolePath{
-    return [self pathWithName:@"vconsole.min.js"];
-}
 + (NSString *)pathWithName:(NSString *)name{
+    return [[NSBundle mainBundle] pathForResource:name.stringByDeletingPathExtension ofType:name.pathExtension];
     NSBundle *bundle = [NSBundle bundleWithPath:[[NSBundle mainBundle] pathForResource:@"TestBundle" ofType:@"bundle"]];
-    NSString *destPath = [bundle pathForResource:name.stringByDeletingPathExtension ofType:name.pathExtension];
-    return destPath;
+    return [bundle pathForResource:name.stringByDeletingPathExtension ofType:name.pathExtension];
 }
 @end
 
