@@ -35,39 +35,28 @@
     return @"alertError";
 }
 - (BOOL)setWebDebugAlertErrorEnable:(BOOL)enable{
-    if ([self getWebDebugAlertErrorEnable] == enable) {
-        return YES;
-    }
-    BOOL res = [self storeWebDebugObj:self.webDebugAlertErrorKey value:@(enable)];
-    return res;
+    return [self module_int_setWebDebug:enable debugKey:self.webDebugAlertErrorKey defaultNum:0];
 }
 - (BOOL)getWebDebugAlertErrorEnable{
-    id obj = [self readWebDebugObj:self.webDebugAlertErrorKey];
-    return ((obj && [obj isKindOfClass:[NSNumber class]]) ? [obj boolValue] : NO);
+    return [self module_int_getWebDebug:self.webDebugAlertErrorKey defaultNum:0];
 }
 
 - (NSString *)webDebugGlobalKey{
     return @"DebugGlobal";
 }
 - (BOOL)setWebDebugGlobalEnable:(BOOL)enable{
-    if ([self getWebDebugGlobalEnable] == enable) {
-        return YES;
+    BOOL res = [self module_int_setWebDebug:enable debugKey:self.webDebugGlobalKey defaultNum:0];
+    if (res) {
+        // 调试开关发生改变 移除全局debugItem
+        [self removeWebDebugGlobalItem];
     }
-    BOOL res = [self storeWebDebugObj:self.webDebugGlobalKey value:@(enable)];
-    
-    // 调试开关发生改变 移除全局debugItem
-    [self removeWebDebugGlobalItem];
-    
     return res;
 }
 - (BOOL)setWebDebugGlobalEnableWhenNoStore:(BOOL)enable{
-    id obj = [self readWebDebugObj:self.webDebugGlobalKey];
-    if (obj) return YES;
-    return [self setWebDebugGlobalEnable:enable];
+    return [self module_int_setWebDebugWhenNoStore:enable debugKey:self.webDebugGlobalKey defaultNum:0];
 }
 - (BOOL)getWebDebugGlobalEnable{
-    id obj = [self readWebDebugObj:self.webDebugGlobalKey];
-    return ((obj && [obj isKindOfClass:[NSNumber class]]) ? [obj boolValue] : NO);
+    return [self module_int_getWebDebug:self.webDebugGlobalKey defaultNum:0];
 }
 
 - (void)removeWebDebugGlobalItem{
@@ -86,6 +75,22 @@
         [self.itemWebMap setObject:item forKey:key];
     }
     return item;
+}
+
+- (BOOL)module_int_setWebDebug:(int)targetNum debugKey:(NSString *)debugKey defaultNum:(int)defaultNum{
+    if ([self module_int_getWebDebug:debugKey defaultNum:defaultNum] == targetNum) {
+        return YES;
+    }
+    return [self storeWebDebugObj:debugKey value:@(targetNum)];
+}
+- (BOOL)module_int_setWebDebugWhenNoStore:(int)targetNum debugKey:(NSString *)debugKey defaultNum:(int)defaultNum{
+    id obj = [self readWebDebugObj:debugKey];
+    if (obj) return YES;
+    return [self module_int_setWebDebug:targetNum debugKey:debugKey defaultNum:defaultNum];
+}
+- (int)module_int_getWebDebug:(NSString *)debugKey defaultNum:(int)defaultNum{
+    id obj = [self readWebDebugObj:debugKey];
+    return ((obj && [obj isKindOfClass:[NSNumber class]]) ? [obj intValue] : defaultNum);
 }
 
 - (NSString *)storeWebDebugFilePath{
@@ -116,39 +121,28 @@
     return @"alertError";
 }
 - (BOOL)setCtxDebugAlertErrorEnable:(BOOL)enable{
-    if ([self getCtxDebugAlertErrorEnable] == enable) {
-        return YES;
-    }
-    BOOL res = [self storeCtxDebugObj:self.ctxDebugAlertErrorKey value:@(enable)];
-    return res;
+    return [self module_int_setCtxDebug:enable debugKey:self.ctxDebugAlertErrorKey defaultNum:0];
 }
 - (BOOL)getCtxDebugAlertErrorEnable{
-    id obj = [self readCtxDebugObj:self.ctxDebugAlertErrorKey];
-    return ((obj && [obj isKindOfClass:[NSNumber class]]) ? [obj boolValue] : NO);
+    return [self module_int_getCtxDebug:self.ctxDebugAlertErrorKey defaultNum:0];
 }
 
 - (NSString *)ctxDebugGlobalKey{
     return @"DebugGlobal";
 }
 - (BOOL)setCtxDebugGlobalEnable:(BOOL)enable{
-    if ([self getCtxDebugGlobalEnable] == enable) {
-        return YES;
+    BOOL res = [self module_int_setCtxDebug:enable debugKey:self.ctxDebugGlobalKey defaultNum:0];
+    if (res) {
+        // 调试开关发生改变 移除全局debugItem
+        [self removeCtxDebugGlobalItem];
     }
-    BOOL res = [self storeCtxDebugObj:self.ctxDebugGlobalKey value:@(enable)];
-    
-    // 调试开关发生改变 移除全局debugItem
-    [self removeCtxDebugGlobalItem];
-    
     return res;
 }
 - (BOOL)setCtxDebugGlobalEnableWhenNoStore:(BOOL)enable{
-    id obj = [self readCtxDebugObj:self.ctxDebugGlobalKey];
-    if (obj) return YES;
-    return [self setCtxDebugGlobalEnable:enable];
+    return [self module_int_setCtxDebugWhenNoStore:enable debugKey:self.ctxDebugGlobalKey defaultNum:0];
 }
 - (BOOL)getCtxDebugGlobalEnable{
-    id obj = [self readCtxDebugObj:self.ctxDebugGlobalKey];
-    return ((obj && [obj isKindOfClass:[NSNumber class]]) ? [obj boolValue] : NO);
+    return [self module_int_getCtxDebug:self.ctxDebugGlobalKey defaultNum:0];
 }
 
 - (void)removeCtxDebugGlobalItem{
@@ -167,6 +161,22 @@
         [self.itemCtxMap setObject:item forKey:key];
     }
     return item;
+}
+
+- (BOOL)module_int_setCtxDebug:(int)targetNum debugKey:(NSString *)debugKey defaultNum:(int)defaultNum{
+    if ([self module_int_getCtxDebug:debugKey defaultNum:defaultNum] == targetNum) {
+        return YES;
+    }
+    return [self storeCtxDebugObj:debugKey value:@(targetNum)];
+}
+- (BOOL)module_int_setCtxDebugWhenNoStore:(int)targetNum debugKey:(NSString *)debugKey defaultNum:(int)defaultNum{
+    id obj = [self readCtxDebugObj:debugKey];
+    if (obj) return YES;
+    return [self module_int_setCtxDebug:targetNum debugKey:debugKey defaultNum:defaultNum];
+}
+- (int)module_int_getCtxDebug:(NSString *)debugKey defaultNum:(int)defaultNum{
+    id obj = [self readCtxDebugObj:debugKey];
+    return ((obj && [obj isKindOfClass:[NSNumber class]]) ? [obj intValue] : defaultNum);
 }
 
 - (NSString *)storeCtxDebugFilePath{
