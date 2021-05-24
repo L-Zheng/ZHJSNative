@@ -10,7 +10,7 @@
 #import <WebKit/WebKit.h>
 #import "ZHJSApiProtocol.h"
 #import "ZHWebConfig.h"
-#import "ZHWebDebugManager.h"
+#import "ZHJSDebugManager.h"
 #import "ZHJSPageItem.h" // WebView/JSContext页面信息数据
 @class ZHWebView;
 @class ZHJSHandler;

@@ -7,7 +7,7 @@
 //
 
 #import "ZHWebDebugItem.h"
-#import "ZHWebDebugManager.h"
+#import "ZHJSDebugManager.h"
 #import "ZHWebView.h"
 #import "ZHJSApiListController.h"
 #import "ZHJSHandler.h"
@@ -27,7 +27,7 @@
     return item;
 }
 + (instancetype)item:(ZHWebView *)webView{
-    ZHWebDebugItem *item = [ZHWebDebugMg() getDebugItem:webView.globalConfig.mpConfig.appId];
+    ZHWebDebugItem *item = [ZHJSDebugMg() getWebDebugGlobalItem:webView.globalConfig.mpConfig.appId];
     
     ZHWebDebugItem *resItem = [item sameItem];
     resItem.webView = webView;
@@ -44,13 +44,13 @@
     self.localUrlStr = item ? item.localUrlStr : nil;
     self.webView = item ? item.webView : nil;
     
-    BOOL globalDebugEnable = [ZHWebDebugMg() getDebugEnable];
+    BOOL globalDebugEnable = [ZHJSDebugMg() getWebDebugGlobalEnable];
     
     self.debugModeEnable = item ? item.debugModeEnable : globalDebugEnable;
     self.refreshEnable = item ? item.refreshEnable : globalDebugEnable;
     self.logOutputWebEnable = item ? item.logOutputWebEnable : globalDebugEnable;
     self.logOutputXcodeEnable = item ? item.logOutputXcodeEnable : globalDebugEnable;
-    self.alertWebErrorEnable = item ? item.alertWebErrorEnable : globalDebugEnable;
+    self.alertWebErrorEnable = item ? item.alertWebErrorEnable : [ZHJSDebugMg() getWebDebugAlertErrorEnable];
     self.touchCalloutEnable = item ? item.touchCalloutEnable : globalDebugEnable;
 }
 
@@ -93,7 +93,7 @@
         NSString *urlStr = [alert.textFields.firstObject text];
         if (urlStr.length == 0) return;
         
-        ZHWebDebugItem *item = [ZHWebDebugMg() getDebugItem:__self.webView.globalConfig.mpConfig.appId];
+        ZHWebDebugItem *item = [ZHJSDebugMg() getWebDebugGlobalItem:__self.webView.globalConfig.mpConfig.appId];
         item.socketUrlStr = urlStr;
         item.debugMode = debugMode;
         
@@ -148,7 +148,7 @@
         NSString *urlStr = [alert.textFields.firstObject text];
         if (urlStr.length == 0) return;
         
-        ZHWebDebugItem *item = [ZHWebDebugMg() getDebugItem:__self.webView.globalConfig.mpConfig.appId];
+        ZHWebDebugItem *item = [ZHJSDebugMg() getWebDebugGlobalItem:__self.webView.globalConfig.mpConfig.appId];
         item.localUrlStr = urlStr;
         item.debugMode = debugMode;
         
@@ -186,7 +186,7 @@
     }];
     UIAlertAction *ac3 = [UIAlertAction actionWithTitle:@"App全局设置" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull actionT) {
         
-        ZHWebDebugItem *item = [ZHWebDebugMg() getDebugItem:__self.webView.globalConfig.mpConfig.appId];
+        ZHWebDebugItem *item = [ZHJSDebugMg() getWebDebugGlobalItem:__self.webView.globalConfig.mpConfig.appId];
         item.debugMode = debugMode;
         
         __self.debugMode = debugMode;

@@ -13,7 +13,7 @@
 #import "ZHJSApiProtocol.h"
 #import "ZHJSContext.h"
 #import "ZHWebViewManager.h"
-#import "ZHCtxDebugManager.h"
+#import "ZHJSDebugManager.h"
 #import "ZHCustomApi.h"
 #import "ZHCustom1Api.h"
 #import "ZHCustomExtra1Api.h"

@@ -213,10 +213,10 @@
 //    setAllowUniversalAccessFromFileURLs(false);
     
     // 设置是否允许通过 file url 加载的 Js代码读取其他的本地文件
-    if ([ZHWebDebugMg() availableIOS9]) {
+    if ([ZHJSDebugMg() availableIOS9]) {
         [wkConfig.preferences setValue:@YES forKey:@"allowFileAccessFromFileURLs"];
     }
-    if ([ZHWebDebugMg() availableIOS10]) {
+    if ([ZHJSDebugMg() availableIOS10]) {
         // 设置是否允许通过 file url 加载的 Javascript 可以访问其他的源(包括http、https等源)
         [wkConfig setValue:@YES forKey:@"allowUniversalAccessFromFileURLs"];
     }
@@ -303,7 +303,7 @@
     //禁用链接预览
     //    [webView setAllowsLinkPreview:NO];
     
-    if ([ZHWebDebugMg() availableIOS11]) {
+    if ([ZHJSDebugMg() availableIOS11]) {
         self.scrollView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
     }
     
@@ -472,7 +472,7 @@
         callBack(nil, ZHInlineError(404, ZHLCInlineString(@"file path is directory. %@", extraErrorDesc)));
         return;
     }
-    if ([ZHWebDebugMg() availableIOS9]) {
+    if ([ZHJSDebugMg() availableIOS9]) {
         NSURL *fileURL = [ZHWebView fileURLWithPath:path isDirectory:NO];
         if (!fileURL) {
             callBack(nil, ZHInlineError(404, ZHLCInlineString(@"parse url params is failed. %@", extraErrorDesc)));
@@ -895,7 +895,7 @@
 //}
 //当WKWebView总体内存占用过大，页面即将白屏的时候，系统会调用上面的回调函数，我们在该函数里执行[webView reload]（这个时候webView.URL取值尚不为零）解决白屏问题。在一些高内存消耗的页面可能会频繁刷新当前页面
 - (void)webViewWebContentProcessDidTerminate:(WKWebView *)webView{
-    if ([ZHWebDebugMg() availableIOS9]) {
+    if ([ZHJSDebugMg() availableIOS9]) {
         // webview content进程被系统终结，抛出异常
         NSDictionary *exceptionInfo = @{
             @"reason": @"The web view whose underlying web content process was terminated.",
@@ -929,7 +929,7 @@
     return nil;
 }
 - (void)webViewDidClose:(WKWebView *)webView{
-    if (![ZHWebDebugMg() availableIOS9]) return;
+    if (![ZHJSDebugMg() availableIOS9]) return;
     id <ZHWKUIDelegate> de = self.zh_UIDelegate;
     if (ZHCheckDelegate(de, _cmd)) {
         return [de webViewDidClose:webView];
@@ -1151,7 +1151,7 @@
 //获取webView准备运行沙盒
 - (NSString *)fetchReadyRunSandBox{
     NSString *boxFolder = [NSString stringWithFormat:@"%p", self];
-    if ([ZHWebDebugMg() availableIOS9]) {
+    if ([ZHJSDebugMg() availableIOS9]) {
         return [ZHWebViewFolder() stringByAppendingPathComponent:boxFolder];
     }
     return [ZHWebViewTmpFolder() stringByAppendingPathComponent:boxFolder];
@@ -1222,7 +1222,7 @@
 #pragma mark - clear
 
 - (void)clearWebViewSystemCache{
-    if ([ZHWebDebugMg() availableIOS9]) {
+    if ([ZHJSDebugMg() availableIOS9]) {
         WKWebsiteDataStore *dataSource = [WKWebsiteDataStore defaultDataStore];
 //        NSMutableSet *set = [WKWebsiteDataStore allWebsiteDataTypes];
         NSMutableSet *set = [NSMutableSet set];

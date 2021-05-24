@@ -7,7 +7,7 @@
 //
 
 #import "ZHCtxDebugItem.h"
-#import "ZHCtxDebugManager.h"
+#import "ZHJSDebugManager.h"
 #import "ZHJSContext.h"
 
 @interface ZHCtxDebugItem ()
@@ -21,7 +21,7 @@
     return item;
 }
 + (instancetype)item:(ZHJSContext *)jsContext{
-    ZHCtxDebugItem *item = [ZHCtxDebugMg() getDebugItem:jsContext.globalConfig.mpConfig.appId];
+    ZHCtxDebugItem *item = [ZHJSDebugMg() getCtxDebugGlobalItem:jsContext.globalConfig.mpConfig.appId];
     
     ZHCtxDebugItem *resItem = [item sameItem];
     resItem.jsContext = jsContext;
@@ -36,10 +36,10 @@
     self.debugMode = item ? item.debugMode : ZHCtxDebugMode_Release;
     self.jsContext = item ? item.jsContext : nil;
     
-    BOOL globalDebugEnable = [ZHCtxDebugMg() getDebugEnable];
+    BOOL globalDebugEnable = [ZHJSDebugMg() getCtxDebugGlobalEnable];
     
     self.debugModeEnable = item ? item.debugModeEnable : globalDebugEnable;
     self.logOutputXcodeEnable = item ? item.logOutputXcodeEnable : globalDebugEnable;
-    self.alertCtxErrorEnable = item ? item.alertCtxErrorEnable : globalDebugEnable;
+    self.alertCtxErrorEnable = item ? item.alertCtxErrorEnable : [ZHJSDebugMg() getCtxDebugAlertErrorEnable];
 }
 @end

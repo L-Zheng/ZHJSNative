@@ -71,6 +71,38 @@
     ];
 }
 
+- (void)c{
+    UILabel *badgeLabel = [[UILabel alloc] init];
+    badgeLabel.textAlignment = NSTextAlignmentCenter;
+    badgeLabel.clipsToBounds = YES;
+    badgeLabel.layer.masksToBounds = YES;
+    badgeLabel.font = [UIFont systemFontOfSize:17];
+    badgeLabel.backgroundColor = [UIColor redColor];
+    badgeLabel.textColor = [UIColor whiteColor];
+    badgeLabel.text = @"发非爱";
+    
+    BOOL isHaveBadgeText = (badgeLabel.text && badgeLabel.text.length > 0);
+    
+    CGSize fitSize = [badgeLabel.text boundingRectWithSize:CGSizeMake(10000, 10000) options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName: badgeLabel.font} context:nil].size;
+//    CGFloat limitH = 24.0;  ios系统图标高度24
+    CGFloat limitH = fitSize.height + 4.0;
+    
+    if (badgeLabel.text.length == 1) {
+        fitSize.width = limitH;
+    }else{
+        fitSize.width += 2 * 5;
+        if (fitSize.width < limitH) fitSize.width = limitH;
+    }
+    CGFloat bageX = 10;
+    CGFloat bageY = 300;
+    CGFloat bageH = isHaveBadgeText ? ceilf((limitH) * 10.0) / 10.0 : 10;
+    CGFloat bageW = isHaveBadgeText ? ceilf((fitSize.width) * 10.0) / 10.0 : 10;
+    badgeLabel.layer.cornerRadius = bageH * 0.5;
+    badgeLabel.frame = CGRectMake(bageX, bageY, bageW, bageH);
+    
+    [self.view addSubview:badgeLabel];
+}
+
 #pragma mark - UITableViewDelegate
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{

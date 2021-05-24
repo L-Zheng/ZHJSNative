@@ -58,7 +58,6 @@
 		0FCF2CF9260EC462003797EF /* ZHWebMpConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 0FCF2CF8260EC462003797EF /* ZHWebMpConfig.m */; };
 		0FCF2CFC260EC54F003797EF /* ZHWebApiOpConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 0FCF2CFB260EC54F003797EF /* ZHWebApiOpConfig.m */; };
 		0FCF2D00260EC67E003797EF /* ZHWebFetchConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 0FCF2CFF260EC67E003797EF /* ZHWebFetchConfig.m */; };
-		0FCF2D06260EC8F8003797EF /* ZHWebDebugManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 0FCF2D05260EC8F8003797EF /* ZHWebDebugManager.m */; };
 		0FCF2D09260EC92A003797EF /* ZHWebDebugItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 0FCF2D08260EC92A003797EF /* ZHWebDebugItem.m */; };
 		0FCF2D14260EEE5D003797EF /* ZHCtxBaseConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 0FCF2D13260EEE5D003797EF /* ZHCtxBaseConfig.m */; };
 		0FCF2D17260EEE77003797EF /* ZHCtxConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 0FCF2D16260EEE77003797EF /* ZHCtxConfig.m */; };
@@ -66,7 +65,6 @@
 		0FCF2D1F260EEEC9003797EF /* ZHCtxLoadConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 0FCF2D1E260EEEC9003797EF /* ZHCtxLoadConfig.m */; };
 		0FCF2D22260EEED7003797EF /* ZHCtxApiOpConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 0FCF2D21260EEED7003797EF /* ZHCtxApiOpConfig.m */; };
 		0FCF2D25260EEEE2003797EF /* ZHCtxMpConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 0FCF2D24260EEEE2003797EF /* ZHCtxMpConfig.m */; };
-		0FCF2D28260EEF27003797EF /* ZHCtxDebugManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 0FCF2D27260EEF27003797EF /* ZHCtxDebugManager.m */; };
 		0FCF2D2B260EEF32003797EF /* ZHCtxDebugItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 0FCF2D2A260EEF32003797EF /* ZHCtxDebugItem.m */; };
 		0FCF2D31260EFF3C003797EF /* ZHJSApiListController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0FCF2D30260EFF3C003797EF /* ZHJSApiListController.m */; };
 		691B8C90D053DEAA69AFA968 /* libPods-ZHJSNative.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8307D4E4EB21B8BB3CAF8B7E /* libPods-ZHJSNative.a */; };
@@ -80,6 +78,7 @@
 		8581BABC258F3755004E25DC /* ZHJSInWebFundApi.m in Sources */ = {isa = PBXBuildFile; fileRef = 8581BABB258F3755004E25DC /* ZHJSInWebFundApi.m */; };
 		8581BAC5258F3795004E25DC /* ZHJSInCtxFundApi.m in Sources */ = {isa = PBXBuildFile; fileRef = 8581BAC4258F3795004E25DC /* ZHJSInCtxFundApi.m */; };
 		8582282425AD97BF00FECFB9 /* ZHJSPageItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 8582282325AD97BF00FECFB9 /* ZHJSPageItem.m */; };
+		85929110265B6E8C004EA584 /* ZHJSDebugManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 8592910F265B6E8C004EA584 /* ZHJSDebugManager.m */; };
 		85A4A30F243FF80A002AE903 /* ZHWebViewManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 85A4A30E243FF80A002AE903 /* ZHWebViewManager.m */; };
 		85A4A3122440003C002AE903 /* ZHEmotion.m in Sources */ = {isa = PBXBuildFile; fileRef = 85A4A3112440003C002AE903 /* ZHEmotion.m */; };
 		85B4FC9924349EA300CD910B /* EFEmoji.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 85B4FC9824349EA300CD910B /* EFEmoji.bundle */; };
@@ -190,8 +189,6 @@
 		0FCF2CFB260EC54F003797EF /* ZHWebApiOpConfig.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHWebApiOpConfig.m; sourceTree = "<group>"; };
 		0FCF2CFE260EC67E003797EF /* ZHWebFetchConfig.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHWebFetchConfig.h; sourceTree = "<group>"; };
 		0FCF2CFF260EC67E003797EF /* ZHWebFetchConfig.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHWebFetchConfig.m; sourceTree = "<group>"; };
-		0FCF2D04260EC8F8003797EF /* ZHWebDebugManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHWebDebugManager.h; sourceTree = "<group>"; };
-		0FCF2D05260EC8F8003797EF /* ZHWebDebugManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHWebDebugManager.m; sourceTree = "<group>"; };
 		0FCF2D07260EC92A003797EF /* ZHWebDebugItem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHWebDebugItem.h; sourceTree = "<group>"; };
 		0FCF2D08260EC92A003797EF /* ZHWebDebugItem.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHWebDebugItem.m; sourceTree = "<group>"; };
 		0FCF2D12260EEE5D003797EF /* ZHCtxBaseConfig.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHCtxBaseConfig.h; sourceTree = "<group>"; };
@@ -206,8 +203,6 @@
 		0FCF2D21260EEED7003797EF /* ZHCtxApiOpConfig.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHCtxApiOpConfig.m; sourceTree = "<group>"; };
 		0FCF2D23260EEEE2003797EF /* ZHCtxMpConfig.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHCtxMpConfig.h; sourceTree = "<group>"; };
 		0FCF2D24260EEEE2003797EF /* ZHCtxMpConfig.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHCtxMpConfig.m; sourceTree = "<group>"; };
-		0FCF2D26260EEF27003797EF /* ZHCtxDebugManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHCtxDebugManager.h; sourceTree = "<group>"; };
-		0FCF2D27260EEF27003797EF /* ZHCtxDebugManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHCtxDebugManager.m; sourceTree = "<group>"; };
 		0FCF2D29260EEF32003797EF /* ZHCtxDebugItem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHCtxDebugItem.h; sourceTree = "<group>"; };
 		0FCF2D2A260EEF32003797EF /* ZHCtxDebugItem.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHCtxDebugItem.m; sourceTree = "<group>"; };
 		0FCF2D2F260EFF3C003797EF /* ZHJSApiListController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHJSApiListController.h; sourceTree = "<group>"; };
@@ -236,6 +231,8 @@
 		8581BAC4258F3795004E25DC /* ZHJSInCtxFundApi.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHJSInCtxFundApi.m; sourceTree = "<group>"; };
 		8582282225AD97BF00FECFB9 /* ZHJSPageItem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHJSPageItem.h; sourceTree = "<group>"; };
 		8582282325AD97BF00FECFB9 /* ZHJSPageItem.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHJSPageItem.m; sourceTree = "<group>"; };
+		8592910E265B6E8C004EA584 /* ZHJSDebugManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHJSDebugManager.h; sourceTree = "<group>"; };
+		8592910F265B6E8C004EA584 /* ZHJSDebugManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHJSDebugManager.m; sourceTree = "<group>"; };
 		85A4A30D243FF80A002AE903 /* ZHWebViewManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHWebViewManager.h; sourceTree = "<group>"; };
 		85A4A30E243FF80A002AE903 /* ZHWebViewManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHWebViewManager.m; sourceTree = "<group>"; };
 		85A4A3102440003C002AE903 /* ZHEmotion.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHEmotion.h; sourceTree = "<group>"; };
@@ -468,8 +465,6 @@
 		0FCF2CE6260EC1D7003797EF /* Debug */ = {
 			isa = PBXGroup;
 			children = (
-				0FCF2D04260EC8F8003797EF /* ZHWebDebugManager.h */,
-				0FCF2D05260EC8F8003797EF /* ZHWebDebugManager.m */,
 				0FCF2D07260EC92A003797EF /* ZHWebDebugItem.h */,
 				0FCF2D08260EC92A003797EF /* ZHWebDebugItem.m */,
 			);
@@ -503,8 +498,6 @@
 		0FCF2D0D260EEDB6003797EF /* Debug */ = {
 			isa = PBXGroup;
 			children = (
-				0FCF2D26260EEF27003797EF /* ZHCtxDebugManager.h */,
-				0FCF2D27260EEF27003797EF /* ZHCtxDebugManager.m */,
 				0FCF2D29260EEF32003797EF /* ZHCtxDebugItem.h */,
 				0FCF2D2A260EEF32003797EF /* ZHCtxDebugItem.m */,
 			);
@@ -618,9 +611,19 @@
 			path = JSContext;
 			sourceTree = "<group>";
 		};
+		8592910D265B6E48004EA584 /* Debug */ = {
+			isa = PBXGroup;
+			children = (
+				8592910E265B6E8C004EA584 /* ZHJSDebugManager.h */,
+				8592910F265B6E8C004EA584 /* ZHJSDebugManager.m */,
+			);
+			path = Debug;
+			sourceTree = "<group>";
+		};
 		85A4A3132440062C002AE903 /* JSNative */ = {
 			isa = PBXGroup;
 			children = (
+				8592910D265B6E48004EA584 /* Debug */,
 				0F845D01265A39DB00626E96 /* Js */,
 				8581BCB0258F55E5004E25DC /* Base */,
 				8581BCB1258F55EE004E25DC /* WebView */,
@@ -846,7 +849,7 @@
 				0F96C09B262C1C1F0030942B /* ZHDebugPanelSearch.m in Sources */,
 				0F96C07B262B0ABD0030942B /* ZHDebugPanelContent.m in Sources */,
 				0FCF2D2B260EEF32003797EF /* ZHCtxDebugItem.m in Sources */,
-				0FCF2D06260EC8F8003797EF /* ZHWebDebugManager.m in Sources */,
+				85929110265B6E8C004EA584 /* ZHJSDebugManager.m in Sources */,
 				0F96C0AB262C24910030942B /* ZHDebugPanelContentIM.m in Sources */,
 				0F2629DA262A6EF900257DAC /* ZHDebugPanel.m in Sources */,
 				0FCF2CEF260EC2C7003797EF /* ZHWebConfig.m in Sources */,
@@ -875,7 +878,6 @@
 				856980822429E0F50042755A /* ZHCustomApi.m in Sources */,
 				0FCF2D1C260EEEBD003797EF /* ZHCtxCreateConfig.m in Sources */,
 				8581BA95258F2579004E25DC /* NSError+ZH.m in Sources */,
-				0FCF2D28260EEF27003797EF /* ZHCtxDebugManager.m in Sources */,
 				0FCF2CF9260EC462003797EF /* ZHWebMpConfig.m in Sources */,
 				85A4A3122440003C002AE903 /* ZHEmotion.m in Sources */,
 				0F2629D7262A6EEE00257DAC /* ZHDebugPanelOption.m in Sources */,

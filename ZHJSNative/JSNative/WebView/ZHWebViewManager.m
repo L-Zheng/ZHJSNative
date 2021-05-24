@@ -136,7 +136,7 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
         [self opMap:self.websMap key:key webView:web add:NO];
 
         ZHWebDebugMode cMode = web.debugItem.debugMode;
-        ZHWebDebugMode gMode = [ZHWebDebugMg() getDebugItem:web.globalConfig.mpConfig.appId].debugMode;
+        ZHWebDebugMode gMode = [ZHJSDebugMg() getWebDebugGlobalItem:web.globalConfig.mpConfig.appId].debugMode;
         return (cMode == gMode ? web : nil);
     }
     return nil;
@@ -543,7 +543,7 @@ NSInteger const ZHWebViewPreLoadingMaxCount = 1;
 
 //清理WebView加载缓存
 - (void)cleanWebViewLoadCache{
-    if ([ZHWebDebugMg() availableIOS9]) {
+    if ([ZHJSDebugMg() availableIOS9]) {
         [self cleanWebViewLoadCache:ZHWebViewFolder()];
         return;
     }
