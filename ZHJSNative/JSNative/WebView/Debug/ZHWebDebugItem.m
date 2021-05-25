@@ -66,15 +66,6 @@
 - (void)alertDebugModeOnline:(UIAlertAction *)action debugMode:(ZHWebDebugMode)debugMode{
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:action.title message:@"该模式将会监听代码改动，同步刷新页面UI。\n在Web项目目录下运行 yarn serve，将http地址填在此处【如：http://192.168.2.21:8080】。" preferredStyle:UIAlertControllerStyleAlert];
     
-    NSString *debugOnlineUrlCacheKey = @"ZHWebViewDebugOnlineUrlCacheKey";
-    void (^cacheBlock)(NSString *) = ^(NSString *urlStr){
-        [[NSUserDefaults standardUserDefaults] setValue:urlStr forKey:debugOnlineUrlCacheKey];
-        [[NSUserDefaults standardUserDefaults] synchronize];
-    };
-    NSString* (^fetchCacheBlock)(void) = ^NSString *(void){
-        return [[NSUserDefaults standardUserDefaults] valueForKey:debugOnlineUrlCacheKey];
-    };
-    
     __weak __typeof__(self) __self = self;
     UIAlertAction *ac1 = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull actionT){
     }];
@@ -85,7 +76,7 @@
         __self.socketUrlStr = urlStr;
         __self.debugMode = debugMode;
         
-        cacheBlock(urlStr);
+        [ZHJSDebugMg() readWebDebugObj:[ZHJSDebugMg() webDebugSocketUrlKey]];
         
         [__self doSwitchDebugMode:debugMode];
     }];
@@ -100,14 +91,14 @@
         __self.socketUrlStr = urlStr;
         __self.debugMode = debugMode;
         
-        cacheBlock(urlStr);
+        [ZHJSDebugMg() readWebDebugObj:[ZHJSDebugMg() webDebugSocketUrlKey]];
         
         [__self doSwitchDebugMode:debugMode];
     }];
     [alert addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {
         textField.placeholder = @"输入socket调试地址";
         textField.clearButtonMode = UITextFieldViewModeAlways;
-        NSString *cacheUrl = __self.socketUrlStr?:fetchCacheBlock();
+        NSString *cacheUrl = __self.socketUrlStr?:[ZHJSDebugMg() readWebDebugObj:[ZHJSDebugMg() webDebugSocketUrlKey]];
         if (cacheUrl && cacheUrl.length > 0) {
             textField.text = cacheUrl;
         }
@@ -121,15 +112,6 @@
 - (void)alertDebugModeLocal:(UIAlertAction *)action debugMode:(ZHWebDebugMode)debugMode{
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:action.title message:@"该模式将会运行本机Web项目目录下的内容。\n【如：/Users/em/Desktop/EMCode/fund-projects/fund-details/release】\n在你改动代码后，运行yarn build，点击浮窗刷新。" preferredStyle:UIAlertControllerStyleAlert];
     
-    NSString *debugLocalUrlCacheKey = @"ZHWebViewDebugLocalUrlCacheKey";
-    void (^cacheBlock)(NSString *) = ^(NSString *urlStr){
-        [[NSUserDefaults standardUserDefaults] setValue:urlStr forKey:debugLocalUrlCacheKey];
-        [[NSUserDefaults standardUserDefaults] synchronize];
-    };
-    NSString* (^fetchCacheBlock)(void) = ^NSString *(void){
-        return [[NSUserDefaults standardUserDefaults] valueForKey:debugLocalUrlCacheKey];
-    };
-    
     __weak __typeof__(self) __self = self;
     UIAlertAction *ac1 = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull actionT){
     }];
@@ -140,7 +122,7 @@
         __self.localUrlStr = urlStr;
         __self.debugMode = debugMode;
         
-        cacheBlock(urlStr);
+        [ZHJSDebugMg() storeWebDebugObj:[ZHJSDebugMg() webDebugLocalUrlKey] value:urlStr];
         
         [__self doSwitchDebugMode:debugMode];
     }];
@@ -155,14 +137,15 @@
         __self.localUrlStr = urlStr;
         __self.debugMode = debugMode;
         
-        cacheBlock(urlStr);
+        [ZHJSDebugMg() storeWebDebugObj:[ZHJSDebugMg() webDebugLocalUrlKey] value:urlStr];
         
         [__self doSwitchDebugMode:debugMode];
     }];
     [alert addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {
         textField.placeholder = @"输入本机Web项目目录地址";
         textField.clearButtonMode = UITextFieldViewModeAlways;
-        NSString *cacheUrl = __self.localUrlStr?:fetchCacheBlock();
+        
+        NSString *cacheUrl = __self.localUrlStr?:[ZHJSDebugMg() readWebDebugObj:[ZHJSDebugMg() webDebugLocalUrlKey]];
         if (cacheUrl && cacheUrl.length > 0) {
             textField.text = cacheUrl;
         }

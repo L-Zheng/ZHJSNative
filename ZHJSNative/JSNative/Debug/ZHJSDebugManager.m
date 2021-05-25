@@ -59,6 +59,14 @@
     return [self module_integer_getWebDebug:self.webDebugGlobalKey defaultNum:0];
 }
 
+- (NSString *)webDebugSocketUrlKey{
+    return @"DebugSocketUrl";
+}
+
+- (NSString *)webDebugLocalUrlKey{
+    return @"DebugLocalUrl";
+}
+
 - (void)removeWebDebugGlobalItem{
     [self.itemWebMap removeAllObjects];
 }
