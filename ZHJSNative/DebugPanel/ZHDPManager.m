@@ -86,7 +86,7 @@
     
     // 不可用 self.window  window一旦创建就会自动显示在屏幕上
     // 如果当前列表正在显示，刷新列表
-    if (_window && self.window.debugPanel.status == ZHDebugPanelStatusNew_Show) {
+    if (_window && self.window.debugPanel.status == ZHDebugPanelStatus_Show) {
         ZHDPList *list = self.window.debugPanel.content.selectList;
         if ([list isKindOfClass:ZHDPListLog.class]) {
             [list addSecItem:secItem spaceItem:appDataItem.logSpaceItem];

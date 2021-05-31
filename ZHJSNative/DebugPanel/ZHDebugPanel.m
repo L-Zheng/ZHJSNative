@@ -59,7 +59,7 @@
 }
 - (void)didMoveToSuperview{
     BOOL show = self.superview;
-    self.status = show ? ZHDebugPanelStatusNew_Show : ZHDebugPanelStatusNew_Hide;
+    self.status = show ? ZHDebugPanelStatus_Show : ZHDebugPanelStatus_Hide;
     
     if (!show) return;
     [self reloadAndSelectOptionOnlyOnce:0];
