@@ -2,24 +2,22 @@
 //  ZHDebugPanel.m
 //  ZHJSNative
 //
-//  Created by Zheng on 2021/4/17.
+//  Created by EM on 2021/5/26.
 //  Copyright © 2021 Zheng. All rights reserved.
 //
 
 #import "ZHDebugPanel.h"
-#import "ZHDebugPanelOption.h"
-
-#import "ZHDebugPanelContentLog.h"
-#import "ZHDebugPanelContentNetwork.h"
-#import "ZHDebugPanelContentStorage.h"
-#import "ZHDebugPanelContentIM.h"
+#import "ZHDPOption.h"
+#import "ZHDPContent.h"
+#import "ZHDPList.h"
+#import "ZHDPDataTask.h"
 
 @interface ZHDebugPanel ()
 @end
 
 @implementation ZHDebugPanel
 
-#pragma mark - init
+#pragma mark - override
 
 - (instancetype)initWithFrame:(CGRect)frame{
     self = [super initWithFrame:frame];
@@ -29,129 +27,106 @@
     }
     return self;
 }
+- (void)layoutSubviews{
+    [super layoutSubviews];
+    
+    UIWindow *keyWindow = [[UIApplication sharedApplication] keyWindow];
+    if (keyWindow.windowLevel != UIWindowLevelNormal) {
+        NSArray *windows = [[UIApplication sharedApplication] windows];
+        for (UIWindow *window in windows) {
+            if (window.windowLevel == UIWindowLevelNormal){
+                keyWindow = window;
+                break;
+            }
+        }
+    }
+    UIEdgeInsets safeAreaInsets = UIEdgeInsetsZero;
+    if (@available(iOS 11.0, *)) {
+        safeAreaInsets = [keyWindow safeAreaInsets];
+    }
+    
+    CGFloat marginTop = 5;
+    CGFloat marginBottom = safeAreaInsets.bottom + 5;
+    
+    self.option.frame = CGRectMake(0, marginTop, self.bounds.size.width, 30);
+    
+    CGFloat contentY = CGRectGetMaxY(self.option.frame) + marginTop;
+    CGFloat contentH = self.bounds.size.height - contentY - marginBottom;
+    self.content.frame = CGRectMake(0, contentY, self.bounds.size.width, contentH);
+}
+- (void)willMoveToSuperview:(UIView *)newSuperview{
+    [super willMoveToSuperview:newSuperview];
+}
+- (void)didMoveToSuperview{
+    BOOL show = self.superview;
+    self.status = show ? ZHDebugPanelStatusNew_Show : ZHDebugPanelStatusNew_Hide;
+    
+    if (!show) return;
+    [self reloadAndSelectOptionOnlyOnce:0];
+    
+    if (self.content.selectList) {
+        [self.content.selectList reloadListWhenShow];
+    }
+}
 
 #pragma mark - config
 
 - (void)configData{
 }
-
 - (void)configUI{
     self.clipsToBounds = YES;
-    self.backgroundColor = [UIColor grayColor];
+    self.backgroundColor = [UIColor colorWithRed:243.0/255.0 green:243.0/255.0 blue:243.0/255.0 alpha:1.0];
+    
+    [self addSubview:self.option];
+    [self addSubview:self.content];
 }
 
-#pragma mark - event
+#pragma mark - option
 
-- (void)selectOption:(ZHDebugPanelContent *)content{
-    for (UIView *view in self.allContents) {
-        [view removeFromSuperview];
-    }
-    self.selectContent = content;
-    [self addSubview:content];
-    
-    [content setNeedsLayout];
-    [content layoutIfNeeded];
-    
-    
-    
-    [content addDataTest];
-    [content addDataTest];
-    [content addDataTest];
-    [content addDataTest];
-    [content addDataTest];
-    [content addDataTest];
+- (void)selectOption:(NSInteger)idx{
+    [self.option selectIndexPath:[NSIndexPath indexPathForItem:idx inSection:0]];
 }
-
-- (NSArray *)allContents{
-    return @[self.logContent, self.networkContent, self.storageContent, self.imContent];
+- (void)reloadAndSelectOptionOnlyOnce:(NSInteger)idx{
+    if (self.option.selectItem) return;
+    [self reloadAndSelectOption:idx];
 }
-
-#pragma mark - layout
-
-- (void)willMoveToSuperview:(UIView *)newSuperview{
-    [super willMoveToSuperview:newSuperview];
-    // 添加到父视图
-    if (newSuperview) {
-        return;
-    }
-}
-- (void)didMoveToSuperview{
-    self.status = self.superview ? ZHDebugPanelStatus_Show : ZHDebugPanelStatus_Hide;
-    if (!self.superview) {
-        return;
+- (void)reloadAndSelectOption:(NSInteger)idx{
+    NSMutableArray <ZHDPOptionItem *> *items = [NSMutableArray array];
+    
+    NSArray <ZHDPList *> *lists = [self.content allLists];
+    for (ZHDPList *list in lists) {
+        ZHDPOptionItem *item = [[ZHDPOptionItem alloc] init];
+        item.title = list.item.title;
+        item.selected = NO;
+        item.list = list;
+        
+        [items addObject:item];
     }
     
-    if (self.optionView.superview != self) {
-        [self.optionView removeFromSuperview];
-        [self addSubview:self.optionView];
-        [self.optionView reloadWithItems:[self allContents]];
-    }
-    
-    
-    
-    
-    
-    [self.optionView selectContent:self.logContent];
-
+    [self.option reloadWithItems:items.copy];
+    [self selectOption:idx];
 }
 
-//FOUNDATION_EXPORT
-CGFloat optionMarginTop = 5;
-CGFloat optionH = 30;
-CGFloat contentMarginTop = 5;
-
-- (void)layoutSubviews{
-    [super layoutSubviews];
-    
-    self.optionView.frame = CGRectMake(0, optionMarginTop, self.bounds.size.width, optionH);
-    
-    CGFloat contentY = CGRectGetMaxY(self.optionView.frame) + contentMarginTop;
-    CGFloat contentH = self.bounds.size.height - contentY;
-    self.selectContent.frame = CGRectMake(0, contentY, self.bounds.size.width, contentH);
-}
+#pragma mark - content
 
 #pragma mark - getter
 
-- (ZHDebugPanelOption *)optionView{
-    if (!_optionView) {
+- (ZHDPOption *)option{
+    if (!_option) {
+        _option = [[ZHDPOption alloc] initWithFrame:CGRectZero];
         __weak __typeof__(self) weakSelf = self;
-        _optionView = [[ZHDebugPanelOption alloc] initWithFrame:CGRectZero];
-        _optionView.selectBlock = ^(ZHDebugPanelContent *content) {
-            [weakSelf selectOption:content];
+        _option.selectBlock = ^(NSIndexPath *indexPath, ZHDPOptionItem *item) {
+            [weakSelf.content selectList:item.list];
         };
-        _optionView.debugPanel = self;
+        _option.debugPanel = self;
     }
-    return _optionView;
+    return _option;
 }
-
-- (ZHDebugPanelContentLog *)logContent{
-    if (!_logContent) {
-        _logContent = [[ZHDebugPanelContentLog alloc] initWithFrame:CGRectZero];
-        _logContent.debugPanel = self;
+- (ZHDPContent *)content{
+    if (!_content) {
+        _content = [[ZHDPContent alloc] initWithFrame:CGRectZero];
+        _content.debugPanel = self;
     }
-    return _logContent;
+    return _content;
 }
-- (ZHDebugPanelContentNetwork *)networkContent{
-    if (!_networkContent) {
-        _networkContent = [[ZHDebugPanelContentNetwork alloc] initWithFrame:CGRectZero];
-        _networkContent.debugPanel = self;
-    }
-    return _networkContent;
-}
-- (ZHDebugPanelContentStorage *)storageContent{
-    if (!_storageContent) {
-        _storageContent = [[ZHDebugPanelContentStorage alloc] initWithFrame:CGRectZero];
-        _storageContent.debugPanel = self;
-    }
-    return _storageContent;
-}
-- (ZHDebugPanelContentIM *)imContent{
-    if (!_imContent) {
-        _imContent = [[ZHDebugPanelContentIM alloc] initWithFrame:CGRectZero];
-        _imContent.debugPanel = self;
-    }
-    return _imContent;
-}
-
-
 @end

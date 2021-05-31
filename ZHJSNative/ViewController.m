@@ -11,6 +11,7 @@
 #import "ZHWebViewManager.h"
 #import "ZHDebugPanel.h"
 #import "ZHJSWebTestController.h"
+#import "ZHDPManager.h"
 
 @interface ViewController ()<UITableViewDataSource,UITableViewDelegate>
 @property (nonatomic,strong) UITableView *tableView;
@@ -60,12 +61,13 @@
         @{
             @"title": @"调试控制台",
             @"block": ^(void){
-                    ZHDebugPanel *panelView = [[ZHDebugPanel alloc] initWithFrame:CGRectMake(0, 300, weakSelf.view.bounds.size.width, 300)];
-                    [weakSelf.view addSubview:panelView];
-                    
-                    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                        [panelView removeFromSuperview];
-                    });
+                [ZHDPMg() open];
+            }
+        },
+        @{
+            @"title": @"移除 调试控制台",
+            @"block": ^(void){
+                [ZHDPMg() close];
             }
         }
     ];
