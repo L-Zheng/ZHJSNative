@@ -11,32 +11,20 @@
 #import "ZHDPManager.h"// 调试面板管理
 #import "ZHDPListApps.h"// pop app列表
 
-@interface ZHDPListOprateCell ()
+@interface ZHDPListOprateCollectionViewCell()
+@property (nonatomic,strong) UIView *selectView;
 @property (nonatomic, strong) UILabel *iconLabel;
 @property (nonatomic, strong) UILabel *descLabel;
 @end
 
-@implementation ZHDPListOprateCell
+@implementation ZHDPListOprateCollectionViewCell
 
-+ (instancetype)cellWithTableView:(UITableView *)tableView{
-    NSString *cellID = NSStringFromClass(self);
-    ZHDPListOprateCell *cell = [tableView dequeueReusableCellWithIdentifier:cellID];
-    if (!cell) {
-        cell = [[ZHDPListOprateCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellID];
-//        cell.selectionStyle = UITableViewCellSelectionStyleNone;
-    }
-    return cell;
-}
-- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier{
-    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+- (instancetype)initWithFrame:(CGRect)frame{
+    self = [super initWithFrame:frame];
     if (self) {
-        self.clipsToBounds = YES;
-        //        ⚠️[TableView] Changing the background color of UITableViewHeaderFooterView is not supported. Use the background view configuration instead.
-        self.backgroundColor = [UIColor clearColor];
-        self.contentView.backgroundColor = [UIColor clearColor];
-        self.backgroundView = [UIView new];
-        //        self.selectedBackgroundView = [UIView new];
+        [self configNormalStyle];
         
+        self.selectedBackgroundView = self.selectView;
         [self.contentView addSubview:self.iconLabel];
         [self.contentView addSubview:self.descLabel];
     }
@@ -68,6 +56,25 @@
     self.descLabel.textColor = item.textColor;
 }
 
+- (void)setSelected:(BOOL)selected{
+    [super setSelected:selected];
+    (selected ? [self configHighlightStyle] : [self configNormalStyle]);
+}
+- (void)configNormalStyle{
+    self.contentView.backgroundColor = [UIColor clearColor];
+//    cell.contentView.backgroundColor = [UIColor colorWithRed:arc4random_uniform(255.0)/255.0 green:arc4random_uniform(255.0)/255.0 blue:arc4random_uniform(255.0)/255.0 alpha:0.5];
+}
+- (void)configHighlightStyle{
+    self.contentView.backgroundColor = [UIColor lightGrayColor];
+}
+
+- (UIView *)selectView{
+    if (!_selectView) {
+        _selectView = [[UIView alloc] initWithFrame:CGRectZero];
+        _selectView.clipsToBounds = YES;
+    }
+    return _selectView;
+}
 - (UILabel *)iconLabel {
     if (!_iconLabel) {
         _iconLabel = [[UILabel alloc] initWithFrame:CGRectZero];
@@ -94,8 +101,8 @@
 @end
 
 
-@interface ZHDPListOprate ()<UITableViewDataSource,UITableViewDelegate>
-@property (nonatomic,strong) UITableView *tableView;
+@interface ZHDPListOprate ()<UICollectionViewDataSource,UICollectionViewDelegate>
+@property (nonatomic, strong) UICollectionView *collectionView;
 @property (nonatomic,retain) NSArray <ZHDPListOprateItem *> *items;
 @end
 
@@ -114,7 +121,13 @@
 - (void)layoutSubviews{
     [super layoutSubviews];
 
-    self.tableView.frame = self.shadowView.frame;
+    CGFloat W = ([self minPopW] - [self focusW]) * 0.5;
+    CGFloat H = W;
+    UICollectionViewLayout *layout = self.collectionView.collectionViewLayout;
+    if ([layout isKindOfClass:UICollectionViewFlowLayout.class]) {
+        ((UICollectionViewFlowLayout *)layout).itemSize = CGSizeMake(W, H);
+    }
+    self.collectionView.frame = self.shadowView.frame;
     [self reloadListFrequently];
 }
 - (void)willMoveToSuperview:(UIView *)newSuperview{
@@ -134,7 +147,7 @@
     return [self minPopW];
 }
 - (CGFloat)minPopW{
-    return 85;
+    return 100 + [self focusW];
 }
 - (CGFloat)maxPopW{
     return self.list.bounds.size.width - 10;
@@ -169,8 +182,7 @@
     return YES;
 }
 - (void)reloadList{
-    self.tableView.tableFooterView = [UIView new];
-    [self.tableView reloadData];
+    [self.collectionView reloadData];
 }
 
 #pragma mark - config
@@ -180,7 +192,7 @@
 }
 - (void)configUI{
     [super configUI];
-    [self addSubview:self.tableView];
+    [self addSubview:self.collectionView];
 }
 
 #pragma mark - reload
@@ -198,45 +210,67 @@
     [self reloadListFrequently];
 }
 
-#pragma mark - UITableViewDelegate
+#pragma mark - UICollectionViewDelegate
 
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+- (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView {
+    return 1;
+}
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
     return self.items.count;
 }
-- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
-    return 50;
-}
-- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
-    
-    ZHDPListOprateCell *cell = [ZHDPListOprateCell cellWithTableView:tableView];
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
+    ZHDPListOprateCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:self.collectionCellIdentifier forIndexPath:indexPath];
     [cell configItem:self.items[indexPath.row]];
     return cell;
 }
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
-    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+- (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath{
+    [collectionView deselectItemAtIndexPath:indexPath animated:YES];
     
     void (^block) (void) = self.items[indexPath.row].block;
     if (block) block();
 }
+- (BOOL)collectionView:(UICollectionView *)collectionView shouldHighlightItemAtIndexPath:(NSIndexPath *)indexPath{
+    return YES;
+}
+- (void)collectionView:(UICollectionView *)collectionView didHighlightItemAtIndexPath:(NSIndexPath *)indexPath{
+    ZHDPListOprateCollectionViewCell *cell = (ZHDPListOprateCollectionViewCell *)[collectionView cellForItemAtIndexPath:indexPath];
+    [cell configHighlightStyle];
+}
+- (void)collectionView:(UICollectionView *)collectionView  didUnhighlightItemAtIndexPath:(NSIndexPath *)indexPath{
+    ZHDPListOprateCollectionViewCell *cell = (ZHDPListOprateCollectionViewCell *)[collectionView cellForItemAtIndexPath:indexPath];
+    [cell configNormalStyle];
+}
 
 #pragma mark - getter
 
-- (UITableView *)tableView {
-    if (!_tableView) {
-        _tableView = [[UITableView alloc] initWithFrame:CGRectZero style:UITableViewStylePlain];
-        _tableView.backgroundColor = [UIColor clearColor];
+- (UICollectionView *)collectionView{
+    if (!_collectionView) {
+        UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
+        layout.minimumInteritemSpacing = 0;
+        layout.minimumLineSpacing = 0;// 横向间距
+        layout.scrollDirection = UICollectionViewScrollDirectionVertical;
+                
+//        [Assert] negative or zero item sizes are not supported in the flow layout
+        layout.itemSize = CGSizeMake(1, 1);
         
-        _tableView.directionalLockEnabled = YES;
-        _tableView.delegate = self;
-        _tableView.dataSource = self;
-        _tableView.showsVerticalScrollIndicator = NO;
+        _collectionView = [[UICollectionView alloc]initWithFrame:CGRectZero collectionViewLayout:layout];
         
-        _tableView.separatorInset = UIEdgeInsetsZero;
-        _tableView.separatorStyle = UITableViewCellSeparatorStyleSingleLine;
+        _collectionView.backgroundColor = [UIColor clearColor];
+        _collectionView.dataSource = self;
+        _collectionView.delegate = self;
         
-        _tableView.clipsToBounds = YES;
+        _collectionView.showsHorizontalScrollIndicator = NO;
+        _collectionView.showsVerticalScrollIndicator = YES;
+        _collectionView.alwaysBounceHorizontal = NO;
+        _collectionView.alwaysBounceVertical = YES;
+        _collectionView.directionalLockEnabled = YES;
+        
+        [_collectionView registerClass:[ZHDPListOprateCollectionViewCell class] forCellWithReuseIdentifier:self.collectionCellIdentifier];
     }
-    return _tableView;
+    return _collectionView;
+}
+- (NSString *)collectionCellIdentifier{
+    return [NSString stringWithFormat:@"%@_CollectionViewCell", NSStringFromClass(self.class)];
 }
 
 @end

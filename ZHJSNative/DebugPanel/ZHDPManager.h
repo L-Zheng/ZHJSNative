@@ -18,6 +18,12 @@ typedef NS_ENUM(NSInteger, ZHDPManagerStatus) {
     ZHDPManagerStatus_Close      = 2
 };
 
+typedef NS_ENUM(NSInteger, ZHDPOutputColorType) {
+    ZHDPOutputColorType_Default     = 0,
+    ZHDPOutputColorType_Warning      = 1,
+    ZHDPOutputColorType_Error      = 2,
+};
+
 @interface ZHDPManager : NSObject
 
 + (instancetype)shareManager;
@@ -69,6 +75,9 @@ typedef NS_ENUM(NSInteger, ZHDPManagerStatus) {
 - (CGFloat)defaultLineW;
 - (CGFloat)defaultCornerRadius;
 
+- (NSDictionary *)outputColorMap;
+- (UIColor *)fetchOutputColor:(ZHDPOutputColorType)type;
+
 #pragma mark - toast
 
 - (void)showToast:(NSString *)title;
@@ -78,7 +87,7 @@ typedef NS_ENUM(NSInteger, ZHDPManagerStatus) {
 - (id)jsValueToNative:(JSValue *)jsValue;
 - (void)convertToString:(id)title block:(void (^) (NSString *conciseStr, NSString *detailStr))block;
 - (NSAttributedString *)createDetailAttStr:(NSArray *)titles descs:(NSArray *)descs;
-- (ZHDPListColItem *)createColItem:(NSString *)title percent:(CGFloat)percent X:(CGFloat)X;
+- (ZHDPListColItem *)createColItem:(NSString *)title percent:(CGFloat)percent X:(CGFloat)X colorType:(ZHDPOutputColorType)colorType;
 
 - (void)copySecItemToPasteboard:(ZHDPListSecItem *)secItem;
 

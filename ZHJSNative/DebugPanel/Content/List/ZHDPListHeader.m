@@ -49,24 +49,13 @@
 
 - (void)addGesture{
     UITapGestureRecognizer *gesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapGes:)];
-    [self addGestureRecognizer:gesture];
-    
-    UILongPressGestureRecognizer *longPressGes = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(longPressGes:)];
-    [self addGestureRecognizer:longPressGes];
-}
-
-- (void)longPressGes:(UILongPressGestureRecognizer *)ges{
-    if (ges.state == UIGestureRecognizerStateBegan) {
-        if (self.longPressGesBlock) {
-            self.longPressGesBlock(self.item.open, self.item);
-        }
-    }
+    [self.contentView addGestureRecognizer:gesture];
 }
 - (void)tapGes:(UITapGestureRecognizer *)ges{
     if (!self.item) {
         return;
     }
-//    self.item.open = !self.item.isOpen;
+    self.item.open = !self.item.isOpen;
     if (self.tapGesBlock) {
         self.tapGesBlock(self.item.open, self.item);
     }

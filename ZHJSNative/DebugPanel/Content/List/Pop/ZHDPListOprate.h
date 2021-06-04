@@ -9,9 +9,10 @@
 #import "ZHDPListPop.h"
 #import "ZHDPDataTask.h"// 数据管理
 
-@interface ZHDPListOprateCell : UITableViewCell
-+ (instancetype)cellWithTableView:(UITableView *)tableView;
+@interface ZHDPListOprateCollectionViewCell : UICollectionViewCell
 - (void)configItem:(ZHDPListOprateItem *)item;
+- (void)configNormalStyle;
+- (void)configHighlightStyle;
 @end
 
 

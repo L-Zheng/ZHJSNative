@@ -9,6 +9,8 @@
 #import "ZHDPListCell.h"
 
 @interface ZHDPListCell ()
+@property (nonatomic,strong) ZHDPListRowItem *item;
+@property (nonatomic,strong) ZHDPListRow *rowContent;
 @end
 
 @implementation ZHDPListCell
@@ -33,6 +35,8 @@
         //        self.selectedBackgroundView = [UIView new];
         
         [self.contentView addSubview:self.rowContent];
+        
+        [self addGesture];
     }
     return self;
 }
@@ -40,6 +44,32 @@
 - (void)layoutSubviews{
     [super layoutSubviews];
     self.rowContent.frame = self.contentView.bounds;
+}
+
+- (void)addGesture{
+    UITapGestureRecognizer *gesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapGes:)];
+    [self.contentView addGestureRecognizer:gesture];
+    
+    UILongPressGestureRecognizer *longPressGes = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(longPressGes:)];
+    [self.contentView addGestureRecognizer:longPressGes];
+}
+- (void)tapGes:(UITapGestureRecognizer *)ges{
+    if (self.tapGesBlock) {
+        self.tapGesBlock();
+    }
+}
+- (void)longPressGes:(UILongPressGestureRecognizer *)ges{
+    if (ges.state == UIGestureRecognizerStateBegan) {
+        if (self.longPressGesBlock) {
+            self.longPressGesBlock();
+        }
+    }
+}
+
+- (void)configItem:(ZHDPListRowItem *)item{
+    self.item = item;
+    
+    [self.rowContent configItem:item.colItems];
 }
 
 - (ZHDPListRow *)rowContent{

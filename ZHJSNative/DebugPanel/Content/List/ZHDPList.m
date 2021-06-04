@@ -361,9 +361,20 @@ typedef NS_ENUM(NSInteger, ZHDPScrollStatus) {
     if (self.items.count <= 0) return;
 
     ZHDPListSecItem *secItem = self.items.lastObject;
-    NSInteger row = (secItem.isOpen ? (secItem.rowItems.count > 0 ? secItem.rowItems.count - 1 : 0) : 0);
+    NSInteger row = (secItem.isOpen ? (secItem.rowItems.count > 0 ? secItem.rowItems.count - 1 : -1) : -1);
     NSInteger sec = self.items.count - 1;
-    [self.tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:row inSection:sec] atScrollPosition:UITableViewScrollPositionBottom animated:animated];
+    if (row >= 0) {
+        [self.tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:row inSection:sec] atScrollPosition:UITableViewScrollPositionBottom animated:animated];
+    }else{
+        CGFloat listH = self.tableView.frame.size.height;
+        CGFloat listContentH = self.tableView.contentSize.height;
+        
+        if (listContentH <= listH) {
+            return;
+        }
+        // list 总行数为0  不能调用函数scrollToRowAtIndexPath滚动
+        [self.tableView setContentOffset:CGPointMake(0, (listContentH - listH)) animated:animated];
+    }
 }
 
 - (void)scrollListToTopCode{
@@ -377,20 +388,21 @@ typedef NS_ENUM(NSInteger, ZHDPScrollStatus) {
 
 #pragma mark - UITableViewDelegate
 
+// 存在问题  tableView为多组一行(行高为1像素)模式  调用滚动函数scrollToRowAtIndexPath  有可能滚动不到最底部
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView{
     return self.items.count;
 }
 - (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section{
+    ZHDPListSecItem *secItem = self.items[section];
+    if (secItem.headerH <= 0) {
+        return nil;
+    }
     ZHDPListHeader *header = [ZHDPListHeader sctionHeaderWithTableView:tableView];
     __weak __typeof__(self) weakSelf = self;
     header.tapGesBlock = ^(BOOL open, ZHDPListSecItem *item) {
-        [weakSelf.detail showWithSecItem:item];
-//        [weakSelf.tableView reloadSections:[NSIndexSet indexSetWithIndex:section] withRowAnimation:UITableViewRowAnimationAutomatic];
+        [weakSelf.tableView reloadSections:[NSIndexSet indexSetWithIndex:section] withRowAnimation:UITableViewRowAnimationAutomatic];
     };
-    header.longPressGesBlock = ^(BOOL open, ZHDPListSecItem *item) {
-        [ZHDPMg() copySecItemToPasteboard:item];
-    };
-    [header configItem:self.items[section]];
+    [header configItem:secItem];
     return header;
 }
 - (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section{
@@ -400,22 +412,30 @@ typedef NS_ENUM(NSInteger, ZHDPScrollStatus) {
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
     ZHDPListSecItem *secItem = self.items[section];
     NSInteger rows = secItem.isOpen ? secItem.rowItems.count : 0;
-    return (rows > 0 ? rows : 1);
+    return rows;
 }
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
     ZHDPListSecItem *secItem = self.items[indexPath.section];
-    NSInteger rows = secItem.isOpen ? secItem.rowItems.count : 0;
-    // [FWDPMg() defaultLineW]  返回一个像素的行高  否则  scrollToRowAtIndexPath滚动时  位置可能不准确
-    return (rows > 0 ? secItem.rowItems[indexPath.row].rowH : 1.2);
+    return secItem.rowItems[indexPath.row].rowH;
+    // [ZHDPMg() defaultLineW]  返回一个像素的行高  否则  scrollToRowAtIndexPath滚动时  位置可能不准确
 }
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
     ZHDPListSecItem *secItem = self.items[indexPath.section];
-    NSInteger rows = secItem.isOpen ? secItem.rowItems.count : 0;
-    NSArray <ZHDPListColItem *> *colItems = (rows > 0 ? secItem.rowItems[indexPath.row].colItems : nil);
+    ZHDPListRowItem *rowItem = secItem.rowItems[indexPath.row];
     
     ZHDPListCell *cell = [ZHDPListCell cellWithTableView:tableView];
-    [cell.rowContent configItem:colItems];
+    __weak __typeof__(self) weakSelf = self;
+    cell.tapGesBlock = ^(void) {
+        [weakSelf.detail showWithSecItem:secItem];
+    };
+    cell.longPressGesBlock = ^(void) {
+        [ZHDPMg() copySecItemToPasteboard:secItem];
+    };
+    [cell configItem:rowItem];
     return cell;
+}
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
 // 将要开始拖拽
 - (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView{
@@ -450,9 +470,6 @@ typedef NS_ENUM(NSInteger, ZHDPScrollStatus) {
 //    NSLog(@"%s",__func__);
 }
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView{
-}
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
-    [tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
 
 #pragma mark - getter

@@ -254,6 +254,21 @@
     return 10.0;
 }
 
+- (NSDictionary *)outputColorMap{
+    return @{
+        @(ZHDPOutputColorType_Error): [UIColor colorWithRed:220.0/255.0 green:20.0/255.0 blue:60.0/255.0 alpha:1],
+        @(ZHDPOutputColorType_Warning): [UIColor colorWithRed:255.0/255.0 green:215.0/255.0 blue:0.0/255.0 alpha:1],
+        @(ZHDPOutputColorType_Default): [UIColor blackColor]
+    };
+}
+- (UIColor *)fetchOutputColor:(ZHDPOutputColorType)type{
+    NSDictionary *map = [self outputColorMap];
+    UIColor *res = [map objectForKey:@(type)];
+    if (!res) {
+        res = [map objectForKey:@(ZHDPOutputColorType_Default)];
+    }
+    return res;
+}
 
 #pragma mark - toast
 
@@ -390,18 +405,18 @@
     }
     return [[NSAttributedString alloc] initWithAttributedString:attStr];
 }
-- (ZHDPListColItem *)createColItem:(NSString *)title percent:(CGFloat)percent X:(CGFloat)X{
-    
+- (ZHDPListColItem *)createColItem:(NSString *)title percent:(CGFloat)percent X:(CGFloat)X colorType:(ZHDPOutputColorType)colorType{
+
     title = title?:@"";
     NSMutableAttributedString *tAtt = [[NSMutableAttributedString alloc] init];
     
     NSUInteger limit = 300;
     NSUInteger titleLength = title.length;
     if (titleLength < limit) {
-        [tAtt appendAttributedString:[[NSAttributedString alloc] initWithString:title attributes:@{NSFontAttributeName: [self defaultFont]}]];
+        [tAtt appendAttributedString:[[NSAttributedString alloc] initWithString:title attributes:@{NSFontAttributeName: [self defaultFont], NSForegroundColorAttributeName: [self fetchOutputColor:colorType]}]];
     }else{
         title = [title substringToIndex:limit - 1];
-        [tAtt appendAttributedString:[[NSAttributedString alloc] initWithString:title attributes:@{NSFontAttributeName: [self defaultFont]}]];
+        [tAtt appendAttributedString:[[NSAttributedString alloc] initWithString:title attributes:@{NSFontAttributeName: [self defaultFont], NSForegroundColorAttributeName: [self fetchOutputColor:colorType]}]];
         [tAtt appendAttributedString:[[NSAttributedString alloc] initWithString:@"\n...点击展开" attributes:@{NSFontAttributeName: [self defaultFont], NSForegroundColorAttributeName: [self selectColor]}]];
     }
     
@@ -616,7 +631,7 @@ static id _instance;
             detail = detailStr;
         }];
         // 添加参数
-        ZHDPListColItem *colItem = [self createColItem:detail percent:percent.floatValue X:X];
+        ZHDPListColItem *colItem = [self createColItem:detail percent:percent.floatValue X:X colorType:ZHDPOutputColorType_Default];
         [colItems addObject:colItem];
         X += (colItem.rectValue.CGRectValue.size.width + [dpMg marginW]);
         
@@ -632,14 +647,14 @@ static id _instance;
         
     // 每一组中的每行数据
     ZHDPListRowItem *rowItem = [[ZHDPListRowItem alloc] init];
-    rowItem.colItems = @[];
+    rowItem.colItems = colItems.copy;
     
     // 每一组数据
     ZHDPListSecItem *secItem = [[ZHDPListSecItem alloc] init];
     secItem.enterMemoryTime = [[NSDate date] timeIntervalSince1970];
-    secItem.open = NO;
-    secItem.colItems = colItems.copy;
-    secItem.rowItems = @[];
+    secItem.open = YES;
+    secItem.colItems = @[];
+    secItem.rowItems = @[rowItem];
     secItem.detailItems = detailItems.copy;
     secItem.pasteboardBlock = ^NSString *{
         NSMutableString *str = [NSMutableString string];
@@ -667,10 +682,10 @@ static id _instance;
     }
     
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self zh_test_addLogSafe:res.copy];
+        [self zh_test_addLogSafe:ZHDPOutputColorType_Default args:res.copy];
     });
 }
-- (void)zh_test_addLogSafe:(NSArray *)args{
+- (void)zh_test_addLogSafe:(ZHDPOutputColorType)colorType args:(NSArray *)args{
     
     ZHDPManager *dpMg = ZHDPMg();
     
@@ -703,7 +718,7 @@ static id _instance;
     // 添加时间
     CGFloat X = [dpMg marginW];
     NSString *dateStr = [[dpMg dateFormat] stringFromDate:[NSDate date]];
-    ZHDPListColItem *colItem = [self createColItem:dateStr percent:datePercent X:X];
+    ZHDPListColItem *colItem = [self createColItem:dateStr percent:datePercent X:X colorType:colorType];
     [colItems addObject:colItem];
     X += (colItem.rectValue.CGRectValue.size.width + [dpMg marginW]);
     
@@ -717,7 +732,7 @@ static id _instance;
             detail = detailStr;
         }];
         // 添加参数
-        colItem = [self createColItem:concise percent:otherPercent X:X];
+        colItem = [self createColItem:concise percent:otherPercent X:X colorType:colorType];
         [colItems addObject:colItem];
         X += (colItem.rectValue.CGRectValue.size.width + [dpMg marginW]);
         
@@ -733,14 +748,14 @@ static id _instance;
         
     // 每一组中的每行数据
     ZHDPListRowItem *rowItem = [[ZHDPListRowItem alloc] init];
-    rowItem.colItems = @[];
-    
+    rowItem.colItems = colItems.copy;
+
     // 每一组数据
     ZHDPListSecItem *secItem = [[ZHDPListSecItem alloc] init];
     secItem.enterMemoryTime = [[NSDate date] timeIntervalSince1970];
-    secItem.open = NO;
-    secItem.colItems = colItems.copy;
-    secItem.rowItems = @[];
+    secItem.open = YES;
+    secItem.colItems = @[];
+    secItem.rowItems = @[rowItem];
     secItem.detailItems = detailItems.copy;
     secItem.pasteboardBlock = ^NSString *{
         NSMutableString *str = [NSMutableString string];
@@ -810,8 +825,9 @@ static id _instance;
     }
     
     NSString *method = request.HTTPMethod;
-    NSString *statusCode = [NSString stringWithFormat:@"%d",(int)httpResponse.statusCode];
-    
+    NSString *statusCode = [NSString stringWithFormat:@"%ld",(NSInteger)httpResponse.statusCode];
+    ZHDPOutputColorType colorType = ((statusCode.integerValue < 200 || statusCode.integerValue >= 300) ? ZHDPOutputColorType_Error :  ZHDPOutputColorType_Default);
+
     NSDate *endDate = [NSDate date];
     NSTimeInterval startTimeDouble = [startDate timeIntervalSince1970];
     NSTimeInterval endTimeDouble = [endDate timeIntervalSince1970];
@@ -869,7 +885,7 @@ static id _instance;
             detail = detailStr;
         }];
         // 添加参数
-        ZHDPListColItem *colItem = [self createColItem:concise percent:percent.floatValue X:X];
+        ZHDPListColItem *colItem = [self createColItem:concise percent:percent.floatValue X:X colorType:colorType];
         [colItems addObject:colItem];
         X += (colItem.rectValue.CGRectValue.size.width + [dpMg marginW]);
     }
@@ -953,14 +969,14 @@ static id _instance;
     
     // 每一组中的每行数据
     ZHDPListRowItem *rowItem = [[ZHDPListRowItem alloc] init];
-    rowItem.colItems = @[];
-        
+    rowItem.colItems = colItems.copy;
+
     // 每一组数据
     ZHDPListSecItem *secItem = [[ZHDPListSecItem alloc] init];
     secItem.enterMemoryTime = [[NSDate date] timeIntervalSince1970];
-    secItem.open = NO;
-    secItem.colItems = colItems.copy;
-    secItem.rowItems = @[];
+    secItem.open = YES;
+    secItem.colItems = @[];
+    secItem.rowItems = @[rowItem];
     secItem.detailItems = detailItems.copy;
     secItem.pasteboardBlock = ^NSString *{
         NSMutableString *str = [NSMutableString string];
@@ -1049,7 +1065,7 @@ static id _instance;
             detail = detailStr;
         }];
         // 添加参数
-        ZHDPListColItem *colItem = [self createColItem:concise percent:percent.floatValue X:X];
+        ZHDPListColItem *colItem = [self createColItem:concise percent:percent.floatValue X:X colorType:ZHDPOutputColorType_Default];
         [colItems addObject:colItem];
         X += (colItem.rectValue.CGRectValue.size.width + [dpMg marginW]);
         
@@ -1066,14 +1082,14 @@ static id _instance;
         
     // 每一组中的每行数据
     ZHDPListRowItem *rowItem = [[ZHDPListRowItem alloc] init];
-    rowItem.colItems = @[];
-    
+    rowItem.colItems = colItems.copy;
+
     // 每一组数据
     ZHDPListSecItem *secItem = [[ZHDPListSecItem alloc] init];
     secItem.enterMemoryTime = [[NSDate date] timeIntervalSince1970];
-    secItem.open = NO;
-    secItem.colItems = colItems.copy;
-    secItem.rowItems = @[];
+    secItem.open = YES;
+    secItem.colItems = @[];
+    secItem.rowItems = @[rowItem];
     secItem.detailItems = detailItems.copy;
     secItem.pasteboardBlock = ^NSString *{
         NSMutableString *str = [NSMutableString string];

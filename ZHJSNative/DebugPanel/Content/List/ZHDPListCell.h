@@ -14,7 +14,11 @@ NS_ASSUME_NONNULL_BEGIN
 @interface ZHDPListCell : UITableViewCell
 
 + (instancetype)cellWithTableView:(UITableView *)tableView;
-@property (nonatomic,strong) ZHDPListRow *rowContent;
+
+@property (nonatomic,copy) void (^tapGesBlock) (void);
+@property (nonatomic,copy) void (^longPressGesBlock) (void);
+
+- (void)configItem:(ZHDPListRowItem *)item;
 
 @end
 
