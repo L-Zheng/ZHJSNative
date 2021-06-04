@@ -89,6 +89,8 @@
 		8581BAC5258F3795004E25DC /* ZHJSInCtxFundApi.m in Sources */ = {isa = PBXBuildFile; fileRef = 8581BAC4258F3795004E25DC /* ZHJSInCtxFundApi.m */; };
 		8582282425AD97BF00FECFB9 /* ZHJSPageItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 8582282325AD97BF00FECFB9 /* ZHJSPageItem.m */; };
 		85929110265B6E8C004EA584 /* ZHJSDebugManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 8592910F265B6E8C004EA584 /* ZHJSDebugManager.m */; };
+		859BE97D2668D369003C02DE /* ZHDPNetworkTask.m in Sources */ = {isa = PBXBuildFile; fileRef = 859BE97C2668D369003C02DE /* ZHDPNetworkTask.m */; };
+		859BE9802668DF44003C02DE /* ZHDPListPopShadow.m in Sources */ = {isa = PBXBuildFile; fileRef = 859BE97F2668DF44003C02DE /* ZHDPListPopShadow.m */; };
 		859D255C265F84BB003513BA /* ZHDPManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 859D255B265F84BB003513BA /* ZHDPManager.m */; };
 		859D255F265F84E3003513BA /* ZHDPDataTask.m in Sources */ = {isa = PBXBuildFile; fileRef = 859D255E265F84E3003513BA /* ZHDPDataTask.m */; };
 		859D2568265FA99C003513BA /* ZHDPListRow.m in Sources */ = {isa = PBXBuildFile; fileRef = 859D2567265FA99C003513BA /* ZHDPListRow.m */; };
@@ -263,6 +265,10 @@
 		8582282325AD97BF00FECFB9 /* ZHJSPageItem.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHJSPageItem.m; sourceTree = "<group>"; };
 		8592910E265B6E8C004EA584 /* ZHJSDebugManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHJSDebugManager.h; sourceTree = "<group>"; };
 		8592910F265B6E8C004EA584 /* ZHJSDebugManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHJSDebugManager.m; sourceTree = "<group>"; };
+		859BE97B2668D369003C02DE /* ZHDPNetworkTask.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHDPNetworkTask.h; sourceTree = "<group>"; };
+		859BE97C2668D369003C02DE /* ZHDPNetworkTask.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHDPNetworkTask.m; sourceTree = "<group>"; };
+		859BE97E2668DF44003C02DE /* ZHDPListPopShadow.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHDPListPopShadow.h; sourceTree = "<group>"; };
+		859BE97F2668DF44003C02DE /* ZHDPListPopShadow.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHDPListPopShadow.m; sourceTree = "<group>"; };
 		859D255A265F84BB003513BA /* ZHDPManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHDPManager.h; sourceTree = "<group>"; };
 		859D255B265F84BB003513BA /* ZHDPManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHDPManager.m; sourceTree = "<group>"; };
 		859D255D265F84E3003513BA /* ZHDPDataTask.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHDPDataTask.h; sourceTree = "<group>"; };
@@ -521,6 +527,8 @@
 			children = (
 				859D255A265F84BB003513BA /* ZHDPManager.h */,
 				859D255B265F84BB003513BA /* ZHDPManager.m */,
+				859BE97B2668D369003C02DE /* ZHDPNetworkTask.h */,
+				859BE97C2668D369003C02DE /* ZHDPNetworkTask.m */,
 				859D255D265F84E3003513BA /* ZHDPDataTask.h */,
 				859D255E265F84E3003513BA /* ZHDPDataTask.m */,
 				85C0868126648769005AF025 /* ZHDPWindow.h */,
@@ -619,6 +627,8 @@
 			children = (
 				851B12982662390300FA3AA3 /* ZHDPListPop.h */,
 				851B12992662390300FA3AA3 /* ZHDPListPop.m */,
+				859BE97E2668DF44003C02DE /* ZHDPListPopShadow.h */,
+				859BE97F2668DF44003C02DE /* ZHDPListPopShadow.m */,
 				85CEEC862660DA8E004467F1 /* ZHDPListOprate.h */,
 				85CEEC872660DA8E004467F1 /* ZHDPListOprate.m */,
 				85CEEC8D2660FA6F004467F1 /* ZHDPListApps.h */,
@@ -969,6 +979,7 @@
 				8582282425AD97BF00FECFB9 /* ZHJSPageItem.m in Sources */,
 				0FCF2D17260EEE77003797EF /* ZHCtxConfig.m in Sources */,
 				0F07989F24010627004AAFBC /* ZHController.m in Sources */,
+				859BE97D2668D369003C02DE /* ZHDPNetworkTask.m in Sources */,
 				0F079870240104FB004AAFBC /* main.m in Sources */,
 				859D255F265F84E3003513BA /* ZHDPDataTask.m in Sources */,
 				0F0798A224010647004AAFBC /* ZHJSHandler.m in Sources */,
@@ -998,6 +1009,7 @@
 				85C0868626649326005AF025 /* ZHDPFloat.m in Sources */,
 				0F5E33D9242F084E00623068 /* ZHCustom1Api.m in Sources */,
 				0F07989C2401060A004AAFBC /* ZHWebView.m in Sources */,
+				859BE9802668DF44003C02DE /* ZHDPListPopShadow.m in Sources */,
 				85118B5B265E4EF8002BDFC9 /* ZHDPList.m in Sources */,
 				85118B53265E482A002BDFC9 /* ZHDPComponent.m in Sources */,
 				8539A2E3246E9C2800FD7EFB /* ZHCustom2Api.m in Sources */,

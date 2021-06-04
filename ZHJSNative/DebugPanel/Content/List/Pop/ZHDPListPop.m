@@ -7,8 +7,8 @@
 //
 
 #import "ZHDPListPop.h"
-#import "ZHDPManager.h"
-#import "ZHDPList.h"
+#import "ZHDPManager.h"// 调试面板管理
+#import "ZHDPList.h"// 列表
 
 @interface ZHDPListPop ()
 
@@ -34,16 +34,13 @@
 }
 - (void)layoutSubviews{
     [super layoutSubviews];
+
+    [self updateArrowBtnFrame];
     
-    CGFloat X = 0;
-    CGFloat H = self.arrowBtn.frame.size.height;
-    CGFloat Y = (self.frame.size.height - H) * 0.5;
-    self.arrowBtn.frame = (CGRect){{X, Y}, self.arrowBtn.frame.size};
-    
-    X = CGRectGetMaxX(self.arrowBtn.frame);
+    CGFloat X = CGRectGetMaxX(self.arrowBtn.frame);
     CGFloat W = self.frame.size.width - X;
-    H = self.frame.size.height;
-    Y = 0;
+    CGFloat H = self.frame.size.height;
+    CGFloat Y = 0;
     self.shadowView.frame = CGRectMake(X, Y, W, H);
 
     self.bgBtn.frame = self.list.bounds;
@@ -79,6 +76,7 @@
     // self.realW = [self defaultPopW];
     self.realRevealW = self.realW;
     self.arrowBtn.selected = YES;
+    [self updateArrowBtnFrame];
 
     if ([self allowMaskWhenShow]) {
         [self.bgBtn removeFromSuperview];
@@ -95,6 +93,7 @@
     // self.realW = [self minPopW];
     self.realRevealW = [self minRevealW];
     self.arrowBtn.selected = NO;
+    [self updateArrowBtnFrame];
 
     [self doAnimation:^{
         self.bgBtn.alpha = 0.0;
@@ -110,6 +109,9 @@
 
 - (BOOL)isShow{
     return self.arrowBtn.selected;
+}
+- (void)reloadListInstant{
+    [self reloadList];
 }
 - (void)reloadListFrequently{
     [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(reloadList) object:nil];
@@ -133,6 +135,16 @@
     
     [self addSubview:self.arrowBtn];
     [self addSubview:self.shadowView];
+}
+
+#pragma mark - frame
+
+- (void)updateArrowBtnFrame{
+    CGFloat X = 0;
+    CGFloat W = self.focusW;
+    CGFloat H = self.arrowBtn.isSelected ? self.frame.size.height : W * 2;
+    CGFloat Y = (self.frame.size.height - H) * 0.5;
+    self.arrowBtn.frame = CGRectMake(X, Y, W, H);
 }
 
 #pragma mark - click
@@ -298,20 +310,9 @@
     }
     return _bgBtn;
 }
-- (UIView *)shadowView{
+- (ZHDPListPopShadow *)shadowView{
     if (!_shadowView) {
-        _shadowView = [[UIView alloc] initWithFrame:CGRectZero];
-        _shadowView.backgroundColor = [UIColor whiteColor];
-        
-        void (^block) (UIView *view) = ^(UIView *view){
-            view.clipsToBounds = NO;
-            view.layer.masksToBounds = NO;
-            view.layer.shadowColor = [UIColor colorWithWhite:0 alpha:0.5].CGColor;
-            view.layer.shadowOffset = CGSizeMake(0,0);
-            view.layer.shadowOpacity = 0.5;
-            view.layer.shadowRadius = 5;
-        };
-        block(_shadowView);
+        _shadowView = [[ZHDPListPopShadow alloc] initWithFrame:CGRectZero];
     }
     return _shadowView;
 }
@@ -341,14 +342,13 @@
 //        view.transform = CGAffineTransformMakeRotation(-M_PI / 6.0);
 //        [_arrowBtn addSubview:view];
 //        _arrowBtn.frame = CGRectMake(0, 0, self.focusW, CGRectGetMaxY(view.frame));
-        
+        _arrowBtn.backgroundColor = [UIColor clearColor];
         _arrowBtn.alpha = 0.5;
         [_arrowBtn setTitle:@"\ue68d" forState:UIControlStateNormal];
         [_arrowBtn setTitle:@"\ue68e" forState:UIControlStateSelected];
         _arrowBtn.titleLabel.font = [ZHDPMg() iconFontWithSize:25];
         _arrowBtn.titleLabel.adjustsFontSizeToFitWidth = YES;
         [_arrowBtn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-        _arrowBtn.frame = CGRectMake(0, 0, self.focusW, self.focusW * 2);
         [_arrowBtn addTarget:self action:@selector(arrowBtnClick:) forControlEvents:UIControlEventTouchUpInside];
     }
     return _arrowBtn;

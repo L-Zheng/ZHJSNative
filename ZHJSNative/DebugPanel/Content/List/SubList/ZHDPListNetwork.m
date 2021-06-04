@@ -7,15 +7,14 @@
 //
 
 #import "ZHDPListNetwork.h"
+#import "ZHDPManager.h"// 调试面板管理
 
 @implementation ZHDPListNetwork
 
-/*
-// Only override drawRect: if you perform custom drawing.
-// An empty implementation adversely affects performance during animation.
-- (void)drawRect:(CGRect)rect {
-    // Drawing code
+#pragma mark - data
+
+- (NSArray <ZHDPListSecItem *> *)fetchAllItems{
+    return [ZHDPMg().dataTask fetchAllAppDataItems_network];
 }
-*/
 
 @end

@@ -7,8 +7,8 @@
 //
 
 #import "ZHDPListDetail.h"
-#import "ZHDPList.h"
-#import "ZHDPManager.h"
+#import "ZHDPList.h"// 列表
+#import "ZHDPManager.h"// 调试面板管理
 
 @interface ZHDPListDetail ()<UICollectionViewDataSource,UICollectionViewDelegate>
 @property (nonatomic, retain) NSArray <ZHDPListDetailItem *> *items;
@@ -16,6 +16,7 @@
 @property (nonatomic, strong) UICollectionView *collectionView;
 @property (nonatomic,strong) UIView *line;
 @property (nonatomic,strong) UITextView *textView;
+@property (nonatomic,strong) UIButton *pasteboardBtn;
 @end
 
 @implementation ZHDPListDetail
@@ -35,24 +36,30 @@
 
     self.contentView.frame = self.shadowView.frame;
     
-    CGFloat X = 0;
-    CGFloat W = self.contentView.frame.size.width - X;
+    CGFloat W = 30;
     CGFloat H = 30;
     CGFloat Y = 0;
+    CGFloat X = self.contentView.frame.size.width - W;
+    self.pasteboardBtn.frame = CGRectMake(X, Y, W, H);
+    
+    X = [ZHDPMg() marginW] * 2;
+    W = self.pasteboardBtn.frame.origin.x - X;
+    H = 30;
+    Y = 0;
     UICollectionViewLayout *layout = self.collectionView.collectionViewLayout;
     if ([layout isKindOfClass:UICollectionViewFlowLayout.class]) {
-        ((UICollectionViewFlowLayout *)layout).itemSize = CGSizeMake(70, H);
+        ((UICollectionViewFlowLayout *)layout).itemSize = CGSizeMake(50, H);
     }
     self.collectionView.frame = CGRectMake(X, Y, W, H);
     
     X = 0;
     W = self.contentView.frame.size.width;
-    H = 0.5;
+    H = [ZHDPMg() defaultLineW];
     Y = CGRectGetMaxY(self.collectionView.frame);
     self.line.frame = CGRectMake(X, Y, W, H);
     
-    X = 0;
-    W = self.contentView.frame.size.width;
+    X = [ZHDPMg() marginW];
+    W = self.contentView.frame.size.width - X - [ZHDPMg() marginW];
     Y = CGRectGetMaxY(self.line.frame);
     H = self.contentView.frame.size.height - Y;
     self.textView.frame = CGRectMake(X, Y, W, H);
@@ -93,6 +100,11 @@
     self.frame = CGRectMake(X, Y, W, H);
 }
 - (void)showWithSecItem:(ZHDPListSecItem *)secItem{
+    NSArray <ZHDPListDetailItem *> *items = secItem.detailItems;
+    if (!items || ![items isKindOfClass:NSArray.class] || items.count == 0) {
+        return;
+    }
+    
     if ([self isShow]) {
         if (![self.secItem isEqual:secItem]) {
             [self reloadWithSecItem:secItem];
@@ -130,7 +142,7 @@
     }];
 }
 - (BOOL)allowMaskWhenShow{
-    return NO;
+    return YES;
 }
 - (void)reloadList{
     [self.collectionView reloadData];
@@ -145,6 +157,7 @@
     [super configUI];
     [self addSubview:self.contentView];
     [self.contentView addSubview:self.collectionView];
+    [self.contentView addSubview:self.pasteboardBtn];
     [self.contentView addSubview:self.line];
     [self.contentView addSubview:self.textView];
 }
@@ -180,8 +193,14 @@
     for (NSUInteger i = 0; i < self.items.count; i++) {
         self.items[i].selected = (indexPath.item == i ? YES : NO);
     }
-    [self reloadListFrequently];
-    self.textView.text = self.items[indexPath.item].content;
+    [self reloadListInstant];
+    self.textView.attributedText = self.items[indexPath.item].content;
+}
+
+#pragma mark - click
+
+- (void)pasteboardBtnClick:(UIButton *)btn{
+    [ZHDPMg() copySecItemToPasteboard:self.secItem];
 }
 
 #pragma mark - UICollectionViewDelegate
@@ -195,12 +214,14 @@
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
     UICollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:self.collectionCellIdentifier forIndexPath:indexPath];
     cell.backgroundColor = [UIColor clearColor];
+    //    cell.contentView.backgroundColor = [UIColor colorWithRed:arc4random_uniform(255.0)/255.0 green:arc4random_uniform(255.0)/255.0 blue:arc4random_uniform(255.0)/255.0 alpha:1.0];
     cell.contentView.backgroundColor = [UIColor clearColor];
     UILabel *label = [cell viewWithTag:999];
     if (!label) {
         label = [[UILabel alloc] initWithFrame:cell.bounds];
         label.tag = 999;
-        label.textAlignment = NSTextAlignmentCenter;
+        label.font = [ZHDPMg() defaultFont];
+        label.textAlignment = NSTextAlignmentLeft;
         label.adjustsFontSizeToFitWidth = YES;
         [cell addSubview:label];
     }
@@ -220,7 +241,7 @@
     if (!_collectionView) {
         UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
         layout.minimumInteritemSpacing = 0;
-        layout.minimumLineSpacing = 5;
+        layout.minimumLineSpacing = 0;
         layout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
                 
 //        [Assert] negative or zero item sizes are not supported in the flow layout
@@ -232,7 +253,7 @@
         _collectionView.dataSource = self;
         _collectionView.delegate = self;
         
-        _collectionView.showsHorizontalScrollIndicator = YES;
+        _collectionView.showsHorizontalScrollIndicator = NO;
         _collectionView.showsVerticalScrollIndicator = NO;
         _collectionView.alwaysBounceHorizontal = YES;
         _collectionView.directionalLockEnabled = YES;
@@ -247,22 +268,35 @@
 - (UIView *)contentView{
     if (!_contentView) {
         _contentView = [[UIView alloc] initWithFrame:CGRectZero];
-        _contentView.backgroundColor = [UIColor whiteColor];
+        _contentView.backgroundColor = [UIColor clearColor];
         _contentView.clipsToBounds = YES;
     }
     return _contentView;
 }
+- (UIButton *)pasteboardBtn{
+    if (!_pasteboardBtn) {
+        _pasteboardBtn = [[UIButton alloc] initWithFrame:CGRectZero];
+        _pasteboardBtn.titleLabel.font = [ZHDPMg() iconFontWithSize:20];
+        
+        [_pasteboardBtn setTitle:@"\ue617" forState:UIControlStateNormal];
+        [_pasteboardBtn setTitleColor:[ZHDPMg() defaultColor] forState:UIControlStateNormal];
+        
+        [_pasteboardBtn addTarget:self action:@selector(pasteboardBtnClick:) forControlEvents:UIControlEventTouchUpInside];
+    }
+    return _pasteboardBtn;
+}
 - (UIView *)line{
     if (!_line) {
         _line = [[UIView alloc] initWithFrame:CGRectZero];
-        _line.backgroundColor = [UIColor colorWithRed:230/255.0 green:230/255.0 blue:230/255.0 alpha:1];
+        _line.backgroundColor = [ZHDPMg() defaultLineColor];
     }
     return _line;
 }
 - (UITextView *)textView{
     if (!_textView) {
         _textView = [[UITextView alloc] initWithFrame:CGRectZero];
-        _textView.font = [UIFont systemFontOfSize:13];
+        _textView.backgroundColor = [UIColor clearColor];
+        _textView.font = [ZHDPMg() defaultFont];
         _textView.editable = NO;
     }
     return _textView;

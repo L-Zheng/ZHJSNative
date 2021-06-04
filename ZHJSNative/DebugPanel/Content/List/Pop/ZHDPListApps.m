@@ -7,8 +7,8 @@
 //
 
 #import "ZHDPListApps.h"
-#import "ZHDPManager.h"
-#import "ZHDPList.h"
+#import "ZHDPManager.h"// 调试面板管理
+#import "ZHDPList.h"// 列表
 
 @interface ZHDPListApps ()<UITableViewDataSource,UITableViewDelegate>
 @property (nonatomic,strong) UILabel *topTipLabel;
@@ -71,7 +71,7 @@
     return 0;
 }
 - (CGFloat)defaultPopW{
-    return 150;
+    return 200;
 }
 - (CGFloat)minPopW{
     return 0;
@@ -147,6 +147,7 @@
 
 - (void)reloadSecItems{
     NSArray <ZHDPListSecItem *> *secItems = [self.list fetchAllItems]?:@[];
+    ZHDPAppItem *fundCliItem = nil;
     NSMutableArray *appIds = [NSMutableArray array];
     NSMutableArray *items = [NSMutableArray array];
     for (ZHDPListSecItem *secItem in secItems) {
@@ -157,7 +158,14 @@
         }
         if ([appIds containsObject:appId]) continue;
         [appIds addObject:appId];
-        [items addObject:appItem];
+        if (appItem.isFundCli) {
+            fundCliItem = appItem;
+        }else{
+            [items addObject:appItem];
+        }
+    }
+    if (fundCliItem) {
+        [items insertObject:fundCliItem atIndex:0];
     }
     self.items = items.copy;
     [self reloadListFrequently];
@@ -194,7 +202,7 @@
         cell.contentView.backgroundColor = [UIColor clearColor];
         cell.backgroundView = [UIView new];
         
-        cell.textLabel.font = [UIFont systemFontOfSize:13];
+        cell.textLabel.font = [ZHDPMg() defaultFont];
         cell.textLabel.numberOfLines = 0;
         cell.textLabel.adjustsFontSizeToFitWidth = YES;
     }
@@ -216,7 +224,7 @@
 - (UILabel *)topTipLabel {
     if (!_topTipLabel) {
         _topTipLabel = [[UILabel alloc] initWithFrame:CGRectZero];
-        _topTipLabel.font = [UIFont systemFontOfSize:13.0f];
+        _topTipLabel.font = [ZHDPMg() defaultBoldFont];
         _topTipLabel.textAlignment = NSTextAlignmentCenter;
         _topTipLabel.text = @"筛选";
         _topTipLabel.textColor = [UIColor blackColor];
@@ -234,8 +242,8 @@
         _tableView.delegate = self;
         _tableView.dataSource = self;
         
-        _tableView.layer.borderColor = [UIColor colorWithRed:240.0/255.0 green:240.0/255.0 blue:241.0/255.0 alpha:1.0].CGColor;
-        _tableView.layer.borderWidth = 0.5;
+        _tableView.layer.borderColor = [ZHDPMg() defaultLineColor].CGColor;
+        _tableView.layer.borderWidth = [ZHDPMg() defaultLineW];
         
         _tableView.separatorInset = UIEdgeInsetsZero;
         _tableView.separatorStyle = UITableViewCellSeparatorStyleSingleLine;
@@ -245,7 +253,7 @@
 - (UILabel *)tipLabel {
     if (!_tipLabel) {
         _tipLabel = [[UILabel alloc] initWithFrame:CGRectZero];
-        _tipLabel.font = [UIFont systemFontOfSize:17.0f];
+        _tipLabel.font = [ZHDPMg() defaultFont];
         _tipLabel.textAlignment = NSTextAlignmentCenter;
         _tipLabel.text = @"内容为空";
         _tipLabel.numberOfLines = 0;
@@ -259,7 +267,7 @@
     if (!_selectAllBtn) {
         _selectAllBtn = [[UIButton alloc] initWithFrame:CGRectZero];
         _selectAllBtn.backgroundColor = [UIColor clearColor];
-        _selectAllBtn.titleLabel.font = [UIFont systemFontOfSize:13];
+        _selectAllBtn.titleLabel.font = [ZHDPMg() defaultBoldFont];
         _selectAllBtn.titleLabel.adjustsFontSizeToFitWidth = YES;
         
         [_selectAllBtn setTitle:@"选择全部" forState:UIControlStateNormal];

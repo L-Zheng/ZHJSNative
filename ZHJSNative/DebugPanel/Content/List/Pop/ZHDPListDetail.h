@@ -7,7 +7,7 @@
 //
 
 #import "ZHDPListPop.h"
-#import "ZHDPDataTask.h"
+#import "ZHDPDataTask.h"// 数据管理
 
 @interface ZHDPListDetail : ZHDPListPop
 - (void)showWithSecItem:(ZHDPListSecItem *)secItem;

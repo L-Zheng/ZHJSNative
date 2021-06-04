@@ -8,8 +8,22 @@
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
-@class ZHDPManager;
-@class ZHDPAppDataItem;
+@class ZHDPManager;// 调试面板管理
+@class ZHDPAppDataItem;// 某个app的数据
+
+/* 数据结构
+ @{
+     @"appId": ZHDPAppDataItem
+     @"appId": ZHDPAppDataItem
+   }
+
+ ZHDPAppDataItem
+     ZHDPAppItem *appItem;
+     NSMutableArray <ZHDPListSecItem *> *logItems;
+     NSMutableArray <ZHDPListSecItem *> *networkItems;
+     NSMutableArray <ZHDPListSecItem *> *imItems;
+     NSMutableArray <ZHDPListSecItem *> *storageItems;
+ */
 
 // list操作栏数据
 @interface ZHDPListOprateItem : NSObject
@@ -27,8 +41,7 @@
 
 // list中每一行中每一分段的信息
 @interface ZHDPListColItem : NSObject
-@property (nonatomic,strong) UIFont *font;
-@property (nonatomic,copy) NSString *title;
+@property (nonatomic,copy) NSAttributedString *attTitle;
 @property (nonatomic,assign) CGFloat percent;
 @property (nonatomic,strong) NSValue *rectValue;
 @end
@@ -42,7 +55,7 @@
 // list选中某一组显示的详细信息
 @interface ZHDPListDetailItem : NSObject
 @property (nonatomic,copy) NSString *title;
-@property (nonatomic,copy) NSString *content;
+@property (nonatomic,copy) NSAttributedString *content;
 @property (nonatomic,assign,getter=isSelected) BOOL selected;
 @end
 
@@ -57,6 +70,8 @@
 @property (nonatomic,retain) NSArray <ZHDPListRowItem *> *rowItems;
 
 @property (nonatomic,retain) NSArray <ZHDPListDetailItem *> *detailItems;
+
+@property (nonatomic,copy) NSString * (^pasteboardBlock) (void);
 @end
 
 // 某种类型数据的存储最大容量
@@ -69,6 +84,7 @@
 @interface ZHDPAppItem : NSObject
 @property (nonatomic,copy) NSString *appName;
 @property (nonatomic,copy) NSString *appId;
+@property (nonatomic,assign,getter=isFundCli) BOOL fundCli;
 @end
 
 // 某个应用的数据
@@ -108,6 +124,7 @@
 - (ZHDPAppDataItem *)fetchAppDataItem:(ZHDPAppItem *)appItem;
 
 // 清理并添加数据
+- (void)cleanAllItems:(NSMutableArray *)items;
 - (void)addAndCleanItems:(NSMutableArray *)items item:(ZHDPListSecItem *)item spaceItem:(ZHDPDataSpaceItem *)spaceItem;
 @end
 

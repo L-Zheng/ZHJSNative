@@ -7,9 +7,9 @@
 //
 
 #import "ZHDPListOprate.h"
-#import "ZHDPList.h"
-#import "ZHDPManager.h"
-#import "ZHDPListApps.h"
+#import "ZHDPList.h"// 列表
+#import "ZHDPManager.h"// 调试面板管理
+#import "ZHDPListApps.h"// pop app列表
 
 @interface ZHDPListOprateCell ()
 @property (nonatomic, strong) UILabel *iconLabel;
@@ -32,7 +32,7 @@
     if (self) {
         self.clipsToBounds = YES;
         //        ⚠️[TableView] Changing the background color of UITableViewHeaderFooterView is not supported. Use the background view configuration instead.
-        //        self.backgroundColor = [UIColor clearColor];
+        self.backgroundColor = [UIColor clearColor];
         self.contentView.backgroundColor = [UIColor clearColor];
         self.backgroundView = [UIView new];
         //        self.selectedBackgroundView = [UIView new];
@@ -71,7 +71,7 @@
 - (UILabel *)iconLabel {
     if (!_iconLabel) {
         _iconLabel = [[UILabel alloc] initWithFrame:CGRectZero];
-        _iconLabel.font = [ZHDPMg() iconFontWithSize:23];
+        _iconLabel.font = [ZHDPMg() iconFontWithSize:20];
         _iconLabel.textAlignment = NSTextAlignmentCenter;
 //        _iconLabel.numberOfLines = 0;
         _iconLabel.backgroundColor = [UIColor clearColor];
@@ -146,7 +146,7 @@
     
     CGFloat W = self.realW;
     CGFloat X = superW - self.realRevealW;
-    CGFloat H = superH * 0.8;
+    CGFloat H = superH * 0.85;
     CGFloat Y = (superH - H) * 0.5;
     self.frame = CGRectMake(X, Y, W, H);
 }
@@ -229,6 +229,7 @@
         _tableView.directionalLockEnabled = YES;
         _tableView.delegate = self;
         _tableView.dataSource = self;
+        _tableView.showsVerticalScrollIndicator = NO;
         
         _tableView.separatorInset = UIEdgeInsetsZero;
         _tableView.separatorStyle = UITableViewCellSeparatorStyleSingleLine;

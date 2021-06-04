@@ -7,11 +7,11 @@
 //
 
 #import "ZHDPContent.h"
-#import "ZHDPDataTask.h"
-#import "ZHDPListLog.h"
-#import "ZHDPListNetwork.h"
-#import "ZHDPListIM.h"
-#import "ZHDPListStorage.h"
+#import "ZHDPDataTask.h"// 数据管理
+#import "ZHDPListLog.h"// log列表
+#import "ZHDPListNetwork.h"// network列表
+#import "ZHDPListStorage.h"// storage列表
+#import "ZHDPListIM.h"// im列表
 
 @interface ZHDPContent ()
 @property (nonatomic, strong) ZHDPListLog *logList;
@@ -50,7 +50,7 @@
 #pragma mark - lists
 
 - (NSArray <ZHDPList *> *)allLists{
-    return @[self.logList, self.networkList, self.imList, self.storageList];
+    return @[self.logList, self.networkList, self.storageList, self.imList];
 }
 - (void)selectList:(ZHDPList *)list{
     if (!list || [self.selectList isEqual:list]) return;

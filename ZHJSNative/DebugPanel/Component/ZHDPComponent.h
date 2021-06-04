@@ -7,7 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
-@class ZHDebugPanel;
+@class ZHDebugPanel;// 调试面板
 
 NS_ASSUME_NONNULL_BEGIN
 

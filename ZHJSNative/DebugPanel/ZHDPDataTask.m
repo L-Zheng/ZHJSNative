@@ -31,9 +31,6 @@
 
 // list中每一行中每一分段的信息
 @implementation ZHDPListColItem
-- (UIFont *)font{
-    return _font?:[UIFont systemFontOfSize:17];
-}
 @end
 
 // list中每一行的信息
@@ -62,7 +59,14 @@
 
 // 单个应用的简要信息
 @implementation ZHDPAppItem
-
+- (void)setAppId:(NSString *)appId{
+    _appId = appId;
+    if (appId && [appId isKindOfClass:NSString.class] && appId.length > 0) {
+        if ([appId isEqualToString:@"a_socket"]) {
+            self.fundCli = YES;
+        }
+    }
+}
 @end
 
 // 单个应用的数据
@@ -186,6 +190,9 @@
 
 
 // 清理并添加数据
+- (void)cleanAllItems:(NSMutableArray *)items{
+    [items removeAllObjects];
+}
 - (void)cleanItems:(NSMutableArray *)items spaceItem:(ZHDPDataSpaceItem *)spaceItem{
     if (!items) return;
     

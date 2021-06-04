@@ -7,10 +7,12 @@
 //
 
 #import "ZHDPListRow.h"
+#import "ZHDPManager.h"// 调试面板管理
 
 @interface ZHDPListRow ()
 @property (nonatomic,strong) NSArray <ZHDPListColItem *> *items;
 @property (nonatomic,retain) NSMutableArray *labels;
+@property (nonatomic,retain) NSMutableArray *verticalLines;
 @property (nonatomic,strong) UIView *line;
 @end
 
@@ -29,7 +31,13 @@
 - (void)layoutSubviews{
     [super layoutSubviews];
     
-    self.line.frame = CGRectMake(0, self.bounds.size.height - 0.5, self.bounds.size.width, 0.5);
+    for (UIView *line in self.verticalLines) {
+        if (line.superview) {
+            line.frame = CGRectMake(line.frame.origin.x, 0, line.frame.size.width, self.bounds.size.height);
+        }
+    }
+    
+    self.line.frame = CGRectMake(0, self.bounds.size.height - [ZHDPMg() defaultLineW], self.bounds.size.width, [ZHDPMg() defaultLineW]);
 }
 
 #pragma mark - config
@@ -59,21 +67,57 @@
             [self.labels addObject:label];
         }
         
-        label.font = colItem.font;
-        label.text = colItem.title;
+        label.attributedText = colItem.attTitle;
         label.frame = [colItem.rectValue CGRectValue];
-        if (label.superview != self) {
-            [label removeFromSuperview];
-            [self addSubview:label];
+        [self addViewToSelf:label];
+        
+        if (i < colItems.count - 1) {
+            UIView *line = i < self.verticalLines.count ? self.verticalLines[i] : nil;
+            if (!line) {
+                line = [[UIView alloc] initWithFrame:CGRectZero];
+                line.backgroundColor = [ZHDPMg() defaultLineColor];
+//                line.backgroundColor = [UIColor cyanColor];
+                [self.verticalLines addObject:line];
+            }
+            line.frame = CGRectMake(CGRectGetMaxX(label.frame) + ([ZHDPMg() marginW] - [ZHDPMg() defaultLineW]) * 0.5, label.frame.origin.y, [ZHDPMg() defaultLineW], label.frame.size.height);
+            [self addViewToSelf:line];
         }
     }
+    if (colItems.count < self.labels.count) {
+        for (NSInteger i = colItems.count; i < self.labels.count; i++) {
+            UIView *view = self.labels[i];
+            [view removeFromSuperview];
+        }
+    }
+    if (colItems.count <= 1) {
+        for (NSInteger i = 0; i < self.verticalLines.count; i++) {
+            UIView *view = self.verticalLines[i];
+            [view removeFromSuperview];
+        }
+    }else{
+        if (colItems.count - 1 < self.verticalLines.count) {
+            for (NSInteger i = colItems.count - 1; i < self.verticalLines.count; i++) {
+                UIView *view = self.verticalLines[i];
+                [view removeFromSuperview];
+            }
+        }
+    }
+    
     if (!self.line) {
         self.line = [[UIView alloc] initWithFrame:CGRectZero];
-        self.line.backgroundColor = [UIColor colorWithRed:230/255.0 green:230/255.0 blue:230/255.0 alpha:1];
+        self.line.backgroundColor = [ZHDPMg() defaultLineColor];
     }
-    if (self.line.superview != self) {
-        [self.line removeFromSuperview];
-        [self addSubview:self.line];
+    [self addViewToSelf:self.line];
+}
+- (void)addViewToSelf:(UIView *)view{
+    if (!view) return;
+    if (!view.superview) {
+        [self addSubview:view];
+    }else{
+        if (view.superview != self) {
+            [view removeFromSuperview];
+            [self addSubview:view];
+        }
     }
 }
 
@@ -82,6 +126,12 @@
         _labels = [NSMutableArray array];
     }
     return _labels;
+}
+- (NSMutableArray *)verticalLines{
+    if (!_verticalLines) {
+        _verticalLines = [NSMutableArray array];
+    }
+    return _verticalLines;
 }
 
 @end

@@ -7,12 +7,16 @@
 //
 
 #import "ZHDPComponent.h"
-@class ZHDPList;
+@class ZHDPList;// 列表
 
 @interface ZHDPOptionItem : NSObject
 @property (nonatomic,copy) NSString *title;
 @property (nonatomic,assign,getter=isSelected) BOOL selected;
 @property (nonatomic,weak) ZHDPList *list;
+@end
+
+@interface ZHDPOptionCollectionViewCell : UICollectionViewCell
+- (void)configItem:(ZHDPOptionItem *)item;
 @end
 
 @interface ZHDPOption : ZHDPComponent

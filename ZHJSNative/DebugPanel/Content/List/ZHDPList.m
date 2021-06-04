@@ -7,13 +7,13 @@
 //
 
 #import "ZHDPList.h"
-#import "ZHDPListCell.h"
-#import "ZHDPListHeader.h"
-#import "ZHDPManager.h"
-#import "ZHDPListOprate.h"
-#import "ZHDPListSearch.h"
-#import "ZHDPListApps.h"
-#import "ZHDPListDetail.h"
+#import "ZHDPListCell.h"// list cell
+#import "ZHDPListHeader.h"// list header
+#import "ZHDPManager.h"// 调试面板管理
+#import "ZHDPListOprate.h"// pop操作栏
+#import "ZHDPListSearch.h"// 搜索
+#import "ZHDPListApps.h"// pop app列表
+#import "ZHDPListDetail.h"// pop detail数据
 
 typedef NS_ENUM(NSInteger, ZHDPScrollStatus) {
     ZHDPScrollStatus_Idle      = 0,//闲置
@@ -23,7 +23,6 @@ typedef NS_ENUM(NSInteger, ZHDPScrollStatus) {
 
 @interface ZHDPList () <UITableViewDataSource,UITableViewDelegate>
 
-@property (nonatomic,retain) NSMutableArray <ZHDPListSecItem *> *items;
 @property (nonatomic,retain) NSMutableArray *items_temp;
 
 @property (nonatomic,assign) ZHDPScrollStatus scrollStatus;
@@ -92,14 +91,17 @@ typedef NS_ENUM(NSInteger, ZHDPScrollStatus) {
     
     if (listContentH <= 0 || listH <= 0) {
         self.allowScrollAuto = YES;
+        [self scrollListToBottom:NO];
         return;
     }
     if (listContentH < listH) {
         self.allowScrollAuto = YES;
+        [self scrollListToBottom:NO];
         return;
     }
-    if (listOffSetY >= listContentH - listH - 5) {
+    if (listOffSetY >= listContentH - listH - 10) {
         self.allowScrollAuto = YES;
+        [self scrollListToBottom:NO];
         return;
     }
     self.allowScrollAuto = NO;
@@ -133,7 +135,7 @@ typedef NS_ENUM(NSInteger, ZHDPScrollStatus) {
     }
     NSArray <ZHDPListColItem *> *colItems = secItem.colItems.copy;
     for (ZHDPListColItem *colItem in colItems) {
-        if ([colItem.title.lowercaseString containsString:keyword.lowercaseString]) {
+        if ([colItem.attTitle.string.lowercaseString containsString:keyword.lowercaseString]) {
             return YES;
         }
     }
@@ -159,7 +161,7 @@ typedef NS_ENUM(NSInteger, ZHDPScrollStatus) {
         return;
     }
     [UIView animateWithDuration:0.25 animations:^{
-        self.searchH = 30;
+        self.searchH = 40;
         [self updateSearchFrame];
     }];
 }
@@ -171,7 +173,7 @@ typedef NS_ENUM(NSInteger, ZHDPScrollStatus) {
     [UIView animateWithDuration:0.25 animations:^{
         [self updateSearchFrame];
     } completion:^(BOOL finished) {
-        [self reloadListWhenShow];
+        [self reloadListWhenCloseSearch];
     }];
 }
 
@@ -181,8 +183,8 @@ typedef NS_ENUM(NSInteger, ZHDPScrollStatus) {
     NSMutableArray *res = [NSMutableArray array];
     
     __weak __typeof__(self) weakSelf = self;
-    NSArray *icons = @[@"\ue68b", @"\ue609", @"\ue630", @"\ue691", @"\ue60a"];
-    NSArray *descs = @[@"筛选", @"查找", @"顶部", @"底部", @"隐藏"];
+    NSArray *icons = @[@"\ue68b", @"\ue609", @"\ue636", @"\ue61d", @"\ue60a", @"\ue630", @"\ue691"];
+    NSArray *descs = @[@"筛选", @"查找", @"刷新", @"删除", @"隐藏", @"顶部", @"底部"];
     NSArray *blocks = @[
         ^{
             [weakSelf.apps show];
@@ -193,14 +195,22 @@ typedef NS_ENUM(NSInteger, ZHDPScrollStatus) {
          },
          ^{
              [weakSelf.oprate hide];
+             [weakSelf reloadListWhenRefresh];
+         },
+         ^{
+             [weakSelf.oprate hide];
+             [ZHDPMg() removeSecItemsList:weakSelf.class secItems:weakSelf.items.copy];
+         },
+         ^{
+             [ZHDPMg() switchFloat];
+         },
+         ^{
+             [weakSelf.oprate hide];
              [weakSelf scrollListToTopCode];
          },
          ^{
              [weakSelf.oprate hide];
              [weakSelf scrollListToBottomCode];
-         },
-         ^{
-             [ZHDPMg() switchFloat];
          }
     ];
     for (NSUInteger i = 0; i < icons.count; i++) {
@@ -273,16 +283,44 @@ typedef NS_ENUM(NSInteger, ZHDPScrollStatus) {
     block();
     [self reloadList];
 }
+- (void)removeSecItems:(NSArray <ZHDPListSecItem *> *)secItems{
+    if (!secItems || ![secItems isKindOfClass:NSArray.class] || secItems.count == 0 || self.items.count == 0) {
+        return;
+    }
+    NSUInteger originCount = self.items.count;
+    [self.items removeObjectsInArray:secItems];
+    if (self.items.count == originCount) {
+        return;
+    }
+    [self reloadListFrequently];
+}
+- (void)removeSecItem:(ZHDPListSecItem *)secItem{
+    if (!secItem || ![secItem isKindOfClass:ZHDPListSecItem.class] || self.items.count == 0) return;
+    if ([self.items containsObject:secItem]) {
+        [self.items removeObject:secItem];
+        [self reloadListFrequently];
+    }
+}
 - (void)reloadListWhenSelectApp{
     [self reloadListWhenShow];
 }
 - (void)reloadListWhenSearch{
     [self reloadListWhenShow];
 }
+- (void)reloadListWhenCloseSearch{
+    [self reloadListWhenShow];
+}
+- (void)reloadListWhenRefresh{
+    [self reloadListWhenShow];
+}
 - (void)reloadListWhenShow{
     NSArray <ZHDPListSecItem *> *items = [self fetchAllItems]?:@[];
     self.items = [[self filterItems:items.copy]?:@[] mutableCopy];
     [self reloadList];
+}
+- (void)reloadListFrequently{
+    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(reloadList) object:nil];
+    [self performSelector:@selector(reloadList) withObject:nil afterDelay:0.25];
 }
 - (void)reloadList{
     if (!self.allowScrollAuto) {
@@ -313,19 +351,19 @@ typedef NS_ENUM(NSInteger, ZHDPScrollStatus) {
 }
 - (void)scrollListToBottomAutoInternal{
     if (!self.allowScrollAuto) return;
-    [self scrollListToBottom];
+    [self scrollListToBottom:YES];
 }
 - (void)scrollListToBottomCode{
     [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(scrollListToBottomAutoInternal) object:nil];
-    [self scrollListToBottom];
+    [self scrollListToBottom:YES];
 }
-- (void)scrollListToBottom{
+- (void)scrollListToBottom:(BOOL)animated{
     if (self.items.count <= 0) return;
 
     ZHDPListSecItem *secItem = self.items.lastObject;
     NSInteger row = (secItem.isOpen ? (secItem.rowItems.count > 0 ? secItem.rowItems.count - 1 : 0) : 0);
     NSInteger sec = self.items.count - 1;
-    [self.tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:row inSection:sec] atScrollPosition:UITableViewScrollPositionBottom animated:YES];
+    [self.tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:row inSection:sec] atScrollPosition:UITableViewScrollPositionBottom animated:animated];
 }
 
 - (void)scrollListToTopCode{
@@ -345,9 +383,12 @@ typedef NS_ENUM(NSInteger, ZHDPScrollStatus) {
 - (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section{
     ZHDPListHeader *header = [ZHDPListHeader sctionHeaderWithTableView:tableView];
     __weak __typeof__(self) weakSelf = self;
-    header.tapClickBlock = ^(BOOL open, ZHDPListSecItem *item) {
+    header.tapGesBlock = ^(BOOL open, ZHDPListSecItem *item) {
         [weakSelf.detail showWithSecItem:item];
 //        [weakSelf.tableView reloadSections:[NSIndexSet indexSetWithIndex:section] withRowAnimation:UITableViewRowAnimationAutomatic];
+    };
+    header.longPressGesBlock = ^(BOOL open, ZHDPListSecItem *item) {
+        [ZHDPMg() copySecItemToPasteboard:item];
     };
     [header configItem:self.items[section]];
     return header;
@@ -364,7 +405,8 @@ typedef NS_ENUM(NSInteger, ZHDPScrollStatus) {
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
     ZHDPListSecItem *secItem = self.items[indexPath.section];
     NSInteger rows = secItem.isOpen ? secItem.rowItems.count : 0;
-    return (rows > 0 ? secItem.rowItems[indexPath.row].rowH : 0);
+    // [FWDPMg() defaultLineW]  返回一个像素的行高  否则  scrollToRowAtIndexPath滚动时  位置可能不准确
+    return (rows > 0 ? secItem.rowItems[indexPath.row].rowH : 1.2);
 }
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
     ZHDPListSecItem *secItem = self.items[indexPath.section];
@@ -435,6 +477,12 @@ typedef NS_ENUM(NSInteger, ZHDPScrollStatus) {
         _tableView.directionalLockEnabled = YES;
         _tableView.delegate = self;
         _tableView.dataSource = self;
+        
+        if (@available(iOS 11.0, *)){
+            _tableView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
+        }else{
+//            self.automaticallyAdjustsScrollViewInsets = YES;
+        }
         
 //        _tableView.separatorColor = [UIColor colorWithRed:0.0/255.0 green:0.0/255.0 blue:0.0/255.0 alpha:0.25];
 //        _tableView.separatorInset = UIEdgeInsetsZero;

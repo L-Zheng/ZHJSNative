@@ -18,7 +18,7 @@
     ZHDPListCell *cell = [tableView dequeueReusableCellWithIdentifier:cellID];
     if (!cell) {
         cell = [[ZHDPListCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellID];
-//        cell.selectionStyle = UITableViewCellSelectionStyleNone;
+        cell.selectionStyle = UITableViewCellSelectionStyleNone;
     }
     return cell;
 }

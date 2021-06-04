@@ -7,15 +7,16 @@
 //
 
 #import "ZHDPComponent.h"
-@class ZHDPListItem;
-@class ZHDPListSecItem;
-@class ZHDPDataSpaceItem;
+@class ZHDPListItem;// list数据
+@class ZHDPListSecItem;// 每一组数据
+@class ZHDPDataSpaceItem;// 数据存储容量
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface ZHDPList : ZHDPComponent
 @property (nonatomic,strong) ZHDPListItem *item;
 
+@property (nonatomic,retain) NSMutableArray <ZHDPListSecItem *> *items;
 @property (nonatomic,strong) UITableView *tableView;
 
 #pragma mark - search
@@ -30,6 +31,8 @@ NS_ASSUME_NONNULL_BEGIN
 #pragma mark - reload
 
 - (void)addSecItem:(ZHDPListSecItem *)item spaceItem:(ZHDPDataSpaceItem *)spaceItem;
+- (void)removeSecItems:(NSArray <ZHDPListSecItem *> *)secItems;
+- (void)removeSecItem:(ZHDPListSecItem *)secItem;
 - (void)reloadListWhenShow;
 - (void)reloadList;
 - (void)scrollListToBottomCode;

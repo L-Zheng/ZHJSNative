@@ -7,7 +7,7 @@
 //
 
 #import "ZHDPComponent.h"
-@class ZHDPList;
+@class ZHDPList;// 列表
 
 @interface ZHDPListSearch : ZHDPComponent
 @property (nonatomic,weak) ZHDPList *list;

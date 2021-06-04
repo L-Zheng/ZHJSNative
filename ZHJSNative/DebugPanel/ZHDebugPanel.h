@@ -7,8 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
-@class ZHDPOption;
-@class ZHDPContent;
+@class ZHDPOption;// 操作栏
+@class ZHDPContent;// 内容列表容器
 
 typedef NS_ENUM(NSInteger, ZHDebugPanelStatus) {
     ZHDebugPanelStatus_Unknown     = 0,

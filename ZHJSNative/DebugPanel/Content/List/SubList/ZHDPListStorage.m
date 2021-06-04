@@ -7,15 +7,38 @@
 //
 
 #import "ZHDPListStorage.h"
+#import "ZHDPManager.h"// 调试面板管理
 
 @implementation ZHDPListStorage
 
-/*
-// Only override drawRect: if you perform custom drawing.
-// An empty implementation adversely affects performance during animation.
-- (void)drawRect:(CGRect)rect {
-    // Drawing code
+#pragma mark - data
+
+- (NSArray <ZHDPListSecItem *> *)fetchAllItems{
+    return [ZHDPMg().dataTask fetchAllAppDataItems_storage];
 }
-*/
+
+#pragma mark - reload
+
+- (void)reloadListWhenSelectApp{
+    [ZHDPMg() zh_test_reloadStorage];
+    [super reloadListWhenShow];
+}
+- (void)reloadListWhenSearch{
+    [super reloadListWhenShow];
+}
+- (void)reloadListWhenCloseSearch{
+    [super reloadListWhenShow];
+}
+- (void)reloadListWhenRefresh{
+    [ZHDPMg() zh_test_reloadStorage];
+    [super reloadListWhenShow];
+}
+- (void)reloadListWhenShow{
+    NSArray <ZHDPListSecItem *> *items = [self fetchAllItems]?:@[];
+    if (items.count == 0) {
+        [ZHDPMg() zh_test_reloadStorage];
+    }
+    [super reloadListWhenShow];
+}
 
 @end

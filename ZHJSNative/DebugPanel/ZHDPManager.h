@@ -7,8 +7,10 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "ZHDPDataTask.h"
-#import "ZHDPWindow.h"
+#import "ZHDPDataTask.h"// 数据管理
+#import "ZHDPNetworkTask.h"// 网络数据截获
+#import "ZHDPWindow.h"// 调试面板主窗口
+#import <JavaScriptCore/JavaScriptCore.h>
 
 typedef NS_ENUM(NSInteger, ZHDPManagerStatus) {
     ZHDPManagerStatus_Unknown     = 0,
@@ -23,10 +25,30 @@ typedef NS_ENUM(NSInteger, ZHDPManagerStatus) {
 @property (nonatomic,strong) ZHDPDataTask *dataTask;
 @property (nonatomic,strong) ZHDPWindow *window;
 
+#pragma mark - network
+
+@property (nonatomic,strong) ZHDPNetworkTask *networkTask;
+
+#pragma mark - basic
+
+- (CGFloat)basicW;
+- (CGFloat)marginW;
+
+#pragma mark - date
+
+- (NSDateFormatter *)dateByFormat:(NSString *)formatStr;
+- (NSDateFormatter *)dateFormat;
+- (CGFloat)dateW;
+
 #pragma mark - open close
 
 - (void)open;
 - (void)close;
+
+#pragma mark - window
+
+- (UIWindow *)fetchKeyWindow;
+- (UIEdgeInsets)fetchKeyWindowSafeAreaInsets;
 
 #pragma mark - switch
 
@@ -37,11 +59,55 @@ typedef NS_ENUM(NSInteger, ZHDPManagerStatus) {
 
 - (UIFont *)iconFontWithSize:(CGFloat)fontSize;
 - (UIFont *)defaultFont;
+- (UIFont *)defaultBoldFont;
 
 #pragma mark - color
 
 - (UIColor *)defaultColor;
 - (UIColor *)selectColor;
+- (UIColor *)defaultLineColor;
+- (CGFloat)defaultLineW;
+- (CGFloat)defaultCornerRadius;
+
+#pragma mark - toast
+
+- (void)showToast:(NSString *)title;
+
+#pragma mark - data
+
+- (id)jsValueToNative:(JSValue *)jsValue;
+- (void)convertToString:(id)title block:(void (^) (NSString *conciseStr, NSString *detailStr))block;
+- (NSAttributedString *)createDetailAttStr:(NSArray *)titles descs:(NSArray *)descs;
+- (ZHDPListColItem *)createColItem:(NSString *)title percent:(CGFloat)percent X:(CGFloat)X;
+
+- (void)copySecItemToPasteboard:(ZHDPListSecItem *)secItem;
+
+- (void)addSecItemToIMList:(ZHDPListSecItem *)secItem spaceItem:(ZHDPDataSpaceItem *)spaceItem;
+    
+- (void)addSecItemToLogList:(ZHDPListSecItem *)secItem spaceItem:(ZHDPDataSpaceItem *)spaceItem;
+
+- (void)addSecItemToNetworkList:(ZHDPListSecItem *)secItem spaceItem:(ZHDPDataSpaceItem *)spaceItem;
+
+- (void)addSecItemToStorageList:(ZHDPListSecItem *)secItem spaceItem:(ZHDPDataSpaceItem *)spaceItem;
+
+- (void)removeSecItemsList:(Class)listClass secItems:(NSArray <ZHDPListSecItem *> *)secItems;
+@end
+
+@interface ZHDPManager (ZHPlatformTest)
+
+#pragma mark - monitor
+
+- (void)startMonitorMpLog;
+- (void)stopMonitorMpLog;
+    
+#pragma mark - data
+    
+- (void)zh_test_addLog;
+- (void)zh_test_addNetwork:(NSDate *)startDate request:(NSURLRequest *)request response:(NSURLResponse *)response responseData:(NSData *)responseData;
+
+- (void)zh_test_reloadStorage;
+- (void)zh_test_addStorage;
+
 @end
 
 __attribute__((unused)) static ZHDPManager * ZHDPMg() {

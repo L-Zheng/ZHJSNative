@@ -91,6 +91,38 @@
             }
         }
     }
+    [self addNotification];
+}
+
+#pragma mark - notification
+
+- (void)addNotification{
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillChanged:) name:UIKeyboardWillShowNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillChanged:) name:UIKeyboardWillHideNotification object:nil];
+}
+- (void)keyboardWillChanged:(NSNotification *)note{
+    
+    if (self.debugPanel.status != ZHDebugPanelStatus_Show) {
+        return;
+    }
+    
+    CGRect frame = [[[note userInfo] objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
+//    CGFloat duration = [[[note userInfo] objectForKey:UIKeyboardAnimationDurationUserInfoKey] floatValue];
+    
+    UIEdgeInsets safeAreaInsets = [ZHDPMg() fetchKeyWindowSafeAreaInsets];
+    
+    BOOL show = [note.name isEqualToString:UIKeyboardWillShowNotification];
+    CGFloat W = self.debugPanel.frame.size.width;
+    CGFloat H = self.debugPanel.frame.size.height;
+    CGFloat X = self.debugPanel.frame.origin.x;
+    CGFloat Y = self.debugPanel.frame.origin.y - (show ? frame.size.height : -frame.size.height);
+    if (Y <= safeAreaInsets.top + 10) {
+        Y = safeAreaInsets.top + 10;
+    }
+    if (Y >= self.bounds.size.height - H) {
+        Y = self.bounds.size.height - H;
+    }
+    [self updateDebugPanelFrame:CGRectMake(X, Y, W, H)];
 }
 
 #pragma mark - show hide
@@ -153,20 +185,16 @@
     CGFloat originW = self.debugPanel.frame.size.width;
     CGFloat originH = self.debugPanel.frame.size.height;
     
-    UIEdgeInsets safeAreaInsets = UIEdgeInsetsZero;
-//    if (@available(iOS 11.0, *)) {
-//        safeAreaInsets = [[[[UIApplication sharedApplication] delegate] window] safeAreaInsets];
-//    }
-    
     CGFloat W = originW > 0 ? originW : self.bounds.size.width;
     CGFloat H = originH > 0 ? originH : self.bounds.size.height * 0.5;
     CGFloat X = self.bounds.size.width - W;
-    CGFloat Y = self.bounds.size.height - (show ? (H + safeAreaInsets.bottom) : 0);
-    
+    CGFloat Y = self.bounds.size.height - (show ? H : 0);
+
     [self updateDebugPanelFrame:CGRectMake(X, Y, W, H)];
 }
 - (void)hideDebugPanel{
     if (!_debugPanel) return;
+    [self endEditing:YES];
     
     [UIView animateWithDuration:0.25 animations:^{
         [self updateDebugPanelFrameWhenShowHide:NO];

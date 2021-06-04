@@ -7,15 +7,68 @@
 //
 
 #import "ZHDPOption.h"
-#import "ZHDebugPanel.h"
-#import "ZHDPManager.h"
+#import "ZHDebugPanel.h"// 调试面板
+#import "ZHDPManager.h"// 调试面板管理
 
 @implementation ZHDPOptionItem
 
 @end
 
+@interface ZHDPOptionCollectionViewCell()
+@property (nonatomic, strong) UILabel *label;
+@property (nonatomic,strong) UIView *line;
+@end
+@implementation ZHDPOptionCollectionViewCell
+
+- (instancetype)initWithFrame:(CGRect)frame{
+    self = [super initWithFrame:frame];
+    if (self) {
+        self.contentView.backgroundColor = [UIColor clearColor];
+    //    cell.contentView.backgroundColor = [UIColor colorWithRed:arc4random_uniform(255.0)/255.0 green:arc4random_uniform(255.0)/255.0 blue:arc4random_uniform(255.0)/255.0 alpha:0.5];
+        
+        [self.contentView addSubview:self.label];
+        [self.contentView addSubview:self.line];
+    }
+    return self;
+}
+
+- (void)layoutSubviews{
+    [super layoutSubviews];
+    self.label.frame = self.contentView.bounds;
+    
+    CGFloat W = 1.0 / UIScreen.mainScreen.scale;
+    CGFloat H = self.bounds.size.height;
+    CGFloat X = self.bounds.size.width - W;
+    CGFloat Y = 0;
+    self.line.frame = CGRectMake(X, Y, W, H);
+}
+
+- (void)configItem:(ZHDPOptionItem *)item{
+    self.label.text = [NSString stringWithFormat:@"%@", item.title];
+    self.label.textColor = item.isSelected ? [ZHDPMg() selectColor] : [ZHDPMg() defaultColor];
+    self.label.backgroundColor = item.isSelected ? [UIColor whiteColor] : [UIColor clearColor];
+}
+
+- (UILabel *)label {
+    if (!_label) {
+        _label = [[UILabel alloc] initWithFrame:CGRectZero];
+        _label.textAlignment = NSTextAlignmentCenter;
+    }
+    return _label;
+}
+- (UIView *)line{
+    if (!_line) {
+        _line = [[UIView alloc] initWithFrame:CGRectZero];
+        _line.backgroundColor = [ZHDPMg() defaultLineColor];
+    }
+    return _line;
+}
+
+@end
+
 @interface ZHDPOption ()<UICollectionViewDataSource,UICollectionViewDelegate>
 @property (nonatomic, strong) UICollectionView *collectionView;
+@property (nonatomic,strong) UIView *line;
 
 @property (nonatomic, strong) UIPanGestureRecognizer *panGes;
 @property (nonatomic, assign) CGPoint gesStartPoint;
@@ -37,12 +90,22 @@
 - (void)layoutSubviews{
     [super layoutSubviews];
     
+    CGFloat X = 0;
+    CGFloat Y = 0;
+    CGFloat W = self.bounds.size.width;
+    CGFloat H = self.bounds.size.height;
     UICollectionViewLayout *layout = self.collectionView.collectionViewLayout;
     if ([layout isKindOfClass:UICollectionViewFlowLayout.class]) {
-        ((UICollectionViewFlowLayout *)layout).itemSize = CGSizeMake(70, self.bounds.size.height);
+        ((UICollectionViewFlowLayout *)layout).itemSize = CGSizeMake(80, H);
     }
-    self.collectionView.frame = self.bounds;
+    self.collectionView.frame = CGRectMake(X, Y, W, H);
     
+    X = 0;
+    W = self.bounds.size.width;
+    H = [ZHDPMg() defaultLineW];
+    Y = self.bounds.size.height - H;
+    self.line.frame = CGRectMake(X, Y, W, H);
+
     [self reloadCollectionViewFrequently];
 }
 
@@ -56,6 +119,7 @@
     [self addGesture];
     
     [self addSubview:self.collectionView];
+    [self addSubview:self.line];
 }
 
 #pragma mark - gesture
@@ -141,20 +205,9 @@
     return self.items.count;
 }
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
-    UICollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:self.collectionCellIdentifier forIndexPath:indexPath];
-    cell.contentView.backgroundColor = [UIColor clearColor];
-//    cell.contentView.backgroundColor = [UIColor colorWithRed:arc4random_uniform(255.0)/255.0 green:arc4random_uniform(255.0)/255.0 blue:arc4random_uniform(255.0)/255.0 alpha:0.5];
-    UILabel *label = [cell viewWithTag:999];
-    if (!label) {
-        label = [[UILabel alloc] initWithFrame:cell.bounds];
-        label.tag = 999;
-        label.textAlignment = NSTextAlignmentCenter;
-        label.adjustsFontSizeToFitWidth = YES;
-        [cell addSubview:label];
-    }
+    ZHDPOptionCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:self.collectionCellIdentifier forIndexPath:indexPath];
     ZHDPOptionItem *item = self.items[indexPath.item];
-    label.text = [NSString stringWithFormat:@"%@", item.title];
-    label.textColor = item.isSelected ? [ZHDPMg() selectColor] : [ZHDPMg() defaultColor];
+    [cell configItem:item];
     return cell;
 }
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath{
@@ -185,12 +238,19 @@
         _collectionView.alwaysBounceHorizontal = YES;
         _collectionView.directionalLockEnabled = YES;
         
-        [_collectionView registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:self.collectionCellIdentifier];
+        [_collectionView registerClass:[ZHDPOptionCollectionViewCell class] forCellWithReuseIdentifier:self.collectionCellIdentifier];
     }
     return _collectionView;
 }
 - (NSString *)collectionCellIdentifier{
     return [NSString stringWithFormat:@"%@_CollectionViewCell", NSStringFromClass(self.class)];
+}
+- (UIView *)line{
+    if (!_line) {
+        _line = [[UIView alloc] initWithFrame:CGRectZero];
+        _line.backgroundColor = [ZHDPMg() defaultLineColor];
+    }
+    return _line;
 }
 
 @end

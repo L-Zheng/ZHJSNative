@@ -7,10 +7,11 @@
 //
 
 #import "ZHDebugPanel.h"
-#import "ZHDPOption.h"
-#import "ZHDPContent.h"
-#import "ZHDPList.h"
-#import "ZHDPDataTask.h"
+#import "ZHDPManager.h"// 调试面板管理
+#import "ZHDPOption.h"// 操作栏
+#import "ZHDPContent.h"// 内容列表容器
+#import "ZHDPList.h"// 列表
+#import "ZHDPDataTask.h"// 数据管理
 
 @interface ZHDebugPanel ()
 @end
@@ -30,27 +31,11 @@
 - (void)layoutSubviews{
     [super layoutSubviews];
     
-    UIWindow *keyWindow = [[UIApplication sharedApplication] keyWindow];
-    if (keyWindow.windowLevel != UIWindowLevelNormal) {
-        NSArray *windows = [[UIApplication sharedApplication] windows];
-        for (UIWindow *window in windows) {
-            if (window.windowLevel == UIWindowLevelNormal){
-                keyWindow = window;
-                break;
-            }
-        }
-    }
-    UIEdgeInsets safeAreaInsets = UIEdgeInsetsZero;
-    if (@available(iOS 11.0, *)) {
-        safeAreaInsets = [keyWindow safeAreaInsets];
-    }
-    
-    CGFloat marginTop = 5;
-    CGFloat marginBottom = safeAreaInsets.bottom + 5;
-    
-    self.option.frame = CGRectMake(0, marginTop, self.bounds.size.width, 30);
-    
-    CGFloat contentY = CGRectGetMaxY(self.option.frame) + marginTop;
+    UIEdgeInsets safeAreaInsets = [ZHDPMg() fetchKeyWindowSafeAreaInsets];
+    CGFloat marginBottom = safeAreaInsets.bottom;
+    self.option.frame = CGRectMake(0, 0, self.bounds.size.width, 40);
+
+    CGFloat contentY = CGRectGetMaxY(self.option.frame);
     CGFloat contentH = self.bounds.size.height - contentY - marginBottom;
     self.content.frame = CGRectMake(0, contentY, self.bounds.size.width, contentH);
 }
@@ -75,8 +60,8 @@
 }
 - (void)configUI{
     self.clipsToBounds = YES;
-    self.backgroundColor = [UIColor colorWithRed:243.0/255.0 green:243.0/255.0 blue:243.0/255.0 alpha:1.0];
-    
+    self.backgroundColor = [UIColor colorWithRed:239.0/255.0 green:239.0/255.0 blue:244.0/255.0 alpha:1.0];
+
     [self addSubview:self.option];
     [self addSubview:self.content];
 }

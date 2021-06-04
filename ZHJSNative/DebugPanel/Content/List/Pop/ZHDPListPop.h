@@ -7,13 +7,14 @@
 //
 
 #import "ZHDPComponent.h"
+#import "ZHDPListPopShadow.h"// pop阴影
 @class ZHDPList;
 
 @interface ZHDPListPop : ZHDPComponent
 @property (nonatomic,weak) ZHDPList *list;
 
 @property (nonatomic,strong) UIButton *bgBtn;
-@property (nonatomic,strong) UIView *shadowView;
+@property (nonatomic,strong) ZHDPListPopShadow *shadowView;
 @property (nonatomic,strong) UIButton *arrowBtn;
 
 // 宽度
@@ -38,6 +39,7 @@
 
 // public func
 - (BOOL)isShow;
+- (void)reloadListInstant;
 - (void)reloadListFrequently;
 - (void)doAnimation:(void (^)(void))animation completion:(void (^ __nullable)(BOOL finished))completion;
 @end

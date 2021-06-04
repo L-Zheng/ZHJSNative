@@ -7,8 +7,8 @@
 //
 
 #import "ZHDPListSearch.h"
-#import "ZHDPList.h"
-#import "ZHDPManager.h"
+#import "ZHDPList.h"// 列表
+#import "ZHDPManager.h"// 调试面板管理
 
 @interface ZHDPListSearch ()
 @property (nonatomic,strong) UILabel *searchIcon;
@@ -92,6 +92,7 @@
 #pragma mark - click
 
 - (void)btnClick{
+    [self.field resignFirstResponder];
     self.keyWord = @"";
     self.field.text = self.keyWord;
     [self.list hideSearch];
@@ -102,7 +103,7 @@
 - (UILabel *)searchIcon {
     if (!_searchIcon) {
         _searchIcon = [[UILabel alloc] initWithFrame:CGRectZero];
-        _searchIcon.font = [ZHDPMg() iconFontWithSize:13];
+        _searchIcon.font = [ZHDPMg() iconFontWithSize:15];
         _searchIcon.adjustsFontSizeToFitWidth = YES;
         _searchIcon.textAlignment = NSTextAlignmentCenter;
         _searchIcon.backgroundColor = [UIColor clearColor];
@@ -118,7 +119,7 @@
         _field.placeholder = @"输入以查找";
         //    _field.borderStyle = UITextBorderStyleLine;
         _field.clearButtonMode = UITextFieldViewModeAlways;
-        _field.font = [UIFont systemFontOfSize:13];
+        _field.font = [ZHDPMg() defaultFont];
         _field.textColor = [UIColor blackColor];
     }
     return _field;
@@ -128,10 +129,10 @@
         _btn = [[UIButton alloc] initWithFrame:CGRectZero];
         [_btn setTitle:@"关闭" forState:UIControlStateNormal];
         [_btn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-        _btn.titleLabel.font = [UIFont systemFontOfSize:13];
+        _btn.titleLabel.font = [ZHDPMg() defaultFont];
         _btn.layer.borderColor = [UIColor blackColor].CGColor;
-        _btn.layer.borderWidth = 0.5;
-        _btn.layer.cornerRadius = 3.0;
+        _btn.layer.borderWidth = [ZHDPMg() defaultLineW];
+        _btn.layer.cornerRadius = 5.0;
         _btn.layer.masksToBounds = YES;
         _btn.clipsToBounds = YES;
         [_btn addTarget:self action:@selector(btnClick) forControlEvents:UIControlEventTouchUpInside];

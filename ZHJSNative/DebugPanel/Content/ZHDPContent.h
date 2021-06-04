@@ -7,7 +7,7 @@
 //
 
 #import "ZHDPComponent.h"
-@class ZHDPList;
+@class ZHDPList;// 列表
 
 NS_ASSUME_NONNULL_BEGIN
 

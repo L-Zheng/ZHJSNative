@@ -48,17 +48,27 @@
 }
 
 - (void)addGesture{
-    UITapGestureRecognizer *gesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapClickGes:)];
+    UITapGestureRecognizer *gesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapGes:)];
     [self addGestureRecognizer:gesture];
+    
+    UILongPressGestureRecognizer *longPressGes = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(longPressGes:)];
+    [self addGestureRecognizer:longPressGes];
 }
 
-- (void)tapClickGes:(UITapGestureRecognizer *)tapGes{
+- (void)longPressGes:(UILongPressGestureRecognizer *)ges{
+    if (ges.state == UIGestureRecognizerStateBegan) {
+        if (self.longPressGesBlock) {
+            self.longPressGesBlock(self.item.open, self.item);
+        }
+    }
+}
+- (void)tapGes:(UITapGestureRecognizer *)ges{
     if (!self.item) {
         return;
     }
 //    self.item.open = !self.item.isOpen;
-    if (self.tapClickBlock) {
-        self.tapClickBlock(self.item.open, self.item);
+    if (self.tapGesBlock) {
+        self.tapGesBlock(self.item.open, self.item);
     }
 }
 
