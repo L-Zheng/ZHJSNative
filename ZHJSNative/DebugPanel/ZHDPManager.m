@@ -766,6 +766,12 @@ static id _instance;
     });
 }
 - (void)zh_test_addNetworkSafe:(NSDate *)startDate request:(NSURLRequest *)request response:(NSURLResponse *)response responseData:(NSData *)responseData{
+    
+    ZHDPManager *dpMg = ZHDPMg();
+    if (dpMg.status != ZHDPManagerStatus_Open) {
+        return;
+    }
+    
     NSHTTPURLResponse *httpResponse = nil;
     if ([response isKindOfClass:NSHTTPURLResponse.class]) {
         httpResponse = (NSHTTPURLResponse*)response;
@@ -836,9 +842,6 @@ static id _instance;
             }
         }
     }
-    
-    ZHDPManager *dpMg = ZHDPMg();
-    
     
     // 哪个应用的数据  默认App的数据
     ZHDPAppItem *appItem = [[ZHDPAppItem alloc] init];
