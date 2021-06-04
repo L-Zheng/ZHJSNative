@@ -139,7 +139,7 @@
     }
     [inView addSubview:view];
 }
-- (void)showFloat{
+- (void)showFloat:(NSString *)title{
     if (CGRectEqualToRect(self.floatRect, CGRectZero)) {
         CGFloat W = 100;
         CGFloat H = 40;
@@ -149,6 +149,7 @@
     }
     
     [self showView:self.floatView];
+    [self.floatView updateTitle:title];
     
     self.floatView.alpha = 0.0;
     [UIView animateWithDuration:0.25 animations:^{

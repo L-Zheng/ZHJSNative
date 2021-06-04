@@ -24,6 +24,11 @@
 
 @implementation ZHDPManager
 
+#pragma mark - config
+
+- (void)config{
+}
+
 #pragma mark - basic
 
 - (CGFloat)basicW{
@@ -84,7 +89,7 @@
     if (self.status != ZHDPManagerStatus_Open) {
         return;
     }
-    [self.window showFloat];
+    [self.window showFloat:[self fetchFloatTitle]];
     [self.window hideDebugPanel];
 }
 - (void)close{
@@ -92,9 +97,12 @@
         return;
     }
     self.status = ZHDPManagerStatus_Close;
+    [self removeTimer];
     [self stopMonitorMpLog];
-    [self.networkTask cancelNetwork];
+    if (_networkTask) [self.networkTask cancelNetwork];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:@"ZHSDKImMessageToConsoleNotification" object:nil];
+    
+    if (!_window) return;
     self.window.hidden = YES;
     self.window = nil;
 }
@@ -123,11 +131,21 @@
     return safeAreaInsets;
 }
 
+#pragma mark - float
+
+- (NSString *)fetchFloatTitle{
+    return @"调试台";
+}
+- (void)updateFloatTitle{
+    if (!_window) return;
+    [self.window.floatView updateTitle:[self fetchFloatTitle]];
+}
+
 #pragma mark - switch
 
 - (void)switchFloat{
     if (!_window) return;
-    [self.window showFloat];
+    [self.window showFloat:[self fetchFloatTitle]];
     [self.window hideDebugPanel];
 }
 - (void)switchDebugPanel{
@@ -505,6 +523,7 @@
         // 只加载一次的资源
         static dispatch_once_t onceToken;
         dispatch_once(&onceToken, ^{
+            [self config];
         });
     }
     return self;

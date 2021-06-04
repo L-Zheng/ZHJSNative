@@ -150,7 +150,7 @@
         _titleLabel.numberOfLines = 0;
         _titleLabel.textColor = [UIColor whiteColor];
         _titleLabel.backgroundColor = [UIColor clearColor];
-        _titleLabel.adjustsFontSizeToFitWidth = NO;
+        _titleLabel.adjustsFontSizeToFitWidth = YES;
     }
     return _titleLabel;
 }

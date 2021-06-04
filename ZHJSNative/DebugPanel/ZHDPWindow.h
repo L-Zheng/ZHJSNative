@@ -15,7 +15,7 @@
 @property (nonatomic,strong) ZHDPFloat *floatView;
 @property (nonatomic,strong) ZHDebugPanel *debugPanel;
 
-- (void)showFloat;
+- (void)showFloat:(NSString *)title;
 - (void)hideFloat;
 - (void)updateFloatFrame:(CGRect)rect;
 - (void)showDebugPanel;
