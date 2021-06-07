@@ -13,4 +13,6 @@
 @property (nonatomic,weak) ZHDPList *list;
 @property (nonatomic,copy) NSString *keyWord;
 @property (nonatomic,copy) void (^fieldChangeBlock) (NSString *str);
+
+- (void)becomeFirstResponder;
 @end

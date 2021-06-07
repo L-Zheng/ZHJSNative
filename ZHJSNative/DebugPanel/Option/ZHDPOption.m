@@ -70,6 +70,8 @@
 @property (nonatomic, strong) UICollectionView *collectionView;
 @property (nonatomic,strong) UIView *line;
 
+@property (nonatomic,strong) UIButton *hideBtn;
+
 @property (nonatomic, strong) UIPanGestureRecognizer *panGes;
 @property (nonatomic, assign) CGPoint gesStartPoint;
 @property (nonatomic, assign) CGRect gesStartFrame;
@@ -90,10 +92,16 @@
 - (void)layoutSubviews{
     [super layoutSubviews];
     
-    CGFloat X = 0;
-    CGFloat Y = 0;
-    CGFloat W = self.bounds.size.width;
+    CGFloat W = 30;
     CGFloat H = self.bounds.size.height;
+    CGFloat Y = 0;
+    CGFloat X = self.bounds.size.width - W;
+    self.hideBtn.frame = CGRectMake(X, Y, W, H);
+    
+    X = 0;
+    Y = 0;
+    W = self.hideBtn.frame.origin.x - X;
+    H = self.bounds.size.height;
     UICollectionViewLayout *layout = self.collectionView.collectionViewLayout;
     if ([layout isKindOfClass:UICollectionViewFlowLayout.class]) {
         ((UICollectionViewFlowLayout *)layout).itemSize = CGSizeMake(80, H);
@@ -120,6 +128,7 @@
     
     [self addSubview:self.collectionView];
     [self addSubview:self.line];
+    [self addSubview:self.hideBtn];
 }
 
 #pragma mark - gesture
@@ -196,6 +205,12 @@
     [self reloadCollectionView];
 }
 
+#pragma mark - click
+
+- (void)hideBtnClick:(UIButton *)btn{
+    [ZHDPMg() switchFloat];
+}
+
 #pragma mark - UICollectionViewDelegate
 
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView {
@@ -251,6 +266,18 @@
         _line.backgroundColor = [ZHDPMg() defaultLineColor];
     }
     return _line;
+}
+- (UIButton *)hideBtn{
+    if (!_hideBtn) {
+        _hideBtn = [[UIButton alloc] initWithFrame:CGRectZero];
+        _hideBtn.titleLabel.font = [ZHDPMg() iconFontWithSize:20];
+        
+        [_hideBtn setTitle:@"\ue60a" forState:UIControlStateNormal];
+        [_hideBtn setTitleColor:[ZHDPMg() defaultColor] forState:UIControlStateNormal];
+        
+        [_hideBtn addTarget:self action:@selector(hideBtnClick:) forControlEvents:UIControlEventTouchUpInside];
+    }
+    return _hideBtn;
 }
 
 @end

@@ -163,6 +163,8 @@ typedef NS_ENUM(NSInteger, ZHDPScrollStatus) {
     [UIView animateWithDuration:0.25 animations:^{
         self.searchH = 40;
         [self updateSearchFrame];
+    } completion:^(BOOL finished) {
+        [self.search becomeFirstResponder];
     }];
 }
 - (void)hideSearch{
@@ -183,8 +185,8 @@ typedef NS_ENUM(NSInteger, ZHDPScrollStatus) {
     NSMutableArray *res = [NSMutableArray array];
     
     __weak __typeof__(self) weakSelf = self;
-    NSArray *icons = @[@"\ue68b", @"\ue609", @"\ue636", @"\ue61d", @"\ue60a", @"\ue630", @"\ue691"];
-    NSArray *descs = @[@"筛选", @"查找", @"刷新", @"删除", @"隐藏", @"顶部", @"底部"];
+    NSArray *icons = @[@"\ue68b", @"\ue609", @"\ue636", @"\ue61d", @"\ue630", @"\ue691", @"\ue60a", @"\ue681"];
+    NSArray *descs = @[@"筛选", @"查找", @"刷新", @"删除", @"顶部", @"底部", @"隐藏", @"退出"];
     NSArray *blocks = @[
         ^{
             [weakSelf.apps show];
@@ -202,15 +204,18 @@ typedef NS_ENUM(NSInteger, ZHDPScrollStatus) {
              [ZHDPMg() removeSecItemsList:weakSelf.class secItems:weakSelf.items.copy];
          },
          ^{
-             [ZHDPMg() switchFloat];
-         },
-         ^{
              [weakSelf.oprate hide];
              [weakSelf scrollListToTopCode];
          },
          ^{
              [weakSelf.oprate hide];
              [weakSelf scrollListToBottomCode];
+         },
+         ^{
+             [ZHDPMg() switchFloat];
+         },
+         ^{
+             [ZHDPMg() close];
          }
     ];
     for (NSUInteger i = 0; i < icons.count; i++) {

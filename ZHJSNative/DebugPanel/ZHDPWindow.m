@@ -101,8 +101,8 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillChanged:) name:UIKeyboardWillHideNotification object:nil];
 }
 - (void)keyboardWillChanged:(NSNotification *)note{
-    
-    if (self.debugPanel.status != ZHDebugPanelStatus_Show) {
+    if (ZHDPMg().status != ZHDPManagerStatus_Open || !_debugPanel ||
+        self.debugPanel.status != ZHDebugPanelStatus_Show) {
         return;
     }
     

@@ -89,6 +89,10 @@
     }
 }
 
+- (void)becomeFirstResponder{
+    [self.field becomeFirstResponder];
+}
+
 #pragma mark - click
 
 - (void)btnClick{
