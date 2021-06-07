@@ -13,7 +13,8 @@
 @interface ZHDPListSearch ()
 @property (nonatomic,strong) UILabel *searchIcon;
 @property (nonatomic,strong) UITextField *field;
-@property (nonatomic,strong) UIButton *btn;
+@property (nonatomic,strong) UIButton *keyboardBtn;
+@property (nonatomic,strong) UIButton *closeBtn;
 @end
 
 @implementation ZHDPListSearch
@@ -31,12 +32,18 @@
 - (void)layoutSubviews{
     [super layoutSubviews];
     
-    CGFloat W = 40;
     CGFloat H = self.bounds.size.height * 0.5;
+    CGFloat W = [[self.closeBtn titleForState:UIControlStateNormal] boundingRectWithSize:CGSizeMake(self.bounds.size.width, H) options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName: self.closeBtn.titleLabel.font} context:nil].size.width + 10;
     CGFloat X = self.bounds.size.width - W - 10;
     CGFloat Y = (self.bounds.size.height - H) * 0.5;
-    self.btn.frame = CGRectMake(X, Y, W, H);
+    self.closeBtn.frame = CGRectMake(X, Y, W, H);
     
+    Y = (self.bounds.size.height - H) * 0.5;
+    H = self.bounds.size.height * 0.5;
+    W = [[self.keyboardBtn titleForState:UIControlStateNormal] boundingRectWithSize:CGSizeMake(self.bounds.size.width, H) options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName: self.keyboardBtn.titleLabel.font} context:nil].size.width + 10;
+    X = self.closeBtn.frame.origin.x - W - 10;
+    self.keyboardBtn.frame = CGRectMake(X, Y, W, H);
+
     X = 0;
     Y = 0;
     H = self.bounds.size.height;
@@ -45,7 +52,7 @@
     
     X = CGRectGetMaxX(self.searchIcon.frame) + 0;
     Y = 0;
-    W = self.btn.frame.origin.x - X;
+    W = self.keyboardBtn.frame.origin.x - 5 - X;
     H = self.bounds.size.height;
     self.field.frame = CGRectMake(X, Y, W, H);
 }
@@ -73,7 +80,8 @@
     
     [self addSubview:self.searchIcon];
     [self addSubview:self.field];
-    [self addSubview:self.btn];
+    [self addSubview:self.closeBtn];
+    [self addSubview:self.keyboardBtn];
 }
 
 #pragma mark - field
@@ -92,11 +100,20 @@
 - (void)becomeFirstResponder{
     [self.field becomeFirstResponder];
 }
+- (void)resignFirstResponder{
+    [self.field resignFirstResponder];
+}
+- (BOOL)isFirstResponder{
+    return [self.field isFirstResponder];
+}
 
 #pragma mark - click
 
-- (void)btnClick{
-    [self.field resignFirstResponder];
+- (void)keyboardBtnClick{
+    [self resignFirstResponder];
+}
+
+- (void)closeBtnClick{
     self.keyWord = @"";
     self.field.text = self.keyWord;
     [self.list hideSearch];
@@ -128,20 +145,35 @@
     }
     return _field;
 }
-- (UIButton *)btn{
-    if (!_btn) {
-        _btn = [[UIButton alloc] initWithFrame:CGRectZero];
-        [_btn setTitle:@"关闭" forState:UIControlStateNormal];
-        [_btn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-        _btn.titleLabel.font = [ZHDPMg() defaultFont];
-        _btn.layer.borderColor = [UIColor blackColor].CGColor;
-        _btn.layer.borderWidth = [ZHDPMg() defaultLineW];
-        _btn.layer.cornerRadius = 5.0;
-        _btn.layer.masksToBounds = YES;
-        _btn.clipsToBounds = YES;
-        [_btn addTarget:self action:@selector(btnClick) forControlEvents:UIControlEventTouchUpInside];
+- (UIButton *)keyboardBtn{
+    if (!_keyboardBtn) {
+        _keyboardBtn = [[UIButton alloc] initWithFrame:CGRectZero];
+        [_keyboardBtn setTitle:@"收起键盘" forState:UIControlStateNormal];
+        [_keyboardBtn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+        _keyboardBtn.titleLabel.font = [ZHDPMg() defaultFont];
+        _keyboardBtn.layer.borderColor = [UIColor blackColor].CGColor;
+        _keyboardBtn.layer.borderWidth = [ZHDPMg() defaultLineW];
+        _keyboardBtn.layer.cornerRadius = 5.0;
+        _keyboardBtn.layer.masksToBounds = YES;
+        _keyboardBtn.clipsToBounds = YES;
+        [_keyboardBtn addTarget:self action:@selector(keyboardBtnClick) forControlEvents:UIControlEventTouchUpInside];
     }
-    return _btn;
+    return _keyboardBtn;
+}
+- (UIButton *)closeBtn{
+    if (!_closeBtn) {
+        _closeBtn = [[UIButton alloc] initWithFrame:CGRectZero];
+        [_closeBtn setTitle:@"关闭" forState:UIControlStateNormal];
+        [_closeBtn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+        _closeBtn.titleLabel.font = [ZHDPMg() defaultFont];
+        _closeBtn.layer.borderColor = [UIColor blackColor].CGColor;
+        _closeBtn.layer.borderWidth = [ZHDPMg() defaultLineW];
+        _closeBtn.layer.cornerRadius = 5.0;
+        _closeBtn.layer.masksToBounds = YES;
+        _closeBtn.clipsToBounds = YES;
+        [_closeBtn addTarget:self action:@selector(closeBtnClick) forControlEvents:UIControlEventTouchUpInside];
+    }
+    return _closeBtn;
 }
 
 @end

@@ -22,7 +22,10 @@ NS_ASSUME_NONNULL_BEGIN
 #pragma mark - search
 
 - (void)showSearch;
+- (BOOL)isShowSearch;
 - (void)hideSearch;
+- (void)resignFirstResponder;
+- (BOOL)isFirstResponder;
 
 #pragma mark - sub class
 

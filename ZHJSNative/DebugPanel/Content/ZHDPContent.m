@@ -56,6 +56,14 @@
     if (!list || [self.selectList isEqual:list]) return;
     
     ZHDPList *originList = self.selectList;
+    if ([originList isFirstResponder]) {
+        if ([list isShowSearch]) {
+            [originList resignFirstResponder];
+//            [list becomeFirstResponder];
+        }else{
+            [originList resignFirstResponder];
+        }
+    }
     self.selectList = list;
     
     [originList removeFromSuperview];

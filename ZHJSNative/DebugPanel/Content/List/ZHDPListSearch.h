@@ -15,4 +15,6 @@
 @property (nonatomic,copy) void (^fieldChangeBlock) (NSString *str);
 
 - (void)becomeFirstResponder;
+- (void)resignFirstResponder;
+- (BOOL)isFirstResponder;
 @end

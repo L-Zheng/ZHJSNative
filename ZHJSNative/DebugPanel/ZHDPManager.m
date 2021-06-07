@@ -485,10 +485,7 @@
     };
     [self removeSecItemsList:secItems block:^NSMutableArray *(ZHDPListSecItem *secItem) {
         NSMutableArray * (^block) (ZHDPListSecItem *secItem) = [map objectForKey:NSStringFromClass(listClass)];
-        if (block) {
-            return block(secItem);
-        }
-        return [NSMutableArray array];
+        return (block ? block(secItem) : [NSMutableArray array]);
     }];
 }
 - (void)removeSecItemsList:(NSArray <ZHDPListSecItem *> *)secItems block:(NSMutableArray * (^) (ZHDPListSecItem *secItem))block{

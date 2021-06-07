@@ -133,12 +133,24 @@ typedef NS_ENUM(NSInteger, ZHDPScrollStatus) {
     if (!keyword || ![keyword isKindOfClass:NSString.class] || keyword.length == 0) {
         return YES;
     }
+    // 搜索某一组
     NSArray <ZHDPListColItem *> *colItems = secItem.colItems.copy;
     for (ZHDPListColItem *colItem in colItems) {
         if ([colItem.attTitle.string.lowercaseString containsString:keyword.lowercaseString]) {
             return YES;
         }
     }
+    // 搜索某一行
+    NSArray <ZHDPListRowItem *> *rowItems = secItem.rowItems.copy;
+    for (ZHDPListRowItem *rowItem in rowItems) {
+        colItems = rowItem.colItems.copy;
+        for (ZHDPListColItem *colItem in colItems) {
+            if ([colItem.attTitle.string.lowercaseString containsString:keyword.lowercaseString]) {
+                return YES;
+            }
+        }
+    }
+    
     return NO;
 }
 - (NSArray <ZHDPListSecItem *> *)filterItems:(NSArray <ZHDPListSecItem *> *)items{
@@ -167,16 +179,26 @@ typedef NS_ENUM(NSInteger, ZHDPScrollStatus) {
         [self.search becomeFirstResponder];
     }];
 }
+- (BOOL)isShowSearch{
+    return (self.searchH > 0);
+}
 - (void)hideSearch{
     if (self.search.frame.size.height <= 0) {
         return;
     }
+    [self.search resignFirstResponder];
     self.searchH = 0;
     [UIView animateWithDuration:0.25 animations:^{
         [self updateSearchFrame];
     } completion:^(BOOL finished) {
         [self reloadListWhenCloseSearch];
     }];
+}
+- (void)resignFirstResponder{
+    [self.search resignFirstResponder];
+}
+- (BOOL)isFirstResponder{
+    return [self.search isFirstResponder];
 }
 
 #pragma mark - oprate

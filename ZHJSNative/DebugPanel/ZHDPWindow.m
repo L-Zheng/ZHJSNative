@@ -8,6 +8,8 @@
 
 #import "ZHDPWindow.h"
 #import "ZHDPManager.h"
+#import "ZHDPContent.h"
+#import "ZHDPList.h"
 
 @interface ZHDPWindow ()
 @property (nonatomic, assign) CGRect debugPanelRect;
@@ -101,8 +103,15 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillChanged:) name:UIKeyboardWillHideNotification object:nil];
 }
 - (void)keyboardWillChanged:(NSNotification *)note{
-    if (ZHDPMg().status != ZHDPManagerStatus_Open || !_debugPanel ||
-        self.debugPanel.status != ZHDebugPanelStatus_Show) {
+    [self keyboardWillChangedIntenal:note];
+//    [NSObject cancelPreviousPerformRequestsWithTarget:self];
+//    [self performSelector:@selector(keyboardWillChangedIntenal:) withObject:note afterDelay:0.25];
+}
+- (void)keyboardWillChangedIntenal:(NSNotification *)note{
+    if (ZHDPMg().status != ZHDPManagerStatus_Open ||
+        !_debugPanel ||
+        self.debugPanel.status != ZHDebugPanelStatus_Show ||
+        ![self.debugPanel.content.selectList isFirstResponder]) {
         return;
     }
     
