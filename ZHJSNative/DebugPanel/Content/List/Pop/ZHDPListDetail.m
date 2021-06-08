@@ -178,6 +178,7 @@
     self.items = items.copy;
     
     [self selectItem:items.firstObject];
+    [self scrollTextViewToTopFrequently];
 }
 
 #pragma mark - select
@@ -195,6 +196,13 @@
     }
     [self reloadListInstant];
     self.textView.attributedText = self.items[indexPath.item].content;
+}
+- (void)scrollTextViewToTopFrequently{
+    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(scrollTextViewToTopInternal) object:nil];
+    [self performSelector:@selector(scrollTextViewToTopInternal) withObject:nil afterDelay:0.25];
+}
+- (void)scrollTextViewToTopInternal{
+    [self.textView setContentOffset:CGPointMake(0, 0) animated:YES];
 }
 
 #pragma mark - click
@@ -298,6 +306,7 @@
         _textView.backgroundColor = [UIColor clearColor];
         _textView.font = [ZHDPMg() defaultFont];
         _textView.editable = NO;
+        _textView.alwaysBounceVertical = YES;
     }
     return _textView;
 }

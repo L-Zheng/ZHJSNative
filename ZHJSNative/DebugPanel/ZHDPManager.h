@@ -115,7 +115,6 @@ typedef NS_ENUM(NSInteger, ZHDPOutputColorType) {
 - (void)zh_test_addNetwork:(NSDate *)startDate request:(NSURLRequest *)request response:(NSURLResponse *)response responseData:(NSData *)responseData;
 
 - (void)zh_test_reloadStorage;
-- (void)zh_test_addStorage;
 
 @end
 

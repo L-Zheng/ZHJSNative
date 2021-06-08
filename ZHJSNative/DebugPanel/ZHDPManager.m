@@ -83,7 +83,7 @@
         return;
     }
     
-    [self addTimer:1.0];
+    [self addTimer:0.5];
 }
 - (void)openInternal{
     if (self.status != ZHDPManagerStatus_Open) {
@@ -398,7 +398,7 @@
     NSMutableParagraphStyle *style = [[NSMutableParagraphStyle alloc] init];
     style.lineSpacing = 5;
     for (NSUInteger i = 0; i < titles.count; i++) {
-        [attStr appendAttributedString:[[NSAttributedString alloc] initWithString:titles[i] attributes:@{NSFontAttributeName: [ZHDPMg() defaultBoldFont], NSForegroundColorAttributeName: [ZHDPMg() defaultColor], NSParagraphStyleAttributeName: style}]];
+        [attStr appendAttributedString:[[NSAttributedString alloc] initWithString:titles[i] attributes:@{NSFontAttributeName: [ZHDPMg() defaultBoldFont], NSForegroundColorAttributeName: [ZHDPMg() selectColor], NSParagraphStyleAttributeName: style}]];
         if (i < descs.count){
             [attStr appendAttributedString:[[NSAttributedString alloc] initWithString:descs[i] attributes:@{NSFontAttributeName: [ZHDPMg() defaultFont], NSForegroundColorAttributeName: [ZHDPMg() defaultColor], NSParagraphStyleAttributeName: style}]];
         }
@@ -997,34 +997,32 @@ static id _instance;
         [self zh_test_reloadStorageSafe];
     });
 }
-- (void)zh_test_addStorage{
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [self zh_test_addStorageSafe];
-    });
-}
 - (void)zh_test_reloadStorageSafe{
     ZHDPManager *dpMg = ZHDPMg();
     
-    // 哪个应用的数据
-    ZHDPAppItem *appItem = [[ZHDPAppItem alloc] init];
-    appItem.appId = @"App";
-    appItem.appName = @"App";
+    // 从全局数据管理中移除所有storage数据
+    NSArray <ZHDPAppDataItem *> *appDataItems = [dpMg.dataTask fetchAllAppDataItems];
+    for (ZHDPAppDataItem *appDataItem in appDataItems) {
+        [dpMg.dataTask cleanAllItems:appDataItem.storageItems];
+    }
     
-    // 从全局数据管理中移除
-    ZHDPAppDataItem *appDataItem = [dpMg.dataTask fetchAppDataItem:appItem];
-    [dpMg.dataTask cleanAllItems:appDataItem.storageItems];
+    // 读取storage数据
+    NSArray *arr = @[
+        @{@"test": @"ffffffffffffff"}
+    ];
+    for (NSDictionary *info in arr) {
+        // 载入新数据
+        [self zh_test_addStorageSafe:info];
+    }
     
-    // 载入新数据
-    [self zh_test_addStorageSafe];
 }
-- (void)zh_test_addStorageSafe{
+- (void)zh_test_addStorageSafe:(NSDictionary *)storage{
     ZHDPManager *dpMg = ZHDPMg();
     
     if (dpMg.status != ZHDPManagerStatus_Open) {
         return;
     }
     
-    NSDictionary *storage = @{@"test": @"ffffffffffffff"};
     if (!storage || ![storage isKindOfClass:NSDictionary.class] || storage.allKeys.count == 0) {
         return;
     }
