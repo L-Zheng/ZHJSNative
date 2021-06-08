@@ -12,7 +12,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface ZHDPListApps : ZHDPListPop
-@property (nonatomic,weak) ZHDPAppItem *selectItem;
+@property (nonatomic,strong) ZHDPAppItem *selectItem;
 @property (nonatomic,copy) void (^selectBlock) (ZHDPAppItem *item);
 @end
 
