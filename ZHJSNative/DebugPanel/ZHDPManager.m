@@ -120,7 +120,7 @@
             }
         }
     }
-    return keyWindow;
+    return keyWindow.isKeyWindow ? keyWindow : nil;
 }
 - (UIEdgeInsets)fetchKeyWindowSafeAreaInsets{
     UIWindow *keyWindow = [ZHDPMg() fetchKeyWindow];
