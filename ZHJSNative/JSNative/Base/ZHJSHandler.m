@@ -442,23 +442,29 @@ case cType:{\
     
     ZHErrorAlertController *alert = [ZHErrorAlertController alertControllerWithTitle:title message:[info description] preferredStyle:UIAlertControllerStyleAlert];
     __weak __typeof__(self) __self = self;
+    void (^closeAll)(UIAlertAction *action) = ^(UIAlertAction *action){
+        UIViewController *last = [__self fetchActivityCtrl].presentingViewController;
+        while ([last isKindOfClass:[ZHErrorAlertController class]]) {
+            last = last.presentingViewController;
+        }
+        [last dismissViewControllerAnimated:YES completion:nil];
+    };
     [alert addAction:[UIAlertAction actionWithTitle:@"复制" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         [UIPasteboard generalPasteboard].string = [info description];
     }]];
     [alert addAction:[UIAlertAction actionWithTitle:@"关闭当前窗口" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
     }]];
     [alert addAction:[UIAlertAction actionWithTitle:@"关闭所有窗口" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
-        UIViewController *last = [__self fetchActivityCtrl].presentingViewController;
-        while ([last isKindOfClass:[ZHErrorAlertController class]]) {
-            last = last.presentingViewController;
-        }
-        [last dismissViewControllerAnimated:YES completion:nil];
+        closeAll(action);
     }]];
     [alert addAction:[UIAlertAction actionWithTitle:@"永久关闭窗口" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
+        closeAll(action);
         if (__self.webView) {
+            __self.webView.debugItem.alertWebErrorEnable = NO;
             [ZHJSDebugMg() setWebDebugAlertErrorEnable:NO];
         }
         if (__self.jsContext) {
+            __self.jsContext.debugItem.alertCtxErrorEnable = NO;
             [ZHJSDebugMg() setCtxDebugAlertErrorEnable:NO];
         }
     }]];
