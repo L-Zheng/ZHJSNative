@@ -110,7 +110,12 @@
         return NO;
     }
     NSString *filePath = [self storeWebDebugFilePath];
-    if (!self.debugWebConfig) self.debugWebConfig = [NSMutableDictionary dictionary];
+    if (!self.debugWebConfig) {
+        self.debugWebConfig = [self readJsonFromFilePath:filePath];
+    }
+    if (!self.debugWebConfig) {
+        self.debugWebConfig = [NSMutableDictionary dictionary];
+    }
     [self.debugWebConfig setObject:value forKey:debugKey];
     return [self jsonToFilePath:self.debugWebConfig filePath:filePath];
 }
@@ -196,7 +201,12 @@
         return NO;
     }
     NSString *filePath = [self storeCtxDebugFilePath];
-    if (!self.debugCtxConfig) self.debugCtxConfig = [NSMutableDictionary dictionary];
+    if (!self.debugCtxConfig) {
+        self.debugCtxConfig = [self readJsonFromFilePath:filePath];
+    }
+    if (!self.debugCtxConfig) {
+        self.debugCtxConfig = [NSMutableDictionary dictionary];
+    }
     [self.debugCtxConfig setObject:value forKey:debugKey];
     return [self jsonToFilePath:self.debugCtxConfig filePath:filePath];
 }
