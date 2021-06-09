@@ -807,6 +807,9 @@
         if (completionHandler) completionHandler(res, error);
     }];
 }
+- (void)evaluateJavaScript:(NSString *)javaScriptString completionHandler:(void (^ _Nullable)(_Nullable id, NSError * _Nullable error))completionHandler{
+    [super evaluateJavaScript:javaScriptString completionHandler:completionHandler];
+}
 
 
 #pragma mark - UIGestureRecognizerDelegate

@@ -462,6 +462,13 @@ case cType:{\
             [ZHJSDebugMg() setCtxDebugAlertErrorEnable:NO];
         }
     }]];
+    /*
+     web页面 点击返回键 可能会执行evaluateJavaScript，由于执行的js函数可能不存在，造成js报错，随即 presentViewController弹窗，此时又立即调用函数 [navigationController popViewControllerAnimated:]  系统不会处理navigationController，造成不会返回
+     此处延时弹窗
+     */
+    [self performSelector:@selector(showExceptionInternal:) withObject:alert afterDelay:0.3];
+}
+- (void)showExceptionInternal:(ZHErrorAlertController *)alert{
     [[self fetchActivityCtrl] presentViewController:alert animated:YES completion:nil];
 }
 
@@ -831,6 +838,7 @@ case cType:{\
 }
 
 - (void)dealloc{
+    [NSObject cancelPreviousPerformRequestsWithTarget:self];
     NSLog(@"%s", __func__);
 }
 
