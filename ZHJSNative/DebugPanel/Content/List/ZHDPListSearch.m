@@ -128,7 +128,7 @@
         _searchIcon.adjustsFontSizeToFitWidth = YES;
         _searchIcon.textAlignment = NSTextAlignmentCenter;
         _searchIcon.backgroundColor = [UIColor clearColor];
-        _searchIcon.text = @"\ue609";
+        _searchIcon.text = @"\ue60b";
     }
     return _searchIcon;
 }

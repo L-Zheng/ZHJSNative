@@ -207,7 +207,7 @@ typedef NS_ENUM(NSInteger, ZHDPScrollStatus) {
     NSMutableArray *res = [NSMutableArray array];
     
     __weak __typeof__(self) weakSelf = self;
-    NSArray *icons = @[@"\ue68b", @"\ue609", @"\ue636", @"\ue61d", @"\ue630", @"\ue691", @"\ue60a", @"\ue681"];
+    NSArray *icons = @[@"\ue68b", @"\ue60b", @"\ue636", @"\ue61d", @"\ue630", @"\ue691", @"\ue60c", @"\ue681"];
     NSArray *descs = @[@"筛选", @"查找", @"刷新", @"删除", @"顶部", @"底部", @"隐藏", @"退出"];
     NSArray *blocks = @[
         ^{

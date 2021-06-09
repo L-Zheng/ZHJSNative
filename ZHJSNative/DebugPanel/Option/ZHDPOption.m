@@ -272,7 +272,7 @@
         _hideBtn = [[UIButton alloc] initWithFrame:CGRectZero];
         _hideBtn.titleLabel.font = [ZHDPMg() iconFontWithSize:20];
         
-        [_hideBtn setTitle:@"\ue60a" forState:UIControlStateNormal];
+        [_hideBtn setTitle:@"\ue60c" forState:UIControlStateNormal];
         [_hideBtn setTitleColor:[ZHDPMg() defaultColor] forState:UIControlStateNormal];
         
         [_hideBtn addTarget:self action:@selector(hideBtnClick:) forControlEvents:UIControlEventTouchUpInside];
