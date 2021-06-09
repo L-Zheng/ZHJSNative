@@ -111,7 +111,7 @@
 
 - (UIWindow *)fetchKeyWindow{
     UIWindow *keyWindow = [[UIApplication sharedApplication] keyWindow];
-    if (keyWindow.windowLevel != UIWindowLevelNormal) {
+    if (!keyWindow || keyWindow.windowLevel != UIWindowLevelNormal) {
         NSArray *windows = [[UIApplication sharedApplication] windows];
         for (UIWindow *window in windows) {
             if (window.windowLevel == UIWindowLevelNormal){
