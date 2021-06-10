@@ -110,6 +110,7 @@
 #pragma mark - window
 
 - (UIWindow *)fetchKeyWindow{
+    // window必须成为keyWindow  才可创建自定义的window  否则崩溃
     UIWindow *keyWindow = [[UIApplication sharedApplication] keyWindow];
     if (!keyWindow || keyWindow.windowLevel != UIWindowLevelNormal) {
         NSArray *windows = [[UIApplication sharedApplication] windows];
@@ -123,7 +124,17 @@
     return keyWindow.isKeyWindow ? keyWindow : nil;
 }
 - (UIEdgeInsets)fetchKeyWindowSafeAreaInsets{
-    UIWindow *keyWindow = [ZHDPMg() fetchKeyWindow];
+    // 只是获取window的safeAreaInsets  不需要window成为keyWindow
+    UIWindow *keyWindow = [[UIApplication sharedApplication] keyWindow];
+    if (keyWindow.windowLevel != UIWindowLevelNormal) {
+        NSArray *windows = [[UIApplication sharedApplication] windows];
+        for (UIWindow *window in windows) {
+            if (window.windowLevel == UIWindowLevelNormal){
+                keyWindow = window;
+                break;
+            }
+        }
+    }
     UIEdgeInsets safeAreaInsets = UIEdgeInsetsZero;
     if (@available(iOS 11.0, *)) {
         safeAreaInsets = [keyWindow safeAreaInsets];
