@@ -76,7 +76,7 @@
         __self.socketUrlStr = urlStr;
         __self.debugMode = debugMode;
         
-        [ZHJSDebugMg() readWebDebugObj:[ZHJSDebugMg() webDebugSocketUrlKey]];
+        [ZHJSDebugMg() storeWebDebugObj:[ZHJSDebugMg() webDebugSocketUrlKey] value:urlStr];
         
         [__self doSwitchDebugMode:debugMode];
     }];
@@ -91,7 +91,7 @@
         __self.socketUrlStr = urlStr;
         __self.debugMode = debugMode;
         
-        [ZHJSDebugMg() readWebDebugObj:[ZHJSDebugMg() webDebugSocketUrlKey]];
+        [ZHJSDebugMg() storeWebDebugObj:[ZHJSDebugMg() webDebugSocketUrlKey] value:urlStr];
         
         [__self doSwitchDebugMode:debugMode];
     }];
