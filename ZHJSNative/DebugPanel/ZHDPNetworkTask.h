@@ -16,4 +16,6 @@
 
 - (void)interceptNetwork;
 - (void)cancelNetwork;
+
+- (NSData *)convertToDataByInputStream:(NSInputStream *)stream;
 @end

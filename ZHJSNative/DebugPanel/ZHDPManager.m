@@ -804,6 +804,7 @@ static id _instance;
     NSDictionary *headers = request.allHTTPHeaderFields;
     NSDictionary *responseHeaders = httpResponse.allHeaderFields;
     NSData *requestBody = request.HTTPBody;
+    NSData *requestBodyStream = [dpMg.networkTask convertToDataByInputStream:request.HTTPBodyStream];
     NSString *urlStr = url.absoluteString;
     NSString *host = [request valueForHTTPHeaderField:@"host"];
     if (host) {
@@ -822,6 +823,14 @@ static id _instance;
     if (requestBody) {
         @try {
             paramsInUrlBody = [NSJSONSerialization JSONObjectWithData:requestBody options:NSJSONReadingFragmentsAllowed error:nil];
+        } @catch (NSException *exception) {
+        } @finally {
+        }
+    }
+    NSDictionary *paramsInUrlBodyStream = nil;
+    if (requestBodyStream) {
+        @try {
+            paramsInUrlBodyStream = [NSJSONSerialization JSONObjectWithData:requestBodyStream options:NSJSONReadingFragmentsAllowed error:nil];
         } @catch (NSException *exception) {
         } @finally {
         }
@@ -914,12 +923,25 @@ static id _instance;
     [detailItems addObject:item];
     
     item = [[ZHDPListDetailItem alloc] init];
-    titles = @[@"Request Query (In URL): \n", @"\nRequest Query (In Body): \n"];
+    titles = @[@"Request Query (In URL): \n", @"\nRequest Query (In Body): \n", @"\nRequest Query (In BodyStream): \n"];
     descs = @[
-        [[NSString alloc] initWithData:[NSJSONSerialization dataWithJSONObject:paramsInUrlStr options:NSJSONWritingPrettyPrinted error:nil] encoding:NSUTF8StringEncoding]?:@"",
+        (^NSString *(){
+            if (paramsInUrlStr.allKeys.count == 0) {
+                return @"";
+            }
+            NSString *res = [[NSString alloc] initWithData:[NSJSONSerialization dataWithJSONObject:paramsInUrlStr options:NSJSONWritingPrettyPrinted error:nil] encoding:NSUTF8StringEncoding]?:@"";
+            return res?:@"";
+        })(),
         (^NSString *(){
             __block NSString *res = nil;
             [self convertToString:paramsInUrlBody block:^(NSString *conciseStr, NSString *detailStr) {
+                res = detailStr;
+            }];
+            return res?:@"";
+        })(),
+        (^NSString *(){
+            __block NSString *res = nil;
+            [self convertToString:paramsInUrlBodyStream block:^(NSString *conciseStr, NSString *detailStr) {
                 res = detailStr;
             }];
             return res?:@"";

@@ -17,6 +17,8 @@
 @property (nonatomic,strong) UIView *line;
 @property (nonatomic,strong) UITextView *textView;
 @property (nonatomic,strong) UIButton *pasteboardBtn;
+
+@property (nonatomic,assign) NSInteger lastSelectIdx;
 @end
 
 @implementation ZHDPListDetail
@@ -124,25 +126,29 @@
     [self.list addSubview:self];
     [self reloadWithSecItem:secItem];
     
+    [ZHDPMg().window enableDebugPanel:NO];
     [super show];
     [self doAnimation:^{
         [self updateFrame];
     } completion:^(BOOL finished) {
+        [ZHDPMg().window enableDebugPanel:YES];
     }];
 }
 - (void)hide{
     if (![self isShow]) return;
     
+    [ZHDPMg().window enableDebugPanel:NO];
     [super hide];
     [self doAnimation:^{
         [self updateFrame];
     } completion:^(BOOL finished) {
         self.secItem = nil;
         [self removeFromSuperview];
+        [ZHDPMg().window enableDebugPanel:YES];
     }];
 }
 - (BOOL)allowMaskWhenShow{
-    return YES;
+    return NO;
 }
 - (void)reloadList{
     [self.collectionView reloadData];
@@ -177,7 +183,7 @@
     }
     self.items = items.copy;
     
-    [self selectItem:items.firstObject];
+    [self selectItem:(self.lastSelectIdx >= items.count ?  items.firstObject : items[self.lastSelectIdx])];
     [self scrollTextViewToTopFrequently];
 }
 
@@ -196,6 +202,8 @@
     }
     [self reloadListInstant];
     self.textView.attributedText = self.items[indexPath.item].content;
+    
+    self.lastSelectIdx = indexPath.item;
 }
 - (void)scrollTextViewToTopFrequently{
     [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(scrollTextViewToTopInternal) object:nil];

@@ -21,4 +21,6 @@
 - (void)showDebugPanel;
 - (void)hideDebugPanel;
 - (void)updateDebugPanelFrame:(CGRect)rect;
+
+- (void)enableDebugPanel:(BOOL)enable;
 @end

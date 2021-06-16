@@ -213,6 +213,15 @@
     }];
 }
 
+#pragma mark - enable
+
+- (void)enableDebugPanel:(BOOL)enable{
+    if (!_debugPanel) {
+        return;
+    }
+    self.debugPanel.userInteractionEnabled = enable;
+}
+
 #pragma mark - getter
 
 - (ZHDPFloat *)floatView{
