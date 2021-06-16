@@ -103,6 +103,10 @@
 
 @property (nonatomic,strong) ZHDPDataSpaceItem *storageSpaceItem;
 @property (nonatomic,retain) NSMutableArray <ZHDPListSecItem *> *storageItems;
+
+@property (nonatomic,strong) ZHDPDataSpaceItem *memorySpaceItem;
+@property (nonatomic,retain) NSMutableArray <ZHDPListSecItem *> *memoryItems;
+
 @end
 
 
@@ -119,6 +123,7 @@
 - (NSArray <ZHDPListSecItem *> *)fetchAllAppDataItems_network;
 - (NSArray <ZHDPListSecItem *> *)fetchAllAppDataItems_im;
 - (NSArray <ZHDPListSecItem *> *)fetchAllAppDataItems_storage;
+- (NSArray <ZHDPListSecItem *> *)fetchAllAppDataItems_memory;
 
 // 查找某个应用的数据
 - (ZHDPAppDataItem *)fetchAppDataItem:(ZHDPAppItem *)appItem;

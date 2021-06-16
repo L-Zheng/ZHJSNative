@@ -123,6 +123,19 @@
     if (!_storageItems) _storageItems = [NSMutableArray array];
     return _storageItems;
 }
+- (ZHDPDataSpaceItem *)memorySpaceItem{
+    if (!_memorySpaceItem) {
+        ZHDPDataSpaceItem *item = [[ZHDPDataSpaceItem alloc] init];
+        item.count = 100;
+        item.removePercent = 0.5;
+        _memorySpaceItem = item;
+    }
+    return _memorySpaceItem;
+}
+- (NSMutableArray<ZHDPListSecItem *> *)memoryItems{
+    if (!_memoryItems) _memoryItems = [NSMutableArray array];
+    return _memoryItems;
+}
 @end
 
 
@@ -170,6 +183,11 @@
 - (NSArray <ZHDPListSecItem *> *)fetchAllAppDataItems_storage{
     return [self fetchAllAppDataItems_module:^NSArray *(ZHDPAppDataItem *appDataItem) {
         return appDataItem.storageItems.copy;
+    }];
+}
+- (NSArray <ZHDPListSecItem *> *)fetchAllAppDataItems_memory{
+    return [self fetchAllAppDataItems_module:^NSArray *(ZHDPAppDataItem *appDataItem) {
+        return appDataItem.memoryItems.copy;
     }];
 }
 

@@ -11,6 +11,7 @@
 #import "ZHDPListLog.h"// log列表
 #import "ZHDPListNetwork.h"// network列表
 #import "ZHDPListStorage.h"// storage列表
+#import "ZHDPListMemory.h"// Memory列表
 #import "ZHDPListIM.h"// im列表
 
 @interface ZHDPContent ()
@@ -18,6 +19,7 @@
 @property (nonatomic, strong) ZHDPListNetwork *networkList;
 @property (nonatomic, strong) ZHDPListIM *imList;
 @property (nonatomic, strong) ZHDPListStorage *storageList;
+@property (nonatomic, strong) ZHDPListMemory *memoryList;
 @end
 
 @implementation ZHDPContent
@@ -50,7 +52,7 @@
 #pragma mark - lists
 
 - (NSArray <ZHDPList *> *)allLists{
-    return @[self.logList, self.networkList, self.storageList, self.imList];
+    return @[self.logList, self.networkList, self.storageList, self.memoryList, self.imList];
 }
 - (void)selectList:(ZHDPList *)list{
     if (!list || [self.selectList isEqual:list]) return;
@@ -100,6 +102,13 @@
         _storageList.item = [ZHDPListItem itemWithTitle:@"Storage"];
     }
     return _storageList;
+}
+- (ZHDPListMemory *)memoryList{
+    if (!_memoryList) {
+        _memoryList = [[ZHDPListMemory alloc] initWithFrame:CGRectZero];
+        _memoryList.item = [ZHDPListItem itemWithTitle:@"Memory"];
+    }
+    return _memoryList;
 }
 
 @end

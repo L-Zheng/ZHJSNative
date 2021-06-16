@@ -1,26 +1,26 @@
 //
-//  ZHDPListStorage.m
+//  ZHDPListMemory.m
 //  ZHJSNative
 //
-//  Created by EM on 2021/5/26.
+//  Created by EM on 2021/6/16.
 //  Copyright © 2021 Zheng. All rights reserved.
 //
 
-#import "ZHDPListStorage.h"
+#import "ZHDPListMemory.h"
 #import "ZHDPManager.h"// 调试面板管理
 
-@implementation ZHDPListStorage
+@implementation ZHDPListMemory
 
 #pragma mark - data
 
 - (NSArray <ZHDPListSecItem *> *)fetchAllItems{
-    return [ZHDPMg().dataTask fetchAllAppDataItems_storage];
+    return [ZHDPMg().dataTask fetchAllAppDataItems_memory];
 }
 
 #pragma mark - reload
 
 - (void)reloadListWhenSelectApp{
-    [ZHDPMg() zh_test_reloadStorage];
+    [ZHDPMg() zh_test_reloadMemory];
     [super reloadListWhenShow];
 }
 - (void)reloadListWhenSearch{
@@ -30,13 +30,13 @@
     [super reloadListWhenShow];
 }
 - (void)reloadListWhenRefresh{
-    [ZHDPMg() zh_test_reloadStorage];
+    [ZHDPMg() zh_test_reloadMemory];
     [super reloadListWhenShow];
 }
 - (void)reloadListWhenShow{
 //    NSArray <ZHDPListSecItem *> *items = [self fetchAllItems]?:@[];
 //    if (items.count == 0) {
-        [ZHDPMg() zh_test_reloadStorage];
+        [ZHDPMg() zh_test_reloadMemory];
 //    }
     [super reloadListWhenShow];
 }

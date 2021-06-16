@@ -99,6 +99,8 @@ typedef NS_ENUM(NSInteger, ZHDPOutputColorType) {
 
 - (void)addSecItemToStorageList:(ZHDPListSecItem *)secItem spaceItem:(ZHDPDataSpaceItem *)spaceItem;
 
+- (void)addSecItemToMemoryList:(ZHDPListSecItem *)secItem spaceItem:(ZHDPDataSpaceItem *)spaceItem;
+
 - (void)removeSecItemsList:(Class)listClass secItems:(NSArray <ZHDPListSecItem *> *)secItems;
 @end
 
@@ -115,6 +117,7 @@ typedef NS_ENUM(NSInteger, ZHDPOutputColorType) {
 - (void)zh_test_addNetwork:(NSDate *)startDate request:(NSURLRequest *)request response:(NSURLResponse *)response responseData:(NSData *)responseData;
 
 - (void)zh_test_reloadStorage;
+- (void)zh_test_reloadMemory;
 
 @end
 

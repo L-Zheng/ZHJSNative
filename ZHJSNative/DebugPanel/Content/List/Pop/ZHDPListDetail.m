@@ -201,8 +201,12 @@
         self.items[i].selected = (indexPath.item == i ? YES : NO);
     }
     [self reloadListInstant];
-    self.textView.attributedText = self.items[indexPath.item].content;
-    
+    NSAttributedString *text = self.items[indexPath.item].content;
+    self.textView.attributedText = [[NSAttributedString alloc] initWithString:@"载入中..." attributes:@{NSFontAttributeName: [ZHDPMg() defaultFont], NSForegroundColorAttributeName: [ZHDPMg() selectColor]}];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.15 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        self.textView.attributedText = text;
+    });
+
     self.lastSelectIdx = indexPath.item;
 }
 - (void)scrollTextViewToTopFrequently{

@@ -79,6 +79,7 @@
 		851B1296266229D100FA3AA3 /* iconfont.woff2 in Resources */ = {isa = PBXBuildFile; fileRef = 851B128E266229D100FA3AA3 /* iconfont.woff2 */; };
 		851B1297266229D100FA3AA3 /* iconfont.css in Resources */ = {isa = PBXBuildFile; fileRef = 851B128F266229D100FA3AA3 /* iconfont.css */; };
 		851B129A2662390300FA3AA3 /* ZHDPListPop.m in Sources */ = {isa = PBXBuildFile; fileRef = 851B12992662390300FA3AA3 /* ZHDPListPop.m */; };
+		853700F0267A0AD300544D93 /* ZHDPListMemory.m in Sources */ = {isa = PBXBuildFile; fileRef = 853700EF267A0AD300544D93 /* ZHDPListMemory.m */; };
 		8539A2E3246E9C2800FD7EFB /* ZHCustom2Api.m in Sources */ = {isa = PBXBuildFile; fileRef = 8539A2E2246E9C2800FD7EFB /* ZHCustom2Api.m */; };
 		856980822429E0F50042755A /* ZHCustomApi.m in Sources */ = {isa = PBXBuildFile; fileRef = 856980812429E0F50042755A /* ZHCustomApi.m */; };
 		8581BA95258F2579004E25DC /* NSError+ZH.m in Sources */ = {isa = PBXBuildFile; fileRef = 8581BA94258F2579004E25DC /* NSError+ZH.m */; };
@@ -244,6 +245,8 @@
 		851B12982662390300FA3AA3 /* ZHDPListPop.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHDPListPop.h; sourceTree = "<group>"; };
 		851B12992662390300FA3AA3 /* ZHDPListPop.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHDPListPop.m; sourceTree = "<group>"; };
 		851EDB07264E6A5000970A3C /* ZHJSPageProtocol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHJSPageProtocol.h; sourceTree = "<group>"; };
+		853700EE267A0AD300544D93 /* ZHDPListMemory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHDPListMemory.h; sourceTree = "<group>"; };
+		853700EF267A0AD300544D93 /* ZHDPListMemory.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHDPListMemory.m; sourceTree = "<group>"; };
 		8539A2E1246E9C2800FD7EFB /* ZHCustom2Api.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHCustom2Api.h; sourceTree = "<group>"; };
 		8539A2E2246E9C2800FD7EFB /* ZHCustom2Api.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHCustom2Api.m; sourceTree = "<group>"; };
 		856980802429E0F50042755A /* ZHCustomApi.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHCustomApi.h; sourceTree = "<group>"; };
@@ -584,6 +587,8 @@
 				85118B69265E4FAA002BDFC9 /* ZHDPListIM.m */,
 				85118B6B265E4FB3002BDFC9 /* ZHDPListStorage.h */,
 				85118B6C265E4FB3002BDFC9 /* ZHDPListStorage.m */,
+				853700EE267A0AD300544D93 /* ZHDPListMemory.h */,
+				853700EF267A0AD300544D93 /* ZHDPListMemory.m */,
 			);
 			path = SubList;
 			sourceTree = "<group>";
@@ -974,6 +979,7 @@
 				0FCF2D09260EC92A003797EF /* ZHWebDebugItem.m in Sources */,
 				0F247F9325B2C23000A2D8A3 /* ZHJSApiItem.m in Sources */,
 				85118B47265E41C0002BDFC9 /* ZHDPOption.m in Sources */,
+				853700F0267A0AD300544D93 /* ZHDPListMemory.m in Sources */,
 				0F079899240105E3004AAFBC /* ZHJSContext.m in Sources */,
 				85118B67265E4F97002BDFC9 /* ZHDPListNetwork.m in Sources */,
 				8582282425AD97BF00FECFB9 /* ZHJSPageItem.m in Sources */,
