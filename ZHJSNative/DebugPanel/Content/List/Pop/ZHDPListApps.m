@@ -167,8 +167,9 @@
     if (fundCliItem) {
         [items insertObject:fundCliItem atIndex:0];
     }
+    // 修改了self.items要立即刷新
     self.items = items.copy;
-    [self reloadListFrequently];
+    [self reloadListInstant];
 }
 
 #pragma mark - select

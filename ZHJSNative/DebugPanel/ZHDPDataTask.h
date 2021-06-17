@@ -128,6 +128,7 @@
 // 查找某个应用的数据
 - (ZHDPAppDataItem *)fetchAppDataItem:(ZHDPAppItem *)appItem;
 
+- (void)cleanAllAppDataItems;
 // 清理并添加数据
 - (void)cleanAllItems:(NSMutableArray *)items;
 - (void)addAndCleanItems:(NSMutableArray *)items item:(ZHDPListSecItem *)item spaceItem:(ZHDPDataSpaceItem *)spaceItem;

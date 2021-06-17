@@ -210,10 +210,10 @@
     self.lastSelectIdx = indexPath.item;
 }
 - (void)scrollTextViewToTopFrequently{
-    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(scrollTextViewToTopInternal) object:nil];
-    [self performSelector:@selector(scrollTextViewToTopInternal) withObject:nil afterDelay:0.25];
+    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(scrollTextViewToTopInstant) object:nil];
+    [self performSelector:@selector(scrollTextViewToTopInstant) withObject:nil afterDelay:0.25];
 }
-- (void)scrollTextViewToTopInternal{
+- (void)scrollTextViewToTopInstant{
     [self.textView setContentOffset:CGPointMake(0, 0) animated:YES];
 }
 

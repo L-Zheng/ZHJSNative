@@ -207,6 +207,9 @@
 }
 
 
+- (void)cleanAllAppDataItems{
+    [self.appDataMap removeAllObjects];
+}
 // 清理并添加数据
 - (void)cleanAllItems:(NSMutableArray *)items{
     [items removeAllObjects];

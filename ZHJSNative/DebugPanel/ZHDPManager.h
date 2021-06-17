@@ -92,17 +92,10 @@ typedef NS_ENUM(NSInteger, ZHDPOutputColorType) {
 
 - (void)copySecItemToPasteboard:(ZHDPListSecItem *)secItem;
 
-- (void)addSecItemToIMList:(ZHDPListSecItem *)secItem spaceItem:(ZHDPDataSpaceItem *)spaceItem;
-    
-- (void)addSecItemToLogList:(ZHDPListSecItem *)secItem spaceItem:(ZHDPDataSpaceItem *)spaceItem;
-
-- (void)addSecItemToNetworkList:(ZHDPListSecItem *)secItem spaceItem:(ZHDPDataSpaceItem *)spaceItem;
-
-- (void)addSecItemToStorageList:(ZHDPListSecItem *)secItem spaceItem:(ZHDPDataSpaceItem *)spaceItem;
-
-- (void)addSecItemToMemoryList:(ZHDPListSecItem *)secItem spaceItem:(ZHDPDataSpaceItem *)spaceItem;
-
+- (void)addSecItemToList:(Class)listClass appItem:(ZHDPAppItem *)appItem secItem:(ZHDPListSecItem *)secItem;
 - (void)removeSecItemsList:(Class)listClass secItems:(NSArray <ZHDPListSecItem *> *)secItems;
+- (void)clearSecItemsList:(Class)listClass appItem:(ZHDPAppItem *)appItem;
+
 @end
 
 @interface ZHDPManager (ZHPlatformTest)

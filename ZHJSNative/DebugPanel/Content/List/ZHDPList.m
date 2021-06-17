@@ -25,6 +25,7 @@ typedef NS_ENUM(NSInteger, ZHDPScrollStatus) {
 @interface ZHDPList () <UITableViewDataSource,UITableViewDelegate>
 
 @property (nonatomic,retain) NSMutableArray *items_temp;
+@property (nonatomic,retain) NSMutableArray *removeItems_temp;
 
 @property (nonatomic,assign) ZHDPScrollStatus scrollStatus;
 @property (nonatomic,assign) BOOL allowScrollAuto;
@@ -230,7 +231,8 @@ typedef NS_ENUM(NSInteger, ZHDPScrollStatus) {
          },
          ^{
              [weakSelf.oprate hide];
-             [ZHDPMg() removeSecItemsList:weakSelf.class secItems:weakSelf.items.copy];
+             [ZHDPMg() clearSecItemsList:weakSelf.class appItem:self.apps.selectItem];
+//             [ZHDPMg() removeSecItemsList:weakSelf.class secItems:weakSelf.items.copy];
          },
          ^{
              [weakSelf.oprate hide];
@@ -324,19 +326,36 @@ typedef NS_ENUM(NSInteger, ZHDPScrollStatus) {
     if (!secItems || ![secItems isKindOfClass:NSArray.class] || secItems.count == 0 || self.items.count == 0) {
         return;
     }
-    NSUInteger originCount = self.items.count;
-    [self.items removeObjectsInArray:secItems];
-    if (self.items.count == originCount) {
-        return;
-    }
-    [self reloadListFrequently];
+    [self.removeItems_temp addObjectsFromArray:secItems];
+    [self removeSecItemFrequently];
 }
 - (void)removeSecItem:(ZHDPListSecItem *)secItem{
     if (!secItem || ![secItem isKindOfClass:ZHDPListSecItem.class] || self.items.count == 0) return;
     if ([self.items containsObject:secItem]) {
-        [self.items removeObject:secItem];
-        [self reloadListFrequently];
+        [self.removeItems_temp addObject:secItem];
+        [self removeSecItemFrequently];
     }
+}
+- (void)clearSecItems{
+    if (self.items.count == 0) return;
+    [self.items removeAllObjects];
+    [self reloadList];
+}
+- (void)removeSecItemFrequently{
+    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(removeSecItemInstant) object:nil];
+    [self performSelector:@selector(removeSecItemInstant) withObject:nil afterDelay:0.25];
+}
+- (void)removeSecItemInstant{
+    if (self.removeItems_temp.count == 0) {
+        return;
+    }
+//    NSUInteger originCount = self.items.count;
+    [self.items removeObjectsInArray:self.removeItems_temp];
+    [self.removeItems_temp removeAllObjects];
+//    if (self.items.count == originCount) {
+//        return;
+//    }
+    [self reloadList];
 }
 - (void)reloadListWhenSelectApp{
     [self reloadListWhenShow];
@@ -522,6 +541,12 @@ typedef NS_ENUM(NSInteger, ZHDPScrollStatus) {
         _items_temp = [NSMutableArray array];
     }
     return _items_temp;
+}
+- (NSMutableArray<ZHDPListSecItem *> *)removeItems_temp{
+    if (!_removeItems_temp) {
+        _removeItems_temp = [NSMutableArray array];
+    }
+    return _removeItems_temp;
 }
 - (UITableView *)tableView {
     if (!_tableView) {

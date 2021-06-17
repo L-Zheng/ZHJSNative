@@ -74,7 +74,7 @@
         }
     }
     self.items = items.copy;
-    [self reloadCollectionViewFrequently];
+    [self reloadCollectionView];
 }
 
 #pragma mark - UICollectionViewDelegate
@@ -87,14 +87,14 @@
 }
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
     ZHDPListOprateCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:self.collectionCellIdentifier forIndexPath:indexPath];
-    [cell configItem:self.items[indexPath.row]];
+    [cell configItem:self.items[indexPath.item]];
     [cell configTitleHideEnable:YES];
     return cell;
 }
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath{
     [collectionView deselectItemAtIndexPath:indexPath animated:YES];
     
-    void (^block) (void) = self.items[indexPath.row].block;
+    void (^block) (void) = self.items[indexPath.item].block;
     if (block) block();
 }
 - (BOOL)collectionView:(UICollectionView *)collectionView shouldHighlightItemAtIndexPath:(NSIndexPath *)indexPath{

@@ -36,6 +36,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)addSecItem:(ZHDPListSecItem *)item spaceItem:(ZHDPDataSpaceItem *)spaceItem;
 - (void)removeSecItems:(NSArray <ZHDPListSecItem *> *)secItems;
 - (void)removeSecItem:(ZHDPListSecItem *)secItem;
+- (void)clearSecItems;
 - (void)reloadListWhenShow;
 - (void)reloadList;
 - (void)scrollListToBottomCode;

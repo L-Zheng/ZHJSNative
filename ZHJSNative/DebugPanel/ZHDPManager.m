@@ -457,68 +457,98 @@
     }
 }
 
+- (NSString *)opSecItemsMapKey_items{
+    return @"itemsBlock";
+}
+- (NSString *)opSecItemsMapKey_space{
+    return @"spaceBlock";
+}
+- (NSDictionary *)opSecItemsMap{
+    NSString *itemsKey = [self opSecItemsMapKey_items];
+    NSString *spaceKey = [self opSecItemsMapKey_space];
+    return @{
+        NSStringFromClass(ZHDPListLog.class): @{
+                itemsKey: ^NSMutableArray *(ZHDPAppDataItem *appDataItem){
+                    return appDataItem.logItems;
+                },
+                spaceKey: ^ZHDPDataSpaceItem *(ZHDPAppDataItem *appDataItem){
+                    return appDataItem.logSpaceItem;
+                }
+        },
+        NSStringFromClass(ZHDPListNetwork.class): @{
+                itemsKey: ^NSMutableArray *(ZHDPAppDataItem *appDataItem){
+                    return appDataItem.networkItems;
+                },
+                spaceKey: ^ZHDPDataSpaceItem *(ZHDPAppDataItem *appDataItem){
+                    return appDataItem.networkSpaceItem;
+                }
+        },
+        NSStringFromClass(ZHDPListStorage.class): @{
+                itemsKey: ^NSMutableArray *(ZHDPAppDataItem *appDataItem){
+                    return appDataItem.storageItems;
+                },
+                spaceKey: ^ZHDPDataSpaceItem *(ZHDPAppDataItem *appDataItem){
+                    return appDataItem.storageSpaceItem;
+                }
+        },
+        NSStringFromClass(ZHDPListMemory.class): @{
+                itemsKey: ^NSMutableArray *(ZHDPAppDataItem *appDataItem){
+                    return appDataItem.memoryItems;
+                },
+                spaceKey: ^ZHDPDataSpaceItem *(ZHDPAppDataItem *appDataItem){
+                    return appDataItem.memorySpaceItem;
+                }
+        },
+        NSStringFromClass(ZHDPListIM.class): @{
+                itemsKey: ^NSMutableArray *(ZHDPAppDataItem *appDataItem){
+                    return appDataItem.imItems;
+                },
+                spaceKey: ^ZHDPDataSpaceItem *(ZHDPAppDataItem *appDataItem){
+                    return appDataItem.imSpaceItem;
+                }
+        },
+    };
+}
 // self.window  window一旦创建就会自动显示在屏幕上
 // 如果当前列表正在显示，刷新列表
-- (void)addSecItemToIMList:(ZHDPListSecItem *)secItem spaceItem:(ZHDPDataSpaceItem *)spaceItem{
-    [self addSecItemToList:ZHDPListIM.class secItem:secItem spaceItem:spaceItem];
-}
-
-- (void)addSecItemToLogList:(ZHDPListSecItem *)secItem spaceItem:(ZHDPDataSpaceItem *)spaceItem{
-    [self addSecItemToList:ZHDPListLog.class secItem:secItem spaceItem:spaceItem];
-}
-
-- (void)addSecItemToNetworkList:(ZHDPListSecItem *)secItem spaceItem:(ZHDPDataSpaceItem *)spaceItem{
-    [self addSecItemToList:ZHDPListNetwork.class secItem:secItem spaceItem:spaceItem];
-}
-
-- (void)addSecItemToStorageList:(ZHDPListSecItem *)secItem spaceItem:(ZHDPDataSpaceItem *)spaceItem{
-    [self addSecItemToList:ZHDPListStorage.class secItem:secItem spaceItem:spaceItem];
-}
-
-- (void)addSecItemToMemoryList:(ZHDPListSecItem *)secItem spaceItem:(ZHDPDataSpaceItem *)spaceItem{
-    [self addSecItemToList:ZHDPListMemory.class secItem:secItem spaceItem:spaceItem];
-}
-
-- (void)addSecItemToList:(Class)listClass secItem:(ZHDPListSecItem *)secItem spaceItem:(ZHDPDataSpaceItem *)spaceItem{
+- (void)addSecItemToList:(Class)listClass appItem:(ZHDPAppItem *)appItem secItem:(ZHDPListSecItem *)secItem{
+    
+    ZHDPManager *dpMg = ZHDPMg();
+    
+    NSDictionary *map = [self opSecItemsMap];
+    NSMutableArray * (^itemsBlock) (ZHDPAppDataItem *) = [[map objectForKey:NSStringFromClass(listClass)] objectForKey:[self opSecItemsMapKey_items]];
+    ZHDPDataSpaceItem * (^spaceBlock) (ZHDPAppDataItem *) = [[map objectForKey:NSStringFromClass(listClass)] objectForKey:[self opSecItemsMapKey_space]];
+    if (!itemsBlock || !spaceBlock) {
+        return;
+    }
+    
+    // 追加到全局数据管理
+    ZHDPAppDataItem *appDataItem = [dpMg.dataTask fetchAppDataItem:appItem];
+    secItem.appDataItem = appDataItem;
+    [dpMg.dataTask addAndCleanItems:itemsBlock(appDataItem) item:secItem spaceItem:spaceBlock(appDataItem)];
+    
+    // 如果当前列表正在显示，刷新列表
     if (_window && self.window.debugPanel.status == ZHDebugPanelStatus_Show) {
         ZHDPList *list = self.window.debugPanel.content.selectList;
         if ([list isKindOfClass:listClass]) {
-            [list addSecItem:secItem spaceItem:spaceItem];
+            [list addSecItem:secItem spaceItem:spaceBlock(appDataItem)];
         }
     }
 }
 - (void)removeSecItemsList:(Class)listClass secItems:(NSArray <ZHDPListSecItem *> *)secItems{
-    NSDictionary *map = @{
-        NSStringFromClass(ZHDPListIM.class): ^NSMutableArray *(ZHDPListSecItem *secItem){
-            return secItem.appDataItem.imItems;
-        },
-        NSStringFromClass(ZHDPListLog.class): ^NSMutableArray *(ZHDPListSecItem *secItem){
-            return secItem.appDataItem.logItems;
-        },
-        NSStringFromClass(ZHDPListNetwork.class): ^NSMutableArray *(ZHDPListSecItem *secItem){
-            return secItem.appDataItem.networkItems;
-        },
-        NSStringFromClass(ZHDPListStorage.class): ^NSMutableArray *(ZHDPListSecItem *secItem){
-            return secItem.appDataItem.storageItems;
-        }
-    };
-    [self removeSecItemsList:secItems block:^NSMutableArray *(ZHDPListSecItem *secItem) {
-        NSMutableArray * (^block) (ZHDPListSecItem *secItem) = [map objectForKey:NSStringFromClass(listClass)];
-        return (block ? block(secItem) : [NSMutableArray array]);
-    }];
-}
-- (void)removeSecItemsList:(NSArray <ZHDPListSecItem *> *)secItems block:(NSMutableArray * (^) (ZHDPListSecItem *secItem))block{
     if (!secItems || ![secItems isKindOfClass:NSArray.class] || secItems.count == 0) {
         return;
     }
-    if (!block) {
+    NSDictionary *map = [self opSecItemsMap];
+    NSMutableArray * (^itemsBlock) (ZHDPAppDataItem *) = [[map objectForKey:NSStringFromClass(listClass)] objectForKey:[self opSecItemsMapKey_items]];
+    if (!itemsBlock) {
         return;
     }
     for (ZHDPListSecItem *secItem in secItems) {
         if (!secItem || ![secItem isKindOfClass:ZHDPListSecItem.class]) {
             continue;
         }
-        NSMutableArray *items = block(secItem);
+        NSMutableArray *items = itemsBlock(secItem.appDataItem);
         if (!items || ![items isKindOfClass:NSArray.class] || items.count == 0) {
             continue;
         }
@@ -534,6 +564,37 @@
             if (1) {
                 [list removeSecItem:secItem];
             }
+        }
+    }
+}
+- (void)clearSecItemsList:(Class)listClass appItem:(ZHDPAppItem *)appItem{
+    NSDictionary *map = [self opSecItemsMap];
+    NSMutableArray * (^itemsBlock) (ZHDPAppDataItem *) = [[map objectForKey:NSStringFromClass(listClass)] objectForKey:[self opSecItemsMapKey_items]];
+    if (!itemsBlock) {
+        return;
+    }
+    
+    ZHDPManager *dpMg = ZHDPMg();
+    // 是否清除所有
+    BOOL isRemoveAll = (!appItem || ![appItem isKindOfClass:ZHDPAppItem.class]);
+    
+    // 从全局数据管理中移除数据
+    NSArray <ZHDPAppDataItem *> *appDataItems = nil;
+    if (isRemoveAll) {
+        appDataItems = [dpMg.dataTask fetchAllAppDataItems];
+    }else{
+        ZHDPAppDataItem *appDataItem = [dpMg.dataTask fetchAppDataItem:appItem];
+        appDataItems = (appDataItem ? @[appDataItem] : @[]);
+    }
+    for (ZHDPAppDataItem *appDataItem in appDataItems) {
+        [dpMg.dataTask cleanAllItems:itemsBlock(appDataItem)];
+    }
+    
+    // 如果当前列表正在显示，从列表中删除，刷新列表
+    if (_window && self.window.debugPanel.status == ZHDebugPanelStatus_Show) {
+        ZHDPList *list = self.window.debugPanel.content.selectList;
+        if (1) {
+            [list clearSecItems];
         }
     }
 }
@@ -679,14 +740,8 @@ static id _instance;
         }
         return str;
     };
-    
-    // 追加到全局数据管理
-    ZHDPAppDataItem *appDataItem = [dpMg.dataTask fetchAppDataItem:appItem];
-    secItem.appDataItem = appDataItem;
-    [dpMg.dataTask addAndCleanItems:appDataItem.imItems item:secItem spaceItem:appDataItem.imSpaceItem];
-    
-    // 如果当前列表正在显示，刷新列表
-    [dpMg addSecItemToIMList:secItem spaceItem:appDataItem.imSpaceItem];
+    // 添加数据
+    [self addSecItemToList:ZHDPListIM.class appItem:appItem secItem:secItem];
 }
 
 - (void)zh_test_addLog{
@@ -781,14 +836,8 @@ static id _instance;
         }
         return str;
     };
-    
-    // 追加到全局数据管理
-    ZHDPAppDataItem *appDataItem = [dpMg.dataTask fetchAppDataItem:appItem];
-    secItem.appDataItem = appDataItem;
-    [dpMg.dataTask addAndCleanItems:appDataItem.logItems item:secItem spaceItem:appDataItem.logSpaceItem];
-    
-    // 如果当前列表正在显示，刷新列表
-    [dpMg addSecItemToLogList:secItem spaceItem:appDataItem.logSpaceItem];
+    // 添加数据
+    [self addSecItemToList:ZHDPListLog.class appItem:appItem secItem:secItem];
 }
 
 - (void)zh_test_addNetwork:(NSDate *)startDate request:(NSURLRequest *)request response:(NSURLResponse *)response responseData:(NSData *)responseData{
@@ -1023,14 +1072,8 @@ static id _instance;
         }
         return str;
     };
-    
-    // 追加到全局数据管理
-    ZHDPAppDataItem *appDataItem = [dpMg.dataTask fetchAppDataItem:appItem];
-    secItem.appDataItem = appDataItem;
-    [dpMg.dataTask addAndCleanItems:appDataItem.networkItems item:secItem spaceItem:appDataItem.networkSpaceItem];
-    
-    // 如果当前列表正在显示，刷新列表
-    [dpMg addSecItemToNetworkList:secItem spaceItem:appDataItem.networkSpaceItem];
+    // 添加数据
+    [self addSecItemToList:ZHDPListNetwork.class appItem:appItem secItem:secItem];
 }
 
 - (void)zh_test_reloadStorage{
@@ -1134,14 +1177,8 @@ static id _instance;
         }
         return str;
     };
-    
-    // 追加到全局数据管理
-    ZHDPAppDataItem *appDataItem = [dpMg.dataTask fetchAppDataItem:appItem];
-    secItem.appDataItem = appDataItem;
-    [dpMg.dataTask addAndCleanItems:appDataItem.storageItems item:secItem spaceItem:appDataItem.storageSpaceItem];
-    
-    // 如果当前列表正在显示，刷新列表
-    [dpMg addSecItemToStorageList:secItem spaceItem:appDataItem.storageSpaceItem];
+    // 添加数据
+    [self addSecItemToList:ZHDPListStorage.class appItem:appItem secItem:secItem];
 }
 
 - (void)zh_test_reloadMemory{
@@ -1250,14 +1287,8 @@ static id _instance;
         }
         return str;
     };
-    
-    // 追加到全局数据管理
-    ZHDPAppDataItem *appDataItem = [dpMg.dataTask fetchAppDataItem:appItem];
-    secItem.appDataItem = appDataItem;
-    [dpMg.dataTask addAndCleanItems:appDataItem.memoryItems item:secItem spaceItem:appDataItem.memorySpaceItem];
-    
-    // 如果当前列表正在显示，刷新列表
-    [dpMg addSecItemToMemoryList:secItem spaceItem:appDataItem.memorySpaceItem];
+    // 添加数据
+    [self addSecItemToList:ZHDPListMemory.class appItem:appItem secItem:secItem];
 }
 @end
 
