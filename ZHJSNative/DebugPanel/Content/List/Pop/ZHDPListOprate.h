@@ -11,6 +11,8 @@
 
 @interface ZHDPListOprateCollectionViewCell : UICollectionViewCell
 - (void)configItem:(ZHDPListOprateItem *)item;
+
+- (void)configTitleHideEnable:(BOOL)enable;
 - (void)configNormalStyle;
 - (void)configHighlightStyle;
 @end

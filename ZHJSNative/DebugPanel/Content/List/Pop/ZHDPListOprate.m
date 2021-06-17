@@ -34,18 +34,20 @@
 - (void)layoutSubviews{
     [super layoutSubviews];
     
+    BOOL titleHide = self.descLabel.isHidden;
+    
     CGFloat X = 0;
     CGFloat Y = 0;
     CGFloat W = self.bounds.size.width;
     CGFloat H = 30;
-    self.iconLabel.frame = CGRectMake(X, Y, W, H);
+    self.iconLabel.frame = titleHide ? self.bounds : CGRectMake(X, Y, W, H);
 //    self.iconLabel.backgroundColor = [UIColor cyanColor];
     
     X = 0;
     W = self.bounds.size.width;
     H = 25;
     Y = self.bounds.size.height - H;
-    self.descLabel.frame = CGRectMake(X, Y, W, H);
+    self.descLabel.frame = titleHide ? CGRectZero : CGRectMake(X, Y, W, H);
 //    self.descLabel.backgroundColor = [UIColor orangeColor];
 }
 
@@ -59,6 +61,9 @@
 - (void)setSelected:(BOOL)selected{
     [super setSelected:selected];
     (selected ? [self configHighlightStyle] : [self configNormalStyle]);
+}
+- (void)configTitleHideEnable:(BOOL)enable{
+    self.descLabel.hidden = enable;
 }
 - (void)configNormalStyle{
     self.contentView.backgroundColor = [UIColor clearColor];
