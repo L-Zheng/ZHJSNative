@@ -249,6 +249,9 @@
 
 #pragma mark - color
 
+- (UIColor *)bgColor{
+    return [UIColor colorWithRed:239.0/255.0 green:239.0/255.0 blue:244.0/255.0 alpha:1.0];
+}
 - (UIColor *)defaultColor{
     return [UIColor blackColor];
 }
@@ -422,7 +425,7 @@
     title = title?:@"";
     NSMutableAttributedString *tAtt = [[NSMutableAttributedString alloc] init];
     
-    NSUInteger limit = 300;
+    NSUInteger limit = 200;
     NSUInteger titleLength = title.length;
     if (titleLength < limit) {
         [tAtt appendAttributedString:[[NSAttributedString alloc] initWithString:title attributes:@{NSFontAttributeName: [self defaultFont], NSForegroundColorAttributeName: [self fetchOutputColor:colorType]}]];
@@ -745,7 +748,7 @@ static id _instance;
             detail = detailStr;
         }];
         // 添加参数
-        colItem = [self createColItem:concise percent:otherPercent X:X colorType:colorType];
+        colItem = [self createColItem:detail percent:otherPercent X:X colorType:colorType];
         [colItems addObject:colItem];
         X += (colItem.rectValue.CGRectValue.size.width + [dpMg marginW]);
         
@@ -907,7 +910,7 @@ static id _instance;
             detail = detailStr;
         }];
         // 添加参数
-        ZHDPListColItem *colItem = [self createColItem:concise percent:percent.floatValue X:X colorType:colorType];
+        ZHDPListColItem *colItem = [self createColItem:detail percent:percent.floatValue X:X colorType:colorType];
         [colItems addObject:colItem];
         X += (colItem.rectValue.CGRectValue.size.width + [dpMg marginW]);
     }
@@ -1098,7 +1101,7 @@ static id _instance;
             detail = detailStr;
         }];
         // 添加参数
-        ZHDPListColItem *colItem = [self createColItem:concise percent:percent.floatValue X:X colorType:ZHDPOutputColorType_Default];
+        ZHDPListColItem *colItem = [self createColItem:detail percent:percent.floatValue X:X colorType:ZHDPOutputColorType_Default];
         [colItems addObject:colItem];
         X += (colItem.rectValue.CGRectValue.size.width + [dpMg marginW]);
         
@@ -1214,7 +1217,7 @@ static id _instance;
             detail = detailStr;
         }];
         // 添加参数
-        ZHDPListColItem *colItem = [self createColItem:concise percent:percent.floatValue X:X colorType:ZHDPOutputColorType_Default];
+        ZHDPListColItem *colItem = [self createColItem:detail percent:percent.floatValue X:X colorType:ZHDPOutputColorType_Default];
         [colItems addObject:colItem];
         X += (colItem.rectValue.CGRectValue.size.width + [dpMg marginW]);
         

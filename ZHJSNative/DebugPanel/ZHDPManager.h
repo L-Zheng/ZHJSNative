@@ -69,6 +69,7 @@ typedef NS_ENUM(NSInteger, ZHDPOutputColorType) {
 
 #pragma mark - color
 
+- (UIColor *)bgColor;
 - (UIColor *)defaultColor;
 - (UIColor *)selectColor;
 - (UIColor *)defaultLineColor;

@@ -90,6 +90,7 @@
 		8581BAC5258F3795004E25DC /* ZHJSInCtxFundApi.m in Sources */ = {isa = PBXBuildFile; fileRef = 8581BAC4258F3795004E25DC /* ZHJSInCtxFundApi.m */; };
 		8582282425AD97BF00FECFB9 /* ZHJSPageItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 8582282325AD97BF00FECFB9 /* ZHJSPageItem.m */; };
 		85929110265B6E8C004EA584 /* ZHJSDebugManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 8592910F265B6E8C004EA584 /* ZHJSDebugManager.m */; };
+		85958052267AEB4B0079EFBE /* ZHDPListOption.m in Sources */ = {isa = PBXBuildFile; fileRef = 85958051267AEB4B0079EFBE /* ZHDPListOption.m */; };
 		859BE97D2668D369003C02DE /* ZHDPNetworkTask.m in Sources */ = {isa = PBXBuildFile; fileRef = 859BE97C2668D369003C02DE /* ZHDPNetworkTask.m */; };
 		859BE9802668DF44003C02DE /* ZHDPListPopShadow.m in Sources */ = {isa = PBXBuildFile; fileRef = 859BE97F2668DF44003C02DE /* ZHDPListPopShadow.m */; };
 		859D255C265F84BB003513BA /* ZHDPManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 859D255B265F84BB003513BA /* ZHDPManager.m */; };
@@ -268,6 +269,8 @@
 		8582282325AD97BF00FECFB9 /* ZHJSPageItem.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHJSPageItem.m; sourceTree = "<group>"; };
 		8592910E265B6E8C004EA584 /* ZHJSDebugManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHJSDebugManager.h; sourceTree = "<group>"; };
 		8592910F265B6E8C004EA584 /* ZHJSDebugManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHJSDebugManager.m; sourceTree = "<group>"; };
+		85958050267AEB4B0079EFBE /* ZHDPListOption.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHDPListOption.h; sourceTree = "<group>"; };
+		85958051267AEB4B0079EFBE /* ZHDPListOption.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHDPListOption.m; sourceTree = "<group>"; };
 		859BE97B2668D369003C02DE /* ZHDPNetworkTask.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHDPNetworkTask.h; sourceTree = "<group>"; };
 		859BE97C2668D369003C02DE /* ZHDPNetworkTask.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHDPNetworkTask.m; sourceTree = "<group>"; };
 		859BE97E2668DF44003C02DE /* ZHDPListPopShadow.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHDPListPopShadow.h; sourceTree = "<group>"; };
@@ -606,6 +609,7 @@
 				859D2567265FA99C003513BA /* ZHDPListRow.m */,
 				85CEEC892660EAA9004467F1 /* ZHDPListSearch.h */,
 				85CEEC8A2660EAA9004467F1 /* ZHDPListSearch.m */,
+				8595804F267AEB210079EFBE /* Option */,
 				851B129B2662393800FA3AA3 /* Pop */,
 				85118B58265E4EE4002BDFC9 /* SubList */,
 			);
@@ -723,6 +727,15 @@
 				8592910F265B6E8C004EA584 /* ZHJSDebugManager.m */,
 			);
 			path = Debug;
+			sourceTree = "<group>";
+		};
+		8595804F267AEB210079EFBE /* Option */ = {
+			isa = PBXGroup;
+			children = (
+				85958050267AEB4B0079EFBE /* ZHDPListOption.h */,
+				85958051267AEB4B0079EFBE /* ZHDPListOption.m */,
+			);
+			path = Option;
 			sourceTree = "<group>";
 		};
 		85A4A3132440062C002AE903 /* JSNative */ = {
@@ -987,6 +1000,7 @@
 				0F07989F24010627004AAFBC /* ZHController.m in Sources */,
 				859BE97D2668D369003C02DE /* ZHDPNetworkTask.m in Sources */,
 				0F079870240104FB004AAFBC /* main.m in Sources */,
+				85958052267AEB4B0079EFBE /* ZHDPListOption.m in Sources */,
 				859D255F265F84E3003513BA /* ZHDPDataTask.m in Sources */,
 				0F0798A224010647004AAFBC /* ZHJSHandler.m in Sources */,
 				8581BAAA258F3075004E25DC /* ZHJSInApi.m in Sources */,

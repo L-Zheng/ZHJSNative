@@ -60,7 +60,7 @@
 }
 - (void)configUI{
     self.clipsToBounds = YES;
-    self.backgroundColor = [UIColor colorWithRed:239.0/255.0 green:239.0/255.0 blue:244.0/255.0 alpha:1.0];
+    self.backgroundColor = [ZHDPMg() bgColor];
 
     [self addSubview:self.option];
     [self addSubview:self.content];

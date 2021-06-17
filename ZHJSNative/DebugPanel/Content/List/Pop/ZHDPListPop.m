@@ -343,12 +343,13 @@
 //        [_arrowBtn addSubview:view];
 //        _arrowBtn.frame = CGRectMake(0, 0, self.focusW, CGRectGetMaxY(view.frame));
         _arrowBtn.backgroundColor = [UIColor clearColor];
-        _arrowBtn.alpha = 0.5;
+        _arrowBtn.alpha = 0.7;
         [_arrowBtn setTitle:@"\ue68d" forState:UIControlStateNormal];
         [_arrowBtn setTitle:@"\ue68e" forState:UIControlStateSelected];
+        [_arrowBtn setTitleColor:[ZHDPMg() defaultColor] forState:UIControlStateNormal];
+        [_arrowBtn setTitleColor:[ZHDPMg() selectColor] forState:UIControlStateSelected];
         _arrowBtn.titleLabel.font = [ZHDPMg() iconFontWithSize:25];
         _arrowBtn.titleLabel.adjustsFontSizeToFitWidth = YES;
-        [_arrowBtn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
         [_arrowBtn addTarget:self action:@selector(arrowBtnClick:) forControlEvents:UIControlEventTouchUpInside];
     }
     return _arrowBtn;

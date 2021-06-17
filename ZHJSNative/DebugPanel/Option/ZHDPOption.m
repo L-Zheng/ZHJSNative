@@ -92,7 +92,7 @@
 - (void)layoutSubviews{
     [super layoutSubviews];
     
-    CGFloat W = 30;
+    CGFloat W = 0;
     CGFloat H = self.bounds.size.height;
     CGFloat Y = 0;
     CGFloat X = self.bounds.size.width - W;
@@ -248,7 +248,7 @@
         _collectionView.dataSource = self;
         _collectionView.delegate = self;
         
-        _collectionView.showsHorizontalScrollIndicator = YES;
+        _collectionView.showsHorizontalScrollIndicator = NO;
         _collectionView.showsVerticalScrollIndicator = NO;
         _collectionView.alwaysBounceHorizontal = YES;
         _collectionView.directionalLockEnabled = YES;

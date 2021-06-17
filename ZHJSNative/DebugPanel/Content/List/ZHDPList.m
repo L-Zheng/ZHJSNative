@@ -14,6 +14,7 @@
 #import "ZHDPListSearch.h"// 搜索
 #import "ZHDPListApps.h"// pop app列表
 #import "ZHDPListDetail.h"// pop detail数据
+#import "ZHDPListOption.h"// 工具栏
 
 typedef NS_ENUM(NSInteger, ZHDPScrollStatus) {
     ZHDPScrollStatus_Idle      = 0,//闲置
@@ -36,6 +37,8 @@ typedef NS_ENUM(NSInteger, ZHDPScrollStatus) {
 @property (nonatomic,strong) ZHDPListApps *apps;
 
 @property (nonatomic,strong) ZHDPListDetail *detail;
+
+@property (nonatomic,strong) ZHDPListOption *option;
 @end
 
 @implementation ZHDPList
@@ -81,6 +84,8 @@ typedef NS_ENUM(NSInteger, ZHDPScrollStatus) {
     
     [self addSubview:self.tableView];
     
+    [self addSubview:self.option];
+    
     [self addSubview:self.oprate];
     [self relaodOprate];
 }
@@ -112,7 +117,9 @@ typedef NS_ENUM(NSInteger, ZHDPScrollStatus) {
 - (void)updateSearchFrame{
     CGFloat h = self.searchH;
     self.search.frame = CGRectMake(0, 0, self.bounds.size.width, h);
-    self.tableView.frame = CGRectMake(0, h, self.bounds.size.width, self.bounds.size.height - h);
+    CGFloat optionH = 50;
+    self.option.frame = CGRectMake(0, self.bounds.size.height - optionH, self.bounds.size.width, optionH);
+    self.tableView.frame = CGRectMake(0, h, self.bounds.size.width, self.bounds.size.height - h - optionH);
 }
 - (BOOL)verifyFilterCondition:(ZHDPListSecItem *)secItem{
     if (!secItem || ![secItem isKindOfClass:ZHDPListSecItem.class]) {
@@ -261,6 +268,9 @@ typedef NS_ENUM(NSInteger, ZHDPScrollStatus) {
     }
     
     [self.oprate reloadWithItems:items];
+    NSMutableArray *optionItems = items.mutableCopy;
+    [optionItems removeLastObject];
+    [self.option reloadWithItems:optionItems.copy];
 }
 
 #pragma mark - apps
@@ -571,6 +581,13 @@ typedef NS_ENUM(NSInteger, ZHDPScrollStatus) {
         _detail.list = self;
     }
     return _detail;
+}
+- (ZHDPListOption *)option{
+    if (!_option) {
+        _option = [[ZHDPListOption alloc] initWithFrame:CGRectZero];
+        _option.list = self;
+    }
+    return _option;
 }
 
 @end
