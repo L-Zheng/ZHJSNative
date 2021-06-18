@@ -752,6 +752,9 @@ static id _instance;
 
 - (void)zh_test_addIM:(NSArray *)args{
     dispatch_async(dispatch_get_main_queue(), ^{
+        if (ZHDPMg().status != ZHDPManagerStatus_Open) {
+            return;
+        }
         [self zh_test_addIMSafe:args];
     });
 }
@@ -841,6 +844,9 @@ static id _instance;
     }
     
     dispatch_async(dispatch_get_main_queue(), ^{
+        if (ZHDPMg().status != ZHDPManagerStatus_Open) {
+            return;
+        }
         [self zh_test_addLogSafe:ZHDPOutputColorType_Default args:res.copy];
     });
 }
@@ -930,6 +936,9 @@ static id _instance;
 
 - (void)zh_test_addNetwork:(NSDate *)startDate request:(NSURLRequest *)request response:(NSURLResponse *)response responseData:(NSData *)responseData{
     dispatch_async(dispatch_get_main_queue(), ^{
+        if (ZHDPMg().status != ZHDPManagerStatus_Open) {
+            return;
+        }
         [self zh_test_addNetworkSafe:startDate request:request response:response responseData:responseData];
     });
 }
@@ -1149,6 +1158,9 @@ static id _instance;
 
 - (void)zh_test_reloadStorage{
     dispatch_async(dispatch_get_main_queue(), ^{
+        if (ZHDPMg().status != ZHDPManagerStatus_Open) {
+            return;
+        }
         [self zh_test_reloadStorageSafe];
     });
 }
@@ -1254,6 +1266,9 @@ static id _instance;
 
 - (void)zh_test_reloadMemory{
     dispatch_async(dispatch_get_main_queue(), ^{
+        if (ZHDPMg().status != ZHDPManagerStatus_Open) {
+            return;
+        }
         [self zh_test_reloadMemorySafe];
     });
 }
@@ -1367,6 +1382,9 @@ static id _instance;
         return;
     }
     dispatch_async(dispatch_get_main_queue(), ^{
+        if (ZHDPMg().status != ZHDPManagerStatus_Open) {
+            return;
+        }
         ZHDPOutputColorType type = ZHDPOutputColorType_Error;
         [self zh_test_addExceptionSafe:@"App" colorType:type args:@[title] stack:stack];
     });
