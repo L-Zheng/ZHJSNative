@@ -14,7 +14,7 @@
 #pragma mark - data
 
 - (NSArray <ZHDPListSecItem *> *)fetchAllItems{
-    return [ZHDPMg().dataTask fetchAllAppDataItems_im];
+    return [ZHDPMg() fetchAllAppDataItems:self.class];
 }
 
 @end

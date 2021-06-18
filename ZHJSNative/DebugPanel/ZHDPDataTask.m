@@ -136,6 +136,19 @@
     if (!_memoryItems) _memoryItems = [NSMutableArray array];
     return _memoryItems;
 }
+- (ZHDPDataSpaceItem *)exceptionSpaceItem{
+    if (!_exceptionSpaceItem) {
+        ZHDPDataSpaceItem *item = [[ZHDPDataSpaceItem alloc] init];
+        item.count = 100;
+        item.removePercent = 0.5;
+        _exceptionSpaceItem = item;
+    }
+    return _exceptionSpaceItem;
+}
+- (NSMutableArray<ZHDPListSecItem *> *)exceptionItems{
+    if (!_exceptionItems) _exceptionItems = [NSMutableArray array];
+    return _exceptionItems;
+}
 @end
 
 
@@ -145,50 +158,6 @@
 // 查找所有应用的数据
 - (NSArray <ZHDPAppDataItem *> *)fetchAllAppDataItems{
     return [self.appDataMap allValues].copy;
-}
-- (NSArray <ZHDPListSecItem *> *)fetchAllAppDataItems_module:(NSArray * (^) (ZHDPAppDataItem *appDataItem))block{
-    if (!block) return nil;
-    
-    NSMutableArray *res = [NSMutableArray array];
-    NSArray <ZHDPAppDataItem *> *appDataItems = [self fetchAllAppDataItems];
-    for (ZHDPAppDataItem *appDataItem in appDataItems) {
-        [res addObjectsFromArray:block(appDataItem)];
-    }
-    // 按照进入内存的时间 升序排列
-    [res sortUsingComparator:^NSComparisonResult(ZHDPListSecItem *obj1, ZHDPListSecItem  *obj2) {
-        if (obj1.enterMemoryTime > obj2.enterMemoryTime) {
-            return NSOrderedDescending;
-        }else if (obj1.enterMemoryTime < obj2.enterMemoryTime){
-            return NSOrderedAscending;
-        }
-        return NSOrderedSame;
-    }];
-    return res.copy;
-}
-- (NSArray <ZHDPListSecItem *> *)fetchAllAppDataItems_log{
-    return [self fetchAllAppDataItems_module:^NSArray *(ZHDPAppDataItem *appDataItem) {
-        return appDataItem.logItems.copy;
-    }];
-}
-- (NSArray <ZHDPListSecItem *> *)fetchAllAppDataItems_network{
-    return [self fetchAllAppDataItems_module:^NSArray *(ZHDPAppDataItem *appDataItem) {
-        return appDataItem.networkItems.copy;
-    }];
-}
-- (NSArray <ZHDPListSecItem *> *)fetchAllAppDataItems_im{
-    return [self fetchAllAppDataItems_module:^NSArray *(ZHDPAppDataItem *appDataItem) {
-        return appDataItem.imItems.copy;
-    }];
-}
-- (NSArray <ZHDPListSecItem *> *)fetchAllAppDataItems_storage{
-    return [self fetchAllAppDataItems_module:^NSArray *(ZHDPAppDataItem *appDataItem) {
-        return appDataItem.storageItems.copy;
-    }];
-}
-- (NSArray <ZHDPListSecItem *> *)fetchAllAppDataItems_memory{
-    return [self fetchAllAppDataItems_module:^NSArray *(ZHDPAppDataItem *appDataItem) {
-        return appDataItem.memoryItems.copy;
-    }];
 }
 
 // 查找某个应用的数据

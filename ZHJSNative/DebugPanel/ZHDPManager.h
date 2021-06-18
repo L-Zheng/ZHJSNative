@@ -12,6 +12,8 @@
 #import "ZHDPWindow.h"// 调试面板主窗口
 #import <JavaScriptCore/JavaScriptCore.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 typedef NS_ENUM(NSInteger, ZHDPManagerStatus) {
     ZHDPManagerStatus_Unknown     = 0,
     ZHDPManagerStatus_Open      = 1,
@@ -96,6 +98,7 @@ typedef NS_ENUM(NSInteger, ZHDPOutputColorType) {
 
 - (void)copySecItemToPasteboard:(ZHDPListSecItem *)secItem;
 
+- (NSArray <ZHDPListSecItem *> *)fetchAllAppDataItems:(Class)listClass;
 - (void)addSecItemToList:(Class)listClass appItem:(ZHDPAppItem *)appItem secItem:(ZHDPListSecItem *)secItem;
 - (void)removeSecItemsList:(Class)listClass secItems:(NSArray <ZHDPListSecItem *> *)secItems;
 - (void)clearSecItemsList:(Class)listClass appItem:(ZHDPAppItem *)appItem;
@@ -117,8 +120,13 @@ typedef NS_ENUM(NSInteger, ZHDPOutputColorType) {
 - (void)zh_test_reloadStorage;
 - (void)zh_test_reloadMemory;
 
+- (void)zh_test_addException:(NSString *)title stack:(NSString *)stack;
+
 @end
 
 __attribute__((unused)) static ZHDPManager * ZHDPMg() {
     return [ZHDPManager shareManager];
 }
+
+NS_ASSUME_NONNULL_END
+

@@ -14,6 +14,7 @@
 #import "ZHDPListStorage.h"// storage列表
 #import "ZHDPListMemory.h"// Memory列表
 #import "ZHDPListIM.h"// im列表
+#import "ZHDPListException.h"// Exception列表
 
 @interface ZHDPManager (){
     CFURLRef _originFontUrl;//注册字体Url
@@ -561,7 +562,40 @@
                     return appDataItem.imSpaceItem;
                 }
         },
+        NSStringFromClass(ZHDPListException.class): @{
+                itemsKey: ^NSMutableArray *(ZHDPAppDataItem *appDataItem){
+                    return appDataItem.exceptionItems;
+                },
+                spaceKey: ^ZHDPDataSpaceItem *(ZHDPAppDataItem *appDataItem){
+                    return appDataItem.exceptionSpaceItem;
+                }
+        }
     };
+}
+
+- (NSArray <ZHDPListSecItem *> *)fetchAllAppDataItems:(Class)listClass{
+    ZHDPManager *dpMg = ZHDPMg();
+    
+    NSDictionary *map = [dpMg opSecItemsMap];
+    NSMutableArray * (^itemsBlock) (ZHDPAppDataItem *) = [[map objectForKey:NSStringFromClass(listClass)] objectForKey:[dpMg opSecItemsMapKey_items]];
+    
+    if (!itemsBlock) return nil;
+    
+    NSMutableArray *res = [NSMutableArray array];
+    NSArray <ZHDPAppDataItem *> *appDataItems = [dpMg.dataTask fetchAllAppDataItems];
+    for (ZHDPAppDataItem *appDataItem in appDataItems) {
+        [res addObjectsFromArray:itemsBlock(appDataItem).copy];
+    }
+    // 按照进入内存的时间 升序排列
+    [res sortUsingComparator:^NSComparisonResult(ZHDPListSecItem *obj1, ZHDPListSecItem  *obj2) {
+        if (obj1.enterMemoryTime > obj2.enterMemoryTime) {
+            return NSOrderedDescending;
+        }else if (obj1.enterMemoryTime < obj2.enterMemoryTime){
+            return NSOrderedAscending;
+        }
+        return NSOrderedSame;
+    }];
+    return res.copy;
 }
 // self.window  window一旦创建就会自动显示在屏幕上
 // 如果当前列表正在显示，刷新列表
@@ -1326,6 +1360,101 @@ static id _instance;
     };
     // 添加数据
     [self addSecItemToList:ZHDPListMemory.class appItem:appItem secItem:secItem];
+}
+
+- (void)zh_test_addException:(NSString *)title stack:(NSString *)stack{
+    if (!title || ![title isKindOfClass:NSString.class] || title.length == 0) {
+        return;
+    }
+    dispatch_async(dispatch_get_main_queue(), ^{
+        ZHDPOutputColorType type = ZHDPOutputColorType_Error;
+        [self zh_test_addExceptionSafe:@"App" colorType:type args:@[title] stack:stack];
+    });
+}
+- (void)zh_test_addExceptionSafe:(NSString *)appId colorType:(ZHDPOutputColorType)colorType args:(NSArray *)args stack:(NSString *)stack{
+    ZHDPManager *dpMg = ZHDPMg();
+    
+    if (dpMg.status != ZHDPManagerStatus_Open) {
+        return;
+    }
+    
+    if (!args || args.count <= 0) {
+        return;
+    }
+    
+    // 哪个应用的数据
+    ZHDPAppItem *appItem = [[ZHDPAppItem alloc] init];
+    appItem.appId = appId ?: @"App";
+    appItem.appName = @"App";
+    
+    // 内容
+    NSInteger count = args.count;
+    CGFloat datePercent = [dpMg dateW] / [dpMg basicW];
+    CGFloat freeW = ([dpMg basicW] - ([dpMg marginW] * (count + 1 + 1)) - [dpMg dateW]) * 1.0 / (count * 1.0);
+    CGFloat otherPercent = freeW / [dpMg basicW];
+    
+    // 每一行中的各个分段数据
+    NSMutableArray <ZHDPListColItem *> *colItems = [NSMutableArray array];
+    NSMutableArray <ZHDPListDetailItem *> *detailItems = [NSMutableArray array];
+    NSMutableArray *descs = [NSMutableArray array];
+    
+    // 添加时间
+    CGFloat X = [dpMg marginW];
+    NSString *dateStr = [[dpMg dateFormat] stringFromDate:[NSDate date]];
+    ZHDPListColItem *colItem = [self createColItem:dateStr percent:datePercent X:X colorType:colorType];
+    [colItems addObject:colItem];
+    X += (colItem.rectValue.CGRectValue.size.width + [dpMg marginW]);
+    
+    for (NSUInteger i = 0; i < count; i++) {
+        NSString *title = args[i];
+        
+        __block NSString *concise = nil;
+        __block NSString *detail = nil;
+        [dpMg convertToString:title block:^(NSString *conciseStr, NSString *detailStr) {
+            concise = conciseStr;
+            detail = detailStr;
+        }];
+        // 添加参数
+        colItem = [self createColItem:detail percent:otherPercent X:X colorType:colorType];
+        [colItems addObject:colItem];
+        X += (colItem.rectValue.CGRectValue.size.width + [dpMg marginW]);
+        
+        [descs addObject:detail?:@""];
+    }
+    
+    // 弹窗详情数据
+    ZHDPListDetailItem *item = [[ZHDPListDetailItem alloc] init];
+    item.title = @"简要";
+    item.content = [dpMg createDetailAttStr:@[@"message: \n"] descs:descs];
+    [detailItems addObject:item];
+    
+    item = [[ZHDPListDetailItem alloc] init];
+    item.title = @"调用栈";
+    item.content = [dpMg createDetailAttStr:@[@"stacktrace: \n"] descs:@[stack?:@""]];
+    [detailItems addObject:item];
+        
+    // 每一组中的每行数据
+    ZHDPListRowItem *rowItem = [[ZHDPListRowItem alloc] init];
+    rowItem.colItems = colItems.copy;
+    
+    // 每一组数据
+    ZHDPListSecItem *secItem = [[ZHDPListSecItem alloc] init];
+    secItem.enterMemoryTime = [[NSDate date] timeIntervalSince1970];
+    secItem.open = YES;
+    secItem.colItems = @[];
+    secItem.rowItems = @[rowItem];
+    secItem.detailItems = detailItems.copy;
+    secItem.pasteboardBlock = ^NSString *{
+        NSMutableString *str = [NSMutableString string];
+        [str appendString:dateStr];
+        for (ZHDPListDetailItem *item in detailItems) {
+            [str appendFormat:@"\n\n%@:\n%@", item.title, item.content.string];
+        }
+        return str;
+    };
+    
+    // 添加数据
+    [self addSecItemToList:ZHDPListException.class appItem:appItem secItem:secItem];
 }
 @end
 

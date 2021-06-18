@@ -13,6 +13,7 @@
 #import "ZHDPListStorage.h"// storage列表
 #import "ZHDPListMemory.h"// Memory列表
 #import "ZHDPListIM.h"// im列表
+#import "ZHDPListException.h"// Exception列表
 
 @interface ZHDPContent ()
 @property (nonatomic, strong) ZHDPListLog *logList;
@@ -20,6 +21,7 @@
 @property (nonatomic, strong) ZHDPListIM *imList;
 @property (nonatomic, strong) ZHDPListStorage *storageList;
 @property (nonatomic, strong) ZHDPListMemory *memoryList;
+@property (nonatomic, strong) ZHDPListException *exceptionList;
 @end
 
 @implementation ZHDPContent
@@ -52,7 +54,7 @@
 #pragma mark - lists
 
 - (NSArray <ZHDPList *> *)allLists{
-    return @[self.logList, self.networkList, self.storageList, self.memoryList, self.imList];
+    return @[self.logList, self.networkList, self.storageList, self.memoryList, self.exceptionList, self.imList];
 }
 - (void)selectList:(ZHDPList *)list{
     if (!list || [self.selectList isEqual:list]) return;
@@ -109,6 +111,13 @@
         _memoryList.item = [ZHDPListItem itemWithTitle:@"Memory"];
     }
     return _memoryList;
+}
+- (ZHDPListException *)exceptionList{
+    if (!_exceptionList) {
+        _exceptionList = [[ZHDPListException alloc] initWithFrame:CGRectZero];
+        _exceptionList.item = [ZHDPListItem itemWithTitle:@"Exception"];
+    }
+    return _exceptionList;
 }
 
 @end

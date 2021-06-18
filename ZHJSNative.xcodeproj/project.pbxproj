@@ -106,6 +106,7 @@
 		85CEEC882660DA8E004467F1 /* ZHDPListOprate.m in Sources */ = {isa = PBXBuildFile; fileRef = 85CEEC872660DA8E004467F1 /* ZHDPListOprate.m */; };
 		85CEEC8B2660EAA9004467F1 /* ZHDPListSearch.m in Sources */ = {isa = PBXBuildFile; fileRef = 85CEEC8A2660EAA9004467F1 /* ZHDPListSearch.m */; };
 		85CEEC8F2660FA6F004467F1 /* ZHDPListApps.m in Sources */ = {isa = PBXBuildFile; fileRef = 85CEEC8E2660FA6F004467F1 /* ZHDPListApps.m */; };
+		85EE2850267C94C100B9C0DD /* ZHDPListException.m in Sources */ = {isa = PBXBuildFile; fileRef = 85EE284F267C94C100B9C0DD /* ZHDPListException.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -300,6 +301,8 @@
 		85CEEC8A2660EAA9004467F1 /* ZHDPListSearch.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHDPListSearch.m; sourceTree = "<group>"; };
 		85CEEC8D2660FA6F004467F1 /* ZHDPListApps.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHDPListApps.h; sourceTree = "<group>"; };
 		85CEEC8E2660FA6F004467F1 /* ZHDPListApps.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHDPListApps.m; sourceTree = "<group>"; };
+		85EE284E267C94C100B9C0DD /* ZHDPListException.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHDPListException.h; sourceTree = "<group>"; };
+		85EE284F267C94C100B9C0DD /* ZHDPListException.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHDPListException.m; sourceTree = "<group>"; };
 		E56B9B5085C846D362800AF3 /* Pods-ZHJSNative.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ZHJSNative.release.xcconfig"; path = "Target Support Files/Pods-ZHJSNative/Pods-ZHJSNative.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -592,6 +595,8 @@
 				85118B6C265E4FB3002BDFC9 /* ZHDPListStorage.m */,
 				853700EE267A0AD300544D93 /* ZHDPListMemory.h */,
 				853700EF267A0AD300544D93 /* ZHDPListMemory.m */,
+				85EE284E267C94C100B9C0DD /* ZHDPListException.h */,
+				85EE284F267C94C100B9C0DD /* ZHDPListException.m */,
 			);
 			path = SubList;
 			sourceTree = "<group>";
@@ -981,6 +986,7 @@
 				85B578F5263535EB0078281E /* ZHJSWebTestController.m in Sources */,
 				85118B4F265E4233002BDFC9 /* ZHDebugPanel.m in Sources */,
 				0FCF2D1F260EEEC9003797EF /* ZHCtxLoadConfig.m in Sources */,
+				85EE2850267C94C100B9C0DD /* ZHDPListException.m in Sources */,
 				85CEEC8F2660FA6F004467F1 /* ZHDPListApps.m in Sources */,
 				85118B74265E566C002BDFC9 /* ZHDPListHeader.m in Sources */,
 				851B127F2661F0BC00FA3AA3 /* ZHDPListDetail.m in Sources */,
