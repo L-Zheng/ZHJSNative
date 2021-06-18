@@ -169,18 +169,21 @@
     self.frame = CGRectMake(X, Y, W, H);
 }
 - (void)show{
+    [ZHDPMg().window enableDebugPanel:NO];
     [super show];
-    [self doAnimation:^{
+    [ZHDPMg() doAnimation:^{
         [self updateFrame];
     } completion:^(BOOL finished) {
-        
+        [ZHDPMg().window enableDebugPanel:YES];
     }];
 }
-- (void)hide{    
+- (void)hide{
+    [ZHDPMg().window enableDebugPanel:NO];
     [super hide];
-    [self doAnimation:^{
+    [ZHDPMg() doAnimation:^{
         [self updateFrame];
     } completion:^(BOOL finished) {
+        [ZHDPMg().window enableDebugPanel:YES];
     }];
 }
 - (BOOL)allowMaskWhenShow{

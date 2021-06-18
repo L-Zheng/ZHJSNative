@@ -82,7 +82,7 @@
         [self.bgBtn removeFromSuperview];
         [self.list insertSubview:self.bgBtn belowSubview:self];
         self.bgBtn.alpha = 0.0;
-        [self doAnimation:^{
+        [ZHDPMg() doAnimation:^{
             self.bgBtn.alpha = 0.3;
         } completion:^(BOOL finished) {
             
@@ -95,7 +95,7 @@
     self.arrowBtn.selected = NO;
     [self updateArrowBtnFrame];
 
-    [self doAnimation:^{
+    [ZHDPMg() doAnimation:^{
         self.bgBtn.alpha = 0.0;
     } completion:^(BOOL finished) {
         [self.bgBtn removeFromSuperview];
@@ -116,9 +116,6 @@
 - (void)reloadListFrequently{
     [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(reloadList) object:nil];
     [self performSelector:@selector(reloadList) withObject:nil afterDelay:0.25];
-}
-- (void)doAnimation:(void (^)(void))animation completion:(void (^ __nullable)(BOOL finished))completion{
-    [UIView animateWithDuration:0.25 animations:animation completion:completion];
 }
 
 #pragma mark - config

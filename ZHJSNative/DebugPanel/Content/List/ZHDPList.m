@@ -90,28 +90,6 @@ typedef NS_ENUM(NSInteger, ZHDPScrollStatus) {
     [self addSubview:self.oprate];
     [self relaodOprate];
 }
-- (void)configScrollAuto{
-    CGFloat listH = self.tableView.frame.size.height;
-    CGFloat listOffSetY = self.tableView.contentOffset.y;
-    CGFloat listContentH = self.tableView.contentSize.height;
-    
-    if (listContentH <= 0 || listH <= 0) {
-        self.allowScrollAuto = YES;
-        [self scrollListToBottom:NO];
-        return;
-    }
-    if (listContentH < listH) {
-        self.allowScrollAuto = YES;
-        [self scrollListToBottom:NO];
-        return;
-    }
-    if (listOffSetY >= listContentH - listH - 10) {
-        self.allowScrollAuto = YES;
-        [self scrollListToBottom:NO];
-        return;
-    }
-    self.allowScrollAuto = NO;
-}
 
 #pragma mark - search
 
@@ -180,7 +158,7 @@ typedef NS_ENUM(NSInteger, ZHDPScrollStatus) {
     if (self.search.frame.size.height > 0) {
         return;
     }
-    [UIView animateWithDuration:0.25 animations:^{
+    [ZHDPMg() doAnimation:^{
         self.searchH = 40;
         [self updateSearchFrame];
     } completion:^(BOOL finished) {
@@ -196,7 +174,7 @@ typedef NS_ENUM(NSInteger, ZHDPScrollStatus) {
     }
     [self.search resignFirstResponder];
     self.searchH = 0;
-    [UIView animateWithDuration:0.25 animations:^{
+    [ZHDPMg() doAnimation:^{
         [self updateSearchFrame];
     } completion:^(BOOL finished) {
         [self reloadListWhenCloseSearch];
@@ -291,10 +269,8 @@ typedef NS_ENUM(NSInteger, ZHDPScrollStatus) {
 
 #pragma mark - reload
 
-- (void)setScrollStatus:(ZHDPScrollStatus)scrollStatus{
-    _scrollStatus = scrollStatus;
-    
-    if (scrollStatus != ZHDPScrollStatus_Idle) return;
+- (void)updateSecItemWhenScrollEnd{
+    if (self.scrollStatus != ZHDPScrollStatus_Idle) return;
     
     NSArray *arr = self.items_temp.copy;
     if (arr.count <= 0) return;
@@ -384,43 +360,60 @@ typedef NS_ENUM(NSInteger, ZHDPScrollStatus) {
         return;
     }
     
-    CGFloat listH = self.tableView.frame.size.height;
-//    CGFloat listOffSetY = self.tableView.contentOffset.y;
-    CGFloat listContentH = self.tableView.contentSize.height;
-    
-    if (listContentH <= 0 || listH <= 0) {
-        [self.tableView reloadData];
-        return;
-    }
-    if (listContentH < listH) {
-        [self.tableView reloadData];
-        return;
-    }
-    
     [self.tableView reloadData];
     [self scrollListToBottomAuto];
 }
 
+#pragma mark - scroll
+
+- (void)updateScrollAuto{
+    if (self.scrollStatus != ZHDPScrollStatus_Idle) {
+        self.allowScrollAuto = NO;
+        return;
+    }
+    
+    CGFloat listH = self.tableView.frame.size.height;
+    CGFloat listOffSetY = self.tableView.contentOffset.y;
+    CGFloat listContentH = self.tableView.contentSize.height;
+    
+    if (listContentH <= 0 || listH <= 0) {
+        self.allowScrollAuto = YES;
+        return;
+    }
+    if (listContentH <= listH) {
+        self.allowScrollAuto = YES;
+        return;
+    }
+    if (listOffSetY >= listContentH - listH - 10) {
+        self.allowScrollAuto = YES;
+        return;
+    }
+    self.allowScrollAuto = NO;
+}
 - (void)scrollListToBottomAuto{
-    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(scrollListToBottomAutoInternal) object:nil];
-    [self performSelector:@selector(scrollListToBottomAutoInternal) withObject:nil afterDelay:0.3];
+    [self cancelScrollEvent];
+    [self performSelector:@selector(scrollListToBottomAutoInternal) withObject:nil afterDelay:0.25];
 }
 - (void)scrollListToBottomAutoInternal{
-    if (!self.allowScrollAuto) return;
-    [self scrollListToBottom:YES];
+    if (!self.allowScrollAuto || self.scrollStatus != ZHDPScrollStatus_Idle) return;
+    [self scrollListToBottomInstant];
 }
 - (void)scrollListToBottomCode{
-    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(scrollListToBottomAutoInternal) object:nil];
-    [self scrollListToBottom:YES];
+    [self cancelScrollEvent];
+    [self performSelector:@selector(scrollListToBottomInstant) withObject:nil afterDelay:0.25];
 }
-- (void)scrollListToBottom:(BOOL)animated{
+- (void)scrollListToBottomInstant{
+    self.allowScrollAuto = YES;
+    
     if (self.items.count <= 0) return;
-
+    
+    BOOL animated = YES;
+    
     ZHDPListSecItem *secItem = self.items.lastObject;
-    NSInteger row = (secItem.isOpen ? (secItem.rowItems.count > 0 ? secItem.rowItems.count - 1 : -1) : -1);
+    NSInteger rows = (secItem.isOpen ? secItem.rowItems.count : 0);
     NSInteger sec = self.items.count - 1;
-    if (row >= 0) {
-        [self.tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:row inSection:sec] atScrollPosition:UITableViewScrollPositionBottom animated:animated];
+    if (rows > 0) {
+        [self.tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:rows - 1 inSection:sec] atScrollPosition:UITableViewScrollPositionBottom animated:animated];
     }else{
         CGFloat listH = self.tableView.frame.size.height;
         CGFloat listContentH = self.tableView.contentSize.height;
@@ -434,12 +427,40 @@ typedef NS_ENUM(NSInteger, ZHDPScrollStatus) {
 }
 
 - (void)scrollListToTopCode{
-    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(scrollListToBottomAutoInternal) object:nil];
-    [self scrollListToTop];
+    [self cancelScrollEvent];
+    [self performSelector:@selector(scrollListToTopInstant) withObject:nil afterDelay:0.25];
 }
-- (void)scrollListToTop{
+- (void)scrollListToTopInstant{
     if (self.items.count <= 0) return;
-    [self.tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0] atScrollPosition:UITableViewScrollPositionTop animated:YES];
+    
+    BOOL animated = YES;
+    
+    ZHDPListSecItem *secItem = self.items.firstObject;
+    NSInteger rows = (secItem.isOpen ? secItem.rowItems.count : 0);
+    if (rows > 0) {
+        [self.tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0] atScrollPosition:UITableViewScrollPositionTop animated:animated];
+    }else{
+        // list 总行数为0  不能调用函数scrollToRowAtIndexPath滚动
+        [self.tableView setContentOffset:CGPointMake(0, 0) animated:animated];
+    }
+    
+    CGFloat listH = self.tableView.frame.size.height;
+    CGFloat listContentH = self.tableView.contentSize.height;
+    
+    if (listContentH <= 0 || listH <= 0) {
+        self.allowScrollAuto = YES;
+        return;
+    }
+    if (listContentH <= listH) {
+        self.allowScrollAuto = YES;
+        return;
+    }
+    self.allowScrollAuto = NO;
+}
+- (void)cancelScrollEvent{
+    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(scrollListToBottomAutoInternal) object:nil];
+    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(scrollListToTopInstant) object:nil];
+    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(scrollListToBottomInstant) object:nil];
 }
 
 #pragma mark - UITableViewDelegate
@@ -496,33 +517,37 @@ typedef NS_ENUM(NSInteger, ZHDPScrollStatus) {
 // 将要开始拖拽
 - (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView{
     self.scrollStatus = ZHDPScrollStatus_Dragging;
+    [self updateScrollAuto];
 }
 // 将要结束拖拽
 - (void)scrollViewWillEndDragging:(UIScrollView *)scrollView withVelocity:(CGPoint)velocity targetContentOffset:(inout CGPoint *)targetContentOffset{
     self.scrollStatus = ZHDPScrollStatus_Dragging;
+    [self updateScrollAuto];
 }
 // 结束拖拽
 - (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate{
     self.scrollStatus = decelerate ? ZHDPScrollStatus_DraggingDecelerate : ZHDPScrollStatus_Idle;
+    [self updateScrollAuto];
     if (!decelerate) {
-        [self configScrollAuto];
+        [self updateSecItemWhenScrollEnd];
     }
 //    NSLog(@"%s",__func__);
 }
-// 将要开始减速
+// 将要开始减速（手指拖动才会调用）
 - (void)scrollViewWillBeginDecelerating:(UIScrollView *)scrollView{
     self.scrollStatus = ZHDPScrollStatus_DraggingDecelerate;
 //    NSLog(@"%s",__func__);
 }
-// 完成减速
+// 完成减速（手指拖动才会调用）
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView{
-    [self configScrollAuto];
     self.scrollStatus = ZHDPScrollStatus_Idle;
+    [self updateScrollAuto];
+    [self updateSecItemWhenScrollEnd];
 //    NSLog(@"%s",__func__);
 }
 // called when setContentOffset/scrollRectVisible:animated: finishes. not called if not animating
 - (void)scrollViewDidEndScrollingAnimation:(UIScrollView *)scrollView{
-    [self configScrollAuto];
+//    [self updateScrollAuto];
 //    NSLog(@"%s",__func__);
 }
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView{

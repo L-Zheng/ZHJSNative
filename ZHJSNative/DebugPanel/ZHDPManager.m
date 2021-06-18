@@ -62,6 +62,22 @@
     return [str boundingRectWithSize:CGSizeMake(basicW, CGFLOAT_MAX) options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName: [self defaultFont]} context:nil].size.width;
 }
 
+#pragma mark - animate
+
+- (void)doAnimation:(void (^)(void))animation completion:(void (^ __nullable)(BOOL finished))completion{
+//    BOOL isHaveWindow = (_window ? YES : NO);
+//    if (isHaveWindow) {
+//        [self.window enableDebugPanel:NO];
+//    }
+//    __weak __typeof__(self) weakSelf = self;
+    [UIView animateWithDuration:0.20 animations:animation completion:^(BOOL finished) {
+        if (completion) completion(finished);
+//        if (isHaveWindow) {
+//            [weakSelf.window enableDebugPanel:YES];
+//        }
+    }];
+}
+
 #pragma mark - open close
 
 - (void)openOnlyFunction{

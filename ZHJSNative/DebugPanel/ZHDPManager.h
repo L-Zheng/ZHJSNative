@@ -46,6 +46,10 @@ typedef NS_ENUM(NSInteger, ZHDPOutputColorType) {
 - (NSDateFormatter *)dateFormat;
 - (CGFloat)dateW;
 
+#pragma mark - animate
+
+- (void)doAnimation:(void (^)(void))animation completion:(void (^ __nullable)(BOOL finished))completion;
+
 #pragma mark - open close
 
 - (void)open;

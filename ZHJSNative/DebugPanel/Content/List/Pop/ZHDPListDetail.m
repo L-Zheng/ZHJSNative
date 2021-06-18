@@ -107,10 +107,13 @@
         return;
     }
     
+    [ZHDPMg().window enableDebugPanel:NO];
+    
     if ([self isShow]) {
         if (![self.secItem isEqual:secItem]) {
             [self reloadWithSecItem:secItem];
         }
+        [ZHDPMg().window enableDebugPanel:YES];
         return;
     }
     
@@ -126,20 +129,22 @@
     [self.list addSubview:self];
     [self reloadWithSecItem:secItem];
     
-    [ZHDPMg().window enableDebugPanel:NO];
     [super show];
-    [self doAnimation:^{
+    [ZHDPMg() doAnimation:^{
         [self updateFrame];
     } completion:^(BOOL finished) {
         [ZHDPMg().window enableDebugPanel:YES];
     }];
 }
 - (void)hide{
-    if (![self isShow]) return;
-    
     [ZHDPMg().window enableDebugPanel:NO];
+    if (![self isShow]) {
+        [ZHDPMg().window enableDebugPanel:YES];
+        return;
+    }
+    
     [super hide];
-    [self doAnimation:^{
+    [ZHDPMg() doAnimation:^{
         [self updateFrame];
     } completion:^(BOOL finished) {
         self.secItem = nil;

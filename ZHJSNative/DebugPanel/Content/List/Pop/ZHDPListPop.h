@@ -41,5 +41,4 @@
 - (BOOL)isShow;
 - (void)reloadListInstant;
 - (void)reloadListFrequently;
-- (void)doAnimation:(void (^)(void))animation completion:(void (^ __nullable)(BOOL finished))completion;
 @end

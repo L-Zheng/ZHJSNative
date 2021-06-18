@@ -92,7 +92,11 @@
     self.frame = CGRectMake(X, Y, W, H);
 }
 - (void)show{
-    if ([self isShow]) return;
+    [ZHDPMg().window enableDebugPanel:NO];
+    if ([self isShow]) {
+        [ZHDPMg().window enableDebugPanel:YES];
+        return;
+    }
     
     CGFloat superW = self.list.bounds.size.width;
     CGFloat superH = self.list.bounds.size.height;
@@ -108,19 +112,25 @@
     [self reloadSecItems];
     
     [super show];
-    [self doAnimation:^{
+    [ZHDPMg() doAnimation:^{
         [self updateFrame];
     } completion:^(BOOL finished) {
+        [ZHDPMg().window enableDebugPanel:YES];
     }];
 }
 - (void)hide{
-    if (![self isShow]) return;
+    [ZHDPMg().window enableDebugPanel:NO];
+    if (![self isShow]) {
+        [ZHDPMg().window enableDebugPanel:YES];
+        return;
+    }
     
     [super hide];
-    [self doAnimation:^{
+    [ZHDPMg() doAnimation:^{
         [self updateFrame];
     } completion:^(BOOL finished) {
         [self removeFromSuperview];
+        [ZHDPMg().window enableDebugPanel:YES];
     }];
 }
 - (BOOL)allowMaskWhenShow{
