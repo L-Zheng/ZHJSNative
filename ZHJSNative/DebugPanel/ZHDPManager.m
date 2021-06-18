@@ -462,6 +462,44 @@
     
     return colItem;
 }
+- (id)parseDataFromRequestBody:(NSData *)data{
+    if (!data || ![data isKindOfClass:NSData.class]) {
+        return nil;
+    }
+    id res = nil;
+    // 尝试json解析
+    @try {
+        res = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingFragmentsAllowed error:nil];
+    } @catch (NSException *exception) {
+    } @finally {
+    }
+    if (res) return res;
+    
+    // 尝试string解析
+    @try {
+        res = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+    } @catch (NSException *exception) {
+    } @finally {
+    }
+    
+    if (!res || ![res isKindOfClass:NSString.class] || ((NSString *)res).length == 0) {
+        return nil;
+    }
+    
+    // 转json
+    NSURLComponents *comp = [[NSURLComponents alloc] init];
+    comp.query = res;
+    res = [NSMutableDictionary dictionary];
+    for (NSURLQueryItem *item in comp.queryItems) {
+        if (item.name.length && item.value.length) {
+            [res setObject:item.value forKey:item.name];
+        }
+    }
+    if (res && [res isKindOfClass:NSDictionary.class] && ((NSDictionary *)res).allKeys.count > 0) {
+        return ((NSDictionary *)res).copy;
+    }
+    return nil;
+}
 
 - (void)copySecItemToPasteboard:(ZHDPListSecItem *)secItem{
     if (secItem.pasteboardBlock) {
@@ -876,36 +914,19 @@ static id _instance;
     NSURL *url = request.URL;
     NSDictionary *headers = request.allHTTPHeaderFields;
     NSDictionary *responseHeaders = httpResponse.allHeaderFields;
-    NSData *requestBody = request.HTTPBody;
-    NSData *requestBodyStream = [dpMg.networkTask convertToDataByInputStream:request.HTTPBodyStream];
+    NSDictionary *paramsInBody = [self parseDataFromRequestBody:request.HTTPBody];
+    NSDictionary *paramsInBodyStream = [self parseDataFromRequestBody:[dpMg.networkTask convertToDataByInputStream:request.HTTPBodyStream]];
     NSString *urlStr = url.absoluteString;
     NSString *host = [request valueForHTTPHeaderField:@"host"];
     if (host) {
         urlStr = [urlStr stringByReplacingOccurrencesOfString:request.URL.host withString:host];
     }
 
-    NSMutableDictionary *paramsInUrlStr = [NSMutableDictionary dictionary];
+    NSMutableDictionary *paramsInUrl = [NSMutableDictionary dictionary];
     NSURLComponents *comp = [NSURLComponents componentsWithString:urlStr];
     for (NSURLQueryItem *item in comp.queryItems) {
         if (item.name.length && item.value.length) {
-            [paramsInUrlStr setObject:item.value forKey:item.name];
-        }
-    }
-    
-    NSDictionary *paramsInUrlBody = nil;
-    if (requestBody) {
-        @try {
-            paramsInUrlBody = [NSJSONSerialization JSONObjectWithData:requestBody options:NSJSONReadingFragmentsAllowed error:nil];
-        } @catch (NSException *exception) {
-        } @finally {
-        }
-    }
-    NSDictionary *paramsInUrlBodyStream = nil;
-    if (requestBodyStream) {
-        @try {
-            paramsInUrlBodyStream = [NSJSONSerialization JSONObjectWithData:requestBodyStream options:NSJSONReadingFragmentsAllowed error:nil];
-        } @catch (NSException *exception) {
-        } @finally {
+            [paramsInUrl setObject:item.value forKey:item.name];
         }
     }
     
@@ -999,22 +1020,22 @@ static id _instance;
     titles = @[@"Request Query (In URL): \n", @"\nRequest Query (In Body): \n", @"\nRequest Query (In BodyStream): \n"];
     descs = @[
         (^NSString *(){
-            if (paramsInUrlStr.allKeys.count == 0) {
+            if (paramsInUrl.allKeys.count == 0) {
                 return @"";
             }
-            NSString *res = [[NSString alloc] initWithData:[NSJSONSerialization dataWithJSONObject:paramsInUrlStr options:NSJSONWritingPrettyPrinted error:nil] encoding:NSUTF8StringEncoding]?:@"";
+            NSString *res = [[NSString alloc] initWithData:[NSJSONSerialization dataWithJSONObject:paramsInUrl options:NSJSONWritingPrettyPrinted error:nil] encoding:NSUTF8StringEncoding]?:@"";
             return res?:@"";
         })(),
         (^NSString *(){
             __block NSString *res = nil;
-            [self convertToString:paramsInUrlBody block:^(NSString *conciseStr, NSString *detailStr) {
+            [self convertToString:paramsInBody block:^(NSString *conciseStr, NSString *detailStr) {
                 res = detailStr;
             }];
             return res?:@"";
         })(),
         (^NSString *(){
             __block NSString *res = nil;
-            [self convertToString:paramsInUrlBodyStream block:^(NSString *conciseStr, NSString *detailStr) {
+            [self convertToString:paramsInBodyStream block:^(NSString *conciseStr, NSString *detailStr) {
                 res = detailStr;
             }];
             return res?:@"";
