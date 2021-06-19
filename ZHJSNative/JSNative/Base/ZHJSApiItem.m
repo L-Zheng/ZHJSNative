@@ -181,7 +181,7 @@
     return ^ZHJSApiCallJsNativeResItem *(NSArray *args, BOOL alive){
         ZHJSApiCallJsArgItem *caItem = [ZHJSApiCallJsArgItem item];
         caItem.alive = alive;
-        caItem.jsFuncArgDatas = args;
+        caItem.jsFuncArgDatas = (args && [args isKindOfClass:NSArray.class]) ? args : @[];
         return __self.jsFuncArg_callArg(caItem);
     };
 }

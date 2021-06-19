@@ -223,6 +223,12 @@ var ZhengSendNative = function(params) {
 };
 var ZhengSendNativeSync = function(params) {
     var res = prompt(JSON.stringify(params));
+    if (ZhengJSType.isNull(res)) {
+        return undefined;
+    }
+    if (ZhengJSType.isString(res) && res.length == 0) {
+        return null;
+    }
     if (!res) return null;
     try {
         res = JSON.parse(res);
