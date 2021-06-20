@@ -802,7 +802,7 @@ case cType:{\
     if (funcId.length == 0) return;
     NSDictionary *sendParams = @{@"funcId": funcId, @"data": ((datas && [datas isKindOfClass:NSArray.class]) ? datas : @[]), @"alive": @(alive)};
     [self.webView postMessageToJs:self.fetchWebViewCallFuncName params:sendParams completionHandler:^(id res, NSError *error) {
-        if (callBack) callBack((!res || [res isEqual:[NSNull null]]) ? nil : res, error);
+        if (callBack) callBack(res, error);
     }];
 }
 

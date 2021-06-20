@@ -25,7 +25,7 @@
 }
 + (instancetype)item:(id)result error:(NSError *)error{
     ZHJSApiCallJsResItem *item = [self item];
-    item.result = result;
+    item.result = ((!result || [result isEqual:[NSNull null]]) ? nil : result);
     item.error = error;
     return item;
 }
