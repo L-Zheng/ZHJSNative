@@ -30,6 +30,7 @@ NS_ASSUME_NONNULL_BEGIN
 #pragma mark - sub class
 
 - (NSArray <ZHDPListSecItem *> *)fetchAllItems;
+- (NSString *)footerTipTitle;
 
 #pragma mark - reload
 

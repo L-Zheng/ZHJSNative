@@ -40,6 +40,8 @@ typedef NS_ENUM(NSInteger, ZHDPScrollStatus) {
 @property (nonatomic,strong) ZHDPListDetail *detail;
 
 @property (nonatomic,strong) ZHDPListOption *option;
+
+@property (nonatomic,strong) UILabel *tipLabel;
 @end
 
 @implementation ZHDPList
@@ -99,6 +101,7 @@ typedef NS_ENUM(NSInteger, ZHDPScrollStatus) {
     CGFloat optionH = 50;
     self.option.frame = CGRectMake(0, self.bounds.size.height - optionH, self.bounds.size.width, optionH);
     self.tableView.frame = CGRectMake(0, h, self.bounds.size.width, self.bounds.size.height - h - optionH);
+    self.tableView.tableFooterView.frame = CGRectMake(0, 0, self.tableView.frame.size.width, 44);
 }
 - (BOOL)verifyFilterCondition:(ZHDPListSecItem *)secItem{
     if (!secItem || ![secItem isKindOfClass:ZHDPListSecItem.class]) {
@@ -266,6 +269,9 @@ typedef NS_ENUM(NSInteger, ZHDPScrollStatus) {
 - (NSArray <ZHDPListSecItem *> *)fetchAllItems{
     return nil;
 }
+- (NSString *)footerTipTitle{
+    return @"暂无数据";
+}
 
 #pragma mark - reload
 
@@ -315,6 +321,7 @@ typedef NS_ENUM(NSInteger, ZHDPScrollStatus) {
 - (void)clearSecItems{
     if (self.items.count == 0) return;
     [self.items removeAllObjects];
+    self.allowScrollAuto = YES;
     [self reloadList];
 }
 - (void)removeSecItemFrequently{
@@ -355,6 +362,7 @@ typedef NS_ENUM(NSInteger, ZHDPScrollStatus) {
     [self performSelector:@selector(reloadList) withObject:nil afterDelay:0.25];
 }
 - (void)reloadList{
+    self.tableView.tableFooterView = (self.items.count <= 0 ? self.tipLabel : nil);
     if (!self.allowScrollAuto) {
         [self.tableView reloadData];
         return;
@@ -638,6 +646,19 @@ typedef NS_ENUM(NSInteger, ZHDPScrollStatus) {
         _option.list = self;
     }
     return _option;
+}
+- (UILabel *)tipLabel {
+    if (!_tipLabel) {
+        _tipLabel = [[UILabel alloc] initWithFrame:CGRectZero];
+        _tipLabel.font = [ZHDPMg() defaultFont];
+        _tipLabel.textAlignment = NSTextAlignmentCenter;
+        _tipLabel.text = [self footerTipTitle];
+        _tipLabel.numberOfLines = 0;
+        _tipLabel.textColor = [UIColor blackColor];
+        _tipLabel.backgroundColor = [UIColor clearColor];
+        _tipLabel.adjustsFontSizeToFitWidth = NO;
+    }
+    return _tipLabel;
 }
 
 @end

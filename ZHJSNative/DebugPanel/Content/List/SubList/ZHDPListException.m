@@ -16,5 +16,8 @@
 - (NSArray <ZHDPListSecItem *> *)fetchAllItems{
     return [ZHDPMg() fetchAllAppDataItems:self.class];
 }
+- (NSString *)footerTipTitle{
+    return [NSString stringWithFormat:@"%@\n将输出js运行异常信息【页面白屏、异常等】", [super footerTipTitle]];
+}
 
 @end
