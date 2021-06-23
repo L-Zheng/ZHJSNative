@@ -389,6 +389,22 @@
     }
     return [jsValue toObject];
 }
+- (NSString *)jsonToString:(id)json{
+    if (!json) {
+        return nil;
+    }
+    if ([json isKindOfClass:NSArray.class] || [json isKindOfClass:NSDictionary.class]) {
+        NSString *res = nil;
+        @try {
+            NSData *data = [NSJSONSerialization dataWithJSONObject:json options:NSJSONWritingPrettyPrinted error:nil];
+            res = (data ? [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] : nil);
+        } @catch (NSException *exception) {
+        } @finally {
+        }
+        return res;
+    }
+    return json;
+}
 - (void)convertToString:(id)title block:(void (^) (NSString *conciseStr, NSString *detailStr))block{
     if (!block) {
         return;
@@ -402,8 +418,7 @@
         return;
     }
     if ([title isKindOfClass:NSArray.class]) {
-        NSData *data = [NSJSONSerialization dataWithJSONObject:title options:NSJSONWritingPrettyPrinted error:nil];
-        block(@"[Object Array]", data ? [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] : @"[Object Array]");
+        block(@"[Object Array]", [self jsonToString:title] ?: @"[Object Array]");
         return;
     }
     if ([title isKindOfClass:NSNull.class]) {
@@ -419,8 +434,7 @@
         return;
     }
     if ([title isKindOfClass:NSDictionary.class]) {
-        NSData *data = [NSJSONSerialization dataWithJSONObject:title options:NSJSONWritingPrettyPrinted error:nil];
-        block(@"[Object Object]", data ? [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] : @"[Object Object]");
+        block(@"[Object Object]", [self jsonToString:title] ?: @"[Object Object]");
         return;
     }
     block([title description], [title description]);
@@ -1066,8 +1080,7 @@ static id _instance;
             if (paramsInUrl.allKeys.count == 0) {
                 return @"";
             }
-            NSString *res = [[NSString alloc] initWithData:[NSJSONSerialization dataWithJSONObject:paramsInUrl options:NSJSONWritingPrettyPrinted error:nil] encoding:NSUTF8StringEncoding]?:@"";
-            return res?:@"";
+            return [self jsonToString:paramsInUrl]?:@"";
         })(),
         (^NSString *(){
             __block NSString *res = nil;
@@ -1112,7 +1125,7 @@ static id _instance;
     item = [[ZHDPListDetailItem alloc] init];
     titles = @[@"Request Headers: \n"];
     descs = @[
-        [[NSString alloc] initWithData:[NSJSONSerialization dataWithJSONObject:headers?:@{} options:NSJSONWritingPrettyPrinted error:nil] encoding:NSUTF8StringEncoding]
+        [self jsonToString:headers?:@{}]?:@""
        ];
     item.title = @"请求头";
     item.content = [dpMg createDetailAttStr:titles descs:descs];
@@ -1121,7 +1134,7 @@ static id _instance;
     item = [[ZHDPListDetailItem alloc] init];
     titles = @[@"Response Headers: \n"];
     descs = @[
-        [[NSString alloc] initWithData:[NSJSONSerialization dataWithJSONObject:responseHeaders?:@{} options:NSJSONWritingPrettyPrinted error:nil] encoding:NSUTF8StringEncoding]
+        [self jsonToString:responseHeaders?:@{}]?:@"",
        ];
     item.title = @"响应头";
     item.content = [dpMg createDetailAttStr:titles descs:descs];
@@ -1130,7 +1143,8 @@ static id _instance;
     item = [[ZHDPListDetailItem alloc] init];
     item.title = @"小程序";
     titles = @[@"小程序信息: \n"].mutableCopy;
-    descs = @[[[NSString alloc] initWithData:[NSJSONSerialization dataWithJSONObject:@{@"appName": appItem.appName?:@"", @"appId": appItem.appId?:@""} options:NSJSONWritingPrettyPrinted error:nil] encoding:NSUTF8StringEncoding]?:@""].mutableCopy;
+        
+    descs = @[[self jsonToString:@{@"appName": appItem.appName?:@"", @"appId": appItem.appId?:@""}]?:@""].mutableCopy;
     item.content = [dpMg createDetailAttStr:titles descs:descs];
     [detailItems addObject:item];
     
