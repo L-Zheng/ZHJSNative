@@ -84,6 +84,8 @@
         item.title = list.item.title;
         item.selected = NO;
         item.list = list;
+        item.font = [UIFont systemFontOfSize:17];
+        item.fitWidth = [item.title boundingRectWithSize:CGSizeMake(CGFLOAT_MAX, self.option.frame.size.height) options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName: item.font} context:nil].size.width;
         
         [items addObject:item];
     }

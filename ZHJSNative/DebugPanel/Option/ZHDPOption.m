@@ -45,6 +45,7 @@
 
 - (void)configItem:(ZHDPOptionItem *)item{
     self.label.text = [NSString stringWithFormat:@"%@", item.title];
+    self.label.font = item.font;
     self.label.textColor = item.isSelected ? [ZHDPMg() selectColor] : [ZHDPMg() defaultColor];
     self.label.backgroundColor = item.isSelected ? [UIColor whiteColor] : [UIColor clearColor];
 }
@@ -53,6 +54,7 @@
     if (!_label) {
         _label = [[UILabel alloc] initWithFrame:CGRectZero];
         _label.textAlignment = NSTextAlignmentCenter;
+        _label.adjustsFontSizeToFitWidth = YES;
     }
     return _label;
 }
@@ -92,7 +94,7 @@
 - (void)layoutSubviews{
     [super layoutSubviews];
     
-    CGFloat W = 0;
+    CGFloat W = 40;
     CGFloat H = self.bounds.size.height;
     CGFloat Y = 0;
     CGFloat X = self.bounds.size.width - W;
@@ -102,10 +104,10 @@
     Y = 0;
     W = self.hideBtn.frame.origin.x - X;
     H = self.bounds.size.height;
-    UICollectionViewLayout *layout = self.collectionView.collectionViewLayout;
-    if ([layout isKindOfClass:UICollectionViewFlowLayout.class]) {
-        ((UICollectionViewFlowLayout *)layout).itemSize = CGSizeMake(80, H);
-    }
+//    UICollectionViewLayout *layout = self.collectionView.collectionViewLayout;
+//    if ([layout isKindOfClass:UICollectionViewFlowLayout.class]) {
+//        ((UICollectionViewFlowLayout *)layout).itemSize = CGSizeMake(80, H);
+//    }
     self.collectionView.frame = CGRectMake(X, Y, W, H);
     
     X = 0;
@@ -224,6 +226,10 @@
     ZHDPOptionItem *item = self.items[indexPath.item];
     [cell configItem:item];
     return cell;
+}
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath{
+    ZHDPOptionItem *item = self.items[indexPath.item];
+    return CGSizeMake(item.fitWidth + 2 * 8, self.bounds.size.height);
 }
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath{
     [collectionView deselectItemAtIndexPath:indexPath animated:YES];
