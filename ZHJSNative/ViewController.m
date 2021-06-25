@@ -11,7 +11,7 @@
 #import "ZHWebViewManager.h"
 #import "ZHDebugPanel.h"
 #import "ZHJSWebTestController.h"
-#import "ZHDPManager.h"
+#import <ZHDebugPanel/ZHDPManager.h>
 
 @interface ViewController ()<UITableViewDataSource,UITableViewDelegate>
 @property (nonatomic,strong) UITableView *tableView;

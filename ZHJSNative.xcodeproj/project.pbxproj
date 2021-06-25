@@ -58,28 +58,6 @@
 		0FCF2D31260EFF3C003797EF /* ZHJSApiListController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0FCF2D30260EFF3C003797EF /* ZHJSApiListController.m */; };
 		691B8C90D053DEAA69AFA968 /* libPods-ZHJSNative.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8307D4E4EB21B8BB3CAF8B7E /* libPods-ZHJSNative.a */; };
 		8505EC1524752EDB00628FD8 /* ZHCustomExtra1Api.m in Sources */ = {isa = PBXBuildFile; fileRef = 8505EC1424752EDB00628FD8 /* ZHCustomExtra1Api.m */; };
-		85118B47265E41C0002BDFC9 /* ZHDPOption.m in Sources */ = {isa = PBXBuildFile; fileRef = 85118B46265E41C0002BDFC9 /* ZHDPOption.m */; };
-		85118B4F265E4233002BDFC9 /* ZHDebugPanel.m in Sources */ = {isa = PBXBuildFile; fileRef = 85118B4E265E4233002BDFC9 /* ZHDebugPanel.m */; };
-		85118B53265E482A002BDFC9 /* ZHDPComponent.m in Sources */ = {isa = PBXBuildFile; fileRef = 85118B52265E482A002BDFC9 /* ZHDPComponent.m */; };
-		85118B57265E4E8F002BDFC9 /* ZHDPContent.m in Sources */ = {isa = PBXBuildFile; fileRef = 85118B56265E4E8F002BDFC9 /* ZHDPContent.m */; };
-		85118B5B265E4EF8002BDFC9 /* ZHDPList.m in Sources */ = {isa = PBXBuildFile; fileRef = 85118B5A265E4EF8002BDFC9 /* ZHDPList.m */; };
-		85118B61265E4F7E002BDFC9 /* ZHDPListLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 85118B60265E4F7E002BDFC9 /* ZHDPListLog.m */; };
-		85118B67265E4F97002BDFC9 /* ZHDPListNetwork.m in Sources */ = {isa = PBXBuildFile; fileRef = 85118B66265E4F97002BDFC9 /* ZHDPListNetwork.m */; };
-		85118B6A265E4FAA002BDFC9 /* ZHDPListIM.m in Sources */ = {isa = PBXBuildFile; fileRef = 85118B69265E4FAA002BDFC9 /* ZHDPListIM.m */; };
-		85118B6D265E4FB3002BDFC9 /* ZHDPListStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = 85118B6C265E4FB3002BDFC9 /* ZHDPListStorage.m */; };
-		85118B74265E566C002BDFC9 /* ZHDPListHeader.m in Sources */ = {isa = PBXBuildFile; fileRef = 85118B73265E566C002BDFC9 /* ZHDPListHeader.m */; };
-		85118B77265E5681002BDFC9 /* ZHDPListCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 85118B76265E5681002BDFC9 /* ZHDPListCell.m */; };
-		851B127F2661F0BC00FA3AA3 /* ZHDPListDetail.m in Sources */ = {isa = PBXBuildFile; fileRef = 851B127E2661F0BC00FA3AA3 /* ZHDPListDetail.m */; };
-		851B1290266229D100FA3AA3 /* iconfont.js in Resources */ = {isa = PBXBuildFile; fileRef = 851B1288266229D100FA3AA3 /* iconfont.js */; };
-		851B1291266229D100FA3AA3 /* demo.css in Resources */ = {isa = PBXBuildFile; fileRef = 851B1289266229D100FA3AA3 /* demo.css */; };
-		851B1292266229D100FA3AA3 /* iconfont.json in Resources */ = {isa = PBXBuildFile; fileRef = 851B128A266229D100FA3AA3 /* iconfont.json */; };
-		851B1293266229D100FA3AA3 /* iconfont.woff in Resources */ = {isa = PBXBuildFile; fileRef = 851B128B266229D100FA3AA3 /* iconfont.woff */; };
-		851B1294266229D100FA3AA3 /* iconfont.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 851B128C266229D100FA3AA3 /* iconfont.ttf */; };
-		851B1295266229D100FA3AA3 /* demo_index.html in Resources */ = {isa = PBXBuildFile; fileRef = 851B128D266229D100FA3AA3 /* demo_index.html */; };
-		851B1296266229D100FA3AA3 /* iconfont.woff2 in Resources */ = {isa = PBXBuildFile; fileRef = 851B128E266229D100FA3AA3 /* iconfont.woff2 */; };
-		851B1297266229D100FA3AA3 /* iconfont.css in Resources */ = {isa = PBXBuildFile; fileRef = 851B128F266229D100FA3AA3 /* iconfont.css */; };
-		851B129A2662390300FA3AA3 /* ZHDPListPop.m in Sources */ = {isa = PBXBuildFile; fileRef = 851B12992662390300FA3AA3 /* ZHDPListPop.m */; };
-		853700F0267A0AD300544D93 /* ZHDPListMemory.m in Sources */ = {isa = PBXBuildFile; fileRef = 853700EF267A0AD300544D93 /* ZHDPListMemory.m */; };
 		8539A2E3246E9C2800FD7EFB /* ZHCustom2Api.m in Sources */ = {isa = PBXBuildFile; fileRef = 8539A2E2246E9C2800FD7EFB /* ZHCustom2Api.m */; };
 		856980822429E0F50042755A /* ZHCustomApi.m in Sources */ = {isa = PBXBuildFile; fileRef = 856980812429E0F50042755A /* ZHCustomApi.m */; };
 		8581BA95258F2579004E25DC /* NSError+ZH.m in Sources */ = {isa = PBXBuildFile; fileRef = 8581BA94258F2579004E25DC /* NSError+ZH.m */; };
@@ -90,23 +68,11 @@
 		8581BAC5258F3795004E25DC /* ZHJSInCtxFundApi.m in Sources */ = {isa = PBXBuildFile; fileRef = 8581BAC4258F3795004E25DC /* ZHJSInCtxFundApi.m */; };
 		8582282425AD97BF00FECFB9 /* ZHJSPageItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 8582282325AD97BF00FECFB9 /* ZHJSPageItem.m */; };
 		85929110265B6E8C004EA584 /* ZHJSDebugManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 8592910F265B6E8C004EA584 /* ZHJSDebugManager.m */; };
-		85958052267AEB4B0079EFBE /* ZHDPListOption.m in Sources */ = {isa = PBXBuildFile; fileRef = 85958051267AEB4B0079EFBE /* ZHDPListOption.m */; };
-		859BE97D2668D369003C02DE /* ZHDPNetworkTask.m in Sources */ = {isa = PBXBuildFile; fileRef = 859BE97C2668D369003C02DE /* ZHDPNetworkTask.m */; };
-		859BE9802668DF44003C02DE /* ZHDPListPopShadow.m in Sources */ = {isa = PBXBuildFile; fileRef = 859BE97F2668DF44003C02DE /* ZHDPListPopShadow.m */; };
-		859D255C265F84BB003513BA /* ZHDPManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 859D255B265F84BB003513BA /* ZHDPManager.m */; };
-		859D255F265F84E3003513BA /* ZHDPDataTask.m in Sources */ = {isa = PBXBuildFile; fileRef = 859D255E265F84E3003513BA /* ZHDPDataTask.m */; };
-		859D2568265FA99C003513BA /* ZHDPListRow.m in Sources */ = {isa = PBXBuildFile; fileRef = 859D2567265FA99C003513BA /* ZHDPListRow.m */; };
 		85A4A30F243FF80A002AE903 /* ZHWebViewManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 85A4A30E243FF80A002AE903 /* ZHWebViewManager.m */; };
 		85A4A3122440003C002AE903 /* ZHEmotion.m in Sources */ = {isa = PBXBuildFile; fileRef = 85A4A3112440003C002AE903 /* ZHEmotion.m */; };
 		85B4FC9924349EA300CD910B /* EFEmoji.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 85B4FC9824349EA300CD910B /* EFEmoji.bundle */; };
 		85B4FC9C2435702900CD910B /* ZhengFile.m in Sources */ = {isa = PBXBuildFile; fileRef = 85B4FC9A2435702900CD910B /* ZhengFile.m */; };
 		85B578F5263535EB0078281E /* ZHJSWebTestController.m in Sources */ = {isa = PBXBuildFile; fileRef = 85B578F4263535EB0078281E /* ZHJSWebTestController.m */; };
-		85C0868326648769005AF025 /* ZHDPWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 85C0868226648769005AF025 /* ZHDPWindow.m */; };
-		85C0868626649326005AF025 /* ZHDPFloat.m in Sources */ = {isa = PBXBuildFile; fileRef = 85C0868526649326005AF025 /* ZHDPFloat.m */; };
-		85CEEC882660DA8E004467F1 /* ZHDPListOprate.m in Sources */ = {isa = PBXBuildFile; fileRef = 85CEEC872660DA8E004467F1 /* ZHDPListOprate.m */; };
-		85CEEC8B2660EAA9004467F1 /* ZHDPListSearch.m in Sources */ = {isa = PBXBuildFile; fileRef = 85CEEC8A2660EAA9004467F1 /* ZHDPListSearch.m */; };
-		85CEEC8F2660FA6F004467F1 /* ZHDPListApps.m in Sources */ = {isa = PBXBuildFile; fileRef = 85CEEC8E2660FA6F004467F1 /* ZHDPListApps.m */; };
-		85EE2850267C94C100B9C0DD /* ZHDPListException.m in Sources */ = {isa = PBXBuildFile; fileRef = 85EE284F267C94C100B9C0DD /* ZHDPListException.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -212,43 +178,7 @@
 		8307D4E4EB21B8BB3CAF8B7E /* libPods-ZHJSNative.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ZHJSNative.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8505EC1324752EDB00628FD8 /* ZHCustomExtra1Api.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHCustomExtra1Api.h; sourceTree = "<group>"; };
 		8505EC1424752EDB00628FD8 /* ZHCustomExtra1Api.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHCustomExtra1Api.m; sourceTree = "<group>"; };
-		85118B45265E41C0002BDFC9 /* ZHDPOption.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHDPOption.h; sourceTree = "<group>"; };
-		85118B46265E41C0002BDFC9 /* ZHDPOption.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHDPOption.m; sourceTree = "<group>"; };
-		85118B4D265E4233002BDFC9 /* ZHDebugPanel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHDebugPanel.h; sourceTree = "<group>"; };
-		85118B4E265E4233002BDFC9 /* ZHDebugPanel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHDebugPanel.m; sourceTree = "<group>"; };
-		85118B51265E482A002BDFC9 /* ZHDPComponent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHDPComponent.h; sourceTree = "<group>"; };
-		85118B52265E482A002BDFC9 /* ZHDPComponent.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHDPComponent.m; sourceTree = "<group>"; };
-		85118B55265E4E8F002BDFC9 /* ZHDPContent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHDPContent.h; sourceTree = "<group>"; };
-		85118B56265E4E8F002BDFC9 /* ZHDPContent.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHDPContent.m; sourceTree = "<group>"; };
-		85118B59265E4EF8002BDFC9 /* ZHDPList.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHDPList.h; sourceTree = "<group>"; };
-		85118B5A265E4EF8002BDFC9 /* ZHDPList.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHDPList.m; sourceTree = "<group>"; };
-		85118B5F265E4F7E002BDFC9 /* ZHDPListLog.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHDPListLog.h; sourceTree = "<group>"; };
-		85118B60265E4F7E002BDFC9 /* ZHDPListLog.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHDPListLog.m; sourceTree = "<group>"; };
-		85118B65265E4F97002BDFC9 /* ZHDPListNetwork.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHDPListNetwork.h; sourceTree = "<group>"; };
-		85118B66265E4F97002BDFC9 /* ZHDPListNetwork.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHDPListNetwork.m; sourceTree = "<group>"; };
-		85118B68265E4FAA002BDFC9 /* ZHDPListIM.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHDPListIM.h; sourceTree = "<group>"; };
-		85118B69265E4FAA002BDFC9 /* ZHDPListIM.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHDPListIM.m; sourceTree = "<group>"; };
-		85118B6B265E4FB3002BDFC9 /* ZHDPListStorage.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHDPListStorage.h; sourceTree = "<group>"; };
-		85118B6C265E4FB3002BDFC9 /* ZHDPListStorage.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHDPListStorage.m; sourceTree = "<group>"; };
-		85118B72265E566C002BDFC9 /* ZHDPListHeader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHDPListHeader.h; sourceTree = "<group>"; };
-		85118B73265E566C002BDFC9 /* ZHDPListHeader.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHDPListHeader.m; sourceTree = "<group>"; };
-		85118B75265E5681002BDFC9 /* ZHDPListCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHDPListCell.h; sourceTree = "<group>"; };
-		85118B76265E5681002BDFC9 /* ZHDPListCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHDPListCell.m; sourceTree = "<group>"; };
-		851B127D2661F0BC00FA3AA3 /* ZHDPListDetail.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHDPListDetail.h; sourceTree = "<group>"; };
-		851B127E2661F0BC00FA3AA3 /* ZHDPListDetail.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHDPListDetail.m; sourceTree = "<group>"; };
-		851B1288266229D100FA3AA3 /* iconfont.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = iconfont.js; sourceTree = "<group>"; };
-		851B1289266229D100FA3AA3 /* demo.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; path = demo.css; sourceTree = "<group>"; };
-		851B128A266229D100FA3AA3 /* iconfont.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = iconfont.json; sourceTree = "<group>"; };
-		851B128B266229D100FA3AA3 /* iconfont.woff */ = {isa = PBXFileReference; lastKnownFileType = file; path = iconfont.woff; sourceTree = "<group>"; };
-		851B128C266229D100FA3AA3 /* iconfont.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = iconfont.ttf; sourceTree = "<group>"; };
-		851B128D266229D100FA3AA3 /* demo_index.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = demo_index.html; sourceTree = "<group>"; };
-		851B128E266229D100FA3AA3 /* iconfont.woff2 */ = {isa = PBXFileReference; lastKnownFileType = file; path = iconfont.woff2; sourceTree = "<group>"; };
-		851B128F266229D100FA3AA3 /* iconfont.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; path = iconfont.css; sourceTree = "<group>"; };
-		851B12982662390300FA3AA3 /* ZHDPListPop.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHDPListPop.h; sourceTree = "<group>"; };
-		851B12992662390300FA3AA3 /* ZHDPListPop.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHDPListPop.m; sourceTree = "<group>"; };
 		851EDB07264E6A5000970A3C /* ZHJSPageProtocol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHJSPageProtocol.h; sourceTree = "<group>"; };
-		853700EE267A0AD300544D93 /* ZHDPListMemory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHDPListMemory.h; sourceTree = "<group>"; };
-		853700EF267A0AD300544D93 /* ZHDPListMemory.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHDPListMemory.m; sourceTree = "<group>"; };
 		8539A2E1246E9C2800FD7EFB /* ZHCustom2Api.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHCustom2Api.h; sourceTree = "<group>"; };
 		8539A2E2246E9C2800FD7EFB /* ZHCustom2Api.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHCustom2Api.m; sourceTree = "<group>"; };
 		856980802429E0F50042755A /* ZHCustomApi.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHCustomApi.h; sourceTree = "<group>"; };
@@ -270,18 +200,6 @@
 		8582282325AD97BF00FECFB9 /* ZHJSPageItem.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHJSPageItem.m; sourceTree = "<group>"; };
 		8592910E265B6E8C004EA584 /* ZHJSDebugManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHJSDebugManager.h; sourceTree = "<group>"; };
 		8592910F265B6E8C004EA584 /* ZHJSDebugManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHJSDebugManager.m; sourceTree = "<group>"; };
-		85958050267AEB4B0079EFBE /* ZHDPListOption.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHDPListOption.h; sourceTree = "<group>"; };
-		85958051267AEB4B0079EFBE /* ZHDPListOption.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHDPListOption.m; sourceTree = "<group>"; };
-		859BE97B2668D369003C02DE /* ZHDPNetworkTask.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHDPNetworkTask.h; sourceTree = "<group>"; };
-		859BE97C2668D369003C02DE /* ZHDPNetworkTask.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHDPNetworkTask.m; sourceTree = "<group>"; };
-		859BE97E2668DF44003C02DE /* ZHDPListPopShadow.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHDPListPopShadow.h; sourceTree = "<group>"; };
-		859BE97F2668DF44003C02DE /* ZHDPListPopShadow.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHDPListPopShadow.m; sourceTree = "<group>"; };
-		859D255A265F84BB003513BA /* ZHDPManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHDPManager.h; sourceTree = "<group>"; };
-		859D255B265F84BB003513BA /* ZHDPManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHDPManager.m; sourceTree = "<group>"; };
-		859D255D265F84E3003513BA /* ZHDPDataTask.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHDPDataTask.h; sourceTree = "<group>"; };
-		859D255E265F84E3003513BA /* ZHDPDataTask.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHDPDataTask.m; sourceTree = "<group>"; };
-		859D2566265FA99C003513BA /* ZHDPListRow.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHDPListRow.h; sourceTree = "<group>"; };
-		859D2567265FA99C003513BA /* ZHDPListRow.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHDPListRow.m; sourceTree = "<group>"; };
 		85A4A30D243FF80A002AE903 /* ZHWebViewManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHWebViewManager.h; sourceTree = "<group>"; };
 		85A4A30E243FF80A002AE903 /* ZHWebViewManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHWebViewManager.m; sourceTree = "<group>"; };
 		85A4A3102440003C002AE903 /* ZHEmotion.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHEmotion.h; sourceTree = "<group>"; };
@@ -291,18 +209,6 @@
 		85B4FC9B2435702900CD910B /* ZhengFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZhengFile.h; sourceTree = "<group>"; };
 		85B578F3263535EB0078281E /* ZHJSWebTestController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHJSWebTestController.h; sourceTree = "<group>"; };
 		85B578F4263535EB0078281E /* ZHJSWebTestController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHJSWebTestController.m; sourceTree = "<group>"; };
-		85C0868126648769005AF025 /* ZHDPWindow.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHDPWindow.h; sourceTree = "<group>"; };
-		85C0868226648769005AF025 /* ZHDPWindow.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHDPWindow.m; sourceTree = "<group>"; };
-		85C0868426649326005AF025 /* ZHDPFloat.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHDPFloat.h; sourceTree = "<group>"; };
-		85C0868526649326005AF025 /* ZHDPFloat.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHDPFloat.m; sourceTree = "<group>"; };
-		85CEEC862660DA8E004467F1 /* ZHDPListOprate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHDPListOprate.h; sourceTree = "<group>"; };
-		85CEEC872660DA8E004467F1 /* ZHDPListOprate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHDPListOprate.m; sourceTree = "<group>"; };
-		85CEEC892660EAA9004467F1 /* ZHDPListSearch.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHDPListSearch.h; sourceTree = "<group>"; };
-		85CEEC8A2660EAA9004467F1 /* ZHDPListSearch.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHDPListSearch.m; sourceTree = "<group>"; };
-		85CEEC8D2660FA6F004467F1 /* ZHDPListApps.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHDPListApps.h; sourceTree = "<group>"; };
-		85CEEC8E2660FA6F004467F1 /* ZHDPListApps.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHDPListApps.m; sourceTree = "<group>"; };
-		85EE284E267C94C100B9C0DD /* ZHDPListException.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZHDPListException.h; sourceTree = "<group>"; };
-		85EE284F267C94C100B9C0DD /* ZHDPListException.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZHDPListException.m; sourceTree = "<group>"; };
 		E56B9B5085C846D362800AF3 /* Pods-ZHJSNative.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ZHJSNative.release.xcconfig"; path = "Target Support Files/Pods-ZHJSNative/Pods-ZHJSNative.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -381,7 +287,6 @@
 				8539A2E2246E9C2800FD7EFB /* ZHCustom2Api.m */,
 				8505EC1324752EDB00628FD8 /* ZHCustomExtra1Api.h */,
 				8505EC1424752EDB00628FD8 /* ZHCustomExtra1Api.m */,
-				85118B4B265E41E9002BDFC9 /* DebugPanel */,
 				85A4A3132440062C002AE903 /* JSNative */,
 				0F079866240104FA004AAFBC /* Main.storyboard */,
 				0F079869240104FB004AAFBC /* Assets.xcassets */,
@@ -531,128 +436,6 @@
 			path = OtherConfig;
 			sourceTree = "<group>";
 		};
-		85118B4B265E41E9002BDFC9 /* DebugPanel */ = {
-			isa = PBXGroup;
-			children = (
-				859D255A265F84BB003513BA /* ZHDPManager.h */,
-				859D255B265F84BB003513BA /* ZHDPManager.m */,
-				859BE97B2668D369003C02DE /* ZHDPNetworkTask.h */,
-				859BE97C2668D369003C02DE /* ZHDPNetworkTask.m */,
-				859D255D265F84E3003513BA /* ZHDPDataTask.h */,
-				859D255E265F84E3003513BA /* ZHDPDataTask.m */,
-				85C0868126648769005AF025 /* ZHDPWindow.h */,
-				85C0868226648769005AF025 /* ZHDPWindow.m */,
-				85C0868426649326005AF025 /* ZHDPFloat.h */,
-				85C0868526649326005AF025 /* ZHDPFloat.m */,
-				85118B4D265E4233002BDFC9 /* ZHDebugPanel.h */,
-				85118B4E265E4233002BDFC9 /* ZHDebugPanel.m */,
-				851B1287266229D100FA3AA3 /* iconfont */,
-				85118B50265E4816002BDFC9 /* Component */,
-				85118B4C265E41FF002BDFC9 /* Option */,
-				85118B54265E4E72002BDFC9 /* Content */,
-			);
-			path = DebugPanel;
-			sourceTree = "<group>";
-		};
-		85118B4C265E41FF002BDFC9 /* Option */ = {
-			isa = PBXGroup;
-			children = (
-				85118B45265E41C0002BDFC9 /* ZHDPOption.h */,
-				85118B46265E41C0002BDFC9 /* ZHDPOption.m */,
-			);
-			path = Option;
-			sourceTree = "<group>";
-		};
-		85118B50265E4816002BDFC9 /* Component */ = {
-			isa = PBXGroup;
-			children = (
-				85118B51265E482A002BDFC9 /* ZHDPComponent.h */,
-				85118B52265E482A002BDFC9 /* ZHDPComponent.m */,
-			);
-			path = Component;
-			sourceTree = "<group>";
-		};
-		85118B54265E4E72002BDFC9 /* Content */ = {
-			isa = PBXGroup;
-			children = (
-				85118B55265E4E8F002BDFC9 /* ZHDPContent.h */,
-				85118B56265E4E8F002BDFC9 /* ZHDPContent.m */,
-				85118B6E265E540F002BDFC9 /* List */,
-			);
-			path = Content;
-			sourceTree = "<group>";
-		};
-		85118B58265E4EE4002BDFC9 /* SubList */ = {
-			isa = PBXGroup;
-			children = (
-				85118B5F265E4F7E002BDFC9 /* ZHDPListLog.h */,
-				85118B60265E4F7E002BDFC9 /* ZHDPListLog.m */,
-				85118B65265E4F97002BDFC9 /* ZHDPListNetwork.h */,
-				85118B66265E4F97002BDFC9 /* ZHDPListNetwork.m */,
-				85118B68265E4FAA002BDFC9 /* ZHDPListIM.h */,
-				85118B69265E4FAA002BDFC9 /* ZHDPListIM.m */,
-				85118B6B265E4FB3002BDFC9 /* ZHDPListStorage.h */,
-				85118B6C265E4FB3002BDFC9 /* ZHDPListStorage.m */,
-				853700EE267A0AD300544D93 /* ZHDPListMemory.h */,
-				853700EF267A0AD300544D93 /* ZHDPListMemory.m */,
-				85EE284E267C94C100B9C0DD /* ZHDPListException.h */,
-				85EE284F267C94C100B9C0DD /* ZHDPListException.m */,
-			);
-			path = SubList;
-			sourceTree = "<group>";
-		};
-		85118B6E265E540F002BDFC9 /* List */ = {
-			isa = PBXGroup;
-			children = (
-				85118B59265E4EF8002BDFC9 /* ZHDPList.h */,
-				85118B5A265E4EF8002BDFC9 /* ZHDPList.m */,
-				85118B72265E566C002BDFC9 /* ZHDPListHeader.h */,
-				85118B73265E566C002BDFC9 /* ZHDPListHeader.m */,
-				85118B75265E5681002BDFC9 /* ZHDPListCell.h */,
-				85118B76265E5681002BDFC9 /* ZHDPListCell.m */,
-				859D2566265FA99C003513BA /* ZHDPListRow.h */,
-				859D2567265FA99C003513BA /* ZHDPListRow.m */,
-				85CEEC892660EAA9004467F1 /* ZHDPListSearch.h */,
-				85CEEC8A2660EAA9004467F1 /* ZHDPListSearch.m */,
-				8595804F267AEB210079EFBE /* Option */,
-				851B129B2662393800FA3AA3 /* Pop */,
-				85118B58265E4EE4002BDFC9 /* SubList */,
-			);
-			path = List;
-			sourceTree = "<group>";
-		};
-		851B1287266229D100FA3AA3 /* iconfont */ = {
-			isa = PBXGroup;
-			children = (
-				851B1288266229D100FA3AA3 /* iconfont.js */,
-				851B1289266229D100FA3AA3 /* demo.css */,
-				851B128A266229D100FA3AA3 /* iconfont.json */,
-				851B128B266229D100FA3AA3 /* iconfont.woff */,
-				851B128C266229D100FA3AA3 /* iconfont.ttf */,
-				851B128D266229D100FA3AA3 /* demo_index.html */,
-				851B128E266229D100FA3AA3 /* iconfont.woff2 */,
-				851B128F266229D100FA3AA3 /* iconfont.css */,
-			);
-			path = iconfont;
-			sourceTree = "<group>";
-		};
-		851B129B2662393800FA3AA3 /* Pop */ = {
-			isa = PBXGroup;
-			children = (
-				851B12982662390300FA3AA3 /* ZHDPListPop.h */,
-				851B12992662390300FA3AA3 /* ZHDPListPop.m */,
-				859BE97E2668DF44003C02DE /* ZHDPListPopShadow.h */,
-				859BE97F2668DF44003C02DE /* ZHDPListPopShadow.m */,
-				85CEEC862660DA8E004467F1 /* ZHDPListOprate.h */,
-				85CEEC872660DA8E004467F1 /* ZHDPListOprate.m */,
-				85CEEC8D2660FA6F004467F1 /* ZHDPListApps.h */,
-				85CEEC8E2660FA6F004467F1 /* ZHDPListApps.m */,
-				851B127D2661F0BC00FA3AA3 /* ZHDPListDetail.h */,
-				851B127E2661F0BC00FA3AA3 /* ZHDPListDetail.m */,
-			);
-			path = Pop;
-			sourceTree = "<group>";
-		};
 		853D438B25A9A23300CF0D35 /* Api */ = {
 			isa = PBXGroup;
 			children = (
@@ -732,15 +515,6 @@
 				8592910F265B6E8C004EA584 /* ZHJSDebugManager.m */,
 			);
 			path = Debug;
-			sourceTree = "<group>";
-		};
-		8595804F267AEB210079EFBE /* Option */ = {
-			isa = PBXGroup;
-			children = (
-				85958050267AEB4B0079EFBE /* ZHDPListOption.h */,
-				85958051267AEB4B0079EFBE /* ZHDPListOption.m */,
-			);
-			path = Option;
 			sourceTree = "<group>";
 		};
 		85A4A3132440062C002AE903 /* JSNative */ = {
@@ -883,28 +657,20 @@
 				0F845D16265A39DC00626E96 /* shell-event.sh in Resources */,
 				0F845D1B265A39DC00626E96 /* logEvent.js in Resources */,
 				0F07986A240104FB004AAFBC /* Assets.xcassets in Resources */,
-				851B1291266229D100FA3AA3 /* demo.css in Resources */,
-				851B1295266229D100FA3AA3 /* demo_index.html in Resources */,
 				0F845D15265A39DC00626E96 /* event.js in Resources */,
 				0F845D1A265A39DC00626E96 /* vconsole.min.js in Resources */,
-				851B1294266229D100FA3AA3 /* iconfont.ttf in Resources */,
 				0F845D1D265A39DC00626E96 /* shell.sh in Resources */,
 				0F845D19265A39DC00626E96 /* shell-log.sh in Resources */,
 				0F845D10265A39DC00626E96 /* min-error.js in Resources */,
 				0F845D17265A39DC00626E96 /* socketEvent.js in Resources */,
 				85B4FC9924349EA300CD910B /* EFEmoji.bundle in Resources */,
 				0F845D13265A39DC00626E96 /* min-event.js in Resources */,
-				851B1293266229D100FA3AA3 /* iconfont.woff in Resources */,
 				0F845D1C265A39DC00626E96 /* shell-socket.sh in Resources */,
 				0F845D12265A39DC00626E96 /* errorEvent.js in Resources */,
 				0F079868240104FA004AAFBC /* Main.storyboard in Resources */,
 				0F0798A72401089A004AAFBC /* TestBundle.bundle in Resources */,
 				0F845D18265A39DC00626E96 /* shell-error.sh in Resources */,
-				851B1290266229D100FA3AA3 /* iconfont.js in Resources */,
-				851B1297266229D100FA3AA3 /* iconfont.css in Resources */,
 				0F845D11265A39DC00626E96 /* min-socket.js in Resources */,
-				851B1296266229D100FA3AA3 /* iconfont.woff2 in Resources */,
-				851B1292266229D100FA3AA3 /* iconfont.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -972,49 +738,31 @@
 			buildActionMask = 2147483647;
 			files = (
 				0FCF2D25260EEEE2003797EF /* ZHCtxMpConfig.m in Sources */,
-				85118B77265E5681002BDFC9 /* ZHDPListCell.m in Sources */,
 				0FCF2CF5260EC3D7003797EF /* ZHWebLoadConfig.m in Sources */,
 				0F079865240104FA004AAFBC /* ViewController.m in Sources */,
 				8505EC1524752EDB00628FD8 /* ZHCustomExtra1Api.m in Sources */,
-				85CEEC8B2660EAA9004467F1 /* ZHDPListSearch.m in Sources */,
-				859D255C265F84BB003513BA /* ZHDPManager.m in Sources */,
 				0FCF2D2B260EEF32003797EF /* ZHCtxDebugItem.m in Sources */,
 				85929110265B6E8C004EA584 /* ZHJSDebugManager.m in Sources */,
-				85118B6D265E4FB3002BDFC9 /* ZHDPListStorage.m in Sources */,
-				859D2568265FA99C003513BA /* ZHDPListRow.m in Sources */,
 				0FCF2CEF260EC2C7003797EF /* ZHWebConfig.m in Sources */,
 				85B578F5263535EB0078281E /* ZHJSWebTestController.m in Sources */,
-				85118B4F265E4233002BDFC9 /* ZHDebugPanel.m in Sources */,
 				0FCF2D1F260EEEC9003797EF /* ZHCtxLoadConfig.m in Sources */,
-				85EE2850267C94C100B9C0DD /* ZHDPListException.m in Sources */,
-				85CEEC8F2660FA6F004467F1 /* ZHDPListApps.m in Sources */,
-				85118B74265E566C002BDFC9 /* ZHDPListHeader.m in Sources */,
-				851B127F2661F0BC00FA3AA3 /* ZHDPListDetail.m in Sources */,
 				0F07985F240104FA004AAFBC /* AppDelegate.m in Sources */,
-				85C0868326648769005AF025 /* ZHDPWindow.m in Sources */,
 				8581BAB3258F370B004E25DC /* ZHJSInWebSocketApi.m in Sources */,
 				85A4A30F243FF80A002AE903 /* ZHWebViewManager.m in Sources */,
 				85B4FC9C2435702900CD910B /* ZhengFile.m in Sources */,
 				0FCF2D09260EC92A003797EF /* ZHWebDebugItem.m in Sources */,
 				0F247F9325B2C23000A2D8A3 /* ZHJSApiItem.m in Sources */,
-				85118B47265E41C0002BDFC9 /* ZHDPOption.m in Sources */,
-				853700F0267A0AD300544D93 /* ZHDPListMemory.m in Sources */,
 				0F079899240105E3004AAFBC /* ZHJSContext.m in Sources */,
-				85118B67265E4F97002BDFC9 /* ZHDPListNetwork.m in Sources */,
 				8582282425AD97BF00FECFB9 /* ZHJSPageItem.m in Sources */,
 				0FCF2D17260EEE77003797EF /* ZHCtxConfig.m in Sources */,
 				0F07989F24010627004AAFBC /* ZHController.m in Sources */,
-				859BE97D2668D369003C02DE /* ZHDPNetworkTask.m in Sources */,
 				0F079870240104FB004AAFBC /* main.m in Sources */,
-				85958052267AEB4B0079EFBE /* ZHDPListOption.m in Sources */,
-				859D255F265F84E3003513BA /* ZHDPDataTask.m in Sources */,
 				0F0798A224010647004AAFBC /* ZHJSHandler.m in Sources */,
 				8581BAAA258F3075004E25DC /* ZHJSInApi.m in Sources */,
 				0FCF2CF2260EC323003797EF /* ZHWebCreateConfig.m in Sources */,
 				0FCF2D22260EEED7003797EF /* ZHCtxApiOpConfig.m in Sources */,
 				8581BA9B258F2A3D004E25DC /* ZHUtil.m in Sources */,
 				0FCF2D00260EC67E003797EF /* ZHWebFetchConfig.m in Sources */,
-				85118B57265E4E8F002BDFC9 /* ZHDPContent.m in Sources */,
 				0FCF2CEC260EC292003797EF /* ZHWebBaseConfig.m in Sources */,
 				856980822429E0F50042755A /* ZHCustomApi.m in Sources */,
 				0FCF2D1C260EEEBD003797EF /* ZHCtxCreateConfig.m in Sources */,
@@ -1022,22 +770,14 @@
 				0FCF2CF9260EC462003797EF /* ZHWebMpConfig.m in Sources */,
 				85A4A3122440003C002AE903 /* ZHEmotion.m in Sources */,
 				8581BAC5258F3795004E25DC /* ZHJSInCtxFundApi.m in Sources */,
-				85118B6A265E4FAA002BDFC9 /* ZHDPListIM.m in Sources */,
-				85118B61265E4F7E002BDFC9 /* ZHDPListLog.m in Sources */,
-				851B129A2662390300FA3AA3 /* ZHDPListPop.m in Sources */,
 				8581BABC258F3755004E25DC /* ZHJSInWebFundApi.m in Sources */,
 				0F079862240104FA004AAFBC /* SceneDelegate.m in Sources */,
 				0FCF2D31260EFF3C003797EF /* ZHJSApiListController.m in Sources */,
 				0F6807DD24016A0500E6B4C6 /* ZHJSApiHandler.m in Sources */,
 				0FCF2CFC260EC54F003797EF /* ZHWebApiOpConfig.m in Sources */,
 				0FCF2D14260EEE5D003797EF /* ZHCtxBaseConfig.m in Sources */,
-				85CEEC882660DA8E004467F1 /* ZHDPListOprate.m in Sources */,
-				85C0868626649326005AF025 /* ZHDPFloat.m in Sources */,
 				0F5E33D9242F084E00623068 /* ZHCustom1Api.m in Sources */,
 				0F07989C2401060A004AAFBC /* ZHWebView.m in Sources */,
-				859BE9802668DF44003C02DE /* ZHDPListPopShadow.m in Sources */,
-				85118B5B265E4EF8002BDFC9 /* ZHDPList.m in Sources */,
-				85118B53265E482A002BDFC9 /* ZHDPComponent.m in Sources */,
 				8539A2E3246E9C2800FD7EFB /* ZHCustom2Api.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
