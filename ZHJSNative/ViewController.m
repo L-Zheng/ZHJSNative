@@ -9,7 +9,6 @@
 #import "ViewController.h"
 #import "ZHController.h"
 #import "ZHWebViewManager.h"
-#import "ZHDebugPanel.h"
 #import "ZHJSWebTestController.h"
 #import <ZHDebugPanel/ZHDPManager.h>
 
