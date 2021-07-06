@@ -228,6 +228,14 @@
         callBack(nil, ZHInlineError(404, ZHLCInlineString(@"url(%@) read string(%@) data is null.", url, loadStr)));
         return;
     }
+    /*
+     若JSContext运行两次，后者的代码不会覆盖前者的代码，仍可执行js里面的aa函数
+     [JSContext evaluateScript:@"var aa = function(){console.log('1111111111')}"];
+     [JSContext evaluateScript:@"var bb = function(){console.log('22222222')}"];
+     
+     JSValue *parseFunc = [self.context objectForKeyedSubscript:@"aa"];
+     [parseFunc callWithArguments:@[]];  // 输出1111111111
+     */
     JSValue *res = [self evaluateScript:loadStr];
     callBack([res toObject], nil);
 }

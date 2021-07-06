@@ -128,6 +128,19 @@
     } loadFinishBlock:^(NSDictionary *info, NSError *error) {
         NSLog(@"--------------------");
     }];
+    
+//    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+//        JSValue *parseFunc = [self.context objectForKeyedSubscript:@"aa"];
+//        [parseFunc callWithArguments:@[]];
+//        [self.context evaluateScript:@"var bb = function(){console.log('22222222')}"];
+//        parseFunc = [self.context objectForKeyedSubscript:@"aa"];
+//        [parseFunc callWithArguments:@[]];
+//        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+//
+//            JSValue *parseFunc = [self.context objectForKeyedSubscript:@"aa"];
+//            [parseFunc callWithArguments:@[]];
+//        });
+//    });
 }
 
 - (void)viewDidLoad {
