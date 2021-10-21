@@ -13,12 +13,29 @@
  * 不识别模板字符串语法  `--${}`
  * 不识别语法  endsWith
  */
-/**  函数参数 ...args  代表将参数arguments分割成args数组  等价于[arg1, arg2, arg3]
-    foo.apply(this, arguments) == 
-    foo.apply(this, [arg1, arg2, arg3]) == 
-    foo.apply(this, args) == 
-    foo.call(this, arg1, arg2, arg3) == 
-    this.foo(arg1, arg2, arg3);
+/**  函数参数 ...args 
+var fo = function (a, b, c){console.log(a + b + c)}
+var jo = function (a, b, c){fo.apply(this, arguments)}
+var args = [1, 2, 3]
+
+jo(...args) ==
+jo(1, 2, 3) == 
+fo(1, 2, 3) == 
+fo.apply(this, [1, 2, 3]) == 
+jo.apply(this, [1, 2, 3]) == 
+fo.call(this, 1, 2, 3)
+// 函数形参
+var test = function (name, ...args){
+    // name = 'my'  args = [1, 2, 3]
+    console.log(name, args);
+}
+test('my', 1, 2, 3) == 
+test.apply(this, ['my', 1, 2, 3])
+// 深拷贝对象
+var a = {name: 'my'}
+var b = { ...a }
+var c = ['j', 'k'] // 若数组里面包含对象，无法深拷贝
+var d = [ ...c ]
 */
 /**
  * 最小化该js文件： 
