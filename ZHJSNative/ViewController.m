@@ -118,6 +118,9 @@
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:cellID];
     if (!cell) {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellID];
+        if (@available(iOS 14.0, *)) {
+            cell.backgroundConfiguration = [UIBackgroundConfiguration clearConfiguration];
+        }
     }
     cell.textLabel.numberOfLines = 0;
     cell.textLabel.adjustsFontSizeToFitWidth = YES;
@@ -139,6 +142,9 @@
     if (!_tableView) {
         _tableView = [[UITableView alloc] initWithFrame:CGRectZero style:UITableViewStylePlain];
         _tableView.backgroundColor = [UIColor clearColor];
+        if (@available(iOS 15.0, *)){
+            _tableView.sectionHeaderTopPadding = 0;
+        }
         
         _tableView.directionalLockEnabled = YES;
         _tableView.delegate = self;
