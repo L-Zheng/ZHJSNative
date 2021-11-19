@@ -826,8 +826,23 @@
 
 #pragma mark - WKNavigationDelegate
 
+/* 调用顺序
+ 网页加载成功 ： www.baidu.com
+ decidePolicyForNavigationAction
+ didStartProvisionalNavigation
+ decidePolicyForNavigationResponse
+ didCommitNavigation
+ didFinishNavigation
+ 
+ 网页加载失败 ： www.xxx.com
+ decidePolicyForNavigationAction
+ didStartProvisionalNavigation
+ didFailProvisionalNavigation
+ */
+// Decides whether to allow or cancel a navigation.
 - (void)webView:(ZHWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler{
     
+//    NSLog(@"lbz-web-%s", __func__);
     id <ZHWKNavigationDelegate> de = self.zh_navigationDelegate;
     if (ZHCheckDelegate(de, _cmd)) {
         [de webView:webView decidePolicyForNavigationAction:navigationAction decisionHandler:decisionHandler];
@@ -840,26 +855,35 @@
     }
     if (decisionHandler) decisionHandler(WKNavigationActionPolicyAllow);
 }
+// Decides whether to allow or cancel a navigation after its response is known.
 - (void)webView:(WKWebView *)webView decidePolicyForNavigationResponse:(WKNavigationResponse *)navigationResponse decisionHandler:(void (^)(WKNavigationResponsePolicy))decisionHandler{
+//    NSLog(@"lbz-web-%s", __func__);
     id <ZHWKNavigationDelegate> de = self.zh_navigationDelegate;
     if (ZHCheckDelegate(de, _cmd)) {
         return [de webView:webView decidePolicyForNavigationResponse:navigationResponse decisionHandler:decisionHandler];
     }
     if (decisionHandler) decisionHandler(WKNavigationResponsePolicyAllow);
 }
+//  Invoked when a main frame navigation starts.
 - (void)webView:(WKWebView *)webView didStartProvisionalNavigation:(null_unspecified WKNavigation *)navigation{
+//    NSLog(@"lbz-web-%s", __func__);
     id <ZHWKNavigationDelegate> de = self.zh_navigationDelegate;
     if (ZHCheckDelegate(de, _cmd)) {
         return [de webView:webView didStartProvisionalNavigation:navigation];
     }
 }
+// nvoked when a server redirect is received for the main frame.
 - (void)webView:(WKWebView *)webView didReceiveServerRedirectForProvisionalNavigation:(null_unspecified WKNavigation *)navigation{
+//    NSLog(@"lbz-web-%s", __func__);
     id <ZHWKNavigationDelegate> de = self.zh_navigationDelegate;
     if (ZHCheckDelegate(de, _cmd)) {
         return [de webView:webView didReceiveServerRedirectForProvisionalNavigation:navigation];
     }
 }
+// Invoked when an error occurs while starting to load data for the main frame.
 - (void)webView:(ZHWebView *)webView didFailProvisionalNavigation:(WKNavigation *)navigation withError:(NSError *)error{
+    if (webView.loadFinish) webView.loadFinish(nil, ZHInlineError(error.code, ZHLCInlineString(@"%@", error.zh_localizedDescription)));
+//    NSLog(@"lbz-web-%s", __func__);
     NSLog(@"-----❌didFailProvisionalNavigation---------------");
     NSLog(@"%@",error);
     
@@ -868,13 +892,17 @@
         return [de webView:webView didFailProvisionalNavigation:navigation withError:error];
     }
 }
+// Invoked when content starts arriving for the main frame.
 - (void)webView:(WKWebView *)webView didCommitNavigation:(null_unspecified WKNavigation *)navigation{
+//    NSLog(@"lbz-web-%s", __func__);
     id <ZHWKNavigationDelegate> de = self.zh_navigationDelegate;
     if (ZHCheckDelegate(de, _cmd)) {
         return [de webView:webView didCommitNavigation:navigation];
     }
 }
+// Invoked when a main frame navigation completes.
 - (void)webView:(ZHWebView *)webView didFinishNavigation:(WKNavigation *)navigation{
+//    NSLog(@"lbz-web-%s", __func__);
     if (webView.loadFinish) webView.loadFinish(nil, nil);
     
     id <ZHWKNavigationDelegate> de = self.zh_navigationDelegate;
@@ -882,7 +910,9 @@
         return [de webView:webView didFinishNavigation:navigation];
     }
 }
+// Invoked when an error occurs during a committed main frame navigation.
 - (void)webView:(ZHWebView *)webView didFailNavigation:(WKNavigation *)navigation withError:(NSError *)error{
+//    NSLog(@"lbz-web-%s", __func__);
     if (webView.loadFinish) webView.loadFinish(nil, ZHInlineError(error.code, ZHLCInlineString(@"%@", error.zh_localizedDescription)));
     
     id <ZHWKNavigationDelegate> de = self.zh_navigationDelegate;
