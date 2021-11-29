@@ -293,7 +293,17 @@
 
 - (void)configUI{
     // UI配置
-    self.backgroundColor = [UIColor colorWithRed:245.0/255.0 green:245.0/255.0 blue:245.0/255.0 alpha:1.0];
+    UIColor *lightColor = [UIColor colorWithRed:245.0/255.0 green:245.0/255.0 blue:245.0/255.0 alpha:1.0];
+    if (@available(iOS 13.0, *)) {
+        self.backgroundColor = [UIColor colorWithDynamicProvider:^UIColor * _Nonnull(UITraitCollection * _Nonnull traitCollection) {
+            if (traitCollection.userInterfaceStyle == UIUserInterfaceStyleDark) {
+                return [UIColor blackColor];
+            }
+            return lightColor;
+        }];
+    }else{
+        self.backgroundColor = lightColor;
+    }
     //    self.scrollView.bounces = NO;
     //    self.scrollView.alwaysBounceVertical = NO;
     //    self.scrollView.alwaysBounceHorizontal = NO;
