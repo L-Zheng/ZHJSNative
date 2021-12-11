@@ -229,6 +229,7 @@
 - (instancetype)initWithFrame:(CGRect)frame configuration:(WKWebViewConfiguration *)configuration{
     self = [super initWithFrame:frame configuration:configuration];
     if (self) {
+        [self updateUserInterfaceStyle];
         [self configGesture];
         [self configUI];
     }
@@ -288,6 +289,12 @@
     [super layoutSubviews];
     [self updateUI];
 }
+//- (void)didMoveToSuperview{
+//    [super didMoveToSuperview];
+//    if (self.superview) {
+//        [self updateUserInterfaceStyle];
+//    }
+//}
 
 #pragma mark - UI
 
@@ -332,6 +339,14 @@
 
 - (void)updateUI{
     [self.debugItem updateFloatViewLocation];
+}
+
+#pragma mark - theme
+
+- (void)updateUserInterfaceStyle{
+    if (@available(iOS 13.0, *)) {
+        self.overrideUserInterfaceStyle = UIUserInterfaceStyleUnspecified;
+    }
 }
 
 #pragma mark - config gesture

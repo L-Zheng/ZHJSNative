@@ -87,6 +87,10 @@ typedef NS_ENUM(NSInteger, ZHWebViewExceptionOperate) {
 
 @property (nonatomic,strong,readonly) NSArray <id <ZHJSApiProtocol>> *apis;
 
+#pragma mark - theme
+
+- (void)updateUserInterfaceStyle;
+
 #pragma mark - Exception
 
 /** 检查WebView异常 ：白屏*/
