@@ -149,7 +149,7 @@ completionHandler:(void (^)(id res, NSError *error))completionHandler;
 
 #pragma mark - clear
 
-- (void)clearWebViewSystemCache;
++ (void)clearWebViewSystemCache:(void (^) (void))complete;
 
 #pragma mark - path
 

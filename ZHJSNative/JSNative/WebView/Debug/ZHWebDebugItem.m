@@ -246,11 +246,13 @@
     self.webView.zh_UIDelegate = nil;
     self.webView.zh_debugSocketDelegate = nil;
     //清除缓存【否则ios11以上不会实时刷新最新的改动】
-    [self.webView clearWebViewSystemCache];
-    //回调
-    if (ZHCheckDelegate(socketDebugDelegate, @selector(zh_webViewStartRefresh:))) {
-        [socketDebugDelegate zh_webViewStartRefresh:self.webView];
-    }
+    __weak __typeof__(self) weakSelf = self;
+    [ZHWebView clearWebViewSystemCache:^{
+        //回调
+        if (ZHCheckDelegate(socketDebugDelegate, @selector(zh_webViewStartRefresh:))) {
+            [socketDebugDelegate zh_webViewStartRefresh:weakSelf.webView];
+        }
+    }];
 }
 
 #pragma mark - activityCtrl

@@ -1279,7 +1279,7 @@
 
 #pragma mark - clear
 
-- (void)clearWebViewSystemCache{
++ (void)clearWebViewSystemCache:(void (^) (void))complete{
     if ([ZHJSDebugMg() availableIOS9]) {
         WKWebsiteDataStore *dataSource = [WKWebsiteDataStore defaultDataStore];
 //        NSMutableSet *set = [WKWebsiteDataStore allWebsiteDataTypes];
@@ -1301,6 +1301,9 @@
             ]];
         }
         [dataSource removeDataOfTypes:set modifiedSince:[NSDate dateWithTimeIntervalSince1970:0] completionHandler:^{
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if (complete) complete();
+            });
         }];
         return;
     }
@@ -1319,6 +1322,7 @@
     removeFolder(path1);
     removeFolder(path2);
     removeFolder(path3);
+    if (complete) complete();
 }
 
 #pragma mark - dealloc
