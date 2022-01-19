@@ -388,7 +388,7 @@ case cType:{\
     [self.apiHandler enumRegsiterApiInjectFinishEventNameMap:^(NSString *apiPrefix, NSString *apiInjectFinishEventName) {
         if (apiPrefix && [apiPrefix isKindOfClass:NSString.class] && apiPrefix.length > 0 &&
             apiInjectFinishEventName && [apiInjectFinishEventName isKindOfClass:NSString.class] && apiInjectFinishEventName.length > 0) {
-            [resCode appendFormat:@"var ZhengReadyEvent_%@ = document.createEvent('Event');ZhengReadyEvent_%@.initEvent('%@');window.dispatchEvent(ZhengReadyEvent_%@);", apiPrefix, apiPrefix, apiInjectFinishEventName, apiPrefix];
+            [resCode appendFormat:@"var ZhengReadyEvent_%@ = document.createEvent('Event');ZhengReadyEvent_%@.initEvent(\"%@\");window.dispatchEvent(ZhengReadyEvent_%@);", apiPrefix, apiPrefix, apiInjectFinishEventName, apiPrefix];
         }
     }];
     return resCode.copy;
