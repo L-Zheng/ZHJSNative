@@ -35,7 +35,7 @@ static NSString * const ZHJSHandlerErrorName = @"ZHJSErrorEventHandler";
 //JSContext注入的api
 - (void)fetchJSContextApi:(void (^) (NSString *apiPrefix, NSDictionary *apiBlockMap))callBack;
 //- (void)fetchJSContextApiWithApis:(NSArray <id <ZHJSApiProtocol>> *)apis callBack:(void (^) (NSString *apiPrefix, NSDictionary *apiBlockMap))callBack;
-- (void)fetchJSContextLogApi:(void (^) (NSString *apiPrefix, NSDictionary *apiBlockMap))callBack;
+- (void)fetchJSContextConsoleApi:(void (^) (NSString *apiPrefix, NSDictionary *apiBlockMap))callBack;
 //WebView注入的api
 - (NSString *)fetchWebViewLogApi;
 - (NSString *)fetchWebViewConsoleApi;

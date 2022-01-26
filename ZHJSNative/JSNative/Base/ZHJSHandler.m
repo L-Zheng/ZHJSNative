@@ -82,12 +82,12 @@ case cType:{\
 
 #pragma mark - JSContext api
 //JSContext注入的api
-- (void)fetchJSContextLogApi:(void (^) (NSString *apiPrefix, NSDictionary *apiBlockMap))callBack{
+- (void)fetchJSContextConsoleApi:(void (^) (NSString *apiPrefix, NSDictionary *apiBlockMap))callBack{
     if (!callBack) return;
-    void (^logBlock)(void) = ^(){
-        NSArray *args = [JSContext currentArguments];
+    
+    // 自定义输出
+    void (^block) (NSArray *, NSString *) = ^(NSArray *args, NSString *flag){
         if (args.count == 0) return;
-        
         id (^formatLog)(JSValue *) = ^id(JSValue *aJSValue){
             if ([aJSValue isUndefined]) {
                 return @"the params is [object Undefined]";
@@ -99,16 +99,37 @@ case cType:{\
         };
         
         if (args.count == 1) {
-            NSLog(@"👉JSCore log >>: %@", formatLog(args[0]));
+            NSLog(@"👉JSCore %@ >>: %@", flag, formatLog(args[0]));
             return;
         }
         NSMutableArray *messages = [NSMutableArray array];
         for (JSValue *obj in args) {
             [messages addObject:formatLog(obj)?:@"null"];
         }
-        NSLog(@"👉JSCore log >>: %@", messages);
+        NSLog(@"👉JSCore %@ >>: %@", flag, messages);
     };
-    callBack(@"console", @{@"log": logBlock});
+    
+    // 注入console
+    NSMutableDictionary *resMap = [NSMutableDictionary dictionary];
+    JSValue *oriConsoleValue = [self.jsContext objectForKeyedSubscript:@"console"];
+    NSArray *flagsMap = @[
+        @[@"debug"],
+        @[@"error"],
+        @[@"info"],
+        @[@"log"],
+        @[@"warn"]
+    ];
+    for (NSArray *flags in flagsMap) {
+        NSString *flag = [flags[0] copy];
+        [resMap setObject:[^{
+            NSArray *args = [JSContext currentArguments];
+            // 回调原始输出方法 用于safari调试console输出
+            [[oriConsoleValue objectForKeyedSubscript:flag] callWithArguments:args];
+            // 回调自定义输出
+            block(args, flag);
+        } copy] forKey:flag];
+    }
+    callBack(@"console", resMap.copy);
 }
 - (void)fetchJSContextApi:(void (^) (NSString *apiPrefix, NSDictionary *apiBlockMap))callBack{
     if (!callBack) return;

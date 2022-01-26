@@ -133,7 +133,7 @@
 //注入console.log
 - (void)registerLogAPI{
     __weak __typeof__(self) __self = self;
-    [self.handler fetchJSContextLogApi:^(NSString *apiPrefix, NSDictionary *apiBlockMap) {
+    [self.handler fetchJSContextConsoleApi:^(NSString *apiPrefix, NSDictionary *apiBlockMap) {
         if (apiBlockMap.allKeys.count == 0) return;
         [__self setObject:apiBlockMap forKeyedSubscript:apiPrefix];
     }];
@@ -208,7 +208,7 @@
                     return;
                 }
                 
-                JSValue *res = [__self evaluateScript:loadStr];
+                JSValue *res = [__self evaluateScript:loadStr withSourceURL:url];
                 callBack([res toObject], nil);
             });
         }];
@@ -236,7 +236,7 @@
      JSValue *parseFunc = [self.context objectForKeyedSubscript:@"aa"];
      [parseFunc callWithArguments:@[]];  // 输出1111111111
      */
-    JSValue *res = [self evaluateScript:loadStr];
+    JSValue *res = [self evaluateScript:loadStr withSourceURL:url];
     callBack([res toObject], nil);
 }
 
