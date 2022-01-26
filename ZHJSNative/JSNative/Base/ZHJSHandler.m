@@ -123,13 +123,52 @@ case cType:{\
         NSString *flag = [flags[0] copy];
 
         JSValue *jsFlagValue = [oriConsoleValue objectForKeyedSubscript:flag];
-        // jsvalue 对 jscontext是强引用
-        __weak __typeof__(jsFlagValue) weakJsFlagValue = jsFlagValue;
+        /*
+         JSValue 对 JSContext是强引用  不能直接在block里面使用JSValue
+         也不能使用weakJSValue  在setObject: forKeyedSubscript:方法被调用后 原有的JSValue被释放
+         
+         有条件地持有（conditional retain）
+            在以下两种情况任何一个满足的情况下保证其管理的JSValue被持有不被释放：
+                可以通过JavaScript的对象图找到该JSValue。【即在JavaScript环境中存在该JSValue】
+                可以通过native对象图找到该JSManagedValue。【即在JSVirtualMachine中存在JSManagedValue，那么JSManagedValue弱引用的JSValue即使引用数为0，也不会释放】
+            如果以上条件都不满足，JSManagedValue对象就会将其value置为nil并释放该JSValue
+         
+         源代码: JSManagedValue内部实现
+             + (JSManagedValue *)managedValueWithValue:(JSValue *)value andOwner:(id)owner
+             {
+                 // 这里的JSManagedValue并没有对JSValue进行强引用
+                 JSManagedValue *managedValue = [[self alloc] initWithValue:value];
+                 // context对应的virtualMachine对value进行了强持有
+                 [value.context.virtualMachine addManagedReference:managedValue withOwner:owner];
+                 return [managedValue autorelease];
+             }
+             - (void)dealloc
+             {
+                 JSVirtualMachine *virtualMachine = [[[self value] context] virtualMachine];
+                 if (virtualMachine) {
+                     NSMapTable *copy = [m_owners copy];
+                     for (id owner in [copy keyEnumerator]) {
+                         size_t count = reinterpret_cast<size_t>(NSMapGet(m_owners, owner));
+                         while (count--)
+                             [virtualMachine removeManagedReference:self withOwner:owner];
+                     }
+                     [copy release];
+                 }
+
+                 [self disconnectValue];
+                 [m_owners release];
+                 [super dealloc];
+             }
+         
+         JSManagedValue.m_owners强引用owner
+         JSVirtualMachine.ownedObjects强引用owner
+         */
+        JSManagedValue *mgValue = [JSManagedValue managedValueWithValue:jsFlagValue andOwner:self];
         
         void (^blockFlag) (void) = ^{
             NSArray *args = [JSContext currentArguments];
             // 回调原始输出方法 用于safari调试console输出
-            [weakJsFlagValue callWithArguments:args];
+            [[mgValue value] callWithArguments:args];
             // 回调自定义输出
             block(args, flag);
         };
