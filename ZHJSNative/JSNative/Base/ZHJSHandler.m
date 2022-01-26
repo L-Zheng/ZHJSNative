@@ -112,8 +112,6 @@ case cType:{\
     // 注入console
     NSMutableDictionary *resMap = [NSMutableDictionary dictionary];
     JSValue *oriConsoleValue = [self.jsContext objectForKeyedSubscript:@"console"];
-    // jsvalue 对 jscontext是强引用
-    __weak __typeof__(oriConsoleValue) weakOriConsoleValue = oriConsoleValue;
     NSArray *flagsMap = @[
         @[@"debug"],
         @[@"error"],
@@ -123,15 +121,26 @@ case cType:{\
     ];
     for (NSArray *flags in flagsMap) {
         NSString *flag = [flags[0] copy];
-        [resMap setObject:[^{
+
+        JSValue *jsFlagValue = [oriConsoleValue objectForKeyedSubscript:flag];
+        // jsvalue 对 jscontext是强引用
+        __weak __typeof__(jsFlagValue) weakJsFlagValue = jsFlagValue;
+        
+        void (^blockFlag) (void) = ^{
             NSArray *args = [JSContext currentArguments];
             // 回调原始输出方法 用于safari调试console输出
-            [[weakOriConsoleValue objectForKeyedSubscript:flag] callWithArguments:args];
+            [weakJsFlagValue callWithArguments:args];
             // 回调自定义输出
             block(args, flag);
-        } copy] forKey:flag];
+        };
+        
+        if (oriConsoleValue) {
+            [oriConsoleValue setObject:[blockFlag copy] forKeyedSubscript:flag];
+        }else{
+            [resMap setObject:[blockFlag copy] forKey:flag];
+        }
     }
-    callBack(@"console", resMap.copy);
+    callBack(oriConsoleValue ? nil : @"console", oriConsoleValue ? nil : resMap.copy);
 }
 - (void)fetchJSContextApi:(void (^) (NSString *apiPrefix, NSDictionary *apiBlockMap))callBack{
     if (!callBack) return;

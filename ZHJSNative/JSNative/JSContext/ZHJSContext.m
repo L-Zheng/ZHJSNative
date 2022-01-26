@@ -134,7 +134,10 @@
 - (void)registerLogAPI{
     __weak __typeof__(self) __self = self;
     [self.handler fetchJSContextConsoleApi:^(NSString *apiPrefix, NSDictionary *apiBlockMap) {
-        if (apiBlockMap.allKeys.count == 0) return;
+        if (!apiPrefix || ![apiPrefix isKindOfClass:NSString.class] || apiPrefix.length == 0 ||
+            !apiBlockMap || ![apiBlockMap isKindOfClass:NSDictionary.class] || apiBlockMap.allKeys.count == 0) {
+            return;
+        }
         [__self setObject:apiBlockMap forKeyedSubscript:apiPrefix];
     }];
 }
