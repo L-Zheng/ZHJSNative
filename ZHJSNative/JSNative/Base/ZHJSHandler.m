@@ -112,6 +112,8 @@ case cType:{\
     // 注入console
     NSMutableDictionary *resMap = [NSMutableDictionary dictionary];
     JSValue *oriConsoleValue = [self.jsContext objectForKeyedSubscript:@"console"];
+    // jsvalue 对 jscontext是强引用
+    __weak __typeof__(oriConsoleValue) weakOriConsoleValue = oriConsoleValue;
     NSArray *flagsMap = @[
         @[@"debug"],
         @[@"error"],
@@ -124,7 +126,7 @@ case cType:{\
         [resMap setObject:[^{
             NSArray *args = [JSContext currentArguments];
             // 回调原始输出方法 用于safari调试console输出
-            [[oriConsoleValue objectForKeyedSubscript:flag] callWithArguments:args];
+            [[weakOriConsoleValue objectForKeyedSubscript:flag] callWithArguments:args];
             // 回调自定义输出
             block(args, flag);
         } copy] forKey:flag];
