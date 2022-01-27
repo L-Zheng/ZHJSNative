@@ -408,6 +408,8 @@
 
 - (void)dealloc{
     [self clear];
+    
+    [self.context destroyContext];
     NSLog(@"%s", __func__);
 }
 

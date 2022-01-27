@@ -53,6 +53,12 @@
        loadStartBlock:(void (^) (NSURL *runSandBoxURL))loadStartBlock
       loadFinishBlock:(void (^) (NSDictionary *info, NSError *error))loadFinishBlock;
 
+#pragma mark - console
+
+- (void)setConsoleValue:(JSValue *)jsValue forKey:(NSString *)key;
+- (JSValue *)getConsoleValueForKey:(NSString *)key;
+- (void)destroyContext;
+
 #pragma mark - render url
 
 @property (nonatomic, strong) NSURL *renderURL;

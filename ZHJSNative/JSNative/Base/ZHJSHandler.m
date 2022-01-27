@@ -108,20 +108,20 @@ case cType:{\
         }
         NSLog(@"👉JSCore %@ >>: %@", flag, messages);
     };
+    __weak __typeof__(self) weakSelf = self;
+    BOOL releaseIpa = YES;
+#ifdef DEBUG
+    releaseIpa = NO;
+#endif
+    // 方案1：JSManagedValue   方案2：强引用JSValue 手动解除循环引用 destroyContext
+    BOOL isWay1 = YES;
     
     // 注入console
     NSMutableDictionary *resMap = [NSMutableDictionary dictionary];
     JSValue *oriConsoleValue = [self.jsContext objectForKeyedSubscript:@"console"];
-    NSArray *flagsMap = @[
-        @[@"debug"],
-        @[@"error"],
-        @[@"info"],
-        @[@"log"],
-        @[@"warn"]
-    ];
+    NSArray *flagsMap = @[@[@"debug"],@[@"error"],@[@"info"],@[@"log"],@[@"warn"]];
     for (NSArray *flags in flagsMap) {
         NSString *flag = [flags[0] copy];
-
         JSValue *jsFlagValue = [oriConsoleValue objectForKeyedSubscript:flag];
         /*
          JSValue 对 JSContext是强引用  不能直接在block里面使用JSValue
@@ -163,12 +163,20 @@ case cType:{\
          JSManagedValue.m_owners强引用owner
          JSVirtualMachine.ownedObjects强引用owner
          */
-        JSManagedValue *mgValue = [JSManagedValue managedValueWithValue:jsFlagValue andOwner:self];
-        
+        JSManagedValue *mgValue = releaseIpa ? nil : (isWay1 ? [JSManagedValue managedValueWithValue:jsFlagValue andOwner:self] : nil);
+        if (!releaseIpa && !isWay1) {
+            [self.jsContext setConsoleValue:jsFlagValue forKey:flag];
+        }
         void (^blockFlag) (void) = ^{
             NSArray *args = [JSContext currentArguments];
             // 回调原始输出方法 用于safari调试console输出
-            [[mgValue value] callWithArguments:args];
+            if (!releaseIpa) {
+                if (isWay1) {
+                    [[mgValue value] callWithArguments:args];
+                }else{
+                    [[weakSelf.jsContext getConsoleValueForKey:flag] callWithArguments:args];
+                }
+            }
             // 回调自定义输出
             block(args, flag);
         };

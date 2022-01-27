@@ -14,7 +14,8 @@
 
 @interface ZHJSContext ()
 @property (nonatomic,strong) ZHJSHandler *handler;
-
+@property (nonatomic,strong) NSLock *lock;
+@property (nonatomic,retain) NSMutableDictionary <NSString *, JSValue *> *consoleValueMap;
 //运行的沙盒目录
 @property (nonatomic, copy) NSURL *runSandBoxURL;
 @end
@@ -48,6 +49,8 @@
     JSVirtualMachine *vm = [[JSVirtualMachine alloc] init];
     self = [self initWithVirtualMachine:vm];
     if (self) {
+        self.lock = [[NSLock alloc] init];
+        
         // debug配置
         ZHCtxDebugItem *debugItem = [ZHCtxDebugItem item:self];
         self.debugItem = debugItem;
@@ -262,6 +265,34 @@
         return nil;
     }
     return [func callWithArguments:arguments];
+}
+
+#pragma mark - console
+
+- (void)setConsoleValue:(JSValue *)jsValue forKey:(NSString *)key{
+    if (!key || ![key isKindOfClass:NSString.class] || key.length == 0 ||
+        !jsValue || ![jsValue isKindOfClass:jsValue.class]) {
+        return;
+    }
+    [self.lock lock];
+    if (!self.consoleValueMap) {
+        self.consoleValueMap = [NSMutableDictionary dictionary];
+    }
+    [self.consoleValueMap setObject:jsValue forKey:key];
+    [self.lock unlock];
+}
+- (JSValue *)getConsoleValueForKey:(NSString *)key{
+    JSValue *res = nil;
+    [self.lock lock];
+    res = [self.consoleValueMap objectForKey:key];
+    [self.lock unlock];
+    return res;
+}
+- (void)destroyContext{
+    // 解除循环引用
+    [self.lock lock];
+    [self.consoleValueMap removeAllObjects];
+    [self.lock unlock];
 }
 
 #pragma mark - ZHJSPageProtocol
