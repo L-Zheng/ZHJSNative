@@ -108,86 +108,109 @@ case cType:{\
         }
         NSLog(@"👉JSCore %@ >>: %@", flag, messages);
     };
-    __weak __typeof__(self) weakSelf = self;
-    BOOL releaseIpa = YES;
+    BOOL prjDebug = NO;
 #ifdef DEBUG
-    releaseIpa = NO;
+    prjDebug = YES;
 #endif
-    // 方案1：JSManagedValue   方案2：强引用JSValue 手动解除循环引用 destroyContext
-    BOOL isWay1 = YES;
     
-    // 注入console
+    __weak __typeof__(self) weakSelf = self;
+    /*
+     JSValue 对 JSContext是强引用  不能直接在block里面使用JSValue
+     也不能使用weakJSValue  在setObject: forKeyedSubscript:方法被调用后 原有的JSValue被释放
+     
+     有条件地持有（conditional retain）
+        在以下两种情况任何一个满足的情况下保证其管理的JSValue被持有不被释放：
+            可以通过JavaScript的对象图找到该JSValue。【即在JavaScript环境中存在该JSValue】
+            可以通过native对象图找到该JSManagedValue。【即在JSVirtualMachine中存在JSManagedValue，那么JSManagedValue弱引用的JSValue即使引用数为0，也不会释放】
+        如果以上条件都不满足，JSManagedValue对象就会将其value置为nil并释放该JSValue
+     
+     源代码: JSManagedValue内部实现
+         + (JSManagedValue *)managedValueWithValue:(JSValue *)value andOwner:(id)owner
+         {
+             // 这里的JSManagedValue并没有对JSValue进行强引用
+             JSManagedValue *managedValue = [[self alloc] initWithValue:value];
+             // context对应的virtualMachine对value进行了强持有
+             [value.context.virtualMachine addManagedReference:managedValue withOwner:owner];
+             return [managedValue autorelease];
+         }
+         - (void)dealloc
+         {
+             JSVirtualMachine *virtualMachine = [[[self value] context] virtualMachine];
+             if (virtualMachine) {
+                 NSMapTable *copy = [m_owners copy];
+                 for (id owner in [copy keyEnumerator]) {
+                     size_t count = reinterpret_cast<size_t>(NSMapGet(m_owners, owner));
+                     while (count--)
+                         [virtualMachine removeManagedReference:self withOwner:owner];
+                 }
+                 [copy release];
+             }
+
+             [self disconnectValue];
+             [m_owners release];
+             [super dealloc];
+         }
+     
+     JSManagedValue.m_owners强引用owner
+     JSVirtualMachine.ownedObjects强引用owner
+     */
+    // 注入console  使用JSManagedValue
+    /*
     NSMutableDictionary *resMap = [NSMutableDictionary dictionary];
-    JSValue *oriConsoleValue = [self.jsContext objectForKeyedSubscript:@"console"];
+    JSValue *oriConsole = [self.jsContext objectForKeyedSubscript:@"console"];
     NSArray *flagsMap = @[@[@"debug"],@[@"error"],@[@"info"],@[@"log"],@[@"warn"]];
     for (NSArray *flags in flagsMap) {
-        NSString *flag = [flags[0] copy];
-        JSValue *jsFlagValue = [oriConsoleValue objectForKeyedSubscript:flag];
-        /*
-         JSValue 对 JSContext是强引用  不能直接在block里面使用JSValue
-         也不能使用weakJSValue  在setObject: forKeyedSubscript:方法被调用后 原有的JSValue被释放
-         
-         有条件地持有（conditional retain）
-            在以下两种情况任何一个满足的情况下保证其管理的JSValue被持有不被释放：
-                可以通过JavaScript的对象图找到该JSValue。【即在JavaScript环境中存在该JSValue】
-                可以通过native对象图找到该JSManagedValue。【即在JSVirtualMachine中存在JSManagedValue，那么JSManagedValue弱引用的JSValue即使引用数为0，也不会释放】
-            如果以上条件都不满足，JSManagedValue对象就会将其value置为nil并释放该JSValue
-         
-         源代码: JSManagedValue内部实现
-             + (JSManagedValue *)managedValueWithValue:(JSValue *)value andOwner:(id)owner
-             {
-                 // 这里的JSManagedValue并没有对JSValue进行强引用
-                 JSManagedValue *managedValue = [[self alloc] initWithValue:value];
-                 // context对应的virtualMachine对value进行了强持有
-                 [value.context.virtualMachine addManagedReference:managedValue withOwner:owner];
-                 return [managedValue autorelease];
-             }
-             - (void)dealloc
-             {
-                 JSVirtualMachine *virtualMachine = [[[self value] context] virtualMachine];
-                 if (virtualMachine) {
-                     NSMapTable *copy = [m_owners copy];
-                     for (id owner in [copy keyEnumerator]) {
-                         size_t count = reinterpret_cast<size_t>(NSMapGet(m_owners, owner));
-                         while (count--)
-                             [virtualMachine removeManagedReference:self withOwner:owner];
-                     }
-                     [copy release];
-                 }
-
-                 [self disconnectValue];
-                 [m_owners release];
-                 [super dealloc];
-             }
-         
-         JSManagedValue.m_owners强引用owner
-         JSVirtualMachine.ownedObjects强引用owner
-         */
-        JSManagedValue *mgValue = releaseIpa ? nil : (isWay1 ? [JSManagedValue managedValueWithValue:jsFlagValue andOwner:self] : nil);
-        if (!releaseIpa && !isWay1) {
-            [self.jsContext setConsoleValue:jsFlagValue forKey:flag];
+        NSString *flag = flags[0];
+        JSManagedValue *jsManaged = nil;
+        if (prjDebug) {
+            JSValue *flagJs = [oriConsole objectForKeyedSubscript:flag];
+            jsManaged = flagJs ? [JSManagedValue managedValueWithValue:flagJs andOwner:self] : nil;
         }
-        void (^blockFlag) (void) = ^{
+        void (^flagJsBlock) (void) = ^{
             NSArray *args = [JSContext currentArguments];
             // 回调原始输出方法 用于safari调试console输出
-            if (!releaseIpa) {
-                if (isWay1) {
-                    [[mgValue value] callWithArguments:args];
-                }else{
-                    [[weakSelf.jsContext getConsoleValueForKey:flag] callWithArguments:args];
-                }
+            if (prjDebug) {
+                [[jsManaged value] callWithArguments:args];
             }
             // 回调自定义输出
             block(args, flag);
         };
-        
-        if (oriConsoleValue) {
-            [oriConsoleValue setObject:[blockFlag copy] forKeyedSubscript:flag];
+        if (oriConsole) {
+            [oriConsole setObject:[flagJsBlock copy] forKeyedSubscript:flag];
         }else{
-            [resMap setObject:[blockFlag copy] forKey:flag];
+            [resMap setObject:[flagJsBlock copy] forKey:flag];
         }
     }
-    callBack(oriConsoleValue ? nil : @"console", oriConsoleValue ? nil : resMap.copy);
+    callBack(oriConsole ? nil : @"console", oriConsole ? nil : resMap.copy);
+    */
+    
+    
+   // 注入console  强引用JSValue 手动解除循环引用 destroyContext
+    NSMutableDictionary *resMap = [NSMutableDictionary dictionary];
+    JSValue *oriConsole = [self.jsContext objectForKeyedSubscript:@"console"];
+    NSArray *flagsMap = @[@[@"debug"],@[@"error"],@[@"info"],@[@"log"],@[@"warn"]];
+    for (NSArray *flags in flagsMap) {
+        NSString *flag = flags[0];
+        if (prjDebug) {
+            JSValue *flagJs = [oriConsole objectForKeyedSubscript:flag];
+            [self.jsContext setConsole:flagJs forKey:flag];
+        }
+        void (^flagJsBlock) (void) = ^{
+            NSArray *args = [JSContext currentArguments];
+            // 回调原始输出方法 用于safari调试console输出
+            if (prjDebug) {
+                [[weakSelf.jsContext getConsoleForKey:flag] callWithArguments:args];
+            }
+            // 回调自定义输出
+            block(args, flag);
+        };
+        if (oriConsole) {
+            [oriConsole setObject:[flagJsBlock copy] forKeyedSubscript:flag];
+        }else{
+            [resMap setObject:[flagJsBlock copy] forKey:flag];
+        }
+    }
+    callBack(oriConsole ? nil : @"console", oriConsole ? nil : resMap.copy);
 }
 - (void)fetchJSContextApi:(void (^) (NSString *apiPrefix, NSDictionary *apiBlockMap))callBack{
     if (!callBack) return;

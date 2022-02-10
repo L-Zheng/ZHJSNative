@@ -55,8 +55,8 @@
 
 #pragma mark - console
 
-- (void)setConsoleValue:(JSValue *)jsValue forKey:(NSString *)key;
-- (JSValue *)getConsoleValueForKey:(NSString *)key;
+- (void)setConsole:(JSValue *)jsValue forKey:(NSString *)key;
+- (JSValue *)getConsoleForKey:(NSString *)key;
 - (void)destroyContext;
 
 #pragma mark - render url
