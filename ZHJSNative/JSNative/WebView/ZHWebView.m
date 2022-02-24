@@ -11,6 +11,7 @@
 #import "ZHJSInWebSocketApi.h"
 #import "ZHJSInWebFundApi.h"
 #import "NSError+ZH.h"
+#import <objc/runtime.h>
 #import "ZHUtil.h"
 
 @interface ZHWebView ()<WKNavigationDelegate, WKUIDelegate, UIScrollViewDelegate, UIGestureRecognizerDelegate>
@@ -229,6 +230,7 @@
 - (instancetype)initWithFrame:(CGRect)frame configuration:(WKWebViewConfiguration *)configuration{
     self = [super initWithFrame:frame configuration:configuration];
     if (self) {
+        [self allowDisplayingKeyboardWithoutUserAction];
         [self updateUserInterfaceStyle];
         [self configGesture];
         [self configUI];
@@ -339,6 +341,38 @@
 
 - (void)updateUI{
     [self.debugItem updateFloatViewLocation];
+}
+
+#pragma mark - keyboard
+
+// 允许自动唤起键盘权限
+- (void)allowDisplayingKeyboardWithoutUserAction {
+    Class class = NSClassFromString(@"WKContentView");
+    NSOperatingSystemVersion iOS_11_3_0 = (NSOperatingSystemVersion){11, 3, 0};
+    NSOperatingSystemVersion iOS_12_2_0 = (NSOperatingSystemVersion){12, 2, 0};
+    NSOperatingSystemVersion iOS_13_0_0 = (NSOperatingSystemVersion){13, 0, 0};
+    char * methodSignature = "_startAssistingNode:userIsInteracting:blurPreviousNode:userObject:";
+    if ([[NSProcessInfo processInfo] isOperatingSystemAtLeastVersion: iOS_13_0_0]) {
+        methodSignature = "_elementDidFocus:userIsInteracting:blurPreviousNode:activityStateChanges:userObject:";
+    } else if ([[NSProcessInfo processInfo] isOperatingSystemAtLeastVersion: iOS_12_2_0]) {
+        methodSignature = "_elementDidFocus:userIsInteracting:blurPreviousNode:changingActivityState:userObject:";
+    }else if ([[NSProcessInfo processInfo] isOperatingSystemAtLeastVersion: iOS_11_3_0]){
+        methodSignature = "_startAssistingNode:userIsInteracting:blurPreviousNode:changingActivityState:userObject:";
+    }
+    SEL selector = sel_getUid(methodSignature);
+    Method method = class_getInstanceMethod(class, selector);
+    IMP original = method_getImplementation(method);
+    IMP override;
+    if ([[NSProcessInfo processInfo] isOperatingSystemAtLeastVersion: iOS_11_3_0]) {
+        override = imp_implementationWithBlock(^void(id me, void* arg0, BOOL arg1, BOOL arg2, BOOL arg3, id arg4) {
+            ((void (*)(id, SEL, void*, BOOL, BOOL, BOOL, id))original)(me, selector, arg0, TRUE, arg2, arg3, arg4);
+        });
+    } else {
+        override = imp_implementationWithBlock(^void(id me, void* arg0, BOOL arg1, BOOL arg2, id arg3) {
+            ((void (*)(id, SEL, void*, BOOL, BOOL, id))original)(me, selector, arg0, TRUE, arg2, arg3);
+        });
+    }
+    method_setImplementation(method, override);
 }
 
 #pragma mark - theme
