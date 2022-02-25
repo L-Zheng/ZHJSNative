@@ -903,7 +903,8 @@
     
 //    NSLog(@"lbz-web-%s", __func__);
     id <ZHWKNavigationDelegate> de = self.zh_navigationDelegate;
-    if (ZHCheckDelegate(de, _cmd)) {
+    // 不要使用 ZHCheckDelegate(de, _cmd)， 此方法名可能会被其它代码用运行时交换掉，导致无法回调
+    if (ZHCheckDelegate(de, @selector(webView:decidePolicyForNavigationAction:decisionHandler:))) {
         [de webView:webView decidePolicyForNavigationAction:navigationAction decisionHandler:decisionHandler];
         return;
     }
@@ -918,7 +919,7 @@
 - (void)webView:(WKWebView *)webView decidePolicyForNavigationResponse:(WKNavigationResponse *)navigationResponse decisionHandler:(void (^)(WKNavigationResponsePolicy))decisionHandler{
 //    NSLog(@"lbz-web-%s", __func__);
     id <ZHWKNavigationDelegate> de = self.zh_navigationDelegate;
-    if (ZHCheckDelegate(de, _cmd)) {
+    if (ZHCheckDelegate(de, @selector(webView:decidePolicyForNavigationResponse:decisionHandler:))) {
         return [de webView:webView decidePolicyForNavigationResponse:navigationResponse decisionHandler:decisionHandler];
     }
     if (decisionHandler) decisionHandler(WKNavigationResponsePolicyAllow);
@@ -927,7 +928,7 @@
 - (void)webView:(WKWebView *)webView didStartProvisionalNavigation:(null_unspecified WKNavigation *)navigation{
 //    NSLog(@"lbz-web-%s", __func__);
     id <ZHWKNavigationDelegate> de = self.zh_navigationDelegate;
-    if (ZHCheckDelegate(de, _cmd)) {
+    if (ZHCheckDelegate(de, @selector(webView:didStartProvisionalNavigation:))) {
         return [de webView:webView didStartProvisionalNavigation:navigation];
     }
 }
@@ -935,7 +936,7 @@
 - (void)webView:(WKWebView *)webView didReceiveServerRedirectForProvisionalNavigation:(null_unspecified WKNavigation *)navigation{
 //    NSLog(@"lbz-web-%s", __func__);
     id <ZHWKNavigationDelegate> de = self.zh_navigationDelegate;
-    if (ZHCheckDelegate(de, _cmd)) {
+    if (ZHCheckDelegate(de, @selector(webView:didReceiveServerRedirectForProvisionalNavigation:))) {
         return [de webView:webView didReceiveServerRedirectForProvisionalNavigation:navigation];
     }
 }
@@ -947,7 +948,7 @@
     NSLog(@"%@",error);
     
     id <ZHWKNavigationDelegate> de = self.zh_navigationDelegate;
-    if (ZHCheckDelegate(de, _cmd)) {
+    if (ZHCheckDelegate(de, @selector(webView:didFailProvisionalNavigation:withError:))) {
         return [de webView:webView didFailProvisionalNavigation:navigation withError:error];
     }
 }
@@ -955,7 +956,7 @@
 - (void)webView:(WKWebView *)webView didCommitNavigation:(null_unspecified WKNavigation *)navigation{
 //    NSLog(@"lbz-web-%s", __func__);
     id <ZHWKNavigationDelegate> de = self.zh_navigationDelegate;
-    if (ZHCheckDelegate(de, _cmd)) {
+    if (ZHCheckDelegate(de, @selector(webView:didCommitNavigation:))) {
         return [de webView:webView didCommitNavigation:navigation];
     }
 }
@@ -965,7 +966,7 @@
     if (webView.loadFinish) webView.loadFinish(nil, nil);
     
     id <ZHWKNavigationDelegate> de = self.zh_navigationDelegate;
-    if (ZHCheckDelegate(de, _cmd)) {
+    if (ZHCheckDelegate(de, @selector(webView:didFinishNavigation:))) {
         return [de webView:webView didFinishNavigation:navigation];
     }
 }
@@ -975,13 +976,13 @@
     if (webView.loadFinish) webView.loadFinish(nil, ZHInlineError(error.code, ZHLCInlineString(@"%@", error.zh_localizedDescription)));
     
     id <ZHWKNavigationDelegate> de = self.zh_navigationDelegate;
-    if (ZHCheckDelegate(de, _cmd)) {
+    if (ZHCheckDelegate(de, @selector(webView:didFailNavigation:withError:))) {
         return [de webView:webView didFailNavigation:navigation withError:error];
     }
 }
 //- (void)webView:(WKWebView *)webView didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(NSURLSessionAuthChallengeDisposition disposition, NSURLCredential * _Nullable credential))completionHandler{
 //    id <ZHWKNavigationDelegate> de = self.zh_navigationDelegate;
-//    if (ZHCheckDelegate(de, _cmd)) {
+//    if (ZHCheckDelegate(de, @selector(webView:didReceiveAuthenticationChallenge:completionHandler:))) {
 //        return [de webView:webView didReceiveAuthenticationChallenge:challenge completionHandler:completionHandler];
 //    }
 //}
@@ -998,7 +999,7 @@
         self.didTerminate = YES;
 
         id <ZHWKNavigationDelegate> de = self.zh_navigationDelegate;
-        if (ZHCheckDelegate(de, _cmd)) {
+        if (ZHCheckDelegate(de, @selector(webViewWebContentProcessDidTerminate:))) {
             [de webViewWebContentProcessDidTerminate:webView];
         }else{
             [self.handler showWebViewException:exceptionInfo];
@@ -1011,7 +1012,7 @@
 // 页面是弹出窗口 _blank 处理
 - (WKWebView *)webView:(ZHWebView *)webView createWebViewWithConfiguration:(WKWebViewConfiguration *)configuration forNavigationAction:(WKNavigationAction *)navigationAction windowFeatures:(WKWindowFeatures *)windowFeatures {
     id <ZHWKUIDelegate> de = self.zh_UIDelegate;
-    if (ZHCheckDelegate(de, _cmd)) {
+    if (ZHCheckDelegate(de, @selector(webView:createWebViewWithConfiguration:forNavigationAction:windowFeatures:))) {
         return [de webView:webView createWebViewWithConfiguration:configuration forNavigationAction:navigationAction windowFeatures:windowFeatures];
     }
     
@@ -1023,13 +1024,13 @@
 - (void)webViewDidClose:(WKWebView *)webView{
     if (![ZHJSDebugMg() availableIOS9]) return;
     id <ZHWKUIDelegate> de = self.zh_UIDelegate;
-    if (ZHCheckDelegate(de, _cmd)) {
+    if (ZHCheckDelegate(de, @selector(webViewDidClose:))) {
         return [de webViewDidClose:webView];
     }
 }
 - (void)webView:(WKWebView *)webView runJavaScriptAlertPanelWithMessage:(NSString *)message initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(void))completionHandler{
     id <ZHWKUIDelegate> de = self.zh_UIDelegate;
-    if (ZHCheckDelegate(de, _cmd)) {
+    if (ZHCheckDelegate(de, @selector(webView:runJavaScriptAlertPanelWithMessage:initiatedByFrame:completionHandler:))) {
         return [de webView:webView runJavaScriptAlertPanelWithMessage:message initiatedByFrame:frame completionHandler:completionHandler];
     }
     
@@ -1044,7 +1045,7 @@
 }
 - (void)webView:(WKWebView *)webView runJavaScriptConfirmPanelWithMessage:(NSString *)message initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(BOOL result))completionHandler{
     id <ZHWKUIDelegate> de = self.zh_UIDelegate;
-    if (ZHCheckDelegate(de, _cmd)) {
+    if (ZHCheckDelegate(de, @selector(webView:runJavaScriptConfirmPanelWithMessage:initiatedByFrame:completionHandler:))) {
         return [de webView:webView runJavaScriptConfirmPanelWithMessage:message initiatedByFrame:frame completionHandler:completionHandler];
     }
     
@@ -1067,7 +1068,7 @@
     __weak __typeof__(self) weakSelf = self;
     void (^block) (void) = ^(void){
         id <ZHWKUIDelegate> de = weakSelf.zh_UIDelegate;
-        if (ZHCheckDelegate(de, _cmd)) {
+        if (ZHCheckDelegate(de, @selector(webView:runJavaScriptTextInputPanelWithPrompt:defaultText:initiatedByFrame:completionHandler:))) {
            [de webView:webView runJavaScriptTextInputPanelWithPrompt:prompt defaultText:defaultText initiatedByFrame:frame completionHandler:completionHandler];
            return;
         }
