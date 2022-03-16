@@ -345,7 +345,10 @@
 
 #pragma mark - keyboard
 
-// 允许自动唤起键盘权限
+/*允许自动唤起键盘权限
+ this.$refs.input.focus()
+ document.getElementById('ffff').focus()
+ */
 - (void)allowDisplayingKeyboardWithoutUserAction {
     Class class = NSClassFromString(@"WKContentView");
     NSOperatingSystemVersion iOS_11_3_0 = (NSOperatingSystemVersion){11, 3, 0};
