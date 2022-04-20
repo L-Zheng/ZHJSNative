@@ -8,6 +8,33 @@
 
 #import "ZHJSInApi.h"
 
+@interface ZHJSInApiModule : NSObject <ZHJSApiProtocol>
+@end
+@implementation ZHJSInApiModule
+
+ZHJS_EXPORT_FUNC(stop, @(NO))
+- (void)js_stop:(ZHJSApiArgItem *)arg{
+    NSLog(@"-------%s---------", __func__);
+}
+ZHJS_EXPORT_FUNC(stopSync, @(YES))
+ - (NSString *)js_stopSync:(ZHJSApiArgItem *)arg{
+     NSLog(@"-------%s---------", __func__);
+     return [NSString stringWithUTF8String:__func__];
+ }
+
+//js api方法名前缀  如：fund
+- (NSString *)zh_jsApiPrefixName{
+    return @"zhengvoiceIn";
+}
+//ios api方法名前缀 如：js_
+- (NSString *)zh_iosApiPrefixName{
+    return @"js_";
+}
+@end
+
+
+
+
 @implementation ZHJSInApi
 
 - (NSDictionary *)js_getJsonSync:(ZHJSApiArgItem *)arg0 arg:(ZHJSApiArgItem *)arg p1:(ZHJSApiArgItem *)p1 p2:(id)p2 p3:(id)p3 p4:(id)p4 p5:(id)p5 p6:(id)p6 p7:(id)p7 p8:(id)p8 p9:(id)p9{
@@ -104,6 +131,9 @@ ZHJS_EXPORT_FUNC(getStringSync, @(YES), @"5.4.2", @{@"dd": @"vvv"})
 //js api注入完成通知H5事件的名称
 - (NSString *)zh_jsApiInjectFinishEventName{
     return @"zhengApiInjectFinishEvent";
+}
+- (NSArray <id<ZHJSApiProtocol>> *)zh_jsApiModules{
+    return @[[[ZHJSInApiModule alloc] init]];
 }
 
 - (void)dealloc{

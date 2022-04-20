@@ -22,11 +22,11 @@
 - (void)removeApis:(NSArray <id <ZHJSApiProtocol>> *)apis completion:(void (^) (NSArray <id <ZHJSApiProtocol>> *successApis, NSArray <id <ZHJSApiProtocol>> *failApis, NSError *error))completion;
 
 //api映射表
-- (void)enumRegsiterApiMap:(void (^)(NSString *apiPrefix, NSDictionary <NSString *, ZHJSApiRegisterItem *> *apiMap))block;
+- (void)enumRegsiterApiMap:(void (^)(NSString *apiPrefix, NSDictionary <NSString *, ZHJSApiRegisterItem *> *apiMap, NSDictionary *apiModuleMap))block;
 //遍历方法映射表->获取api注入完成事件名
 - (void)enumRegsiterApiInjectFinishEventNameMap:(void (^)(NSString *apiPrefix, NSString *apiInjectFinishEventName))block;
 //获取方法名
-- (void)fetchSelectorByName:(NSString *)jsMethodName apiPrefix:(NSString *)apiPrefix callBack:(void (^) (id target, SEL sel))callBack;
+- (void)fetchSelectorByName:(NSString *)jsMethodName apiPrefix:(NSString *)apiPrefix jsModuleName:(NSString *)jsModuleName callBack:(void (^) (id target, SEL sel))callBack;
 
 @end
 //NS_ASSUME_NONNULL_END

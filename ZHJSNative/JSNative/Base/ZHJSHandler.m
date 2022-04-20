@@ -216,9 +216,20 @@ case cType:{\
     if (!callBack) return;
     __weak __typeof__(self) __self = self;
     
-    [self.apiHandler enumRegsiterApiMap:^(NSString *apiPrefix, NSDictionary<NSString *,ZHJSApiRegisterItem *> *apiMap) {
-        NSDictionary *resMap = [__self fetchJSContextNativeImpMap:apiPrefix apiMap:apiMap];
-        callBack(resMap ? apiPrefix : nil, resMap);
+    [self.apiHandler enumRegsiterApiMap:^(NSString *apiPrefix, NSDictionary <NSString *, ZHJSApiRegisterItem *> *apiMap, NSDictionary *apiModuleMap) {
+        // 处理api
+        NSDictionary *resApiMap = [__self fetchJSContextNativeImpMap:apiPrefix jsModuleName:nil apiMap:apiMap];
+        // 处理api module
+        NSDictionary *resApiModuleMap = [__self fetchJSContextNativeModuleImpMap:apiPrefix apiModuleMap:apiModuleMap];
+        // 回调
+        NSMutableDictionary *resMap = (resApiMap || resApiModuleMap ? [NSMutableDictionary dictionary] : nil);
+        if (resApiMap) {
+            [resMap addEntriesFromDictionary:resApiMap];
+        }
+        if (resApiModuleMap) {
+            [resMap addEntriesFromDictionary:resApiModuleMap];
+        }
+        callBack(resMap ? apiPrefix : nil, resMap.copy);
     }];
 }
 //- (void)fetchJSContextApiWithApis:(NSArray <id <ZHJSApiProtocol>> *)apis callBack:(void (^) (NSString *apiPrefix, NSDictionary *apiBlockMap))callBack{
@@ -230,7 +241,53 @@ case cType:{\
 //    }];
 //}
 
-- (NSDictionary *)fetchJSContextNativeImpMap:(NSString *)apiPrefix apiMap:(NSDictionary <NSString *,ZHJSApiRegisterItem *> *)apiMap{
+- (NSDictionary *)fetchJSContextNativeModuleImpMap:(NSString *)apiPrefix apiModuleMap:(NSDictionary *)apiModuleMap{
+    if (![apiPrefix isKindOfClass:[NSString class]] || apiPrefix.length == 0 || !apiModuleMap) {
+        return nil;
+    }
+    __weak __typeof__(self) __self = self;
+    
+    NSMutableDictionary *resMap = [NSMutableDictionary dictionary];
+    [apiModuleMap enumerateKeysAndObjectsUsingBlock:^(NSString *jsModuleName, NSDictionary *moduleMap, BOOL *stop) {
+        NSMutableDictionary *moduleImpMap = [NSMutableDictionary dictionary];
+        [moduleMap enumerateKeysAndObjectsUsingBlock:^(NSString *jsMethod, ZHJSApiRegisterItem *item, BOOL *stop) {
+            //设置方法实现
+            [moduleImpMap setValue:[__self jsContextApiMapNativeImp:jsMethod apiPrefix:apiPrefix jsModuleName:jsModuleName] forKey:jsMethod];
+        }];
+        [resMap setObject:moduleImpMap.copy forKey:jsModuleName];
+    }];
+    NSDictionary *blockMap = resMap.copy;
+    
+    NSMutableDictionary *returnMap = [@{
+        @"registerModules": [^id (void){
+            return blockMap;
+        } copy],
+        @"requireModule": [^id (void){
+            //获取参数
+            NSArray *jsArgs = [ZHJSContext currentArguments];
+            //js没传参数
+            if (jsArgs.count == 0) {
+                return nil;
+            }
+            JSValue *jsArg = jsArgs[0];
+            if (!jsArg.isString) {
+                return nil;
+            }
+            NSString *moduleName = [jsArg toString];
+            return [blockMap objectForKey:moduleName];
+        } copy]
+    } mutableCopy];
+    
+    /** 将moduleName同步到api中,即：myApi.xx() = myApi.requireModule('xx') */
+    [blockMap enumerateKeysAndObjectsUsingBlock:^(NSString *moduleName, id obj, BOOL * stop) {
+        [returnMap setObject:[^id (void){
+            return [blockMap objectForKey:moduleName];
+        } copy] forKey:moduleName];
+    }];
+    
+    return returnMap.copy;
+}
+- (NSDictionary *)fetchJSContextNativeImpMap:(NSString *)apiPrefix jsModuleName:(NSString *)jsModuleName apiMap:(NSDictionary <NSString *,ZHJSApiRegisterItem *> *)apiMap{
     if (![apiPrefix isKindOfClass:[NSString class]] || apiPrefix.length == 0) {
         return nil;
     }
@@ -238,13 +295,13 @@ case cType:{\
     __weak __typeof__(self) __self = self;
     [apiMap enumerateKeysAndObjectsUsingBlock:^(NSString *jsMethod, ZHJSApiRegisterItem *item, BOOL *stop) {
         //设置方法实现
-        [resMap setValue:[__self jsContextApiMapNativeImp:jsMethod apiPrefix:apiPrefix] forKey:jsMethod];
+        [resMap setValue:[__self jsContextApiMapNativeImp:jsMethod apiPrefix:apiPrefix jsModuleName:jsModuleName] forKey:jsMethod];
     }];
     return [resMap copy];
 }
 //JSContext调用原生实现
-- (id)jsContextApiMapNativeImp:(NSString *)key apiPrefix:(NSString *)apiPrefix{
-    if (!key || key.length == 0) return nil;
+- (id)jsContextApiMapNativeImp:(NSString *)jsMethod apiPrefix:(NSString *)apiPrefix jsModuleName:(NSString *)jsModuleName{
+    if (!jsMethod || jsMethod.length == 0) return nil;
     __weak __typeof__(self) __self = self;
     
     //处理js的事件
@@ -253,7 +310,7 @@ case cType:{\
         NSArray *jsArgs = [ZHJSContext currentArguments];
         //js没传参数
         if (jsArgs.count == 0) {
-            return [__self runNativeFunc:key apiPrefix:apiPrefix arguments:@[]];
+            return [__self runNativeFunc:jsMethod apiPrefix:apiPrefix jsModuleName:jsModuleName arguments:@[]];
         }
         
         //处理参数
@@ -354,9 +411,9 @@ case cType:{\
             
             [resArgs addObject:[ZHJSApiArgItem item:__self.jsPage jsData:nativeValue callItem:[ZHJSApiCallJsItem itemWithSFCBlock:block jsFuncArgBlock:nil]]];
         }
-        return [__self runNativeFunc:key apiPrefix:apiPrefix arguments:resArgs.copy];
+        return [__self runNativeFunc:jsMethod apiPrefix:apiPrefix jsModuleName:jsModuleName arguments:resArgs.copy];
     };
-    return apiBlock;
+    return [apiBlock copy];
 }
 
 /**JSContext中：js类型-->JSValue类型 对应关系
@@ -447,20 +504,59 @@ case cType:{\
      self.fetchWebViewCallCompleteFuncKey,
      self.fetchWebViewJsFunctionArgKey,
      self.fetchWebViewCallFuncName,
+     self.fetchWebViewGeneratorApiFuncName,
+     self.fetchWebViewGeneratorModuleApiFuncName,
      self.fetchWebViewGeneratorApiFuncName];
     return [res copy];
 }
 
 - (NSString *)fetchWebViewApi:(BOOL)isReset{
     NSMutableString *res = [NSMutableString string];
-    [self.apiHandler enumRegsiterApiMap:^(NSString *apiPrefix, NSDictionary<NSString *,ZHJSApiRegisterItem *> *apiMap) {
+    [self.apiHandler enumRegsiterApiMap:^(NSString *apiPrefix, NSDictionary <NSString *, ZHJSApiRegisterItem *> *apiMap, NSDictionary *apiModuleMap) {
         //因为要移除api  apiMap设定写死传@{}
-        NSString *jsCode = [self fetchWebViewApiJsCode:apiPrefix apiMap:isReset ? @{} : apiMap];
-        if (jsCode) [res appendString:jsCode];
+        if (isReset) {
+            NSString *jsCode = [self fetchWebViewApiJsCode:apiPrefix apiMap:@{}];
+            if (jsCode) [res appendString:jsCode];
+        }else{
+            NSString *jsCode = [self fetchWebViewApiJsCode:apiPrefix apiMap:apiMap];
+            if (jsCode) [res appendString:jsCode];
+            jsCode = [self fetchWebViewApiModuleJsCode:apiPrefix apiModuleMap:apiModuleMap];
+            if (jsCode) [res appendString:jsCode];
+        }
     }];
     return [res copy];
 }
-- (NSString *)fetchWebViewApiJsCode:(NSString *)apiPrefix apiMap:(NSDictionary <NSString *,ZHJSApiRegisterItem *> *)apiMap{
+- (NSString *)fetchWebViewApiModuleJsCode:(NSString *)apiPrefix apiModuleMap:(NSDictionary *)apiModuleMap{
+    if (![apiPrefix isKindOfClass:[NSString class]] || apiPrefix.length == 0 || !apiModuleMap) return nil;
+    
+    NSMutableString *code = [NSMutableString string];
+    
+    [code appendString:@"{"];
+    [apiModuleMap enumerateKeysAndObjectsUsingBlock:^(NSString *jsModuleName, NSDictionary *moduleMap, BOOL *stop) {
+        NSMutableString *code_module = [NSMutableString string];
+        [code_module appendString:@"{"];
+        [moduleMap enumerateKeysAndObjectsUsingBlock:^(NSString *jsMethod, ZHJSApiRegisterItem *item, BOOL *stop) {
+            [code_module appendFormat:@"%@:{sync:%@},", jsMethod, (item.isSync ? @"true" : @"false")];
+        }];
+        // 删除最后一个逗号
+        NSRange range = [code_module rangeOfString:@"," options:NSBackwardsSearch];
+        if (range.location != NSNotFound){
+            [code_module deleteCharactersInRange:range];
+        }
+        [code_module appendString:@"}"];
+        
+        [code appendFormat:@"%@:%@,", jsModuleName, code_module];
+    }];
+    // 删除最后一个逗号
+    NSRange range = [code rangeOfString:@"," options:NSBackwardsSearch];
+    if (range.location != NSNotFound){
+        [code deleteCharactersInRange:range];
+    }
+    [code appendString:@"}"];
+    
+    return [NSString stringWithFormat:@"var %@=%@('%@',%@,%@);", apiPrefix, self.fetchWebViewGeneratorModuleApiFuncName, apiPrefix, apiPrefix, code];
+}
+- (NSString *)fetchWebViewApiJsCode:(NSString *)apiPrefix apiMap:(NSDictionary <NSString *,ZHJSApiRegisterItem *> *)apiMap {
     if (![apiPrefix isKindOfClass:[NSString class]] || apiPrefix.length == 0) return nil;
     
     NSMutableString *code = [NSMutableString string];
@@ -476,7 +572,7 @@ case cType:{\
     }
     [code appendString:@"}"];
     
-    return [NSString stringWithFormat:@"var %@=%@('%@',%@);",apiPrefix, self.fetchWebViewGeneratorApiFuncName, apiPrefix, code];
+    return [NSString stringWithFormat:@"var %@=%@('%@',undefined,%@);",apiPrefix, self.fetchWebViewGeneratorApiFuncName, apiPrefix, code];
 }
 
 - (NSString *)fetchWebViewApiFinish{
@@ -643,10 +739,11 @@ case cType:{\
     }
     // 解析消息
     NSString *jsMethodName = [jsInfo valueForKey:@"methodName"];
+    NSString *jsModuleName = [jsInfo valueForKey:@"moduleName"];
     NSString *apiPrefix = [jsInfo valueForKey:@"apiPrefix"];
     NSArray *jsArgs = [jsInfo valueForKey:@"args"];
     if (!jsArgs || ![jsArgs isKindOfClass:NSArray.class] || jsArgs.count == 0) {
-        return [self runNativeFunc:jsMethodName apiPrefix:apiPrefix arguments:@[]];
+        return [self runNativeFunc:jsMethodName apiPrefix:apiPrefix jsModuleName:jsModuleName arguments:@[]];
     }
     /**  WebView中：js类型-->原生类型 对应关系
      Date：         params=[NSString class]，Date经JSON.stringify转换为string，@"2020-12-29T05:06:55.383Z"
@@ -735,12 +832,12 @@ case cType:{\
             [resArgs addObject:[ZHJSApiArgItem item:self.jsPage jsData:jsArg callItem:[ZHJSApiCallJsItem itemWithSFCBlock:block jsFuncArgBlock:nil]]];
         }
     }
-    return [self runNativeFunc:jsMethodName apiPrefix:apiPrefix arguments:resArgs.copy];
+    return [self runNativeFunc:jsMethodName apiPrefix:apiPrefix jsModuleName:jsModuleName arguments:resArgs.copy];
 }
 //运行原生方法
-- (id)runNativeFunc:(NSString *)jsMethodName apiPrefix:(NSString *)apiPrefix arguments:(NSArray <ZHJSApiArgItem *> *)arguments{
+- (id)runNativeFunc:(NSString *)jsMethodName apiPrefix:(NSString *)apiPrefix jsModuleName:(NSString *)jsModuleName arguments:(NSArray <ZHJSApiArgItem *> *)arguments{
     __block id value = nil;
-    [self.apiHandler fetchSelectorByName:jsMethodName apiPrefix:apiPrefix callBack:^(id target, SEL sel) {
+    [self.apiHandler fetchSelectorByName:jsMethodName apiPrefix:apiPrefix jsModuleName:jsModuleName callBack:^(id target, SEL sel) {
         if (!target || !sel) return;
         
         NSMethodSignature *sig = [target methodSignatureForSelector:sel];
@@ -773,9 +870,9 @@ case cType:{\
     }];
     return value;
 }
-- (id)runNativeFunc_old_basicData:(NSString *)jsMethodName apiPrefix:(NSString *)apiPrefix arguments:(NSArray *)arguments{
+- (id)runNativeFunc_old_basicData:(NSString *)jsMethodName apiPrefix:(NSString *)apiPrefix jsModuleName:(NSString *)jsModuleName arguments:(NSArray *)arguments{
     __block id value = nil;
-    [self.apiHandler fetchSelectorByName:jsMethodName apiPrefix:apiPrefix callBack:^(id target, SEL sel) {
+    [self.apiHandler fetchSelectorByName:jsMethodName apiPrefix:apiPrefix jsModuleName:jsModuleName callBack:^(id target, SEL sel) {
         if (!target || !sel) return;
         
         NSMethodSignature *sig = [target methodSignatureForSelector:sel];
@@ -925,6 +1022,9 @@ case cType:{\
 }
 - (NSString *)fetchWebViewGeneratorApiFuncName{
     return @"ZhengWebViewGeneratorAPI";
+}
+- (NSString *)fetchWebViewGeneratorModuleApiFuncName{
+    return @"ZhengWebViewGeneratorModuleAPI";
 }
 - (NSString *)fetchWebViewCallSuccessFuncKey{
     return @"ZhengCallBackSuccessKey";

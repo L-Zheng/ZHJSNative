@@ -1105,7 +1105,7 @@
     }
     
     NSError *error;
-    NSDictionary *receiveInfo = [NSJSONSerialization JSONObjectWithData:[prompt dataUsingEncoding:NSUTF8StringEncoding] options:NSJSONReadingAllowFragments error:&error];
+    NSDictionary *receiveInfo = [NSJSONSerialization JSONObjectWithData:promptData options:NSJSONReadingAllowFragments error:&error];
     
     if (error || !receiveInfo || ![receiveInfo isKindOfClass:NSDictionary.class] || receiveInfo.allKeys.count == 0) {
         block();

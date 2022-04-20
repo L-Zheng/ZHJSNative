@@ -35,6 +35,7 @@
         } \
         return config.copy; \
     }; \
+    /** ##为拼接符号 等价于  @" + selArg + "      */ \
     return block(@" ## selArg ## ", ## __VA_ARGS__, nil);\
 }
 #define ZHJS_EXPORT_FUNC(sel, ...) ZHJS_EXPORT_FUNC_CONFIG_INTERNAL(sel, ## __VA_ARGS__)
@@ -46,6 +47,9 @@
  如： js中要使用api ---->  myApi.request({})      zh_iosApiPrefixName = @'js_"
  则：- (NSString *)zh_jsApiPrefixName{return @"myApi"}
  对应的原生方法实现 - (void)js_request:(ZHJSApiArgItem *)arg <#xxx:(ZHJSApiArgItem *)xxx#>{}
+ 
+ 如： js中要使用api ---->  myApi.requireModule('xxx').play({})
+ 则：- (NSArray <id<ZHJSApiProtocol>> *)zh_jsApiModules返回的实例对象要服从ZHJSApiProtocol协议
  */
 //js api方法名前缀  如：myApi
 - (NSString *)zh_jsApiPrefixName;
@@ -56,6 +60,8 @@
 //js api注入完成通知H5事件的名称(WebView可能需要)
 // h5监听代码： window.addEventListener('xxx', () => {});
 - (NSString *)zh_jsApiInjectFinishEventName;
+// api module实例
+- (NSArray <id<ZHJSApiProtocol>> *)zh_jsApiModules;
 /**
  ⚠️⚠️⚠️添加API步骤：
  在服从协议ZHJSApiProtocol的类中实现方法即可：

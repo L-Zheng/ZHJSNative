@@ -119,7 +119,7 @@
 //        }
 //    ]
     NSMutableArray *res = [NSMutableArray array];
-    [self.apiHandler enumRegsiterApiMap:^(NSString *apiPrefix, NSDictionary<NSString *,ZHJSApiRegisterItem *> *apiMap) {
+    [self.apiHandler enumRegsiterApiMap:^(NSString *apiPrefix, NSDictionary <NSString *, ZHJSApiRegisterItem *> *apiMap, NSDictionary *apiModuleMap) {
         
         NSMutableArray *subItems = [NSMutableArray array];
         [apiMap enumerateKeysAndObjectsUsingBlock:^(NSString * key, ZHJSApiRegisterItem *obj, BOOL *stop) {

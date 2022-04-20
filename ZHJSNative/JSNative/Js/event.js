@@ -154,7 +154,7 @@ var ZhengReplaceIosCallBack = function(params) {
 }
 /**
 {
-    '-fund-request-1582972065568-arg0-79-88-': {
+    '-fund-moduleName-request-1582972065568-arg0-79-88-': {
         ZhengCallBackSuccessKey: function
         ZhengCallBackFailKey: function
         ZhengCallBackCompleteKey: function
@@ -179,12 +179,12 @@ var ZhengRemoveCallBack = function(randomKey) {
     if (!ZhengCallBackMap.hasOwnProperty(randomKey)) return;
     delete ZhengCallBackMap[randomKey];
 };
-var ZhengHandleCallBackParams = function(apiPrefix, methodName, params, index) {
+var ZhengHandleCallBackParams = function(apiPrefix, moduleName, methodName, params, index) {
     if (!ZhengJSType.isObject(params) && !ZhengJSType.isFunction(params)) {
         return params;
     }
-    /** 0-10000的随机整数 -fund-request-1582972065568-arg0-79-88- */
-    var randomKey = '-' + apiPrefix + '-' + methodName + '-' + new Date().getTime().toString() + '-arg' + index + '-' + Math.floor(Math.random() * 10000).toString() + '-' + Math.floor(Math.random() * 10000).toString() + '-';
+    /** 0-10000的随机整数 -fund-moduleName-request-1582972065568-arg0-79-88- */
+    var randomKey = '-' + apiPrefix + '-' + (ZhengJSType.isUndefined(moduleName) ? 'Undefined' : moduleName) + '-' + methodName + '-' + new Date().getTime().toString() + '-arg' + index + '-' + Math.floor(Math.random() * 10000).toString() + '-' + Math.floor(Math.random() * 10000).toString() + '-';
     
     /** 参数 */
     var newParams = {};
@@ -220,7 +220,7 @@ var ZhengHandleCallBackParams = function(apiPrefix, methodName, params, index) {
 };
 
 /** 构造发送参数 */
-var ZhengSendParams = function(apiPrefix, methodName, methodSync, params) {
+var ZhengSendParams = function(apiPrefix, moduleName, methodName, methodSync, params) {
     /** arguments */
     var newParams = params;
     /** 处理参数 */
@@ -228,10 +228,10 @@ var ZhengSendParams = function(apiPrefix, methodName, methodSync, params) {
     if (Object.prototype.toString.call(newParams) === '[object Arguments]') {
         var argCount = newParams.length;
         for (var argIdx = 0; argIdx < argCount; argIdx++) {
-            resArgs.push(ZhengHandleCallBackParams(apiPrefix, methodName, newParams[argIdx], argIdx));
+            resArgs.push(ZhengHandleCallBackParams(apiPrefix, moduleName, methodName, newParams[argIdx], argIdx));
         }
     }
-    return {apiPrefix, methodName, methodSync, args: resArgs};
+    return {apiPrefix, moduleName, methodName, methodSync, args: resArgs};
 };
 var ZhengSendNative = function(params) {
     var handler = window.webkit.messageHandlers[ZhengJSToNativeHandlerName];
@@ -258,54 +258,103 @@ var ZhengSendNativeSync = function(params) {
     return null;
 };
 /** 当要移除api时 apiMap为{} */
-var ZhengReplaceGeneratorAPI = function(apiPrefix, apiMap) {
+var ZhengReplaceGeneratorAPI = function(apiPrefix, moduleName, apiMap) {
     if (!apiPrefix || !ZhengJSType.isString(apiPrefix) || !ZhengJSType.isObject(apiMap)) {
         return {};
     }
     var res = {};
     var mapKeys = Object.keys(apiMap);
     for (var i = 0; i < mapKeys.length; i++) {
-        (function(name) {
+        (function(methodName) {
             /** 获取配置：isSync */
-            var config = apiMap[name];
+            var config = apiMap[methodName];
             var isSync = config.hasOwnProperty('sync') ? config.sync : false;
             /** 生成function */
-            res[name] = isSync ? (function () {
-                return ZhengSendNativeSync(ZhengSendParams(apiPrefix, name, ZhengJSToNativeMethodSyncKey, arguments));
+            res[methodName] = isSync ? (function () {
+                return ZhengSendNativeSync(ZhengSendParams(apiPrefix, moduleName, methodName, ZhengJSToNativeMethodSyncKey, arguments));
             }) : (function () {
-                ZhengSendNative(ZhengSendParams(apiPrefix, name, ZhengJSToNativeMethodAsyncKey, arguments));
+                ZhengSendNative(ZhengSendParams(apiPrefix, moduleName, methodName, ZhengJSToNativeMethodAsyncKey, arguments));
             });
         })(mapKeys[i]);
     }
     return res;
 };
+/** 向api中加入module api */
+var ZhengReplaceGeneratorModuleAPI = function (apiPrefix, desApi, moduleApiMap) {
+    if (!apiPrefix || !ZhengJSType.isString(apiPrefix) || !desApi || !ZhengJSType.isObject(desApi) || !moduleApiMap || !ZhengJSType.isObject(moduleApiMap)) {
+        return desApi;
+    }
+    var resModuleMap = {};
+    var mapKeys = Object.keys(moduleApiMap);
+    for (var i = 0; i < mapKeys.length; i++) {
+        (function(moduleName) {
+            resModuleMap[moduleName] = ZhengReplaceGeneratorAPI(apiPrefix, moduleName, moduleApiMap[moduleName]);
+        })(mapKeys[i]);
+    }
+
+    var modulesKey = 'registerModules';
+    var requireModuleKey = 'requireModule';
+
+    desApi[modulesKey] = function() {
+        return resModuleMap;
+    };
+    desApi[requireModuleKey] = function(moduleName) {
+        if (!moduleName || !ZhengJSType.isString(moduleName)) {
+            return undefined;
+        }
+        return resModuleMap[moduleName];
+    };
+    /** 将moduleName同步到api中,即：myApi.xx() = myApi.requireModule('xx') */
+    mapKeys = Object.keys(resModuleMap);
+    for (var j = 0; j < mapKeys.length; j++) {
+        (function(moduleName) {
+            desApi[moduleName] = function () {
+                var moduleFunc = desApi[requireModuleKey];
+                if (!moduleFunc) {
+                    return moduleFunc;
+                }
+                if (!ZhengJSType.isFunction(moduleFunc)) {
+                    return undefined;
+                }
+                return moduleFunc(moduleName);
+            };
+        })(mapKeys[j]);
+    }
+    return desApi;
+}
 /** ❗️❗️Api配置说明：sync：是否是同步方法 */
 /**
-var fund = ZhengReplaceGeneratorAPI('fund', {
+生成api：👉 var fund = {
+    request: function(){}, 
+    getJsonSync: function(){}
+};👈
+var fund = ZhengReplaceGeneratorAPI('fund', undefined, {
     request: {
         sync: false
     },
     getJsonSync: {
         sync: true
-    },
-    getNumberSync: {
-        sync: true
-    },
-    getBoolSync: {
-        sync: true
-    },
-    getStringSync: {
-        sync: true
-    },
-    commonLinkTo: {
-        sync: false
     }
 });
-var zheng = ZhengReplaceGeneratorAPI('zheng', {
-
+加入module api：👉 var fund = {
+    request: function(){}, 
+    getJsonSync: function(){},
+    requireModule: {
+        play: function(){}
+    }
+}👈
+var fund = ZhengReplaceGeneratorAPIMergeModuleAPI('fund', fund, {
+    fundvoice: {
+        play: {
+            sync: false
+        }
+    }
 });
- */
 
-// var ZhengReadyEvent = document.createEvent('Event');
-// ZhengReadyEvent.initEvent('ZhengJSBridgeReady');
-// window.dispatchEvent(ZhengReadyEvent);
+var zheng = ZhengReplaceGeneratorAPI('zheng', {
+});
+
+var ZhengReadyEvent = document.createEvent('Event');
+ZhengReadyEvent.initEvent('ZhengJSBridgeReady');
+window.dispatchEvent(ZhengReadyEvent);
+ */

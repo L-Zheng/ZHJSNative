@@ -11,23 +11,39 @@
 
 @interface ZHJSApiHandler ()
 /**
-@{
-    @"fund": @[
-                @{
-                    @"api": id <ZHJSApiProtocol>,
-                    @"map" : @{
-                            @"getSystemInfoSync": @[
-                                    //本类
-                                    ZHJSApiRegisterItem1,
-                                    //父类
-                                    ZHJSApiRegisterItem2,
-                                    //父类的父类
-                                    ZHJSApiRegisterItem3
-                            ]
-                    }
-                }
-    ]
-}
+ @{
+     @"fund": @[
+                 @{
+                     @"api": id <ZHJSApiProtocol>,
+                     @"map" : @{
+                             @"getSystemInfoSync": @[
+                                     //本类
+                                     ZHJSApiRegisterItem1,
+                                     //父类
+                                     ZHJSApiRegisterItem2,
+                                     //父类的父类
+                                     ZHJSApiRegisterItem3
+                             ]
+                     },
+                     @"modules": @[
+                         @{
+                             @"api": id <ZHJSApiProtocol>,
+                             @"name": @"xxx",
+                             @"map" : @{
+                                     @"getSystemInfoSync": @[
+                                             //本类
+                                             ZHJSApiRegisterItem1,
+                                             //父类
+                                             ZHJSApiRegisterItem2,
+                                             //父类的父类
+                                             ZHJSApiRegisterItem3
+                                     ]
+                             },
+                         }
+                     ]
+                 }
+     ]
+ }
  */
 @property (nonatomic,strong) NSMutableDictionary <NSString *, NSArray *> *apiMap;
 
@@ -77,13 +93,30 @@
     for (id <ZHJSApiProtocol> api in apis) {
         
         NSString *jsPrefix = [self fetchJSApiPrefix:api];
-        if (!jsPrefix || jsPrefix.length == 0) continue;
+        if (!jsPrefix || ![jsPrefix isKindOfClass:[NSString class]] || jsPrefix.length == 0) continue;
         
-        NSMutableArray *items = ([apiMap objectForKey:jsPrefix] ?: [@[] mutableCopy]);
-        [items insertObject:@{
+        NSMutableDictionary *item = [@{
             @"api": api,
             @"map": [self fetchNativeApiMap:api]
-        } atIndex:0];
+        } mutableCopy];
+        NSArray <id<ZHJSApiProtocol>> *modules = [self fetchJSApiModules:api];
+        if (modules && [modules isKindOfClass:NSArray.class]) {
+            NSMutableArray *moduleItems = [NSMutableArray array];
+            for (id <ZHJSApiProtocol> module in modules) {
+                if (![module conformsToProtocol:@protocol(ZHJSApiProtocol)]) {
+                    continue;
+                }
+                [moduleItems insertObject:@{
+                    @"api": module,
+                    @"name": [self fetchJSApiPrefix:module]?:@"",
+                    @"map": [self fetchNativeApiMap:module]
+                } atIndex:0];
+            }
+            [item setObject:moduleItems.copy forKey:@"modules"];
+        }
+        
+        NSMutableArray *items = ([apiMap objectForKey:jsPrefix] ?: [@[] mutableCopy]);
+        [items insertObject:item.copy atIndex:0];
         
         [apiMap setObject:items forKey:jsPrefix];
     }
@@ -156,6 +189,8 @@
     
     if (completion) completion(successApis, failApis, nil);
 }
+
+#pragma mark - fetch protocol
 
 //获取某个api的方法映射表
 - (NSDictionary *)fetchNativeApiMap:(id <ZHJSApiProtocol>)api{
@@ -249,6 +284,15 @@
     }
     return nil;
 }
+//查找js module api实例
+- (NSArray <id<ZHJSApiProtocol>> *)fetchJSApiModules:(id <ZHJSApiProtocol>)api{
+    if (!api) return nil;
+    if (api && [api respondsToSelector:@selector(zh_jsApiModules)]) {
+        NSArray *res = [api zh_jsApiModules];
+        if (res && [res isKindOfClass:NSArray.class]) return res;
+    }
+    return nil;
+}
 
 #pragma mark - public
 
@@ -262,38 +306,77 @@
     [apiMap enumerateKeysAndObjectsUsingBlock:^(NSString *apiPrefix, NSArray *prefixItems, BOOL *prefixStop) {
         
         NSMutableDictionary <NSString *, ZHJSApiRegisterItem *> *functionMap = [@{} mutableCopy];
+        NSMutableDictionary *functionModuleMap = [@{} mutableCopy];
+        __block BOOL hasModuleApi = NO;
         
         // 倒序
         [prefixItems enumerateObjectsWithOptions:NSEnumerationReverse usingBlock:^(NSDictionary *prefixItem, NSUInteger idx, BOOL *apiStop) {
-            //            id <ZHJSApiProtocol> api = [prefixItem objectForKey:@"api"];
             NSDictionary *map = [prefixItem objectForKey:@"map"];
             [map enumerateKeysAndObjectsUsingBlock:^(NSString *jsMethod, NSArray *methodItems, BOOL *mapStop) {
-                if (methodItems.count > 0) {
-                    [functionMap setObject:methodItems[0] forKey:jsMethod];
-                }
+                if (methodItems.count == 0) return;
+                [functionMap setObject:methodItems[0] forKey:jsMethod];
             }];
             
+            NSArray *modules = [prefixItem objectForKey:@"modules"];
+            if (modules && [modules isKindOfClass:NSArray.class]) {
+                // 倒序
+                [modules enumerateObjectsWithOptions:NSEnumerationReverse usingBlock:^(NSDictionary *module, NSUInteger idx_module, BOOL * stop_module) {
+                    NSString *api_moduleName = [module objectForKey:@"name"];
+                    if (api_moduleName && [api_moduleName isKindOfClass:NSString.class] && api_moduleName.length > 0) {
+                        NSMutableDictionary *moduleNameMap = [functionModuleMap objectForKey:api_moduleName];
+                        if (!moduleNameMap) {
+                            moduleNameMap = [NSMutableDictionary dictionary];
+                            [functionModuleMap setObject:moduleNameMap forKey:api_moduleName];
+                        }
+                        
+                        NSDictionary *api_moduleMap = [module objectForKey:@"map"];
+                        [api_moduleMap enumerateKeysAndObjectsUsingBlock:^(NSString *jsMethod, NSArray *methodItems, BOOL *mapStop) {
+                            if (methodItems.count == 0) return;
+                            [moduleNameMap setObject:methodItems[0] forKey:jsMethod];
+                        }];
+                    }
+                }];
+                if (!hasModuleApi) {
+                    hasModuleApi = YES;
+                }
+            }
         }];
         /**
          @{
              @"fund" : @{
+                 @"api": @{
                      @"getSystemInfoSync" : ZHJSApiRegisterItem
+                 }
+                 @"api_module": @{
+                     @"moduleName": @{
+                             @"getSystemInfoSync" : ZHJSApiRegisterItem
+                     }
+                 }
              }
          }
-         */
-        [mergeApiMap setObject:functionMap forKey:apiPrefix];
+        */
+        
+        NSMutableDictionary *apiPrefixMap = [@{
+            @"api": functionMap
+        } mutableCopy];
+        if (hasModuleApi) {
+            [apiPrefixMap addEntriesFromDictionary:@{
+                @"api_module": functionModuleMap
+            }];
+        }
+        [mergeApiMap setObject:apiPrefixMap.copy forKey:apiPrefix];
     }];
     return [mergeApiMap copy];
 }
 
 //遍历方法映射表->获取所有api
-- (void)enumRegsiterApiMap:(void (^)(NSString *apiPrefix, NSDictionary <NSString *, ZHJSApiRegisterItem *> *apiMap))block{
+- (void)enumRegsiterApiMap:(void (^)(NSString *apiPrefix, NSDictionary <NSString *, ZHJSApiRegisterItem *> *apiMap, NSDictionary *apiModuleMap))block{
     if (!block) return;
     
     //转换成注册api
     NSDictionary *mergeApiMap = [self parseApiMapToRegsiterApiMap:self.apiMap];
-    [mergeApiMap enumerateKeysAndObjectsUsingBlock:^(NSString *apiPrefix, NSDictionary *apiMap, BOOL *stop) {
-        if (block) block(apiPrefix, apiMap);
+    [mergeApiMap enumerateKeysAndObjectsUsingBlock:^(NSString *apiPrefix, NSDictionary *map, BOOL *stop) {
+        if (block) block(apiPrefix, [map objectForKey:@"api"], [map objectForKey:@"api_module"]);
     }];
 }
 
@@ -332,7 +415,7 @@
 }
 
 //获取方法名
-- (void)fetchSelectorByName:(NSString *)jsMethodName apiPrefix:(NSString *)apiPrefix callBack:(void (^) (id target, SEL sel))callBack{
+- (void)fetchSelectorByName:(NSString *)jsMethodName apiPrefix:(NSString *)apiPrefix jsModuleName:(NSString *)jsModuleName callBack:(void (^) (id target, SEL sel))callBack{
     if (!callBack) return;
     
     if (!jsMethodName ||
@@ -345,32 +428,63 @@
         return;
     }
     
+    if (!jsModuleName || ![jsMethodName isKindOfClass:NSString.class] ||
+        jsMethodName.length == 0 || [jsModuleName isEqual:[NSNull null]]) {
+        jsModuleName = nil;
+    }
+    
     NSArray *prefixItems = [self.apiMap objectForKey:apiPrefix];
     if (!prefixItems || prefixItems.count == 0) {
         callBack(nil, nil);
         return;
     }
     
-    SEL selRes = nil;
-    id targetRes = nil;
+    __block SEL selRes = nil;
+    __block id targetRes = nil;
     
-    for (NSDictionary *prefixItem in prefixItems) {
-        id <ZHJSApiProtocol> api = [prefixItem objectForKey:@"api"];
-        NSDictionary *map = [prefixItem objectForKey:@"map"];
+    BOOL (^fetchBlock) (NSDictionary *fromItem) = ^ BOOL (NSDictionary *fromItem){
+        id <ZHJSApiProtocol> api = [fromItem objectForKey:@"api"];
+        NSDictionary *map = [fromItem objectForKey:@"map"];
         
+        if (!map) return NO;
         NSArray <ZHJSApiRegisterItem *> *items = map[jsMethodName];
-        
-        if (items.count == 0) continue;
+        if (items.count == 0) return NO;
         
         ZHJSApiRegisterItem *item = items[0];
-        if (!item || !item.nativeMethodName) continue;
+        if (!item || !item.nativeMethodName) return NO;
 
         SEL sel = NSSelectorFromString(item.nativeMethodName);
-        if (!api || ![api respondsToSelector:sel]) continue;
+        if (!api || ![api respondsToSelector:sel]) return NO;
         
         selRes = sel;
         targetRes = api;
-        break;
+        return YES;
+    };
+    
+    for (NSDictionary *prefixItem in prefixItems) {
+        if (!jsModuleName) {
+            if (fetchBlock(prefixItem)) {
+                break;
+            }
+        }else{
+            NSArray *modules = [prefixItem objectForKey:@"modules"];
+            if (!modules || ![modules isKindOfClass:NSArray.class]) {
+                continue;
+            }
+            for (NSDictionary *module in modules) {
+                NSString *moduleName = [module objectForKey:@"name"];
+                if (!moduleName || ![moduleName isKindOfClass:NSString.class] || moduleName.length == 0 ||
+                    ![jsModuleName isEqualToString:moduleName]) {
+                    continue;
+                }
+                if (fetchBlock(module)) {
+                    break;
+                }
+            }
+            if (selRes && targetRes) {
+                break;
+            }
+        }
     }
     
     callBack(targetRes, selRes);
