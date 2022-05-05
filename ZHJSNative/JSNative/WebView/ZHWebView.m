@@ -254,7 +254,7 @@
         return;
     }
     //webview已经加载
-    [self evaluateJs:jsCode completionHandler:^(id res, NSError *error) {
+    [self evaluateJs:jsCode complete:^(id res, NSError *error) {
         if (completion) completion(res, error);
     }];
 }
@@ -777,7 +777,7 @@
     NSString *jsonStr = [self.class encodeObj:relativePath];
     NSString *js = [NSString stringWithFormat:@"%@(\"%@\")",renderFunctionName, jsonStr];
     __weak __typeof__(self) __self = self;
-    [self evaluateJs:js completionHandler:^(id res, NSError *error) {
+    [self evaluateJs:js complete:^(id res, NSError *error) {
         [__self.lock unlock];
         if (completionHandler) completionHandler(res, error);
     }];
@@ -797,46 +797,63 @@
      result ：@(111)  js解析为Number类型
  */
 /** 发送js消息 */
-- (void)postMessageToJs:(NSString *)funcName params:(NSDictionary *)params completionHandler:(void (^)(id res, NSError *error))completionHandler{
+- (void)postMessageToJs:(NSArray *)functions params:(NSDictionary *)params complete:(void (^)(id res, NSError *error))complete{
+    NSMutableArray *newFunctions = [NSMutableArray array];
+    for (NSString *function in functions) {
+        if (!function || ![function isKindOfClass:NSString.class] || function.length == 0) {
+            continue;
+        }
+        [newFunctions addObject:function];
+    }
+    if (!newFunctions || ![newFunctions isKindOfClass:NSArray.class] || newFunctions.count == 0) {
+        if (complete) complete(nil, [NSError errorWithDomain:@"" code:404 userInfo:@{NSLocalizedDescriptionKey: @"evaluate js's function is null"}]);
+        return;
+    }
+    
+    NSMutableString *funcName = [NSMutableString string];
+    for (NSUInteger i = 0; i < newFunctions.count; i++) {
+        [funcName appendFormat:@"%@%@", functions[i], (i == functions.count - 1 ? @"" : @".")];
+    }
+    
     NSString *paramsStr = [ZHWebView encodeObj:params];
-    
     NSString *funcJs = paramsStr.length ? [NSString stringWithFormat:@"(%@)(\"%@\");", funcName, paramsStr] : [NSString stringWithFormat:@"(%@)();", funcName];
-    
+
     // typeof fund === 'function'
-    NSString *js = [NSString stringWithFormat:@"\
-          (function () {\
-              try {\
-                      if (Object.prototype.toString.call(window.%@) === '[object Function]') {\
-                        return %@\
-                      } else {\
-                        return '%@ is ' + Object.prototype.toString.call(window.%@);\
-                      }\
-                  }\
-              catch (error) {\
-                  return error.toString();\
-              }\
-          })();", funcName, funcJs, funcName, funcName];
+//    NSString *js = [NSString stringWithFormat:@"\
+//          (function () {\
+//              try {\
+//                      if (Object.prototype.toString.call(window.%@) === '[object Function]') {\
+//                        return %@\
+//                      } else {\
+//                        return '%@ is ' + Object.prototype.toString.call(window.%@);\
+//                      }\
+//                  }\
+//              catch (error) {\
+//                  return error.toString();\
+//              }\
+//          })();", funcName, funcJs, funcName, funcName];
+    NSString *js = funcJs;
     
-    [self evaluateJs:js completionHandler:^(id res, NSError *error) {
+    [self evaluateJs:js complete:^(id res, NSError *error) {
         if (error) {
             NSLog(@"----❌js:function:%@--error:%@--", funcName, error);
         }else{
 //            NSLog(@"----✅js:function:%@--返回值:%@--", funcName, res?:@"void");
         }
-        if (completionHandler) completionHandler(res, error);
+        if (complete) complete(res, error);
     }];
 }
-- (void)evaluateJs:(NSString *)js completionHandler:(void (^)(id res, NSError *error))completionHandler{
+- (void)evaluateJs:(NSString *)js complete:(void (^)(id res, NSError *error))complete{
     if ([[NSThread currentThread] isEqual:[NSThread mainThread]]) {
-        [self evaluateJsThreadSafe:js completionHandler:completionHandler];
+        [self evaluateJsThreadSafe:js complete:complete];
         return;
     }
     __weak __typeof__(self) __self = self;
     dispatch_async(dispatch_get_main_queue(), ^{
-        [__self evaluateJsThreadSafe:js completionHandler:completionHandler];
+        [__self evaluateJsThreadSafe:js complete:complete];
     });
 }
-- (void)evaluateJsThreadSafe:(NSString *)js completionHandler:(void (^)(id res, NSError *error))completionHandler{
+- (void)evaluateJsThreadSafe:(NSString *)js complete:(void (^)(id res, NSError *error))complete{
     // evaluateJavaScript 只允许主线程回调
     if (@available(iOS 9.0, *)) {
         __weak __typeof__(self) __self = self;
@@ -844,7 +861,7 @@
             if (error) {
                 [__self.handler showWebViewException:error.userInfo];
             }
-            if (completionHandler) completionHandler(res, error);
+            if (complete) complete(res, error);
         }];
         return;
     }
@@ -866,7 +883,7 @@
         if (error) {
             [strongSelf.handler showWebViewException:error.userInfo];
         }
-        if (completionHandler) completionHandler(res, error);
+        if (complete) complete(res, error);
     }];
 }
 - (void)evaluateJavaScript:(NSString *)javaScriptString completionHandler:(void (^ _Nullable)(_Nullable id, NSError * _Nullable error))completionHandler{

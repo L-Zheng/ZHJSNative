@@ -1000,7 +1000,7 @@ case cType:{\
 - (void)callBackJsFunc:(NSString *)funcId datas:(NSArray *)datas alive:(BOOL)alive callBack:(void (^) (id jsRes, NSError *jsError))callBack{
     if (funcId.length == 0) return;
     NSDictionary *sendParams = @{@"funcId": funcId, @"data": ((datas && [datas isKindOfClass:NSArray.class]) ? datas : @[]), @"alive": @(alive)};
-    [self.webView postMessageToJs:self.fetchWebViewCallFuncName params:sendParams completionHandler:^(id res, NSError *error) {
+    [self.webView postMessageToJs:@[self.fetchWebViewCallFuncName] params:sendParams complete:^(id res, NSError *error) {
         if (callBack) callBack(res, error);
     }];
 }

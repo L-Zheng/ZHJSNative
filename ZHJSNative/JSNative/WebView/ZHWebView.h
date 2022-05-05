@@ -141,11 +141,8 @@ completionHandler:(void (^)(id res, NSError *error))completionHandler;
 @property (nonatomic, copy, readonly) NSURL *runSandBoxURL;
 
 /** 发送js消息 */
-- (void)postMessageToJs:(NSString *)funcName
-                 params:(NSDictionary *)params
-      completionHandler:(void (^)(id res, NSError *error))completionHandler;
-- (void)evaluateJs:(NSString *)js
- completionHandler:(void (^)(id res, NSError *error))completionHandler;
+- (void)postMessageToJs:(NSArray *)functions params:(NSDictionary *)params complete:(void (^)(id res, NSError *error))complete;
+- (void)evaluateJs:(NSString *)js complete:(void (^)(id res, NSError *error))complete;
 
 #pragma mark - clear
 

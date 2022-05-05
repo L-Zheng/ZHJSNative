@@ -330,7 +330,7 @@
     NSLog(@"%@", js);
     NSLog(@"----☝️jsCode %@ end--", desc);
     //    NSString *js = [NSString stringWithFormat:@"renderA(\"%@\")",type];
-    [self.webView evaluateJs:js completionHandler:^(id res, NSError *error) {
+    [self.webView evaluateJs:js complete:^(id res, NSError *error) {
         if (error) {
             NSLog(@"----❌%@--%@--", desc, error);
         }else{

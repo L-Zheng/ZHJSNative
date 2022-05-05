@@ -256,7 +256,7 @@
     NSString *jsonStr = block(info);
     NSString *js = [NSString stringWithFormat:@"render(\"%@\")",jsonStr];
     //    NSString *js = [NSString stringWithFormat:@"renderA(\"%@\")",type];
-    [self.webView evaluateJs:js completionHandler:^(id res, NSError *error) {
+    [self.webView evaluateJs:js complete:^(id res, NSError *error) {
         if (error) {
             NSLog(@"----❌--%@--", error);
         }else{
