@@ -51,7 +51,7 @@ console.log = (function (oriLogFunc) {
       /**保留发送error*/
       var iosRes = [];
       var fetchVaule = function (aIdx) {
-        return argCount > aIdx ? params[aIdx] : '无此参数';
+        return argCount > aIdx ? params[aIdx] : 'no this params at index: ' + aIdx;
       };
       if (argCount == 0) return;
       if (argCount == 1) {

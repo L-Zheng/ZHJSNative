@@ -594,6 +594,35 @@ case cType:{\
 
 #pragma mark - exception
 
+- (NSDictionary *)parseException:(NSDictionary *)exception{
+    if (!exception || ![exception isKindOfClass:[NSDictionary class]] || exception.allKeys.count == 0) {
+        return nil;
+    }
+    NSMutableDictionary *res = [exception mutableCopy];
+    id stackRes = nil;
+    NSString *stack = [res valueForKey:@"stack"];
+    if ([stack isKindOfClass:[NSString class]] && stack.length) {
+        // Vue报错是string类型
+        if ([stack containsString:@"\n"]) {
+            NSInteger limit = 10;
+            NSMutableArray *arr = [[stack componentsSeparatedByString:@"\n"] mutableCopy];
+            if (arr.count > limit) {
+                [arr removeObjectsInRange:NSMakeRange(limit, arr.count - limit)];
+            }
+            stackRes = [arr copy];
+        }else{
+            NSInteger limit = 200;
+            if (stack.length > limit) stack = [stack substringToIndex:limit];
+            stackRes = stack;
+        }
+    }else{
+        //html js报错是json类型
+        stackRes = stack;
+    }
+    if (stackRes) [res setValue:stackRes forKey:@"stack"];
+    
+    return res.copy;
+}
 //异常弹窗
 - (void)showWebViewException:(NSDictionary *)exception{
     // 异常抛出
@@ -612,31 +641,8 @@ case cType:{\
     }
 }
 - (void)showException:(NSString *)title exception:(NSDictionary *)exception{
-    if (!exception || ![exception isKindOfClass:[NSDictionary class]] || exception.allKeys.count == 0) return;
-    
-    NSMutableDictionary *info = [exception mutableCopy];
-    
-    id stackRes = nil;
-    NSString *stack = [info valueForKey:@"stack"];
-    if ([stack isKindOfClass:[NSString class]] && stack.length) {
-        //Vue报错是string类型
-        if ([stack containsString:@"\n"]) {
-            NSInteger limit = 3;
-            NSMutableArray *arr = [[stack componentsSeparatedByString:@"\n"] mutableCopy];
-            if (arr.count > limit) {
-                [arr removeObjectsInRange:NSMakeRange(limit, arr.count - limit)];
-            }
-            stackRes = [arr copy];
-        }else{
-            NSInteger limit = 200;
-            if (stack.length > limit) stack = [stack substringToIndex:limit];
-            stackRes = stack;
-        }
-    }else{
-        //html js报错是json类型
-        stackRes = stack;
-    }
-    if (stackRes) [info setValue:stackRes forKey:@"stack"];
+    NSDictionary *info = [self parseException:exception];
+    if (!info) return;
     
     ZHErrorAlertController *alert = [ZHErrorAlertController alertControllerWithTitle:title message:[info description] preferredStyle:UIAlertControllerStyleAlert];
     __weak __typeof__(self) __self = self;
@@ -701,15 +707,11 @@ case cType:{\
          有try cach方法 catch方法抛出异常throw error;   会回调
          有try cach方法 catch方法没有抛出异常throw error;   不会回调
          */
-        NSLog(@"❌WebView js异常");
-        NSDictionary *exception = message.body;
-        NSLog(@"%@", message.body);
-        [self showWebViewException:exception];
+        [self showWebViewException:message.body];
         return;
     }
     if ([message.name isEqualToString:ZHJSHandlerName]) {
-        NSDictionary *receiveInfo = message.body;
-        [self handleScriptMessage:receiveInfo];
+        [self handleScriptMessage:message.body];
         return;
     }
 }

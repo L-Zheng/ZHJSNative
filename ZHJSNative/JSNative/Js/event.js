@@ -9,7 +9,7 @@
  *    如果当前function里面有其他function函数体  var作用域会延伸到其它function函数体
  */
 /** ❌ios8 特殊处理
- * 不识别  let、const变量、() => {}箭头函数 、function函数不能有默认值 如：function(params = {})() 、多参数函数 function (...args)
+ * 不识别  let、const变量、() => {}箭头函数 、function函数不能有默认值(ios9不支持) 如：function(params = {})() 、多参数函数 function (...args)
  * 不识别模板字符串语法  `--${}`
  * 不识别语法  endsWith
  */

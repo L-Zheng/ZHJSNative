@@ -29,13 +29,13 @@ window.onerror = (function (oriFunc) {
             if (lbz_argCount == 0) return;
 
             var lbz_fetchVaule = function (idx) {
-                return lbz_argCount > idx ? lbz_params[idx] : 'libaozheng no this params';
+                return lbz_argCount > idx ? lbz_params[idx] : 'no this params at index: ' + idx;
             };
             var lbz_firstParma = lbz_fetchVaule(0);
             var lbz_isErrorParam = (Object.prototype.toString.call(lbz_firstParma) == '[object Error]');
 
             var lbz_fetchErrorVaule = function (params, key) {
-                return params.hasOwnProperty(key) ? params[key] : 'libaozheng no this key: ' + key;
+                return params.hasOwnProperty(key) ? params[key] : 'no this key: ' + key;
             };
             
             var lbz_res = JSON.parse(JSON.stringify({
