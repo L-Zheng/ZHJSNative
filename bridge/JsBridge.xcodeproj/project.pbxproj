@@ -1,0 +1,792 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 55;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		8503F95E287270BC005F7580 /* JsBridgeCtxHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 8503F93A287270BC005F7580 /* JsBridgeCtxHandler.m */; };
+		8503F95F287270BC005F7580 /* JSContext+JsBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 8503F93B287270BC005F7580 /* JSContext+JsBridge.m */; };
+		8503F960287270BC005F7580 /* error-min.js in Resources */ = {isa = PBXBuildFile; fileRef = 8503F93D287270BC005F7580 /* error-min.js */; };
+		8503F961287270BC005F7580 /* event.js in Resources */ = {isa = PBXBuildFile; fileRef = 8503F93E287270BC005F7580 /* event.js */; };
+		8503F962287270BC005F7580 /* socket-shell.sh in Resources */ = {isa = PBXBuildFile; fileRef = 8503F93F287270BC005F7580 /* socket-shell.sh */; };
+		8503F963287270BC005F7580 /* console.js in Resources */ = {isa = PBXBuildFile; fileRef = 8503F940287270BC005F7580 /* console.js */; };
+		8503F964287270BC005F7580 /* console-min.js in Resources */ = {isa = PBXBuildFile; fileRef = 8503F941287270BC005F7580 /* console-min.js */; };
+		8503F965287270BC005F7580 /* error.js in Resources */ = {isa = PBXBuildFile; fileRef = 8503F942287270BC005F7580 /* error.js */; };
+		8503F966287270BC005F7580 /* socket-min.js in Resources */ = {isa = PBXBuildFile; fileRef = 8503F943287270BC005F7580 /* socket-min.js */; };
+		8503F967287270BC005F7580 /* event-min.js in Resources */ = {isa = PBXBuildFile; fileRef = 8503F944287270BC005F7580 /* event-min.js */; };
+		8503F968287270BC005F7580 /* socket.js in Resources */ = {isa = PBXBuildFile; fileRef = 8503F945287270BC005F7580 /* socket.js */; };
+		8503F969287270BC005F7580 /* vconsole.min.js in Resources */ = {isa = PBXBuildFile; fileRef = 8503F946287270BC005F7580 /* vconsole.min.js */; };
+		8503F96A287270BC005F7580 /* console-shell.sh in Resources */ = {isa = PBXBuildFile; fileRef = 8503F947287270BC005F7580 /* console-shell.sh */; };
+		8503F96B287270BC005F7580 /* shell.sh in Resources */ = {isa = PBXBuildFile; fileRef = 8503F948287270BC005F7580 /* shell.sh */; };
+		8503F96C287270BC005F7580 /* event-shell.sh in Resources */ = {isa = PBXBuildFile; fileRef = 8503F949287270BC005F7580 /* event-shell.sh */; };
+		8503F96D287270BC005F7580 /* error-shell.sh in Resources */ = {isa = PBXBuildFile; fileRef = 8503F94A287270BC005F7580 /* error-shell.sh */; };
+		8503F96E287270BC005F7580 /* JsBridgeWebApiSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 8503F950287270BC005F7580 /* JsBridgeWebApiSocket.m */; };
+		8503F96F287270BC005F7580 /* JsBridgeWebApiConsole.m in Sources */ = {isa = PBXBuildFile; fileRef = 8503F952287270BC005F7580 /* JsBridgeWebApiConsole.m */; };
+		8503F970287270BC005F7580 /* JsBridgeWebApiError.m in Sources */ = {isa = PBXBuildFile; fileRef = 8503F954287270BC005F7580 /* JsBridgeWebApiError.m */; };
+		8503F971287270BC005F7580 /* JsBridgeWebHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 8503F955287270BC005F7580 /* JsBridgeWebHandler.m */; };
+		8503F972287270BC005F7580 /* JsBridgeWebView.m in Sources */ = {isa = PBXBuildFile; fileRef = 8503F956287270BC005F7580 /* JsBridgeWebView.m */; };
+		8503F973287270BC005F7580 /* JsBridgeApiItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 8503F95B287270BC005F7580 /* JsBridgeApiItem.m */; };
+		8503F974287270BC005F7580 /* JsBridgeHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 8503F95C287270BC005F7580 /* JsBridgeHandler.m */; };
+		8503F978287272E8005F7580 /* DemoController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8503F977287272E8005F7580 /* DemoController.m */; };
+		8503F97B2872D29C005F7580 /* DemoWebView.m in Sources */ = {isa = PBXBuildFile; fileRef = 8503F97A2872D29C005F7580 /* DemoWebView.m */; };
+		8503F97E2872D2B5005F7580 /* DemoApi.m in Sources */ = {isa = PBXBuildFile; fileRef = 8503F97D2872D2B5005F7580 /* DemoApi.m */; };
+		8503F9812872D2C0005F7580 /* DemoApiModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 8503F9802872D2C0005F7580 /* DemoApiModule.m */; };
+		858DA1D3286EFB1B008E5662 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 858DA1D2286EFB1B008E5662 /* AppDelegate.m */; };
+		858DA1D6286EFB1B008E5662 /* SceneDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 858DA1D5286EFB1B008E5662 /* SceneDelegate.m */; };
+		858DA1D9286EFB1B008E5662 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 858DA1D8286EFB1B008E5662 /* ViewController.m */; };
+		858DA1DC286EFB1B008E5662 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 858DA1DA286EFB1B008E5662 /* Main.storyboard */; };
+		858DA1DE286EFB2D008E5662 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 858DA1DD286EFB2D008E5662 /* Assets.xcassets */; };
+		858DA1E1286EFB2D008E5662 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 858DA1DF286EFB2D008E5662 /* LaunchScreen.storyboard */; };
+		858DA1E4286EFB2D008E5662 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 858DA1E3286EFB2D008E5662 /* main.m */; };
+		858DA1EE286EFB2E008E5662 /* JsBridgeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 858DA1ED286EFB2E008E5662 /* JsBridgeTests.m */; };
+		858DA1F8286EFB2E008E5662 /* JsBridgeUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 858DA1F7286EFB2E008E5662 /* JsBridgeUITests.m */; };
+		858DA1FA286EFB2E008E5662 /* JsBridgeUITestsLaunchTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 858DA1F9286EFB2E008E5662 /* JsBridgeUITestsLaunchTests.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		858DA1EA286EFB2E008E5662 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 858DA1C6286EFB1B008E5662 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 858DA1CD286EFB1B008E5662;
+			remoteInfo = JsBridge;
+		};
+		858DA1F4286EFB2E008E5662 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 858DA1C6286EFB1B008E5662 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 858DA1CD286EFB1B008E5662;
+			remoteInfo = JsBridge;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		8503F938287270BC005F7580 /* JsBridgeCtxHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JsBridgeCtxHandler.h; sourceTree = "<group>"; };
+		8503F939287270BC005F7580 /* JSContext+JsBridge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "JSContext+JsBridge.h"; sourceTree = "<group>"; };
+		8503F93A287270BC005F7580 /* JsBridgeCtxHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JsBridgeCtxHandler.m; sourceTree = "<group>"; };
+		8503F93B287270BC005F7580 /* JSContext+JsBridge.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "JSContext+JsBridge.m"; sourceTree = "<group>"; };
+		8503F93D287270BC005F7580 /* error-min.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = "error-min.js"; sourceTree = "<group>"; };
+		8503F93E287270BC005F7580 /* event.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = event.js; sourceTree = "<group>"; };
+		8503F93F287270BC005F7580 /* socket-shell.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "socket-shell.sh"; sourceTree = "<group>"; };
+		8503F940287270BC005F7580 /* console.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = console.js; sourceTree = "<group>"; };
+		8503F941287270BC005F7580 /* console-min.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = "console-min.js"; sourceTree = "<group>"; };
+		8503F942287270BC005F7580 /* error.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = error.js; sourceTree = "<group>"; };
+		8503F943287270BC005F7580 /* socket-min.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = "socket-min.js"; sourceTree = "<group>"; };
+		8503F944287270BC005F7580 /* event-min.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = "event-min.js"; sourceTree = "<group>"; };
+		8503F945287270BC005F7580 /* socket.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = socket.js; sourceTree = "<group>"; };
+		8503F946287270BC005F7580 /* vconsole.min.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = vconsole.min.js; sourceTree = "<group>"; };
+		8503F947287270BC005F7580 /* console-shell.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "console-shell.sh"; sourceTree = "<group>"; };
+		8503F948287270BC005F7580 /* shell.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = shell.sh; sourceTree = "<group>"; };
+		8503F949287270BC005F7580 /* event-shell.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "event-shell.sh"; sourceTree = "<group>"; };
+		8503F94A287270BC005F7580 /* error-shell.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "error-shell.sh"; sourceTree = "<group>"; };
+		8503F94C287270BC005F7580 /* JsBridgeWebHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JsBridgeWebHandler.h; sourceTree = "<group>"; };
+		8503F94D287270BC005F7580 /* JsBridgeWebView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JsBridgeWebView.h; sourceTree = "<group>"; };
+		8503F94F287270BC005F7580 /* JsBridgeWebApiError.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JsBridgeWebApiError.h; sourceTree = "<group>"; };
+		8503F950287270BC005F7580 /* JsBridgeWebApiSocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JsBridgeWebApiSocket.m; sourceTree = "<group>"; };
+		8503F951287270BC005F7580 /* JsBridgeWebApiConsole.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JsBridgeWebApiConsole.h; sourceTree = "<group>"; };
+		8503F952287270BC005F7580 /* JsBridgeWebApiConsole.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JsBridgeWebApiConsole.m; sourceTree = "<group>"; };
+		8503F953287270BC005F7580 /* JsBridgeWebApiSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JsBridgeWebApiSocket.h; sourceTree = "<group>"; };
+		8503F954287270BC005F7580 /* JsBridgeWebApiError.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JsBridgeWebApiError.m; sourceTree = "<group>"; };
+		8503F955287270BC005F7580 /* JsBridgeWebHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JsBridgeWebHandler.m; sourceTree = "<group>"; };
+		8503F956287270BC005F7580 /* JsBridgeWebView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JsBridgeWebView.m; sourceTree = "<group>"; };
+		8503F958287270BC005F7580 /* JsBridgeApiItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JsBridgeApiItem.h; sourceTree = "<group>"; };
+		8503F959287270BC005F7580 /* JsBridgeHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JsBridgeHandler.h; sourceTree = "<group>"; };
+		8503F95A287270BC005F7580 /* JsBridgeHandler_Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JsBridgeHandler_Private.h; sourceTree = "<group>"; };
+		8503F95B287270BC005F7580 /* JsBridgeApiItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JsBridgeApiItem.m; sourceTree = "<group>"; };
+		8503F95C287270BC005F7580 /* JsBridgeHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JsBridgeHandler.m; sourceTree = "<group>"; };
+		8503F95D287270BC005F7580 /* JsBridgeProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JsBridgeProtocol.h; sourceTree = "<group>"; };
+		8503F976287272E8005F7580 /* DemoController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DemoController.h; sourceTree = "<group>"; };
+		8503F977287272E8005F7580 /* DemoController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DemoController.m; sourceTree = "<group>"; };
+		8503F9792872D29C005F7580 /* DemoWebView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DemoWebView.h; sourceTree = "<group>"; };
+		8503F97A2872D29C005F7580 /* DemoWebView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DemoWebView.m; sourceTree = "<group>"; };
+		8503F97C2872D2B5005F7580 /* DemoApi.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DemoApi.h; sourceTree = "<group>"; };
+		8503F97D2872D2B5005F7580 /* DemoApi.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DemoApi.m; sourceTree = "<group>"; };
+		8503F97F2872D2C0005F7580 /* DemoApiModule.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DemoApiModule.h; sourceTree = "<group>"; };
+		8503F9802872D2C0005F7580 /* DemoApiModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DemoApiModule.m; sourceTree = "<group>"; };
+		858DA1CE286EFB1B008E5662 /* JsBridge.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JsBridge.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		858DA1D1286EFB1B008E5662 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		858DA1D2286EFB1B008E5662 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		858DA1D4286EFB1B008E5662 /* SceneDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SceneDelegate.h; sourceTree = "<group>"; };
+		858DA1D5286EFB1B008E5662 /* SceneDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SceneDelegate.m; sourceTree = "<group>"; };
+		858DA1D7286EFB1B008E5662 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
+		858DA1D8286EFB1B008E5662 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		858DA1DB286EFB1B008E5662 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		858DA1DD286EFB2D008E5662 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		858DA1E0286EFB2D008E5662 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		858DA1E2286EFB2D008E5662 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		858DA1E3286EFB2D008E5662 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		858DA1E9286EFB2E008E5662 /* JsBridgeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JsBridgeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		858DA1ED286EFB2E008E5662 /* JsBridgeTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JsBridgeTests.m; sourceTree = "<group>"; };
+		858DA1F3286EFB2E008E5662 /* JsBridgeUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JsBridgeUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		858DA1F7286EFB2E008E5662 /* JsBridgeUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JsBridgeUITests.m; sourceTree = "<group>"; };
+		858DA1F9286EFB2E008E5662 /* JsBridgeUITestsLaunchTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JsBridgeUITestsLaunchTests.m; sourceTree = "<group>"; };
+		85C461A7287BE9EF0020C4C7 /* JsBridgeResource.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JsBridgeResource.h; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		858DA1CB286EFB1B008E5662 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		858DA1E6286EFB2E008E5662 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		858DA1F0286EFB2E008E5662 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		8503F936287270BC005F7580 /* JsBridge */ = {
+			isa = PBXGroup;
+			children = (
+				8503F93C287270BC005F7580 /* Js */,
+				8503F957287270BC005F7580 /* Base */,
+				8503F94B287270BC005F7580 /* WebView */,
+				8503F937287270BC005F7580 /* JSContext */,
+			);
+			path = JsBridge;
+			sourceTree = "<group>";
+		};
+		8503F937287270BC005F7580 /* JSContext */ = {
+			isa = PBXGroup;
+			children = (
+				8503F939287270BC005F7580 /* JSContext+JsBridge.h */,
+				8503F93B287270BC005F7580 /* JSContext+JsBridge.m */,
+				8503F938287270BC005F7580 /* JsBridgeCtxHandler.h */,
+				8503F93A287270BC005F7580 /* JsBridgeCtxHandler.m */,
+			);
+			path = JSContext;
+			sourceTree = "<group>";
+		};
+		8503F93C287270BC005F7580 /* Js */ = {
+			isa = PBXGroup;
+			children = (
+				8503F93D287270BC005F7580 /* error-min.js */,
+				8503F93E287270BC005F7580 /* event.js */,
+				8503F93F287270BC005F7580 /* socket-shell.sh */,
+				8503F940287270BC005F7580 /* console.js */,
+				8503F941287270BC005F7580 /* console-min.js */,
+				8503F942287270BC005F7580 /* error.js */,
+				8503F943287270BC005F7580 /* socket-min.js */,
+				8503F944287270BC005F7580 /* event-min.js */,
+				8503F945287270BC005F7580 /* socket.js */,
+				8503F946287270BC005F7580 /* vconsole.min.js */,
+				8503F947287270BC005F7580 /* console-shell.sh */,
+				8503F948287270BC005F7580 /* shell.sh */,
+				8503F949287270BC005F7580 /* event-shell.sh */,
+				8503F94A287270BC005F7580 /* error-shell.sh */,
+			);
+			path = Js;
+			sourceTree = "<group>";
+		};
+		8503F94B287270BC005F7580 /* WebView */ = {
+			isa = PBXGroup;
+			children = (
+				8503F94D287270BC005F7580 /* JsBridgeWebView.h */,
+				8503F956287270BC005F7580 /* JsBridgeWebView.m */,
+				8503F94C287270BC005F7580 /* JsBridgeWebHandler.h */,
+				8503F955287270BC005F7580 /* JsBridgeWebHandler.m */,
+				8503F94E287270BC005F7580 /* Api */,
+			);
+			path = WebView;
+			sourceTree = "<group>";
+		};
+		8503F94E287270BC005F7580 /* Api */ = {
+			isa = PBXGroup;
+			children = (
+				8503F94F287270BC005F7580 /* JsBridgeWebApiError.h */,
+				8503F954287270BC005F7580 /* JsBridgeWebApiError.m */,
+				8503F953287270BC005F7580 /* JsBridgeWebApiSocket.h */,
+				8503F950287270BC005F7580 /* JsBridgeWebApiSocket.m */,
+				8503F951287270BC005F7580 /* JsBridgeWebApiConsole.h */,
+				8503F952287270BC005F7580 /* JsBridgeWebApiConsole.m */,
+			);
+			path = Api;
+			sourceTree = "<group>";
+		};
+		8503F957287270BC005F7580 /* Base */ = {
+			isa = PBXGroup;
+			children = (
+				85C461A7287BE9EF0020C4C7 /* JsBridgeResource.h */,
+				8503F95D287270BC005F7580 /* JsBridgeProtocol.h */,
+				8503F958287270BC005F7580 /* JsBridgeApiItem.h */,
+				8503F95B287270BC005F7580 /* JsBridgeApiItem.m */,
+				8503F959287270BC005F7580 /* JsBridgeHandler.h */,
+				8503F95A287270BC005F7580 /* JsBridgeHandler_Private.h */,
+				8503F95C287270BC005F7580 /* JsBridgeHandler.m */,
+			);
+			path = Base;
+			sourceTree = "<group>";
+		};
+		8503F975287271FF005F7580 /* Demo */ = {
+			isa = PBXGroup;
+			children = (
+				8503F976287272E8005F7580 /* DemoController.h */,
+				8503F977287272E8005F7580 /* DemoController.m */,
+				8503F9792872D29C005F7580 /* DemoWebView.h */,
+				8503F97A2872D29C005F7580 /* DemoWebView.m */,
+				8503F97C2872D2B5005F7580 /* DemoApi.h */,
+				8503F97D2872D2B5005F7580 /* DemoApi.m */,
+				8503F97F2872D2C0005F7580 /* DemoApiModule.h */,
+				8503F9802872D2C0005F7580 /* DemoApiModule.m */,
+			);
+			path = Demo;
+			sourceTree = "<group>";
+		};
+		858DA1C5286EFB1B008E5662 = {
+			isa = PBXGroup;
+			children = (
+				858DA1D0286EFB1B008E5662 /* JsBridge */,
+				858DA1EC286EFB2E008E5662 /* JsBridgeTests */,
+				858DA1F6286EFB2E008E5662 /* JsBridgeUITests */,
+				858DA1CF286EFB1B008E5662 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		858DA1CF286EFB1B008E5662 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				858DA1CE286EFB1B008E5662 /* JsBridge.app */,
+				858DA1E9286EFB2E008E5662 /* JsBridgeTests.xctest */,
+				858DA1F3286EFB2E008E5662 /* JsBridgeUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		858DA1D0286EFB1B008E5662 /* JsBridge */ = {
+			isa = PBXGroup;
+			children = (
+				858DA1D1286EFB1B008E5662 /* AppDelegate.h */,
+				858DA1D2286EFB1B008E5662 /* AppDelegate.m */,
+				858DA1D4286EFB1B008E5662 /* SceneDelegate.h */,
+				858DA1D5286EFB1B008E5662 /* SceneDelegate.m */,
+				858DA1D7286EFB1B008E5662 /* ViewController.h */,
+				858DA1D8286EFB1B008E5662 /* ViewController.m */,
+				8503F975287271FF005F7580 /* Demo */,
+				8503F936287270BC005F7580 /* JsBridge */,
+				858DA1DA286EFB1B008E5662 /* Main.storyboard */,
+				858DA1DD286EFB2D008E5662 /* Assets.xcassets */,
+				858DA1DF286EFB2D008E5662 /* LaunchScreen.storyboard */,
+				858DA1E2286EFB2D008E5662 /* Info.plist */,
+				858DA1E3286EFB2D008E5662 /* main.m */,
+			);
+			path = JsBridge;
+			sourceTree = "<group>";
+		};
+		858DA1EC286EFB2E008E5662 /* JsBridgeTests */ = {
+			isa = PBXGroup;
+			children = (
+				858DA1ED286EFB2E008E5662 /* JsBridgeTests.m */,
+			);
+			path = JsBridgeTests;
+			sourceTree = "<group>";
+		};
+		858DA1F6286EFB2E008E5662 /* JsBridgeUITests */ = {
+			isa = PBXGroup;
+			children = (
+				858DA1F7286EFB2E008E5662 /* JsBridgeUITests.m */,
+				858DA1F9286EFB2E008E5662 /* JsBridgeUITestsLaunchTests.m */,
+			);
+			path = JsBridgeUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		858DA1CD286EFB1B008E5662 /* JsBridge */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 858DA1FD286EFB2E008E5662 /* Build configuration list for PBXNativeTarget "JsBridge" */;
+			buildPhases = (
+				858DA1CA286EFB1B008E5662 /* Sources */,
+				858DA1CB286EFB1B008E5662 /* Frameworks */,
+				858DA1CC286EFB1B008E5662 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = JsBridge;
+			productName = JsBridge;
+			productReference = 858DA1CE286EFB1B008E5662 /* JsBridge.app */;
+			productType = "com.apple.product-type.application";
+		};
+		858DA1E8286EFB2E008E5662 /* JsBridgeTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 858DA200286EFB2E008E5662 /* Build configuration list for PBXNativeTarget "JsBridgeTests" */;
+			buildPhases = (
+				858DA1E5286EFB2E008E5662 /* Sources */,
+				858DA1E6286EFB2E008E5662 /* Frameworks */,
+				858DA1E7286EFB2E008E5662 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				858DA1EB286EFB2E008E5662 /* PBXTargetDependency */,
+			);
+			name = JsBridgeTests;
+			productName = JsBridgeTests;
+			productReference = 858DA1E9286EFB2E008E5662 /* JsBridgeTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		858DA1F2286EFB2E008E5662 /* JsBridgeUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 858DA203286EFB2E008E5662 /* Build configuration list for PBXNativeTarget "JsBridgeUITests" */;
+			buildPhases = (
+				858DA1EF286EFB2E008E5662 /* Sources */,
+				858DA1F0286EFB2E008E5662 /* Frameworks */,
+				858DA1F1286EFB2E008E5662 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				858DA1F5286EFB2E008E5662 /* PBXTargetDependency */,
+			);
+			name = JsBridgeUITests;
+			productName = JsBridgeUITests;
+			productReference = 858DA1F3286EFB2E008E5662 /* JsBridgeUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		858DA1C6286EFB1B008E5662 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastUpgradeCheck = 1340;
+				TargetAttributes = {
+					858DA1CD286EFB1B008E5662 = {
+						CreatedOnToolsVersion = 13.4;
+					};
+					858DA1E8286EFB2E008E5662 = {
+						CreatedOnToolsVersion = 13.4;
+						TestTargetID = 858DA1CD286EFB1B008E5662;
+					};
+					858DA1F2286EFB2E008E5662 = {
+						CreatedOnToolsVersion = 13.4;
+						TestTargetID = 858DA1CD286EFB1B008E5662;
+					};
+				};
+			};
+			buildConfigurationList = 858DA1C9286EFB1B008E5662 /* Build configuration list for PBXProject "JsBridge" */;
+			compatibilityVersion = "Xcode 13.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 858DA1C5286EFB1B008E5662;
+			productRefGroup = 858DA1CF286EFB1B008E5662 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				858DA1CD286EFB1B008E5662 /* JsBridge */,
+				858DA1E8286EFB2E008E5662 /* JsBridgeTests */,
+				858DA1F2286EFB2E008E5662 /* JsBridgeUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		858DA1CC286EFB1B008E5662 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				858DA1E1286EFB2D008E5662 /* LaunchScreen.storyboard in Resources */,
+				8503F968287270BC005F7580 /* socket.js in Resources */,
+				8503F96B287270BC005F7580 /* shell.sh in Resources */,
+				8503F961287270BC005F7580 /* event.js in Resources */,
+				8503F969287270BC005F7580 /* vconsole.min.js in Resources */,
+				858DA1DE286EFB2D008E5662 /* Assets.xcassets in Resources */,
+				8503F96A287270BC005F7580 /* console-shell.sh in Resources */,
+				8503F965287270BC005F7580 /* error.js in Resources */,
+				8503F960287270BC005F7580 /* error-min.js in Resources */,
+				8503F962287270BC005F7580 /* socket-shell.sh in Resources */,
+				8503F96D287270BC005F7580 /* error-shell.sh in Resources */,
+				8503F967287270BC005F7580 /* event-min.js in Resources */,
+				8503F964287270BC005F7580 /* console-min.js in Resources */,
+				8503F963287270BC005F7580 /* console.js in Resources */,
+				8503F966287270BC005F7580 /* socket-min.js in Resources */,
+				8503F96C287270BC005F7580 /* event-shell.sh in Resources */,
+				858DA1DC286EFB1B008E5662 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		858DA1E7286EFB2E008E5662 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		858DA1F1286EFB2E008E5662 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		858DA1CA286EFB1B008E5662 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8503F96E287270BC005F7580 /* JsBridgeWebApiSocket.m in Sources */,
+				8503F974287270BC005F7580 /* JsBridgeHandler.m in Sources */,
+				8503F978287272E8005F7580 /* DemoController.m in Sources */,
+				8503F97E2872D2B5005F7580 /* DemoApi.m in Sources */,
+				858DA1D9286EFB1B008E5662 /* ViewController.m in Sources */,
+				8503F9812872D2C0005F7580 /* DemoApiModule.m in Sources */,
+				858DA1D3286EFB1B008E5662 /* AppDelegate.m in Sources */,
+				8503F95E287270BC005F7580 /* JsBridgeCtxHandler.m in Sources */,
+				858DA1E4286EFB2D008E5662 /* main.m in Sources */,
+				8503F95F287270BC005F7580 /* JSContext+JsBridge.m in Sources */,
+				858DA1D6286EFB1B008E5662 /* SceneDelegate.m in Sources */,
+				8503F973287270BC005F7580 /* JsBridgeApiItem.m in Sources */,
+				8503F971287270BC005F7580 /* JsBridgeWebHandler.m in Sources */,
+				8503F970287270BC005F7580 /* JsBridgeWebApiError.m in Sources */,
+				8503F96F287270BC005F7580 /* JsBridgeWebApiConsole.m in Sources */,
+				8503F97B2872D29C005F7580 /* DemoWebView.m in Sources */,
+				8503F972287270BC005F7580 /* JsBridgeWebView.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		858DA1E5286EFB2E008E5662 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				858DA1EE286EFB2E008E5662 /* JsBridgeTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		858DA1EF286EFB2E008E5662 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				858DA1FA286EFB2E008E5662 /* JsBridgeUITestsLaunchTests.m in Sources */,
+				858DA1F8286EFB2E008E5662 /* JsBridgeUITests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		858DA1EB286EFB2E008E5662 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 858DA1CD286EFB1B008E5662 /* JsBridge */;
+			targetProxy = 858DA1EA286EFB2E008E5662 /* PBXContainerItemProxy */;
+		};
+		858DA1F5286EFB2E008E5662 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 858DA1CD286EFB1B008E5662 /* JsBridge */;
+			targetProxy = 858DA1F4286EFB2E008E5662 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		858DA1DA286EFB1B008E5662 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				858DA1DB286EFB1B008E5662 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		858DA1DF286EFB2D008E5662 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				858DA1E0286EFB2D008E5662 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		858DA1FB286EFB2E008E5662 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.5;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		858DA1FC286EFB2E008E5662 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.5;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		858DA1FE286EFB2E008E5662 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = JsBridge/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = My.JsBridge;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		858DA1FF286EFB2E008E5662 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = JsBridge/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = My.JsBridge;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		858DA201286EFB2E008E5662 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = My.JsBridgeTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/JsBridge.app/JsBridge";
+			};
+			name = Debug;
+		};
+		858DA202286EFB2E008E5662 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = My.JsBridgeTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/JsBridge.app/JsBridge";
+			};
+			name = Release;
+		};
+		858DA204286EFB2E008E5662 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = My.JsBridgeUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = JsBridge;
+			};
+			name = Debug;
+		};
+		858DA205286EFB2E008E5662 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = My.JsBridgeUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = JsBridge;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		858DA1C9286EFB1B008E5662 /* Build configuration list for PBXProject "JsBridge" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				858DA1FB286EFB2E008E5662 /* Debug */,
+				858DA1FC286EFB2E008E5662 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		858DA1FD286EFB2E008E5662 /* Build configuration list for PBXNativeTarget "JsBridge" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				858DA1FE286EFB2E008E5662 /* Debug */,
+				858DA1FF286EFB2E008E5662 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		858DA200286EFB2E008E5662 /* Build configuration list for PBXNativeTarget "JsBridgeTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				858DA201286EFB2E008E5662 /* Debug */,
+				858DA202286EFB2E008E5662 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		858DA203286EFB2E008E5662 /* Build configuration list for PBXNativeTarget "JsBridgeUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				858DA204286EFB2E008E5662 /* Debug */,
+				858DA205286EFB2E008E5662 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 858DA1C6286EFB1B008E5662 /* Project object */;
+}
