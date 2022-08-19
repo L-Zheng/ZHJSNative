@@ -44,14 +44,15 @@ var d = [ ...c ]
  * uglifyjs event.js -b beautify=false,quote_style=1 -o event-min.js
  */
 /** 发送消息name:与iOS原生保持一致 */
-var My_JsBridge_Key_WebHandler = 'My_JsBridge_Replace_WebHandler';
-var My_JsBridge_Key_jsToNativeMethodSync = 'My_JsBridge_Replace_jsToNativeMethodSync';
-var My_JsBridge_Key_jsToNativeMethodAsync = 'My_JsBridge_Replace_jsToNativeMethodAsync';
-var My_JsBridge_Key_callSuccess = 'My_JsBridge_Replace_callSuccess';
-var My_JsBridge_Key_callFail = 'My_JsBridge_Replace_callFail';
-var My_JsBridge_Key_callComplete = 'My_JsBridge_Replace_callComplete';
-var My_JsBridge_Key_callJsFunctionArg = 'My_JsBridge_Replace_callJsFunctionArg';
-var My_JsBridge_Type = (function() {
+;var My_JsBridge = (function (){
+var msgHandlerName = '_Replace_msgHandlerName';
+var bridgeSyncIdentifier = '_Replace_bridgeSyncIdentifier';
+var bridgeAsyncIdentifier = '_Replace_bridgeAsyncIdentifier';
+var callSuccessKey = '_Replace_callSuccessKey';
+var callFailKey = '_Replace_callFailKey';
+var callCompleteKey = '_Replace_callCompleteKey';
+var callJsFuncArgKey = '_Replace_callJsFuncArgKey';
+var jsType = (function() {
     var type = {};
     var typeArr = ['String', 'Object', 'Number', 'Array', 'Undefined', 'Function', 'Null', 'Symbol', 'Boolean'];
     for (var i = 0; i < typeArr.length; i++) {
@@ -63,18 +64,130 @@ var My_JsBridge_Type = (function() {
     }
     return type;
 })();
-var My_JsBridge_callMap = {};
-var My_JsBridge_Replace_nativeCallJs = function(params) {
+var callMap_keyId = 0;
+var callMap_data = {};
+/**
+{
+    '-MyApi-moduleName-request-arg0-1582972065568-79-': {
+        callSuccessKey: function
+        callFailKey: function
+        callCompleteKey: function
+        callJsFuncArgKey: function
+    }
+}
+ */
+var callMap_add = function(randomKey, funcNameKey, func) {
+    var funcMap = callMap_data[randomKey];
+    if (!jsType.isObject(funcMap)) {
+        var map = {};
+        map[funcNameKey] = func;
+        callMap_data[randomKey] = map;
+    } else {
+        /** if (funcMap.hasOwnProperty(funcNameKey)) return; */
+        funcMap[funcNameKey] = func;
+        callMap_data[randomKey] = funcMap;
+    }
+    return randomKey + funcNameKey;
+};
+var callMap_remove = function(randomKey) {
+    if (!callMap_data.hasOwnProperty(randomKey)) return;
+    delete callMap_data[randomKey];
+};
+
+/** 构造参数 */
+var makeParams = function(apiPrefix, moduleName, methodName, params, index) {
+    if (!jsType.isObject(params) && !jsType.isFunction(params)) {
+        return params;
+    }
+    /** 0-10000的随机整数 Math.floor(Math.random() * 10000).toString() */
+    /** 生成 callMap 的 key, -MyApi-moduleName-request-arg0-1582972065568-79- */
+    var randomKey = '-' + apiPrefix + '-' + (jsType.isUndefined(moduleName) ? 'Undefined' : moduleName) + '-' + methodName + '-arg' + index + '-' + new Date().getTime().toString() + '-' + (callMap_keyId++).toString() + '-';
+    
+    /** 参数 */
+    var newParams = {};
+    var funcId = '';
+
+    /** function 参数 */
+    if (jsType.isFunction(params)) {
+        funcId = callMap_add(randomKey, callJsFuncArgKey, params);
+        newParams[callJsFuncArgKey] = funcId;
+        return newParams;
+    }
+
+    newParams = params;
+    /** 成功回调 */
+    var success = params.success;
+    if (success && jsType.isFunction(success)) {
+        funcId = callMap_add(randomKey, callSuccessKey, success);
+        newParams[callSuccessKey] = funcId;
+    }
+    /** 失败回调 */
+    var fail = params.fail;
+    if (fail && jsType.isFunction(fail)) {
+        funcId = callMap_add(randomKey, callFailKey, fail);
+        newParams[callFailKey] = funcId;
+    }
+    /** 完成回调 */
+    var complete = params.complete;
+    if (complete && jsType.isFunction(complete)) {
+        funcId = callMap_add(randomKey, callCompleteKey, complete);
+        newParams[callCompleteKey] = funcId;
+    }
+    return newParams;
+};
+/** 发送参数，因为与 Native 的同步通信使用的是 prompt，为防止开发者也使用 prompt，这里使用 bridgeIdentifier 用于 Native 判断是否是 bridge 通信消息 */
+var sendParams = function(apiPrefix, moduleName, methodName, bridgeIdentifier, params) {
+    /** arguments */
+    var newParams = params;
+    /** 处理参数 */
+    var resArgs = [];
+    if (Object.prototype.toString.call(newParams) === '[object Arguments]') {
+        var argCount = newParams.length;
+        for (var argIdx = 0; argIdx < argCount; argIdx++) {
+            resArgs.push(makeParams(apiPrefix, moduleName, methodName, newParams[argIdx], argIdx));
+        }
+    }
+    return {apiPrefix, moduleName, methodName, bridgeIdentifier, args: resArgs};
+};
+
+/** 发送到 Native */
+var sendNativeAsync = function(params) {
+    var handler = window.webkit.messageHandlers[msgHandlerName];
+    /** 必须这样【JSON.parse(JSON.stringify())】 否则js运行window.webkit.messageHandlers  会报错cannot be cloned */
+    handler.postMessage(JSON.parse(JSON.stringify(params)));
+};
+var sendNativeSync = function(params) {
+    var res = prompt(JSON.stringify(params));
+    if (jsType.isNull(res)) {
+        return undefined;
+    }
+    if (jsType.isString(res) && res.length == 0) {
+        return null;
+    }
+    if (!res) return null;
+    try {
+        res = JSON.parse(res);
+        return res.data;
+    } catch (error) {
+        if (jsType.isFunction(window.onerror) && Object.prototype.toString.call(error) == '[object Error]') {
+            window.onerror.apply(window, [error]);
+        }
+    }
+    return null;
+};
+
+/** 接收 Native 的回调 */
+var receviceNativeCall = function(params) {
     var funcRes = null;
-    if (!My_JsBridge_Type.isString(params) || !params) {
+    if (!jsType.isString(params) || !params) {
         return funcRes;
     }
     var newParams = JSON.parse(decodeURIComponent(params));
-    if (!My_JsBridge_Type.isObject(newParams)) {
+    if (!jsType.isObject(newParams)) {
         return funcRes;
     }
     var funcId = newParams.funcId;
-    var resDatas = (My_JsBridge_Type.isArray(newParams.data) ? newParams.data : []);
+    var resDatas = (jsType.isArray(newParams.data) ? newParams.data : []);
     var alive = newParams.alive;
 
     var randomKey = '',
@@ -91,13 +204,13 @@ var My_JsBridge_Replace_nativeCallJs = function(params) {
         funcNameKey = key;
         return true;
     };
-    var matchRes = (matchKey(My_JsBridge_Key_callSuccess) || matchKey(My_JsBridge_Key_callFail) || matchKey(My_JsBridge_Key_callComplete) || matchKey(My_JsBridge_Key_callJsFunctionArg));
+    var matchRes = (matchKey(callSuccessKey) || matchKey(callFailKey) || matchKey(callCompleteKey) || matchKey(callJsFuncArgKey));
     if (!matchRes) return funcRes;
 
-    var funcMap = My_JsBridge_callMap[randomKey];
-    if (!My_JsBridge_Type.isObject(funcMap)) return funcRes;
+    var funcMap = callMap_data[randomKey];
+    if (!jsType.isObject(funcMap)) return funcRes;
     var func = funcMap[funcNameKey];
-    if (!My_JsBridge_Type.isFunction(func)) return funcRes;
+    if (!jsType.isFunction(func)) return funcRes;
     try {
         /** 调用js function
         原生传参@[] resDatas=[] 调用func()
@@ -141,126 +254,21 @@ var My_JsBridge_Replace_nativeCallJs = function(params) {
         }
         */
     } catch (error) {
-        if (My_JsBridge_Type.isFunction(window.onerror) && Object.prototype.toString.call(error) == '[object Error]') {
+        if (jsType.isFunction(window.onerror) && Object.prototype.toString.call(error) == '[object Error]') {
             window.onerror.apply(window, [error]);
         }
         funcRes = null;
     }
     if (alive) return funcRes;
     /** 回调complete后删除 */
-    if (funcNameKey == My_JsBridge_Key_callComplete || funcNameKey == My_JsBridge_Key_callJsFunctionArg) {
-        My_JsBridge_callMap_remove(randomKey);
+    if (funcNameKey == callCompleteKey || funcNameKey == callJsFuncArgKey) {
+        callMap_remove(randomKey);
     }
     return funcRes;
 }
-/**
-{
-    '-MyApi-moduleName-request-1582972065568-arg0-79-88-': {
-        My_JsBridge_Key_callSuccess: function
-        My_JsBridge_Key_callFail: function
-        My_JsBridge_Key_callComplete: function
-        My_JsBridge_Key_callJsFunctionArg: function
-    }
-}
- */
-var My_JsBridge_callMap_add = function(randomKey, funcNameKey, func) {
-    var funcMap = My_JsBridge_callMap[randomKey];
-    if (!My_JsBridge_Type.isObject(funcMap)) {
-        var map = {};
-        map[funcNameKey] = func;
-        My_JsBridge_callMap[randomKey] = map;
-    } else {
-        /** if (funcMap.hasOwnProperty(funcNameKey)) return; */
-        funcMap[funcNameKey] = func;
-        My_JsBridge_callMap[randomKey] = funcMap;
-    }
-    return randomKey + funcNameKey;
-};
-var My_JsBridge_callMap_remove = function(randomKey) {
-    if (!My_JsBridge_callMap.hasOwnProperty(randomKey)) return;
-    delete My_JsBridge_callMap[randomKey];
-};
-var My_JsBridge_makeParams = function(apiPrefix, moduleName, methodName, params, index) {
-    if (!My_JsBridge_Type.isObject(params) && !My_JsBridge_Type.isFunction(params)) {
-        return params;
-    }
-    /** 0-10000的随机整数 -MyApi-moduleName-request-1582972065568-arg0-79-88- */
-    var randomKey = '-' + apiPrefix + '-' + (My_JsBridge_Type.isUndefined(moduleName) ? 'Undefined' : moduleName) + '-' + methodName + '-' + new Date().getTime().toString() + '-arg' + index + '-' + Math.floor(Math.random() * 10000).toString() + '-' + Math.floor(Math.random() * 10000).toString() + '-';
-    
-    /** 参数 */
-    var newParams = {};
-    var funcId = '';
-
-    /** function 参数 */
-    if (My_JsBridge_Type.isFunction(params)) {
-        funcId = My_JsBridge_callMap_add(randomKey, My_JsBridge_Key_callJsFunctionArg, params);
-        newParams[My_JsBridge_Key_callJsFunctionArg] = funcId;
-        return newParams;
-    }
-
-    newParams = params;
-    /** 成功回调 */
-    var success = params.success;
-    if (success && My_JsBridge_Type.isFunction(success)) {
-        funcId = My_JsBridge_callMap_add(randomKey, My_JsBridge_Key_callSuccess, success);
-        newParams[My_JsBridge_Key_callSuccess] = funcId;
-    }
-    /** 失败回调 */
-    var fail = params.fail;
-    if (fail && My_JsBridge_Type.isFunction(fail)) {
-        funcId = My_JsBridge_callMap_add(randomKey, My_JsBridge_Key_callFail, fail);
-        newParams[My_JsBridge_Key_callFail] = funcId;
-    }
-    /** 完成回调 */
-    var complete = params.complete;
-    if (complete && My_JsBridge_Type.isFunction(complete)) {
-        funcId = My_JsBridge_callMap_add(randomKey, My_JsBridge_Key_callComplete, complete);
-        newParams[My_JsBridge_Key_callComplete] = funcId;
-    }
-    return newParams;
-};
-
-/** 构造发送参数 */
-var My_JsBridge_sendParams = function(apiPrefix, moduleName, methodName, methodSync, params) {
-    /** arguments */
-    var newParams = params;
-    /** 处理参数 */
-    var resArgs = [];
-    if (Object.prototype.toString.call(newParams) === '[object Arguments]') {
-        var argCount = newParams.length;
-        for (var argIdx = 0; argIdx < argCount; argIdx++) {
-            resArgs.push(My_JsBridge_makeParams(apiPrefix, moduleName, methodName, newParams[argIdx], argIdx));
-        }
-    }
-    return {apiPrefix, moduleName, methodName, methodSync, args: resArgs};
-};
-var My_JsBridge_sendNativeAsync = function(params) {
-    var handler = window.webkit.messageHandlers[My_JsBridge_Key_WebHandler];
-    /** 必须这样【JSON.parse(JSON.stringify())】 否则js运行window.webkit.messageHandlers  会报错cannot be cloned */
-    handler.postMessage(JSON.parse(JSON.stringify(params)));
-};
-var My_JsBridge_sendNativeSync = function(params) {
-    var res = prompt(JSON.stringify(params));
-    if (My_JsBridge_Type.isNull(res)) {
-        return undefined;
-    }
-    if (My_JsBridge_Type.isString(res) && res.length == 0) {
-        return null;
-    }
-    if (!res) return null;
-    try {
-        res = JSON.parse(res);
-        return res.data;
-    } catch (error) {
-        if (My_JsBridge_Type.isFunction(window.onerror) && Object.prototype.toString.call(error) == '[object Error]') {
-            window.onerror.apply(window, [error]);
-        }
-    }
-    return null;
-};
-/** 当要移除api时 apiMap为{} */
-var My_JsBridge_Replace_makeApi = function(apiPrefix, moduleName, apiMap) {
-    if (!apiPrefix || !My_JsBridge_Type.isString(apiPrefix) || !My_JsBridge_Type.isObject(apiMap)) {
+/** 构造 api，当要移除 api 时，apiMap 为 {} */
+var makeApi = function(apiPrefix, moduleName, apiMap) {
+    if (!apiPrefix || !jsType.isString(apiPrefix) || !jsType.isObject(apiMap)) {
         return {};
     }
     var res = {};
@@ -272,24 +280,24 @@ var My_JsBridge_Replace_makeApi = function(apiPrefix, moduleName, apiMap) {
             var isSync = config.hasOwnProperty('sync') ? config.sync : false;
             /** 生成function */
             res[methodName] = isSync ? (function () {
-                return My_JsBridge_sendNativeSync(My_JsBridge_sendParams(apiPrefix, moduleName, methodName, My_JsBridge_Key_jsToNativeMethodSync, arguments));
+                return sendNativeSync(sendParams(apiPrefix, moduleName, methodName, bridgeSyncIdentifier, arguments));
             }) : (function () {
-                My_JsBridge_sendNativeAsync(My_JsBridge_sendParams(apiPrefix, moduleName, methodName, My_JsBridge_Key_jsToNativeMethodAsync, arguments));
+                sendNativeAsync(sendParams(apiPrefix, moduleName, methodName, bridgeAsyncIdentifier, arguments));
             });
         })(mapKeys[i]);
     }
     return res;
 };
-/** 向api中加入module api */
-var My_JsBridge_Replace_makeModuleApi = function (apiPrefix, desApi, moduleApiMap) {
-    if (!apiPrefix || !My_JsBridge_Type.isString(apiPrefix) || !desApi || !My_JsBridge_Type.isObject(desApi) || !moduleApiMap || !My_JsBridge_Type.isObject(moduleApiMap)) {
+/** 向 api 中加入 module api */
+var makeModuleApi = function (apiPrefix, desApi, moduleApiMap) {
+    if (!apiPrefix || !jsType.isString(apiPrefix) || !desApi || !jsType.isObject(desApi) || !moduleApiMap || !jsType.isObject(moduleApiMap)) {
         return desApi;
     }
     var resModuleMap = {};
     var mapKeys = Object.keys(moduleApiMap);
     for (var i = 0; i < mapKeys.length; i++) {
         (function(moduleName) {
-            resModuleMap[moduleName] = My_JsBridge_Replace_makeApi(apiPrefix, moduleName, moduleApiMap[moduleName]);
+            resModuleMap[moduleName] = makeApi(apiPrefix, moduleName, moduleApiMap[moduleName]);
         })(mapKeys[i]);
     }
 
@@ -300,7 +308,7 @@ var My_JsBridge_Replace_makeModuleApi = function (apiPrefix, desApi, moduleApiMa
         return resModuleMap;
     };
     desApi[requireModuleKey] = function(moduleName) {
-        if (!moduleName || !My_JsBridge_Type.isString(moduleName)) {
+        if (!moduleName || !jsType.isString(moduleName)) {
             return undefined;
         }
         return resModuleMap[moduleName];
@@ -314,7 +322,7 @@ var My_JsBridge_Replace_makeModuleApi = function (apiPrefix, desApi, moduleApiMa
                 if (!moduleFunc) {
                     return moduleFunc;
                 }
-                if (!My_JsBridge_Type.isFunction(moduleFunc)) {
+                if (!jsType.isFunction(moduleFunc)) {
                     return undefined;
                 }
                 return moduleFunc(moduleName);
@@ -323,13 +331,22 @@ var My_JsBridge_Replace_makeModuleApi = function (apiPrefix, desApi, moduleApiMa
     }
     return desApi;
 }
+
+return [receviceNativeCall, makeApi, makeModuleApi];
+})();
+
+var _Replace_receviceNativeCall = My_JsBridge[0];
+var _Replace_makeApi = My_JsBridge[1];
+var _Replace_makeModuleApi = My_JsBridge[2];
+
+
 /** ❗️❗️Api配置说明：sync：是否是同步方法 */
 /**
 生成api：👉 var MyApi = {
     request: function(){}, 
     getJsonSync: function(){}
 };👈
-var MyApi = My_JsBridge_Replace_makeApi('MyApi', undefined, {
+var MyApi = _Replace_makeApi('MyApi', undefined, {
     request: {
         sync: false
     },
@@ -344,7 +361,7 @@ var MyApi = My_JsBridge_Replace_makeApi('MyApi', undefined, {
         play: function(){}
     }
 }👈
-var MyApi = My_JsBridge_Replace_makeModuleApi('MyApi', MyApi, {
+var MyApi = _Replace_makeModuleApi('MyApi', MyApi, {
     voice: {
         play: {
             sync: false
@@ -353,9 +370,9 @@ var MyApi = My_JsBridge_Replace_makeModuleApi('MyApi', MyApi, {
 });
  
  
-var My_JsBridgeApiReadyEvent = document.createEvent('Event');
-My_JsBridgeApiReadyEvent.initEvent('MyEventName');
-window.dispatchEvent(My_JsBridgeApiReadyEvent);
+var My_JsBridge_ApiInjectFinish_MyApi = document.createEvent('Event');
+My_JsBridge_ApiInjectFinish_MyApi.initEvent('MyEventName');
+window.dispatchEvent(My_JsBridge_ApiInjectFinish_MyApi);
  
 window.addEventListener('MyEventName', () => {});
 */

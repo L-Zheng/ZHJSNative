@@ -44,7 +44,7 @@ window.onerror = (function (oriFunc) {
                 stack: isError ? fetchErrorValue(firstParma, 'stack').toString() : fetchValue(4)
             }));
             /** 发送消息name:与iOS原生保持一致 */
-            My_JsBridge_Error_Replace_Api.sendNative(resErr);
+            _Replace_ErrorApi.sendNative(resErr);
         } catch (error) { 
         }
     }

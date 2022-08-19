@@ -10,7 +10,7 @@
 #import <WebKit/WebKit.h>
 @class JsBridgeWebView;
 
-static NSString * const JsBridgeWebHandlerKey = @"com.wkwebview.myjsbridge.handler";
+static NSString * const JsBridgeWebMessageHandlerName = @"com.WKWebView.JsBridge.MessageHandlerName";
 
 // socket调试代理：监听 vue-cli-service serve的刷新事件
 @protocol JsBridgeWebViewSocketDelegate <NSObject>

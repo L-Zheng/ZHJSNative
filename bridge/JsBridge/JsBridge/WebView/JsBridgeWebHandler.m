@@ -54,7 +54,7 @@
 #pragma mark - WKScriptMessageHandler
 
 - (void)userContentController:(WKUserContentController *)userContentController didReceiveScriptMessage:(WKScriptMessage *)message {
-    if ([message.name isEqualToString:JsBridgeWebHandlerKey]) {
+    if ([message.name isEqualToString:JsBridgeWebMessageHandlerName]) {
         [self handlerJsMsg:message.body];
     }
 }
@@ -63,14 +63,12 @@
 
 - (BOOL)canHandlerJsMsg:(NSDictionary *)jsInfo{
     // js同步、异步函数标识
-    NSString *jsMethodSyncKey = [jsInfo valueForKey:@"methodSync"];
-    if (!jsMethodSyncKey || ![jsMethodSyncKey isKindOfClass:NSString.class] || jsMethodSyncKey.length == 0) {
+    NSString *bridgeIdentifier = [jsInfo valueForKey:@"bridgeIdentifier"];
+    if (!bridgeIdentifier || ![bridgeIdentifier isKindOfClass:NSString.class] || bridgeIdentifier.length == 0) {
         return NO;
     }
-    NSString *syncKey = [self jskey_jsToNativeMethodSync];
-    NSString *asyncKey = [self jskey_jsToNativeMethodAsync];
-    if ([jsMethodSyncKey isEqualToString:syncKey] ||
-        [jsMethodSyncKey isEqualToString:asyncKey]) {
+    if ([bridgeIdentifier isEqualToString:[self jskey_bridgeSyncIdentifier]] ||
+        [bridgeIdentifier isEqualToString:[self jskey_bridgeAsyncIdentifier]]) {
         return YES;
     }
     return NO;
@@ -114,7 +112,7 @@
         NSString *successId = [newParams valueForKey:[self jskey_callSuccess]];
         NSString *failId = [newParams valueForKey:[self jskey_callFail]];
         NSString *completeId = [newParams valueForKey:[self jskey_callComplete]];
-        NSString *jsFuncArgId = [newParams valueForKey:[self jskey_callJsFunctionArg]];
+        NSString *jsFuncArgId = [newParams valueForKey:[self jskey_callJsFuncArg]];
         BOOL hasCallFunction = (successId.length || failId.length || completeId.length || jsFuncArgId.length);
         //不需要回调方法
         if (!hasCallFunction) {
@@ -181,7 +179,7 @@
 - (void)callJsFunc:(NSString *)funcId datas:(NSArray *)datas alive:(BOOL)alive callBack:(void (^) (id jsRes, NSError *jsError))callBack{
     if (funcId.length == 0) return;
     NSDictionary *sendParams = @{@"funcId": funcId, @"data": ((datas && [datas isKindOfClass:NSArray.class]) ? datas : @[]), @"alive": @(alive)};
-    [self.web sendMsgToJs:@[self.jskey_nativeCallJs] params:sendParams complete:^(id res, NSError *error) {
+    [self.web sendMsgToJs:@[self.jskey_receviceNativeCall] params:sendParams complete:^(id res, NSError *error) {
         if (callBack) callBack(res, error);
     }];
 }
@@ -411,7 +409,7 @@
     __block NSMutableString *resCode = [NSMutableString string];
     [self enumRegsiterApiInjectFinishEventNameMap:^(NSString *apiPrefix, NSString *apiInjectFinishEventName) {
         if ([filterApiPrefix containsObject:apiPrefix]) {
-            [resCode appendFormat:@"var My_JsBridgeApiReadyEvent_%@ = document.createEvent('Event');My_JsBridgeApiReadyEvent_%@.initEvent(\"%@\");window.dispatchEvent(My_JsBridgeApiReadyEvent_%@);", apiPrefix, apiPrefix, apiInjectFinishEventName, apiPrefix];
+            [resCode appendFormat:@"var JsBridge_ApiInjectFinish_%@ = document.createEvent('Event');JsBridge_ApiInjectFinish_%@.initEvent(\"%@\");window.dispatchEvent(JsBridge_ApiInjectFinish_%@);", apiPrefix, apiPrefix, apiInjectFinishEventName, apiPrefix];
         }
     }];
     return resCode.copy;
@@ -423,44 +421,43 @@
     // 以下代码由event.js压缩而成
     NSString *fmt = JsBridge_resource_event.length ? JsBridge_resource_event : [self readJsFmt:@"event-min.js"];
     return [NSString stringWithFormat:fmt,
-     JsBridgeWebHandlerKey,
-     self.jskey_jsToNativeMethodSync,
-     self.jskey_jsToNativeMethodAsync,
+    JsBridgeWebMessageHandlerName,
+     self.jskey_bridgeSyncIdentifier,
+     self.jskey_bridgeAsyncIdentifier,
      self.jskey_callSuccess,
      self.jskey_callFail,
      self.jskey_callComplete,
-     self.jskey_callJsFunctionArg,
-     self.jskey_nativeCallJs,
+     self.jskey_callJsFuncArg,
+     self.jskey_receviceNativeCall,
      self.jskey_makeApi,
-     self.jskey_makeModuleApi,
-     self.jskey_makeApi];
+     self.jskey_makeModuleApi];
 }
-- (NSString *)jskey_jsToNativeMethodSync{
-    return @"My_JsBridge_Key_jsToNativeMethodSync";
+- (NSString *)jskey_bridgeSyncIdentifier{
+    return @"JsBridge_Key_SyncIdentifier";
 }
-- (NSString *)jskey_jsToNativeMethodAsync{
-    return @"My_JsBridge_Key_jsToNativeMethodAsync";
+- (NSString *)jskey_bridgeAsyncIdentifier{
+    return @"JsBridge_Key_AsyncIdentifier";
 }
 - (NSString *)jskey_callSuccess{
-    return @"My_JsBridge_Key_callSuccess";
+    return @"JsBridge_Key_CallSuccess";
 }
 - (NSString *)jskey_callFail{
-    return @"My_JsBridge_Key_callFail";
+    return @"JsBridge_Key_CallFail";
 }
 - (NSString *)jskey_callComplete{
-    return @"My_JsBridge_Key_callComplete";
+    return @"JsBridge_Key_CallComplete";
 }
-- (NSString *)jskey_callJsFunctionArg{
-    return @"My_JsBridge_Key_callJsFunctionArg";
+- (NSString *)jskey_callJsFuncArg{
+    return @"JsBridge_Key_CallJsFuncArg";
 }
-- (NSString *)jskey_nativeCallJs{
-    return @"My_JsBridge_Key_nativeCallJs";
+- (NSString *)jskey_receviceNativeCall{
+    return @"My_JsBridge_ReceviceNativeCall";
 }
 - (NSString *)jskey_makeApi{
-    return @"My_JsBridge_Key_makeApi";
+    return @"My_JsBridge_MakeApi";
 }
 - (NSString *)jskey_makeModuleApi{
-    return @"My_JsBridge_Key_makeModuleApi";
+    return @"My_JsBridge_MakeModuleApi";
 }
 
 #pragma mark - js fmt

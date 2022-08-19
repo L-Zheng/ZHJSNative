@@ -20,7 +20,7 @@
 		8503F968287270BC005F7580 /* socket.js in Resources */ = {isa = PBXBuildFile; fileRef = 8503F945287270BC005F7580 /* socket.js */; };
 		8503F969287270BC005F7580 /* vconsole.min.js in Resources */ = {isa = PBXBuildFile; fileRef = 8503F946287270BC005F7580 /* vconsole.min.js */; };
 		8503F96A287270BC005F7580 /* console-shell.sh in Resources */ = {isa = PBXBuildFile; fileRef = 8503F947287270BC005F7580 /* console-shell.sh */; };
-		8503F96B287270BC005F7580 /* shell.sh in Resources */ = {isa = PBXBuildFile; fileRef = 8503F948287270BC005F7580 /* shell.sh */; };
+		8503F96B287270BC005F7580 /* sh-write-code.sh in Resources */ = {isa = PBXBuildFile; fileRef = 8503F948287270BC005F7580 /* sh-write-code.sh */; };
 		8503F96C287270BC005F7580 /* event-shell.sh in Resources */ = {isa = PBXBuildFile; fileRef = 8503F949287270BC005F7580 /* event-shell.sh */; };
 		8503F96D287270BC005F7580 /* error-shell.sh in Resources */ = {isa = PBXBuildFile; fileRef = 8503F94A287270BC005F7580 /* error-shell.sh */; };
 		8503F96E287270BC005F7580 /* JsBridgeWebApiSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 8503F950287270BC005F7580 /* JsBridgeWebApiSocket.m */; };
@@ -34,6 +34,7 @@
 		8503F97B2872D29C005F7580 /* DemoWebView.m in Sources */ = {isa = PBXBuildFile; fileRef = 8503F97A2872D29C005F7580 /* DemoWebView.m */; };
 		8503F97E2872D2B5005F7580 /* DemoApi.m in Sources */ = {isa = PBXBuildFile; fileRef = 8503F97D2872D2B5005F7580 /* DemoApi.m */; };
 		8503F9812872D2C0005F7580 /* DemoApiModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 8503F9802872D2C0005F7580 /* DemoApiModule.m */; };
+		8543664928AB894800F9B2AF /* sh-clear-code.sh in Resources */ = {isa = PBXBuildFile; fileRef = 8543664828AB894800F9B2AF /* sh-clear-code.sh */; };
 		858DA1D3286EFB1B008E5662 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 858DA1D2286EFB1B008E5662 /* AppDelegate.m */; };
 		858DA1D6286EFB1B008E5662 /* SceneDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 858DA1D5286EFB1B008E5662 /* SceneDelegate.m */; };
 		858DA1D9286EFB1B008E5662 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 858DA1D8286EFB1B008E5662 /* ViewController.m */; };
@@ -79,7 +80,7 @@
 		8503F945287270BC005F7580 /* socket.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = socket.js; sourceTree = "<group>"; };
 		8503F946287270BC005F7580 /* vconsole.min.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = vconsole.min.js; sourceTree = "<group>"; };
 		8503F947287270BC005F7580 /* console-shell.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "console-shell.sh"; sourceTree = "<group>"; };
-		8503F948287270BC005F7580 /* shell.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = shell.sh; sourceTree = "<group>"; };
+		8503F948287270BC005F7580 /* sh-write-code.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "sh-write-code.sh"; sourceTree = "<group>"; };
 		8503F949287270BC005F7580 /* event-shell.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "event-shell.sh"; sourceTree = "<group>"; };
 		8503F94A287270BC005F7580 /* error-shell.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "error-shell.sh"; sourceTree = "<group>"; };
 		8503F94C287270BC005F7580 /* JsBridgeWebHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JsBridgeWebHandler.h; sourceTree = "<group>"; };
@@ -106,6 +107,7 @@
 		8503F97D2872D2B5005F7580 /* DemoApi.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DemoApi.m; sourceTree = "<group>"; };
 		8503F97F2872D2C0005F7580 /* DemoApiModule.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DemoApiModule.h; sourceTree = "<group>"; };
 		8503F9802872D2C0005F7580 /* DemoApiModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DemoApiModule.m; sourceTree = "<group>"; };
+		8543664828AB894800F9B2AF /* sh-clear-code.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "sh-clear-code.sh"; sourceTree = "<group>"; };
 		858DA1CE286EFB1B008E5662 /* JsBridge.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JsBridge.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		858DA1D1286EFB1B008E5662 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		858DA1D2286EFB1B008E5662 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -187,7 +189,8 @@
 				8503F945287270BC005F7580 /* socket.js */,
 				8503F946287270BC005F7580 /* vconsole.min.js */,
 				8503F947287270BC005F7580 /* console-shell.sh */,
-				8503F948287270BC005F7580 /* shell.sh */,
+				8503F948287270BC005F7580 /* sh-write-code.sh */,
+				8543664828AB894800F9B2AF /* sh-clear-code.sh */,
 				8503F949287270BC005F7580 /* event-shell.sh */,
 				8503F94A287270BC005F7580 /* error-shell.sh */,
 			);
@@ -410,12 +413,13 @@
 			files = (
 				858DA1E1286EFB2D008E5662 /* LaunchScreen.storyboard in Resources */,
 				8503F968287270BC005F7580 /* socket.js in Resources */,
-				8503F96B287270BC005F7580 /* shell.sh in Resources */,
+				8503F96B287270BC005F7580 /* sh-write-code.sh in Resources */,
 				8503F961287270BC005F7580 /* event.js in Resources */,
 				8503F969287270BC005F7580 /* vconsole.min.js in Resources */,
 				858DA1DE286EFB2D008E5662 /* Assets.xcassets in Resources */,
 				8503F96A287270BC005F7580 /* console-shell.sh in Resources */,
 				8503F965287270BC005F7580 /* error.js in Resources */,
+				8543664928AB894800F9B2AF /* sh-clear-code.sh in Resources */,
 				8503F960287270BC005F7580 /* error-min.js in Resources */,
 				8503F962287270BC005F7580 /* socket-shell.sh in Resources */,
 				8503F96D287270BC005F7580 /* error-shell.sh in Resources */,

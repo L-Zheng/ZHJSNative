@@ -90,7 +90,7 @@
 }
 
 - (NSString *)jsBridge_jsApiPrefix{
-    return @"My_JsBridge_Socket";
+    return @"JsBridge_Socket";
 }
 - (NSString *)jsBridge_iosApiPrefix{
     return @"js_";

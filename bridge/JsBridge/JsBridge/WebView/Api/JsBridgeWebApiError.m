@@ -15,7 +15,7 @@
 }
 
 - (NSString *)jsBridge_jsApiPrefix{
-    return @"My_JsBridge_Error";
+    return @"JsBridge_Error";
 }
 - (NSString *)jsBridge_iosApiPrefix{
     return @"js_";

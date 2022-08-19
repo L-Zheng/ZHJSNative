@@ -60,7 +60,7 @@ console.log = (function (oriLogFunc) {
         }
       }
       /** 发送消息name:与iOS原生保持一致 */
-      My_JsBridge_Console_Replace_Api.sendNative('log', JSON.parse(JSON.stringify(iosRes)));
+      _Replace_ConsoleApi.sendNative('log', JSON.parse(JSON.stringify(iosRes)));
     } catch (error) { }
     /**检测到log error弹窗提醒*/
     return;

@@ -36,7 +36,7 @@
 - (void)configJsBridge{
     [self setUIDelegate:nil];
     [self runJs:[self.jsBridge jssdk_api_support] cold:YES complete:nil];
-    [self.configuration.userContentController addScriptMessageHandler:self.jsBridge name:JsBridgeWebHandlerKey];
+    [self.configuration.userContentController addScriptMessageHandler:self.jsBridge name:JsBridgeWebMessageHandlerName];
 }
 
 #pragma mark - js
@@ -155,7 +155,7 @@
         WKUserContentController *userContent = self.configuration.userContentController;
         [userContent removeAllUserScripts];
         
-        [userContent removeScriptMessageHandlerForName:JsBridgeWebHandlerKey];
+        [userContent removeScriptMessageHandlerForName:JsBridgeWebMessageHandlerName];
     } @catch (NSException *exception) {
     } @finally {
     }

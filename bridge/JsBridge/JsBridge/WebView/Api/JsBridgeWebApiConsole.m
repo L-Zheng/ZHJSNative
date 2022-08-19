@@ -15,7 +15,7 @@
 }
 
 - (NSString *)jsBridge_jsApiPrefix{
-    return @"My_JsBridge_Console";
+    return @"JsBridge_Console";
 }
 - (NSString *)jsBridge_iosApiPrefix{
     return @"js_";
