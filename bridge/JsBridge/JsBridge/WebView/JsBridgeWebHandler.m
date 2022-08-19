@@ -356,48 +356,26 @@
 - (NSString *)jsapi_makeApi:(NSString *)apiPrefix apiMap:(NSDictionary <NSString *,JsBridgeApiRegisterItem *> *)apiMap {
     if (![apiPrefix isKindOfClass:[NSString class]] || apiPrefix.length == 0) return nil;
     
-    NSMutableString *code = [NSMutableString string];
-    
-    [code appendString:@"{"];
+    NSMutableDictionary *codeMap = [NSMutableDictionary dictionary];
     [apiMap enumerateKeysAndObjectsUsingBlock:^(NSString *jsMethod, JsBridgeApiRegisterItem *item, BOOL *stop) {
-        [code appendFormat:@"%@:{sync:%@},", jsMethod, (item.isSync ? @"true" : @"false")];
+        [codeMap setObject:@{@"sync": @(item.isSync)} forKey:jsMethod];
     }];
-    // 删除最后一个逗号
-    NSRange range = [code rangeOfString:@"," options:NSBackwardsSearch];
-    if (range.location != NSNotFound){
-        [code deleteCharactersInRange:range];
-    }
-    [code appendString:@"}"];
+    NSString *code = [[NSString alloc] initWithData:[NSJSONSerialization dataWithJSONObject:codeMap options:NSJSONWritingFragmentsAllowed error:nil] encoding:NSUTF8StringEncoding];
     
     return [NSString stringWithFormat:@"var %@=%@('%@',undefined,%@);",apiPrefix, self.jskey_makeApi, apiPrefix, code];
 }
 - (NSString *)jsapi_makeModule:(NSString *)apiPrefix apiModuleMap:(NSDictionary *)apiModuleMap{
     if (![apiPrefix isKindOfClass:[NSString class]] || apiPrefix.length == 0 || !apiModuleMap) return nil;
     
-    NSMutableString *code = [NSMutableString string];
-    
-    [code appendString:@"{"];
+    NSMutableDictionary *codeMap = [NSMutableDictionary dictionary];
     [apiModuleMap enumerateKeysAndObjectsUsingBlock:^(NSString *jsModuleName, NSDictionary *moduleMap, BOOL *stop) {
-        NSMutableString *code_module = [NSMutableString string];
-        [code_module appendString:@"{"];
+        NSMutableDictionary *codeMap_module = [NSMutableDictionary dictionary];
         [moduleMap enumerateKeysAndObjectsUsingBlock:^(NSString *jsMethod, JsBridgeApiRegisterItem *item, BOOL *stop) {
-            [code_module appendFormat:@"%@:{sync:%@},", jsMethod, (item.isSync ? @"true" : @"false")];
+            [codeMap_module setObject:@{@"sync": @(item.isSync)} forKey:jsMethod];
         }];
-        // 删除最后一个逗号
-        NSRange range = [code_module rangeOfString:@"," options:NSBackwardsSearch];
-        if (range.location != NSNotFound){
-            [code_module deleteCharactersInRange:range];
-        }
-        [code_module appendString:@"}"];
-        
-        [code appendFormat:@"%@:%@,", jsModuleName, code_module];
+        [codeMap setObject:codeMap_module.copy forKey:jsModuleName];
     }];
-    // 删除最后一个逗号
-    NSRange range = [code rangeOfString:@"," options:NSBackwardsSearch];
-    if (range.location != NSNotFound){
-        [code deleteCharactersInRange:range];
-    }
-    [code appendString:@"}"];
+    NSString *code = [[NSString alloc] initWithData:[NSJSONSerialization dataWithJSONObject:codeMap options:NSJSONWritingFragmentsAllowed error:nil] encoding:NSUTF8StringEncoding];
     
     return [NSString stringWithFormat:@"var %@=%@('%@',%@,%@);", apiPrefix, self.jskey_makeModuleApi, apiPrefix, apiPrefix, code];
 }
@@ -409,7 +387,7 @@
     __block NSMutableString *resCode = [NSMutableString string];
     [self enumRegsiterApiInjectFinishEventNameMap:^(NSString *apiPrefix, NSString *apiInjectFinishEventName) {
         if ([filterApiPrefix containsObject:apiPrefix]) {
-            [resCode appendFormat:@"var JsBridge_ApiInjectFinish_%@ = document.createEvent('Event');JsBridge_ApiInjectFinish_%@.initEvent(\"%@\");window.dispatchEvent(JsBridge_ApiInjectFinish_%@);", apiPrefix, apiPrefix, apiInjectFinishEventName, apiPrefix];
+            [resCode appendFormat:@"var JsBridge_ApiInjectFinish_%@ = document.createEvent('Event');JsBridge_ApiInjectFinish_%@.initEvent('%@');window.dispatchEvent(JsBridge_ApiInjectFinish_%@);", apiPrefix, apiPrefix, apiInjectFinishEventName, apiPrefix];
         }
     }];
     return resCode.copy;
