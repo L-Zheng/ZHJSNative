@@ -54,7 +54,7 @@ var callCompleteKey = '_Replace_callCompleteKey';
 var callJsFuncArgKey = '_Replace_callJsFuncArgKey';
 var jsType = (function() {
     var type = {};
-    var typeArr = ['String', 'Object', 'Number', 'Array', 'Undefined', 'Function', 'Null', 'Symbol', 'Boolean'];
+    var typeArr = ['String', 'Object', 'Number', 'Array', 'Undefined', 'Function', 'AsyncFunction', 'Null', 'Symbol', 'Boolean'];
     for (var i = 0; i < typeArr.length; i++) {
         (function(name) {
             type['is' + name] = function(obj) {
@@ -96,7 +96,7 @@ var callMap_remove = function(randomKey) {
 
 /** 构造参数 */
 var makeParams = function(apiPrefix, moduleName, methodName, params, index) {
-    if (!jsType.isObject(params) && !jsType.isFunction(params)) {
+    if (!jsType.isObject(params) && !(jsType.isFunction(params) || jsType.isAsyncFunction(params))) {
         return params;
     }
     /** 0-10000的随机整数 Math.floor(Math.random() * 10000).toString() */
@@ -108,7 +108,7 @@ var makeParams = function(apiPrefix, moduleName, methodName, params, index) {
     var funcId = '';
 
     /** function 参数 */
-    if (jsType.isFunction(params)) {
+    if (jsType.isFunction(params) || jsType.isAsyncFunction(params)) {
         funcId = callMap_add(randomKey, callJsFuncArgKey, params);
         newParams[callJsFuncArgKey] = funcId;
         return newParams;
@@ -117,19 +117,19 @@ var makeParams = function(apiPrefix, moduleName, methodName, params, index) {
     newParams = params;
     /** 成功回调 */
     var success = params.success;
-    if (success && jsType.isFunction(success)) {
+    if (success && (jsType.isFunction(success) || jsType.isAsyncFunction(success))) {
         funcId = callMap_add(randomKey, callSuccessKey, success);
         newParams[callSuccessKey] = funcId;
     }
     /** 失败回调 */
     var fail = params.fail;
-    if (fail && jsType.isFunction(fail)) {
+    if (fail && (jsType.isFunction(fail) || jsType.isAsyncFunction(fail))) {
         funcId = callMap_add(randomKey, callFailKey, fail);
         newParams[callFailKey] = funcId;
     }
     /** 完成回调 */
     var complete = params.complete;
-    if (complete && jsType.isFunction(complete)) {
+    if (complete && (jsType.isFunction(complete) || jsType.isAsyncFunction(complete))) {
         funcId = callMap_add(randomKey, callCompleteKey, complete);
         newParams[callCompleteKey] = funcId;
     }
@@ -169,7 +169,7 @@ var sendNativeSync = function(params) {
         res = JSON.parse(res);
         return res.data;
     } catch (error) {
-        if (jsType.isFunction(window.onerror) && Object.prototype.toString.call(error) == '[object Error]') {
+        if ((jsType.isFunction(window.onerror) || jsType.isAsyncFunction(window.onerror)) && Object.prototype.toString.call(error) == '[object Error]') {
             window.onerror.apply(window, [error]);
         }
     }
@@ -210,7 +210,7 @@ var receviceNativeCall = function(params) {
     var funcMap = callMap_data[randomKey];
     if (!jsType.isObject(funcMap)) return funcRes;
     var func = funcMap[funcNameKey];
-    if (!jsType.isFunction(func)) return funcRes;
+    if (!(jsType.isFunction(func) || jsType.isAsyncFunction(func))) return funcRes;
     try {
         /** 调用js function
         原生传参@[] resDatas=[] 调用func()
@@ -254,7 +254,7 @@ var receviceNativeCall = function(params) {
         }
         */
     } catch (error) {
-        if (jsType.isFunction(window.onerror) && Object.prototype.toString.call(error) == '[object Error]') {
+        if ((jsType.isFunction(window.onerror) || jsType.isAsyncFunction(window.onerror)) && Object.prototype.toString.call(error) == '[object Error]') {
             window.onerror.apply(window, [error]);
         }
         funcRes = null;
@@ -322,7 +322,7 @@ var makeModuleApi = function (apiPrefix, desApi, moduleApiMap) {
                 if (!moduleFunc) {
                     return moduleFunc;
                 }
-                if (!jsType.isFunction(moduleFunc)) {
+                if (!(jsType.isFunction(moduleFunc) || jsType.isAsyncFunction(moduleFunc))) {
                     return undefined;
                 }
                 return moduleFunc(moduleName);
