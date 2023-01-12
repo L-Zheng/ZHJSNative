@@ -14,7 +14,7 @@
 @property (nonatomic, strong) JsBridgeWebHandler *jsBridge;
 
 - (void)runJs:(NSString *)js cold:(BOOL)cold complete:(void (^)(id res, NSError *error))complete;
-- (void)injectJs:(NSString *)js time:(WKUserScriptInjectionTime)time;
+- (void)injectJs:(NSString *)js time:(WKUserScriptInjectionTime)time complete:(void (^)(id res, NSError *error))complete;
 - (void)sendMsgToJs:(NSArray *)functions params:(NSDictionary *)params complete:(void (^)(id res, NSError *error))complete;
 
 @end

@@ -516,8 +516,7 @@
 - (void)captureVConsole:(BOOL)cold complete:(void (^) (id res, NSError *error))complete{
     NSString *js = [self jssdk_api_vconsole];
     if (cold) {
-        [self.web injectJs:js time:WKUserScriptInjectionTimeAtDocumentEnd];
-        if (complete) complete(nil, nil);
+        [self.web injectJs:js time:WKUserScriptInjectionTimeAtDocumentEnd complete:complete];
     }else{
         [self.web runJs:js cold:NO complete:complete];
     }

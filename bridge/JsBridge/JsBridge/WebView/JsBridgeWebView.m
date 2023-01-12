@@ -50,11 +50,11 @@
         [self runJs_hot:js complete:complete];
         return;
     }
-    [self injectJs:js time:WKUserScriptInjectionTimeAtDocumentStart];
-    if (complete) complete(nil, nil);
+    [self injectJs:js time:WKUserScriptInjectionTimeAtDocumentStart complete:complete];
 }
-- (void)injectJs:(NSString *)js time:(WKUserScriptInjectionTime)time{
+- (void)injectJs:(NSString *)js time:(WKUserScriptInjectionTime)time complete:(void (^)(id res, NSError *error))complete{
     if (!js || ![js isKindOfClass:NSString.class] || js.length == 0) {
+        if (complete) complete(nil, JBMakeErr(404, JBLCDesc(@"js is invalid.")));
         return;
     }
     /* 注入js
@@ -65,8 +65,17 @@
      js执行顺序：(vue项目打包后会把js插入到body的末尾)
      start脚本 -> header里面的script标签 -> body里面的script标签 ->vue插入到body末尾的script标签 (beforeCreate -> created -> mounted) -> 与body同级的后面的script标签 ->html根标签执行结束 -> end脚本
      */
-    WKUserScript *script = [[WKUserScript alloc] initWithSource:js injectionTime:time forMainFrameOnly:YES];
-    [self.configuration.userContentController addUserScript:script];
+    void (^block) (void) = ^{
+        WKUserScript *script = [[WKUserScript alloc] initWithSource:js injectionTime:time forMainFrameOnly:YES];
+        [self.configuration.userContentController addUserScript:script];
+        if (complete) complete(nil, nil);
+    };
+    if ([NSThread isMainThread]) {
+        block(); return;
+    }
+    dispatch_async(dispatch_get_main_queue(), ^{
+        block();
+    });
 }
 /** evaluateJavaScript方法运行js函数的参数：
  尽量包裹一层数据【使用NSDictionary-->转成NSString-->utf-8编码】：js端再解析出来【utf-8解码-->JSON.parse()-->json】
@@ -89,7 +98,7 @@
         [newFunctions addObject:function];
     }
     if (!newFunctions || ![newFunctions isKindOfClass:NSArray.class] || newFunctions.count == 0) {
-        if (complete) complete(nil, [NSError errorWithDomain:@"" code:404 userInfo:@{NSLocalizedDescriptionKey: @"evaluate js's function is null"}]);
+        if (complete) complete(nil, JBMakeErr(404, JBLCDesc(@"evaluate js's function is null.")));
         return;
     }
     
@@ -118,6 +127,15 @@
     [self runJs_hot:funcJs complete:complete];
 }
 - (void)runJs_hot:(NSString *)js complete:(void (^)(id res, NSError *error))complete{
+    if ([NSThread isMainThread]) {
+        [self runJs_hot_main:js complete:complete];
+        return;
+    }
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self runJs_hot_main:js complete:complete];
+    });
+}
+- (void)runJs_hot_main:(NSString *)js complete:(void (^)(id res, NSError *error))complete{
     if (@available(iOS 9.0, *)) {
         [self evaluateJavaScript:js completionHandler:complete];
         return;
