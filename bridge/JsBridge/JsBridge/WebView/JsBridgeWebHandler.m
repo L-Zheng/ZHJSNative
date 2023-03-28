@@ -456,6 +456,7 @@
 
 #pragma mark - error
 
+// 运行 -[WKWebView evaluateJavaScript:completionHandler:] 方法导致的异常也会被捕获到
 - (void)captureException:(BOOL)cold handler:(void (^) (id exception))handler{
     __weak __typeof__(self) weakSelf = self;
     void (^block) (id exception) = ^(id exception){
