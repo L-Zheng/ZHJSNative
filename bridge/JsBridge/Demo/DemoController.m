@@ -71,9 +71,12 @@
     [self reloadWeb];
 }
 - (void)reloadWeb{
-    NSString *urlStr = @"http://172.31.35.71:8080";
+    NSString *urlStr = @"http://172.31.35.54:8080/index.html";
 //    urlStr = @"https://www.baidu.com";
     [self.web loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:urlStr]]];
+    
+//    NSString *dir = @"/Users/em/Desktop/My/Company/EM/Code/fund-task/chrome-new/prj-h5/release";
+//    [self.web loadFileURL:[NSURL fileURLWithPath:[dir stringByAppendingPathComponent:@"index.html"]] allowingReadAccessToURL:[NSURL fileURLWithPath:dir]];
 }
 
 #pragma mark - WKNavigationDelegate

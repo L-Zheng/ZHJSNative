@@ -621,14 +621,16 @@ case cType:{\
 #pragma mark - parse
 
 - (NSDictionary *)parseException:(id)exception{
+    // 不做任何处理, 保留浏览器抛出的原始数据
+    return exception;
     if (!exception || ![exception isKindOfClass:[NSDictionary class]]) {
         return nil;
     }
     NSMutableDictionary *res = [exception mutableCopy];
     id stackRes = nil;
     NSString *stack = [res valueForKey:@"stack"];
-    if ([stack isKindOfClass:[NSString class]] && stack.length) {
-        // Vue报错是string类型
+    // Vue 报错 是string类型
+    if ([stack isKindOfClass:[NSString class]]) {
         if ([stack containsString:@"\n"]) {
             NSMutableArray *arr = [[stack componentsSeparatedByString:@"\n"] mutableCopy];
 //            NSInteger limit = 10;
@@ -636,13 +638,16 @@ case cType:{\
 //                [arr removeObjectsInRange:NSMakeRange(limit, arr.count - limit)];
 //            }
             stackRes = [arr copy];
-        }else{
-            NSInteger limit = 200;
-            if (stack.length > limit) stack = [stack substringToIndex:limit];
+        } else {
+//            NSInteger limit = 200;
+//            if (stack.length > limit) {
+//                stack = [stack substringToIndex:limit];
+//            }
             stackRes = stack;
         }
-    }else{
-        //html js报错是json类型
+    }
+    //html js报错是json类型
+    else {
         stackRes = stack;
     }
     if (stackRes) [res setValue:stackRes forKey:@"stack"];
