@@ -92,13 +92,13 @@ window.onerror = (function (oriFunc) {
             var keys = ['message', 'sourceURL', 'line', 'column', 'stack'];
             if (Object.prototype.toString.call(params[0]) == '[object Error]') {
                 // 不能直接将 Error 直接赋值给 resErr, JSON.stringify(params[0]) 是一个空 json.
-                keys.forEach(el => {
+                keys.forEach(function (el) {
                     resErr[el] = params[0][el];
                 });
             }
             else {
                 if (argCount > 4 && (Object.prototype.toString.call(params[4]) == '[object Error]')) {
-                    keys.forEach(el => {
+                    keys.forEach(function (el) {
                         resErr[el] = params[4][el];
                     });
                 }

@@ -5,7 +5,7 @@
 /** ❌ios9 特殊处理
  * 不识别  let变量、() => {}箭头函数 、function函数不能有默认值 如：function(params = {})() 、多参数函数 function (...args)
  *         识别 const、 var、 function(){}
- *    如果当前function里面又调用了其他function  var作用域不会延伸到其它function
+ *    如果当前function里面又调用了其他function  var作用域不会延伸到其它function  递归调用也是如此
  *    如果当前function里面有其他function函数体  var作用域会延伸到其它function函数体
  */
 /** ❌ios8 特殊处理
@@ -54,12 +54,12 @@ var callCompleteKey = '_Replace_callCompleteKey';
 var callJsFuncArgKey = '_Replace_callJsFuncArgKey';
 var jsType = (function() {
     var type = {};
-    var typeArr = ['String', 'Object', 'Number', 'Array', 'Undefined', 'Function', 'AsyncFunction', 'Null', 'Symbol', 'Boolean'];
+    var typeArr = ['String', 'Object', 'Number', 'Array', 'Undefined', 'Function', 'AsyncFunction', 'Null', 'Symbol', 'Boolean', 'Arguments', 'Error', 'Window'];
     for (var i = 0; i < typeArr.length; i++) {
         (function(name) {
             type['is' + name] = function(obj) {
                 return Object.prototype.toString.call(obj) == '[object ' + name + ']';
-            }
+            };
         })(typeArr[i]);
     }
     return type;
@@ -141,7 +141,7 @@ var sendParams = function(apiPrefix, moduleName, methodName, bridgeIdentifier, p
     var newParams = params;
     /** 处理参数 */
     var resArgs = [];
-    if (Object.prototype.toString.call(newParams) === '[object Arguments]') {
+    if (jsType.isArguments(newParams)) {
         var argCount = newParams.length;
         for (var argIdx = 0; argIdx < argCount; argIdx++) {
             resArgs.push(makeParams(apiPrefix, moduleName, methodName, newParams[argIdx], argIdx));
@@ -169,7 +169,7 @@ var sendNativeSync = function(params) {
         res = JSON.parse(res);
         return res.data;
     } catch (error) {
-        if ((jsType.isFunction(window.onerror) || jsType.isAsyncFunction(window.onerror)) && Object.prototype.toString.call(error) == '[object Error]') {
+        if ((jsType.isFunction(window.onerror) || jsType.isAsyncFunction(window.onerror)) && jsType.isError(error)) {
             window.onerror.apply(window, [error]);
         }
     }
@@ -254,7 +254,7 @@ var receviceNativeCall = function(params) {
         }
         */
     } catch (error) {
-        if ((jsType.isFunction(window.onerror) || jsType.isAsyncFunction(window.onerror)) && Object.prototype.toString.call(error) == '[object Error]') {
+        if ((jsType.isFunction(window.onerror) || jsType.isAsyncFunction(window.onerror)) && jsType.isError(error)) {
             window.onerror.apply(window, [error]);
         }
         funcRes = null;
