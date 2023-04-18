@@ -266,14 +266,15 @@
 #pragma mark - console
 
 - (void)captureConsole:(void (^) (NSString *flag, NSArray *args))handler{
+    __weak __typeof__(self) weakSelf = self;
     void (^block) (NSArray *, NSString *) = ^(NSArray *args, NSString *flag){
+        if (!weakSelf) return;
         NSMutableArray *res = [NSMutableArray array];
         for (JSValue *arg in args) {
-            id obj = [arg toObject];
-            [res addObject:obj ?: @"[Object Undefined]"];
+            [res addObject:[weakSelf parseJSValue:arg]];
         }
         if (handler) {
-            handler(flag, args);
+            handler(flag, res.copy);
             return;
         }
         NSLog(@"👉JSCore Console: flag: %@ args: %@", flag, res.copy);
@@ -352,7 +353,6 @@
 //#ifdef DEBUG
 //    prjDebug = YES;
 //#endif
-    __weak __typeof__(self) weakSelf = self;
     NSMutableDictionary *resMap = [NSMutableDictionary dictionary];
     JSValue *oriConsole = [self.jsCtx objectForKeyedSubscript:@"console"];
     NSArray *flagsMap = @[@[@"debug"],@[@"error"],@[@"info"],@[@"log"],@[@"warn"]];
@@ -414,31 +414,70 @@
  array：[JSValue toObject]= [NSArray class]    [jsValue isObject]=YES
  json：[JSValue toObject]= [NSDictionary class]    [jsValue isObject]=YES
  */
-- (id)parseJSValueToObj:(JSValue *)jsValue{
-    if (!jsValue) return nil;
-    if (@available(iOS 9.0, *)) {
-        if (jsValue.isDate) {
-            return [jsValue toDate];
-        }
-        if (jsValue.isArray) {
-            return [jsValue toArray];
-        }
-    }
-    if (@available(iOS 13.0, *)) {
-        if (jsValue.isSymbol) {
-            return nil;
-        }
-    }
-    if (jsValue.isNull || jsValue.isUndefined) {
-        return [jsValue toObject];
-    }
-    if (jsValue.isString || jsValue.isNumber || jsValue.isBoolean){
-        return [jsValue toObject];
-    }
-    if (jsValue.isObject){
-        return [jsValue toObject];
-    }
-    return [jsValue toObject];
+- (id)parseJSValueToObj:(JSValue *)jsVal{
+    return [self parseJSValue:jsVal][@"data"];
 }
-
+- (NSDictionary *)parseJSValue:(JSValue *)jsVal{
+    NSString *type = @"[object 未知类型]"; id data = nil;
+    
+    BOOL ios9 = NO;
+    if (@available(iOS 9.0, *)) {
+        ios9 = YES;
+    }
+    BOOL ios13 = NO;
+    if (@available(iOS 13.0, *)) {
+        ios13 = YES;
+    }
+    
+    if (!jsVal || ![jsVal isKindOfClass:JSValue.class]) {
+        type = type;
+        data = nil;
+    }
+    else if (jsVal.isUndefined) {
+        type = @"[object Undefined]";
+        data = [jsVal toObject];
+    }
+    else if (jsVal.isNull) {
+        type = @"[object Null]";
+        data = [jsVal toObject];
+    }
+    else if (jsVal.isBoolean) {
+        type = @"[object Boolean]";
+        data = @([jsVal toBool]);
+    }
+    else if (jsVal.isNumber) {
+        type = @"[object Number]";
+        data = [jsVal toNumber];
+    }
+    else if (jsVal.isString) {
+        type = @"[object String]";
+        data = [jsVal toString];
+    }
+    else if (ios9 && jsVal.isArray) {
+        type = @"[object Array]";
+        data = [jsVal toArray];
+    }
+    else if (ios9 && jsVal.isDate) {
+        type = @"[object Date]";
+        data = [jsVal toDate];
+    }
+    else if (ios13 && jsVal.isSymbol) {
+        type = @"[object Symbol]";
+        data = nil;
+    }
+    else if (jsVal.isObject) {
+        type = @"[object Object]";
+        data = [jsVal toObject];
+    }
+    else {
+        type = type;
+        data = [jsVal toObject];
+    }
+    NSMutableDictionary *res = [NSMutableDictionary dictionary];
+    [res setObject:type forKey:@"type"];
+    if (data) {
+        [res setObject:data forKey:@"data"];
+    }
+    return res.copy;
+}
 @end

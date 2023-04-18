@@ -76,7 +76,10 @@
 
                 var parseRes = [];
                 for (var i = 0; i < params.length; i++) {
-                    parseRes.push(parseArg(params[i]));
+                    parseRes.push({
+                        data: parseArg(params[i]),
+                        type: Object.prototype.toString.call(params[i])
+                    });
                 }
                 /*  发送消息name:与iOS原生保持一致 
                 JSON.parse(JSON.stringify([undefined])) == [null]
