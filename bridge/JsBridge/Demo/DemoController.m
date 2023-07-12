@@ -28,7 +28,7 @@
 - (void)viewDidLayoutSubviews {
     [super viewDidLayoutSubviews];
     if (@available(iOS 11.0, *)) {
-        self.web.frame = (CGRect){CGPointZero, {self.view.bounds.size.width, self.view.bounds.size.height - self.view.safeAreaInsets.bottom}};
+        self.web.frame = (CGRect){{0, self.view.safeAreaInsets.top} , {self.view.bounds.size.width, self.view.bounds.size.height - self.view.safeAreaInsets.bottom - self.view.safeAreaInsets.top}};
     } else {
         self.web.frame = self.view.bounds;
     }
@@ -62,18 +62,30 @@
     [jsBridge captureConsole:cold handler:^(NSString *flag, NSArray *args) {
         NSLog(@"console: %@ %@", flag, args);
     }];
+    // captureNetwork 与 captureVConsole 同时注入，一个请求会触发两次 network 回调，因为这两个地方采用了同样的 network 拦截方案
+//    [jsBridge captureNetwork:cold handler:^(id data) {
+//        NSLog(@"network: %@", data);
+//    }];
     [jsBridge captureVConsole:cold complete:^(id res, NSError *error) {}];
     
     [jsBridge addApis:@[[[DemoApi alloc] init]] cold:cold complete:^(id res, NSError *error) {
         
     }];
     
+    /* webview 创建完成，如果立即调用 loadRequest
+     会等一段时间才会触发 didStartProvisionalNavigation 代理
+     这是因为 webview 创建完成后，需要初始化一段时间，完成初始化后，才能开始调用执行 loadRequest
+     */
     [self reloadWeb];
 }
 - (void)reloadWeb{
     NSString *urlStr = @"http://172.31.35.54:8080/index.html";
-//    urlStr = @"https://www.baidu.com";
-    [self.web loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:urlStr]]];
+    urlStr = @"https://www.baidu.com";
+    NSURL *url = [NSURL URLWithString:urlStr];
+    
+//    urlStr = @"/Users/em/Desktop/My/Company/EM/Code/my/prj-h5/index.html";
+//    url = [NSURL fileURLWithPath:urlStr];
+    [self.web loadRequest:[NSURLRequest requestWithURL:url]];
     
 //    NSString *dir = @"/Users/em/Desktop/My/Company/EM/Code/fund-task/chrome-new/prj-h5/release";
 //    [self.web loadFileURL:[NSURL fileURLWithPath:[dir stringByAppendingPathComponent:@"index.html"]] allowingReadAccessToURL:[NSURL fileURLWithPath:dir]];

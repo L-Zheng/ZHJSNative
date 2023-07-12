@@ -11,11 +11,13 @@
 #import "JsBridgeWebView.h"
 #import "JsBridgeWebApiError.h"
 #import "JsBridgeWebApiConsole.h"
+#import "JsBridgeWebApiNetwork.h"
 #import "JsBridgeWebApiSocket.h"
 
 @interface JsBridgeWebHandler ()
 @property (nonatomic, strong) JsBridgeWebApiError <JsBridgeApiProtocol> *api_error;
 @property (nonatomic, strong) JsBridgeWebApiConsole <JsBridgeApiProtocol> *api_console;
+@property (nonatomic, strong) JsBridgeWebApiNetwork <JsBridgeApiProtocol> *api_network;
 @property (nonatomic, strong) JsBridgeWebApiSocket <JsBridgeApiProtocol> *api_socket;
 @end
 
@@ -526,6 +528,36 @@
     NSString *js = [self readJsFmt:@"vconsole.min.js"];
     if (!js) return nil;
     return [NSString stringWithFormat:@"%@; var vConsole = new VConsole();", js];
+}
+
+#pragma mark - network
+
+- (void)captureNetwork:(BOOL)cold handler:(void (^) (id data))handler{
+    __weak __typeof__(self) weakSelf = self;
+    void (^block) (id data) = ^(id data){
+        if (!handler) return;
+        handler(data);
+    };
+    
+    if (self.api_network) {
+        self.api_network.handler = block;
+        return;
+    }
+    
+    self.api_network = [[JsBridgeWebApiNetwork alloc] init];
+    self.api_network.jsBridge = self;
+    self.api_network.handler = block;
+    [self addApis:@[self.api_network] cold:cold complete:^(id res1, NSError *error1) {
+        if (error1) return;
+        NSString *js = [weakSelf jssdk_api_network:[weakSelf.api_network jsBridge_jsApiPrefix]];
+        [weakSelf.web runJs:js cold:cold complete:^(id res2, NSError *error2) {
+        }];
+    }];
+}
+- (NSString *)jssdk_api_network:(NSString *)apiJsName{
+    // 以下代码由console.js压缩而成
+    NSString *fmt = JsBridge_resource_network.length ? JsBridge_resource_network : [self readJsFmt:@"network-min.js"];
+    return [NSString stringWithFormat:fmt, apiJsName];
 }
 
 #pragma mark - socket

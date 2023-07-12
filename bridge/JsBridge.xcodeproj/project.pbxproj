@@ -35,6 +35,7 @@
 		8503F97E2872D2B5005F7580 /* DemoApi.m in Sources */ = {isa = PBXBuildFile; fileRef = 8503F97D2872D2B5005F7580 /* DemoApi.m */; };
 		8503F9812872D2C0005F7580 /* DemoApiModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 8503F9802872D2C0005F7580 /* DemoApiModule.m */; };
 		8543664928AB894800F9B2AF /* sh-clear-code.sh in Resources */ = {isa = PBXBuildFile; fileRef = 8543664828AB894800F9B2AF /* sh-clear-code.sh */; };
+		85664C132A5E52CB009CF699 /* JsBridgeWebApiNetwork.m in Sources */ = {isa = PBXBuildFile; fileRef = 85664C122A5E52CB009CF699 /* JsBridgeWebApiNetwork.m */; };
 		858DA1D3286EFB1B008E5662 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 858DA1D2286EFB1B008E5662 /* AppDelegate.m */; };
 		858DA1D6286EFB1B008E5662 /* SceneDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 858DA1D5286EFB1B008E5662 /* SceneDelegate.m */; };
 		858DA1D9286EFB1B008E5662 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 858DA1D8286EFB1B008E5662 /* ViewController.m */; };
@@ -108,6 +109,8 @@
 		8503F97F2872D2C0005F7580 /* DemoApiModule.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DemoApiModule.h; sourceTree = "<group>"; };
 		8503F9802872D2C0005F7580 /* DemoApiModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DemoApiModule.m; sourceTree = "<group>"; };
 		8543664828AB894800F9B2AF /* sh-clear-code.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "sh-clear-code.sh"; sourceTree = "<group>"; };
+		85664C112A5E52CB009CF699 /* JsBridgeWebApiNetwork.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JsBridgeWebApiNetwork.h; sourceTree = "<group>"; };
+		85664C122A5E52CB009CF699 /* JsBridgeWebApiNetwork.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JsBridgeWebApiNetwork.m; sourceTree = "<group>"; };
 		858DA1CE286EFB1B008E5662 /* JsBridge.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JsBridge.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		858DA1D1286EFB1B008E5662 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		858DA1D2286EFB1B008E5662 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -218,6 +221,8 @@
 				8503F950287270BC005F7580 /* JsBridgeWebApiSocket.m */,
 				8503F951287270BC005F7580 /* JsBridgeWebApiConsole.h */,
 				8503F952287270BC005F7580 /* JsBridgeWebApiConsole.m */,
+				85664C112A5E52CB009CF699 /* JsBridgeWebApiNetwork.h */,
+				85664C122A5E52CB009CF699 /* JsBridgeWebApiNetwork.m */,
 			);
 			path = Api;
 			sourceTree = "<group>";
@@ -467,6 +472,7 @@
 				8503F973287270BC005F7580 /* JsBridgeApiItem.m in Sources */,
 				8503F971287270BC005F7580 /* JsBridgeWebHandler.m in Sources */,
 				8503F970287270BC005F7580 /* JsBridgeWebApiError.m in Sources */,
+				85664C132A5E52CB009CF699 /* JsBridgeWebApiNetwork.m in Sources */,
 				8503F96F287270BC005F7580 /* JsBridgeWebApiConsole.m in Sources */,
 				8503F97B2872D29C005F7580 /* DemoWebView.m in Sources */,
 				8503F972287270BC005F7580 /* JsBridgeWebView.m in Sources */,
@@ -649,6 +655,7 @@
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -675,6 +682,7 @@
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

@@ -3,7 +3,7 @@
  *  var变量的作用区域 当前function上下文 
  */
 /** ❌ios9 特殊处理
- * 不识别  let变量、() => {}箭头函数 、function函数不能有默认值 如：function(params = {})() 、多参数函数 function (...args)
+ * 不识别  forof、let变量、() => {}箭头函数 、function函数不能有默认值 如：function(params = {})() 、多参数函数 function (...args)
  *         识别 const、 var、 function(){}
  *    如果当前function里面又调用了其他function  var作用域不会延伸到其它function  递归调用也是如此
  *    如果当前function里面有其他function函数体  var作用域会延伸到其它function函数体

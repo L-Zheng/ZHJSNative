@@ -1,6 +1,7 @@
 sh error-shell.sh
 sh event-shell.sh
 sh console-shell.sh
+sh network-shell.sh
 sh socket-shell.sh
 
 # 写入文件
@@ -13,6 +14,9 @@ res=${res}'
 static NSString * const JsBridge_resource_console = @"";'
 
 res=${res}'
+static NSString * const JsBridge_resource_network = @"";'
+
+res=${res}'
 static NSString * const JsBridge_resource_error = @"";'
 
 res=${res}'
@@ -23,5 +27,6 @@ echo "${res}" > ../Base/JsBridgeResource.h
 
 # static NSString * const JsBridge_resource_event = @"";
 # static NSString * const JsBridge_resource_console = @"";
+# static NSString * const JsBridge_resource_network = @"";
 # static NSString * const JsBridge_resource_error = @"";
 # static NSString * const JsBridge_resource_socket = @"";
