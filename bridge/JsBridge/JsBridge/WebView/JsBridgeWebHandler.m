@@ -527,7 +527,7 @@
 - (NSString *)jssdk_api_vconsole{
     NSString *js = [self readJsFmt:@"vconsole.min.js"];
     if (!js) return nil;
-    return [NSString stringWithFormat:@"%@; var vConsole = new VConsole();", js];
+    return [NSString stringWithFormat:@"%@; var vConsole = new VConsole(); (function() { var timer = null; timer = setInterval(function() { var wrap = document ? document.getElementById('__vconsole') : null; var dom = (typeof wrap === 'object' && typeof wrap.children === 'object' && wrap.children.length > 0) ? wrap.children[0] : null; if (!dom) return; dom.style.width = '60px'; clearInterval(timer); timer = null; }, 1000); })();", js];
 }
 
 #pragma mark - network
