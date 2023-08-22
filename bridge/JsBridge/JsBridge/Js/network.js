@@ -1,4 +1,4 @@
-;var My_NetworkMockXHR = function() {
+;(function() {
     /* 
     https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Reflect
     https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Proxy/Proxy/get
@@ -32,7 +32,6 @@
                 this.XMLReq.ontimeout = function () { that.onTimeout() };
                 this.item = {};
                 this.item.requestHeader = {};
-                this.postData = null
 
                 this.get = function (target, key) {
                     switch (key) {
@@ -199,5 +198,4 @@
             }(XMLReq));
         }
     });
-};
-My_NetworkMockXHR();
+})();
