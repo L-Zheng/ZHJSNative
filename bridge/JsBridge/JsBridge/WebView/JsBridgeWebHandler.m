@@ -484,7 +484,7 @@
 - (NSString *)jssdk_api_error:(NSString *)apiJsName{
     // 以下代码由error.js压缩而成
     NSString *fmt = JsBridge_resource_error.length ? JsBridge_resource_error : [self readJsFmt:@"error-min.js"];
-    return [NSString stringWithFormat:fmt, apiJsName];
+    return [NSString stringWithFormat:fmt, apiJsName, apiJsName];
 }
 
 #pragma mark - console
