@@ -44,7 +44,7 @@ var d = [ ...c ]
  * uglifyjs event.js -b beautify=false,quote_style=1 -o event-min.js
  */
 /** 发送消息name:与iOS原生保持一致 */
-;var My_JsBridge = (function (){
+;var My_JsBridge = window.My_JsBridge || (function (){
 var msgHandlerName = '_Replace_msgHandlerName';
 var bridgeSyncIdentifier = '_Replace_bridgeSyncIdentifier';
 var bridgeAsyncIdentifier = '_Replace_bridgeAsyncIdentifier';
