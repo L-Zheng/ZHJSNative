@@ -95,6 +95,9 @@
 - (NSString *)jsBridge_iosApiPrefix{
     return @"js_";
 }
+- (BOOL)jsBridge_privateApi{
+    return YES;
+}
 
 
 - (void)clearWebSystemCache:(void (^) (void))complete{

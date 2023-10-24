@@ -61,6 +61,8 @@
 - (NSString *)jsBridge_jsApiInjectFinishEventName;
 // api module实例
 - (NSArray <id<JsBridgeApiProtocol>> *)jsBridge_apiModules;
+// 是否是私有api
+- (BOOL)jsBridge_privateApi;
 @end
 
 /**

@@ -67,6 +67,7 @@ case cType:{\
  */
 @property (nonatomic,strong) NSMutableDictionary *apiMap;
 @property (nonatomic,strong) NSMutableArray *outApis;
+@property (nonatomic,copy) void (^captureApiBlock) (NSString *apiName, NSString *moduleName, NSString *methodName, NSArray *args, id ret);
 @end
 
 @implementation JsBridgeHandler
@@ -345,6 +346,10 @@ case cType:{\
     return self.apiMap.allKeys.copy;
 }
 
+- (void)captureApiCall:(void (^) (NSString *apiName, NSString *moduleName, NSString *methodName, NSArray *args, id ret))handler{
+    self.captureApiBlock = [handler copy];
+}
+
 #pragma mark - JsBridgeApiProtocol
 
 //获取某个api的方法映射表
@@ -460,9 +465,15 @@ case cType:{\
 
 // 运行原生方法
 - (id)runNativeFunc:(NSString *)jsMethodName apiPrefix:(NSString *)apiPrefix jsModuleName:(NSString *)jsModuleName arguments:(NSArray <JsBridgeApiArgItem *> *)arguments{
+    __weak __typeof__(self) weakSelf = self;
     __block id value = nil;
     [self fetchSelectorByName:jsMethodName apiPrefix:apiPrefix jsModuleName:jsModuleName callBack:^(id target, SEL sel) {
         if (!target || !sel) return;
+        
+        BOOL privateApi = NO;
+        if ([target respondsToSelector:@selector(jsBridge_privateApi)]) {
+            privateApi = [target jsBridge_privateApi];
+        }
         
         NSMethodSignature *sig = [target methodSignatureForSelector:sel];
         NSInvocation *invo = [JsBridgeInvocation invocationWithMethodSignature:sig];
@@ -491,6 +502,15 @@ case cType:{\
         value = res;
         
         invo = nil;
+        
+        if (!privateApi && weakSelf.captureApiBlock) {
+            NSMutableArray *args = [NSMutableArray array];
+            for (JsBridgeApiArgItem *item in arguments) {
+                [args addObject:item.jsData ?: [NSNull null]];
+            }
+            weakSelf.captureApiBlock(apiPrefix, jsModuleName, jsMethodName, args.copy, value);
+        }
+        
     }];
     return value;
 }

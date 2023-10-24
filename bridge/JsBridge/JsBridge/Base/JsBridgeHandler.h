@@ -13,6 +13,8 @@
 
 @property (nonatomic,weak) id jsPage;
 
+- (void)captureApiCall:(void (^) (NSString *apiName, NSString *moduleName, NSString *methodName, NSArray *args, id ret))handler;
+
 @end
 
 // LocationCode

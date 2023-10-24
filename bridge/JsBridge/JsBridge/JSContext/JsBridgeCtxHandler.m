@@ -171,6 +171,10 @@
             JSValue *successFunc = [jsArg valueForProperty:success];
             JSValue *failFunc = [jsArg valueForProperty:fail];
             JSValue *completeFunc = [jsArg valueForProperty:complete];
+            
+            NSMutableDictionary *nativeValueM = [nativeValue mutableCopy];
+            [nativeValueM removeObjectsForKeys:@[success, fail, complete]];
+            
             JsBridgeApiInCallBlock block = ^JsBridgeApi_InCallBlock_Header{
                 if (!weakSelf) {
                     return [JsBridgeApiCallJsNativeResItem item];
@@ -227,7 +231,7 @@
                 return [JsBridgeApiCallJsNativeResItem item];
             };
             
-            [resArgs addObject:[JsBridgeApiArgItem item:weakSelf.jsPage jsData:nativeValue callItem:[JsBridgeApiCallJsItem itemWithSFCBlock:block jsFuncArgBlock:nil]]];
+            [resArgs addObject:[JsBridgeApiArgItem item:weakSelf.jsPage jsData:nativeValueM.copy callItem:[JsBridgeApiCallJsItem itemWithSFCBlock:block jsFuncArgBlock:nil]]];
         }
         return [weakSelf runNativeFunc:jsMethod apiPrefix:apiPrefix jsModuleName:jsModuleName arguments:resArgs.copy];
     };

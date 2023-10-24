@@ -109,18 +109,23 @@
             [resArgs addObject:[JsBridgeApiArgItem item:self.jsPage jsData:jsArg callItem:nil]];
             continue;
         }
-        NSDictionary *newParams = (NSDictionary *)jsArg;
+        NSMutableDictionary *newParams = [(NSDictionary *)jsArg mutableCopy];
         //获取回调方法
-        NSString *successId = [newParams valueForKey:[self jskey_callSuccess]];
-        NSString *failId = [newParams valueForKey:[self jskey_callFail]];
-        NSString *completeId = [newParams valueForKey:[self jskey_callComplete]];
-        NSString *jsFuncArgId = [newParams valueForKey:[self jskey_callJsFuncArg]];
+        NSString *successKey = [self jskey_callSuccess];
+        NSString *successId = [newParams valueForKey:successKey];
+        NSString *failKey = [self jskey_callFail];
+        NSString *failId = [newParams valueForKey:failKey];
+        NSString *completeKey = [self jskey_callComplete];
+        NSString *completeId = [newParams valueForKey:completeKey];
+        NSString *jsFuncArgKey = [self jskey_callJsFuncArg];
+        NSString *jsFuncArgId = [newParams valueForKey:jsFuncArgKey];
         BOOL hasCallFunction = (successId.length || failId.length || completeId.length || jsFuncArgId.length);
         //不需要回调方法
         if (!hasCallFunction) {
             [resArgs addObject:[JsBridgeApiArgItem item:self.jsPage jsData:jsArg callItem:nil]];
             continue;
         }
+        [newParams removeObjectsForKeys:@[successKey, failKey, completeKey, jsFuncArgKey]];
         //js function 参数回调
         if (jsFuncArgId.length) {
             JsBridgeApiInCallBlock block = ^JsBridgeApi_InCallBlock_Header{
@@ -137,7 +142,7 @@
                 }];
                 return [JsBridgeApiCallJsNativeResItem item];
             };
-            [resArgs addObject:[JsBridgeApiArgItem item:self.jsPage jsData:jsArg callItem:[JsBridgeApiCallJsItem itemWithSFCBlock:nil jsFuncArgBlock:block]]];
+            [resArgs addObject:[JsBridgeApiArgItem item:self.jsPage jsData:newParams.copy callItem:[JsBridgeApiCallJsItem itemWithSFCBlock:nil jsFuncArgBlock:block]]];
         }else{
             //js success/fail/complete 回调
             JsBridgeApiInCallBlock block = ^JsBridgeApi_InCallBlock_Header{
@@ -173,7 +178,7 @@
                 }
                 return [JsBridgeApiCallJsNativeResItem item];
             };
-            [resArgs addObject:[JsBridgeApiArgItem item:self.jsPage jsData:jsArg callItem:[JsBridgeApiCallJsItem itemWithSFCBlock:block jsFuncArgBlock:nil]]];
+            [resArgs addObject:[JsBridgeApiArgItem item:self.jsPage jsData:newParams.copy callItem:[JsBridgeApiCallJsItem itemWithSFCBlock:block jsFuncArgBlock:nil]]];
         }
     }
     return [self runNativeFunc:jsMethodName apiPrefix:apiPrefix jsModuleName:jsModuleName arguments:resArgs.copy];

@@ -67,6 +67,14 @@
 //        NSLog(@"network: %@", data);
 //    }];
     [jsBridge captureVConsole:cold complete:^(id res, NSError *error) {}];
+    [jsBridge captureApiCall:^(NSString *apiName, NSString *moduleName, NSString *methodName, NSArray *args, id ret) {
+        NSString *show = nil;
+        if ([moduleName isKindOfClass:NSString.class] && moduleName.length > 0) {
+            show = [NSString stringWithFormat:@"%@.requireModule('%@').%@", apiName, moduleName, methodName];
+        } else {
+            show = [NSString stringWithFormat:@"%@.%@", apiName, methodName];
+        }
+    }];
     
     [jsBridge addApis:@[[[DemoApi alloc] init]] cold:cold complete:^(id res, NSError *error) {
         
