@@ -46,6 +46,7 @@
 		858DA1EE286EFB2E008E5662 /* JsBridgeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 858DA1ED286EFB2E008E5662 /* JsBridgeTests.m */; };
 		858DA1F8286EFB2E008E5662 /* JsBridgeUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 858DA1F7286EFB2E008E5662 /* JsBridgeUITests.m */; };
 		858DA1FA286EFB2E008E5662 /* JsBridgeUITestsLaunchTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 858DA1F9286EFB2E008E5662 /* JsBridgeUITestsLaunchTests.m */; };
+		859122692BC274CB00B357E0 /* JsBridgeWebApiDevtools.m in Sources */ = {isa = PBXBuildFile; fileRef = 859122682BC274CB00B357E0 /* JsBridgeWebApiDevtools.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -128,6 +129,8 @@
 		858DA1F3286EFB2E008E5662 /* JsBridgeUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JsBridgeUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		858DA1F7286EFB2E008E5662 /* JsBridgeUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JsBridgeUITests.m; sourceTree = "<group>"; };
 		858DA1F9286EFB2E008E5662 /* JsBridgeUITestsLaunchTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JsBridgeUITestsLaunchTests.m; sourceTree = "<group>"; };
+		859122672BC274CB00B357E0 /* JsBridgeWebApiDevtools.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JsBridgeWebApiDevtools.h; sourceTree = "<group>"; };
+		859122682BC274CB00B357E0 /* JsBridgeWebApiDevtools.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JsBridgeWebApiDevtools.m; sourceTree = "<group>"; };
 		85C461A7287BE9EF0020C4C7 /* JsBridgeResource.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JsBridgeResource.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -223,6 +226,8 @@
 				8503F952287270BC005F7580 /* JsBridgeWebApiConsole.m */,
 				85664C112A5E52CB009CF699 /* JsBridgeWebApiNetwork.h */,
 				85664C122A5E52CB009CF699 /* JsBridgeWebApiNetwork.m */,
+				859122672BC274CB00B357E0 /* JsBridgeWebApiDevtools.h */,
+				859122682BC274CB00B357E0 /* JsBridgeWebApiDevtools.m */,
 			);
 			path = Api;
 			sourceTree = "<group>";
@@ -461,6 +466,7 @@
 				8503F96E287270BC005F7580 /* JsBridgeWebApiSocket.m in Sources */,
 				8503F974287270BC005F7580 /* JsBridgeHandler.m in Sources */,
 				8503F978287272E8005F7580 /* DemoController.m in Sources */,
+				859122692BC274CB00B357E0 /* JsBridgeWebApiDevtools.m in Sources */,
 				8503F97E2872D2B5005F7580 /* DemoApi.m in Sources */,
 				858DA1D9286EFB1B008E5662 /* ViewController.m in Sources */,
 				8503F9812872D2C0005F7580 /* DemoApiModule.m in Sources */,

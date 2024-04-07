@@ -46,6 +46,11 @@ static NSString * const JsBridgeWebMessageHandlerName = @"com.WKWebView.JsBridge
 - (void)captureConsole:(BOOL)cold handler:(void (^) (NSString *flag, NSArray *args))handler;
 - (void)captureVConsole:(BOOL)cold complete:(void (^) (id res, NSError *error))complete;
 
+#pragma mark - devtools
+
+// 跟随captureVConsole一块注入, 需在captureVConsole之前调用
+- (void)injectDevtools:(BOOL)cold handler:(void (^) (void (^callback) (NSDictionary *info)))handler;
+
 #pragma mark - network
 
 - (void)captureNetwork:(BOOL)cold handler:(void (^) (id data))handler;

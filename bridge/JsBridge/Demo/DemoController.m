@@ -66,6 +66,14 @@
 //    [jsBridge captureNetwork:cold handler:^(id data) {
 //        NSLog(@"network: %@", data);
 //    }];
+    [jsBridge injectDevtools:cold handler:^(void (^callback)(NSDictionary *info)) {
+        if (callback) {
+            callback(@{
+//                @"url": @"http://localhost:8080",
+//                @"src": @"http://localhost:8080/target.js"
+            });
+        }
+    }];
     [jsBridge captureVConsole:cold complete:^(id res, NSError *error) {}];
     [jsBridge captureApiCall:^(NSString *apiName, NSString *moduleName, NSString *methodName, NSArray *args, id ret) {
         NSString *show = nil;

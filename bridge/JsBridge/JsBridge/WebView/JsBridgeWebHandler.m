@@ -13,12 +13,14 @@
 #import "JsBridgeWebApiConsole.h"
 #import "JsBridgeWebApiNetwork.h"
 #import "JsBridgeWebApiSocket.h"
+#import "JsBridgeWebApiDevtools.h"
 
 @interface JsBridgeWebHandler ()
 @property (nonatomic, strong) JsBridgeWebApiError <JsBridgeApiProtocol> *api_error;
 @property (nonatomic, strong) JsBridgeWebApiConsole <JsBridgeApiProtocol> *api_console;
 @property (nonatomic, strong) JsBridgeWebApiNetwork <JsBridgeApiProtocol> *api_network;
 @property (nonatomic, strong) JsBridgeWebApiSocket <JsBridgeApiProtocol> *api_socket;
+@property (nonatomic, strong) JsBridgeWebApiDevtools <JsBridgeApiProtocol> *api_devtools;
 @end
 
 @implementation JsBridgeWebHandler
@@ -532,7 +534,58 @@
 - (NSString *)jssdk_api_vconsole{
     NSString *js = [self readJsFmt:@"vconsole.min.js"];
     if (!js) return nil;
-    return [NSString stringWithFormat:@"%@; var vConsole = new VConsole(); (function() { var timer = null; timer = setInterval(function() { var wrap = document ? document.getElementById('__vconsole') : null; var dom = (typeof wrap === 'object' && typeof wrap.children === 'object' && wrap.children.length > 0) ? wrap.children[0] : null; if (!dom) return; dom.style.width = '60px'; clearInterval(timer); timer = null; }, 1000); })();", js];
+    
+    return [NSString stringWithFormat:@"%@; \
+var vConsole = new VConsole(); \
+(function() { \
+    var timer = null; \
+    timer = setInterval(function() { \
+        var wrap = document ? document.getElementById('__vconsole') : null; \
+        var dom = (typeof wrap === 'object' && typeof wrap.children === 'object' && wrap.children.length > 0) ? wrap.children[0] : null; \
+        if (!dom) return; \
+        dom.style.width = '60px'; \
+        if (%@) { \
+            var text = dom.innerText; \
+            dom.innerText = ''; \
+                                    \
+            var insert1 = document.createElement('div'); \
+            insert1.innerText = text; \
+            dom.appendChild(insert1); \
+                                        \
+            var insert2 = document.createElement('div'); \
+            insert2.style['margin-top'] = '8px'; \
+            insert2.innerText = 'Devtools'; \
+            window.lbzDevtoolsEnable = false; \
+            insert2.onclick = function (event) { \
+                %@.open(function (res) { \
+                    if (!res.src) { \
+                        console.error('devtools injected src is null'); \
+                        return; \
+                    } \
+                    if (window.lbzDevtoolsEnable) { \
+                        console.warn('devtools has injected'); \
+                        return; \
+                    } \
+                    var script = document.createElement('script'); \
+                    script.src = res.src; \
+                    script.onload = function () { \
+                        console.log('start devtools injected'); \
+                        window.lbzDevtoolsEnable = true; \
+                    }; \
+                    document.head.appendChild(script); \
+                }); \
+                event.stopPropagation(); \
+            }; \
+            dom.appendChild(insert2); \
+        } \
+        clearInterval(timer); \
+        timer = null; \
+    }, 1000); \
+})();",
+            js,
+            self.api_devtools ? @"true" : @"false",
+            self.api_devtools ? [self.api_devtools jsBridge_jsApiPrefix] : @"xxx"
+    ];
 }
 
 #pragma mark - network
@@ -616,6 +669,31 @@
     }else{
         res = [data description];
     }
+    
+    /*
+     https://www.baidu.com?a=1&f=你好
+     
+     
+     假定 URI 中的任何保留字符都有特殊意义，不会编码，但是编码中文字符
+     https://www.baidu.com?a=1&f=%E4%BD%A0%E5%A5%BD
+     == encodeURI(string)
+     NSString *str = [string stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
+     NSString *str = [string stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLFragmentAllowedCharacterSet]];
+     
+     == decodeURI(string)
+     [str stringByRemovingPercentEncoding]
+     
+     
+     假定任何保留字符都代表普通文本，除字母外的其他符号全部编码
+     https%3A%2F%2Fwww.baidu.com%3Fa%3D1%26f%3D%E4%BD%A0%E5%A5%BD
+    == encodeURIComponent(string)
+    NSString *str = (NSString *)CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault, (CFStringRef)string, NULL, (CFStringRef)@"!*'();:@&=+$,/?%#[]", kCFStringEncodingUTF8));
+    NSString *str = [string stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet characterSetWithCharactersInString:@"!*'();:@&=+$,/?%#[]"].invertedSet]
+    
+     == decodeURIComponent(string)
+    [str stringByRemovingPercentEncoding]
+     decodeURIComponent 也可以解码经过encodeURI编码的字符串
+     */
     
     NSString *(^block)(NSString *) = ^NSString *(NSString *str){
         return [str stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
