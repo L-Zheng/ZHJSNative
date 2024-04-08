@@ -21,6 +21,7 @@
 @property (nonatomic, strong) JsBridgeWebApiNetwork <JsBridgeApiProtocol> *api_network;
 @property (nonatomic, strong) JsBridgeWebApiSocket <JsBridgeApiProtocol> *api_socket;
 @property (nonatomic, strong) JsBridgeWebApiDevtools <JsBridgeApiProtocol> *api_devtools;
+@property (nonatomic, strong) JsBridgeWebApiDevtoolsSocket <JsBridgeApiProtocol> *api_devtoolsSocket;
 @end
 
 @implementation JsBridgeWebHandler
@@ -586,6 +587,30 @@ var vConsole = new VConsole(); \
             self.api_devtools ? @"true" : @"false",
             self.api_devtools ? [self.api_devtools jsBridge_jsApiPrefix] : @"xxx"
     ];
+}
+
+#pragma mark - devtools
+
+- (void)injectDevtools:(BOOL)cold
+                  open:(void (^) (void (^callback) (NSDictionary *info)))open
+             wsConnect:(void (^) (NSDictionary *info))wsConnect
+              wsOnOpen:(void (^) (void (^) (id msg)))wsOnOpen
+              wsOnMessage:(void (^) (void (^) (id msg)))wsOnMessage
+                wsSend:(void (^) (id msg))wsSend{
+    if (!self.api_devtools) {
+        self.api_devtools = [[JsBridgeWebApiDevtools alloc] init];
+        self.api_devtools.jsBridge = self;
+    }
+    self.api_devtools.open = [open copy];
+    if (!self.api_devtoolsSocket) {
+        self.api_devtoolsSocket = [[JsBridgeWebApiDevtoolsSocket alloc] init];
+        self.api_devtoolsSocket.jsBridge = self;
+    }
+    self.api_devtoolsSocket.connect = [wsConnect copy];
+    self.api_devtoolsSocket.onOpen = [wsOnOpen copy];
+    self.api_devtoolsSocket.onMessage = [wsOnMessage copy];
+    self.api_devtoolsSocket.send = [wsSend copy];
+    [self addApis:@[self.api_devtools, self.api_devtoolsSocket] cold:cold complete:nil];
 }
 
 #pragma mark - network

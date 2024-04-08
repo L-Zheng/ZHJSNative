@@ -66,13 +66,23 @@
 //    [jsBridge captureNetwork:cold handler:^(id data) {
 //        NSLog(@"network: %@", data);
 //    }];
-    [jsBridge injectDevtools:cold handler:^(void (^callback)(NSDictionary *info)) {
+    __weak __typeof__(self) weakSelf = self;
+    [jsBridge injectDevtools:YES open:^(void (^callback)(NSDictionary *info)) {
         if (callback) {
             callback(@{
 //                @"url": @"http://localhost:8080",
 //                @"src": @"http://localhost:8080/target.js"
             });
         }
+//        [weakSelf devtoolsHandler:callback];
+    } wsConnect:^(NSDictionary *info) {
+//        [weakSelf ws_connect:info];
+    } wsOnOpen:^(void (^block) (id msg)) {
+//        weakSelf.wsOnOpen = [block copy];
+    } wsOnMessage:^(void (^block) (id msg)) {
+//        weakSelf.wsOnMessage = [block copy];
+    } wsSend:^(id msg) {
+//        [weakSelf ws_send:msg];
     }];
     [jsBridge captureVConsole:cold complete:^(id res, NSError *error) {}];
     [jsBridge captureApiCall:^(NSString *apiName, NSString *moduleName, NSString *methodName, NSArray *args, id ret) {
